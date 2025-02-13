@@ -333,12 +333,7 @@ double measure(){                                        // mereni vahy (weight_
   Serial.println(tmp_vaha);  	                          // average raw hodnota
   Serial.print("read - base: \t\t");
   Serial.println(tmp_vaha - base_A);
-  //long real_weight_A = (tmp_vaha - base_A) * (100.0 / base_A);   // vypocet realne vahy OLD
-  //real_weight_A = 0.967 * 10000.0 * ((tmp_vaha - base_A)/(16777216.0  - base_A)); //10000.0
-  //real_weight_A = (tmp_vaha - base_A) * (100.0 / base_A);
-  //real_weight_A = (1000-0)*((tmp_vaha-base_A)/(16777216.0-base_A))+0; // maxhodnota 24bit h711 2^24 = 16777216.0
-  //real_weight_A = (1000-0)*((tmp_vaha)/(16777216.0));        // chat approved
-  //real_weight_A = (tmp_vaha - base_A) * Weight_per_bit;
+
   real_weight_A = (tmp_vaha - base_A)/1605,51;                // 401,3775 je narust hodnoty ADC pri zmene o 0,5g
   real_weight_A = (tmp_vaha - base_A - 1,78)/1605,99602;        // vchazi z lin. rov. y=823,71x+1312,5                  NETESTOVANO
           // 0,97 je systematická odchylka idk jestli provizorní konstrukcí nebo zlým měřítkem
@@ -356,13 +351,6 @@ double measure(){                                        // mereni vahy (weight_
   Serial.print("read - base: \t\t");
   Serial.println(tmp_vaha - base_B);
 
-  //  long real_weight_B = (tmp_vaha - base_B) * (100.0 / base_B); // * 4.0;    OLD erase                  // vypocet realne vahy
-  //real_weight_B = 0.97 * 10000.0 * ((tmp_vaha - base_B)/((16777216.0/2.0)  - base_B));   
-            // 0,97 je systematická odchylka idk jestli provizorní konstrukcí nebo zlým měřítkem
-  //real_weight_B = (tmp_vaha - base_B) * (100.0 / base_B);
-  //real_weight_B = 4*(1000-0)*((tmp_vaha-base_B)/(16777216.0-base_B))+0;
-  //real_weight_B = (1000-0)*((tmp_vaha)/(16777216.0));          // chat approved  16777216 bez baze base_B
-  //real_weight_B = 4 * (tmp_vaha - base_B) * Weight_per_bit;
   real_weight_B = (tmp_vaha - base_B)/768,5;                  // 192,125 je narust hodnoty ADC pri zmene o 0,5g
   real_weight_B = (tmp_vaha - base_B + 1,39)/768,00273;        // vychzi z lin. rov. y=383,23x+1155,5                NETESTOVANO
   Serial.print("weight in grams: \t\t");
