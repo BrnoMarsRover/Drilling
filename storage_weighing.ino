@@ -4,7 +4,7 @@
 //            -recieve 30-33 angle position
 //            -recieve 40 hold position
 //            -recieve 50 cleanse errors
-//            -recieve zbytek error
+//            -recieve rest error
 #include "HX711.h"
 #include "Wire.h"
 #define SLAVE_ADD 0x08
@@ -23,13 +23,13 @@ long angle = 0;                       // aktualni poloha prepocet "poloha"
 int desired_angle = 0;
 int slot[4] = {32, 121, 212, 300}; // orig uhly 34 124 214 305 uhly zmeneny kvuli pólům motoru a jejich magnetizaci ve stavu bez napětí
 //bool full_slot[4] = {0, 0, 0, 0};
-float base_A;                         // dobry by bylo zahodit floaty i double
-float base_B;                         // weight od base to be substracted from measured amount
-float base_weight_A;                  // dobry by bylo zahodit floaty i double
-float base_weight_B;  
+float base_A;                         // weight of base -> weight on motor and storage torso, to be substracted from measured amount
+float base_B;                         
+//float base_weight_A;                  
+//float base_weight_B;  
 int num_prijem = 0;                   // cislo prikazu
 int slot_i = 0;                       // aktivni slot
-float max_weiht = 1200;
+float previous_weight = 0;
 
 struct output_data{
   uint16_t data_out = 0;              // weight
@@ -57,6 +57,12 @@ struct inner_data inner;
 
 HX711 scale;                          // z knihovky pro ADC
 
+void hold_Xsec(int m_seconds = 10000){  // holding the magasine for X sec, enabling manipulation with cells, has to be declared before main loop
+  digitalWrite(wake_up, HIGH);
+  delay(m_seconds);                     // nastavitelny cas
+  digitalWrite(wake_up, LOW);
+}
+
 void setup() {
   Serial.begin(57600);
   Wire.begin(SLAVE_ADD);
@@ -67,7 +73,7 @@ void setup() {
   pinMode(DIR, OUTPUT);
   pinMode(measure_start, INPUT_PULLUP);
   pinMode(move45, INPUT_PULLUP);
-  pinMode(tare_btn, INPUT_PULLUP);          // predelat na 10sec delay
+  pinMode(tare_btn, INPUT_PULLUP);
   pinMode(hall_senz, INPUT);
   pinMode(wake_up, OUTPUT);
 
@@ -125,13 +131,13 @@ void loop() {
   else if(digitalRead(tare_btn) == LOW){                 // tare tenzometru (vynulovani)
     inner.manual_mode = 1;
     Serial.println("Hold and Tare button pushed");
-    hold_10sec();
+    hold_Xsec(10000);
     tare_bases();
     inner.manual_mode = 0;
   }
-  if(num_prijem == 0 && (desired_angle != angle && abs(desired_angle - angle) > 5)){  // hold the line,
+  if(num_prijem == 0 && (desired_angle != angle && abs(desired_angle - angle) > 5)){  // hold storage torso from moving
   //if (inner.time > 20) {                          // jednou za dve vteriny projde if
-    delay(3000);
+    delay(3000);                                    // delayed action for event to pass
     angle = (360.0 / 675.0) * analogRead(hall_senz);  // kontrola aktualniho uhlu
     //if(num_prijem == 0 && (desired_angle != angle && abs(desired_angle - angle) > 5)){  // hold the line, pro odchylku > 2 se pohni
     Serial.print("pohnuto hrideli -> uprava; aktualni uhel: ");
@@ -162,7 +168,6 @@ void receive_data(int numBytes) {         // detekce a vypsani prichozi komunika
     Serial.println(num_prijem);
   }
 }
-
 void send_data() {                        // odeslani vyzadanych dat
   const uint8_t out_arr_size = 3;
   uint8_t output_array[out_arr_size] = {0};
@@ -170,7 +175,7 @@ void send_data() {                        // odeslani vyzadanych dat
   output.data_out = inner.weight;
   output.message = 1*inner.weight_overload + 2*inner.magasine_stuck + 4*inner.unknown_command + 8*inner.pos_not_found + 16*inner.manual_mode + 32*inner.scale_tared; 
   if(output.message > 64){
-    output.message = output.message && B00111111;
+    output.message = output.message && B00111111;   // pre-inserted active slot 0
   }
   switch (inner.active_slot) {
     case 0:
@@ -203,6 +208,7 @@ void send_data() {                        // odeslani vyzadanych dat
   Serial.println("communication resolved");
 }
 int deal_w_comm(){
+  int old_pos = inner.active_slot;
   switch(num_prijem){
       case 10:
         tare_bases();
@@ -215,6 +221,7 @@ int deal_w_comm(){
       case 30:
         if(move(slot[0], 1920) < 0){
           inner.pos_not_found = 1;                            // error, nebyl dosazen cilovy slot
+          move(slot[old_pos], 1920);                          // vraceni na puvodni pozici
         } 
         else{
           inner.active_slot = 0;                              // informace o slotu 0
@@ -223,6 +230,7 @@ int deal_w_comm(){
       case 31:
         if(move(slot[1], 1920) < 0){
           inner.pos_not_found = 1;                            // error, nebyl dosazen cilovy slot
+          move(slot[old_pos], 1920);                          // vraceni na puvodni pozici
         }
         else {
           inner.active_slot = 1;                              // informace o slotu 1
@@ -231,6 +239,7 @@ int deal_w_comm(){
       case 32:
         if(move(slot[2], 1920) < 0){
           inner.pos_not_found = 1;                            // error, nebyl dosazen cilovy slot
+          move(slot[old_pos], 1920);                          // vraceni na puvodni pozici
         }
         else {
           inner.active_slot = 2;                              // informace o slotu 2
@@ -239,13 +248,14 @@ int deal_w_comm(){
       case 33:
         if(move(slot[3], 1920) < 0){
           inner.pos_not_found = 1;                            // error, nebyl dosazen cilovy slot
+          move(slot[old_pos], 1920);                          // vraceni na puvodni pozici
         }
         else{
           inner.active_slot = 3;                              // informace o slotu 3
         }
         break;
       case 40:
-        hold_10sec();
+        hold_Xsec(10000);
         break;
       case 50:
         inner.magasine_stuck = 0;
@@ -280,9 +290,23 @@ int move(int chci_sem, int timeout){           // Imax = 400mA; timeout 120 krok
   digitalWrite(wake_up, HIGH);                  // vzbuzeni driveru
 
   //  if(num_prijem == 0 && (desired_angle != angle && abs(desired_angle - angle) > 2)){  // hold the line, pro odchylku > 2 se pohni
+  int pocet = 10;
+  int previous_angles[pocet];
+  for (int i = 0; i<pocet; ++i) {     // naplneni pole
+    previous_angles[i] = 10000;       // 10k je jen hodnota která dostatecne ovlivní prumer aby neskocil error hned
+  }
+  int index = 0;
+  int sum;
 
   while(chci_sem != angle && abs(chci_sem - angle) > 1){                     // cisty pohyb dokud není podmínka uhlu splnena, odchylka < 0,5
-    if(timeout > 0){
+    previous_angles[index] = angle;
+    index = (index + 1) % pocet;              // z rostoucího indexu pocitam zbytek po deleni tzn 0-9 hodnotu
+    for (int i = 0; i<pocet; ++i) {
+      sum = sum + previous_angles[i];         // vypocet aktualniho prumeru
+    }
+    int avg_10 = (double)sum/10;
+
+    if(timeout > 0 || abs(avg_10 - angle) > 20){   // jestli avg_10 funguje timeout je redundantní
       timeout--;
       if((abs(chci_sem - angle) > 20) && (abs(orig_angle - angle) > 5)){
         digitalWrite(PUL, HIGH);
@@ -309,7 +333,7 @@ int move(int chci_sem, int timeout){           // Imax = 400mA; timeout 120 krok
   desired_angle = chci_sem;                            // reinicializace aktualni polohy
   Serial.print("úhel natoceni: \t\t");
   Serial.println(desired_angle);
-  delay(500);
+  hold_Xsec(500);                                      // previously delay
   digitalWrite(wake_up, LOW);                          // driver jde do hajan
   return 1;
 }
@@ -354,23 +378,19 @@ double measure(){                                        // mereni vahy (weight_
   Serial.print("final weight: \t\t");
   Serial.println(real_weight_B + real_weight_A); //real_weight_B - base_weight_B + real_weight_A - base_weight_A
 
-  if(real_weight_A + real_weight_B > 1200){         // váha báze je 700g -> 1200g mohu měřit a zbyde mi 100g jako rezerva overloadu
+  if(real_weight_A + real_weight_B + previous_weight > 1200){         // váha báze je 700g -> 1200g mohu měřit a zbyde mi 100g jako rezerva overloadu
     inner.weight_overload = 1;
   }
   return real_weight_B + real_weight_A;
 }
-void tare_bases(){                 //  later erase, or built to operator panel
+void tare_bases(){                 // nullify scale for next reading
   scale.power_up();                // wake the fuck up
 
-  scale.set_gain(128);             // nastavenim zesileni 128 je nastaven kanal A 
-  base_A = scale.read_average(5);
-  scale.set_gain(32);              // nastavenim zesileni 32 je nastaven kanal A 
-  base_B = scale.read_average(5);
+  previous_weight = previous_weight + measure();
 
+  scale.set_gain(128);             // nastavenim zesileni 128 je nastaven kanal A je to zaroven TARE!
+  base_A = scale.read_average(5);
+  scale.set_gain(32);              // nastavenim zesileni 32 je nastaven kanal A je to zaroven TARE!
+  base_B = scale.read_average(5);
   scale.power_down();              // a do hajan
-}
-void hold_10sec(){                 // holding the magasine for 5 sec, enabling manipulation with cells
-  digitalWrite(wake_up, HIGH);
-  delay(10000);                     // cas by mel byt nastvitelny, asi jako parametr fnc?
-  digitalWrite(wake_up, LOW);
 }
