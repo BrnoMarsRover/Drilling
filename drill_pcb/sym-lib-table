@@ -1,0 +1,4 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "drill_IFX007T")(type "KiCad")(uri "${KIPRJMOD}/libs/IFX007T/IFX007T.kicad_sym")(options "")(descr ""))
+)
