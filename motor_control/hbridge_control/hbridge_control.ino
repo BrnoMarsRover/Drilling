@@ -1,10 +1,8 @@
 #include "MovingAverage.h"
-#include <PID_v1.h>
 #include <Wire.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
-//#define PIDControl //pokud neni definovano, ovlada se primo duty cycle
 //#define timeMeasure //mereni delky loopu/poctu loopu za sekundu
 #define thermometer
 
@@ -41,32 +39,28 @@ MovingAverage <uint16_t, 16> ampmeterFilter;
 uint16_t ampmeterAvg = 0;
 uint16_t ampmeterFilteredZero = 500;
 //float ampmeterVoltage = 0;
-float ampmeterCurrent = 0; //[mA]
+float ampmeterCurrent = 0; // v amperech
 const float Vcc = 4.5;
 const float ampmeterVoltsToAmps = 10.0;
 const double currentToTorqueCoeff = 1;
 double torque = 0;
 
-//PID
-#ifdef PIDControl
+//PID   //Kp = 0.15; Ki = 0.0005
 const double Kp=0.15, Ki=0.0005, Kd=0.00;
-double PIDoutput = 0;
-double torqueTarget = 0;
-PID myPID(&torque, &PIDoutput, &torqueTarget, Kp, Ki, Kd, DIRECT);
-#endif
+float currentTarget = 0;
+uint32_t lastMillis = 0;
+float errorSum = 0;
+float PIDoutput = 0;
 
 
 //I2C
-float requestedMotorDC = 0;
 const uint8_t I2CAddress = 10;
 const uint8_t inputArraySize = 4;
 uint8_t inputArray[inputArraySize] = {0};
 const uint8_t outputArraySize = 5;
 uint8_t outputArray[outputArraySize] = {0};
 
-//RAMP
-float slewRate = 80.0;
-uint32_t lastMillis = 0;
+
 
 //TIME
 #ifdef timeMeasure
@@ -149,12 +143,6 @@ void setup()
   Wire.begin(I2CAddress);                
   Wire.onReceive(receiveEvent);
   Wire.onRequest(requestEvent);
-
-#ifdef PIDControl
-  myPID.SetMode(AUTOMATIC);
-  myPID.SetOutputLimits(0, 120);
-  myPID.SetSampleTime(1);
-#endif
 }
 
 void loop()
@@ -172,16 +160,21 @@ void loop()
   */
   ampmeterFiltered = ampmeterFilteredScale*analogRead(InPin_AmpmeterFiltered);
   ampmeterAvg = ampmeterFilter.add(ampmeterFiltered);
-
   //ampmeterVoltage = (ampmeterAvg)*(Vcc/1023.0);
-  ampmeterCurrent = abs((float(ampmeterAvg) - float(ampmeterFilteredZero)) * (1.0/float(ampmeterFilteredScale)) * (Vcc/1023.0) * ampmeterVoltsToAmps * 1000.0); //*1000 ... A -> mA  
-  torque = ampmeterCurrent*currentToTorqueCoeff;
+  ampmeterCurrent = abs((float(ampmeterAvg) - float(ampmeterFilteredZero)) * (1.0/float(ampmeterFilteredScale)) * (Vcc/1023.0) * ampmeterVoltsToAmps);
+  
+  float currentDiff = currentTarget - ampmeterCurrent;
 
-#ifdef PIDControl
+  uint32_t currentMillis = millis();
+  float timeDiff = 0.001*(float(currentMillis) - float(lastMillis));
 
-  myPID.Compute();
+  errorSum += currentDiff * timeDiff;
 
-  if(torqueTarget == 0)
+  lastMillis = currentMillis;
+
+  PIDoutput = Kp * currentDiff + Ki * errorSum;
+
+  if(currentTarget == 0)
   {
     motorDC = 0;
   }
@@ -189,26 +182,8 @@ void loop()
   {
     motorDC = uint8_t(PIDoutput);
   }
-#endif
 
-//RAMP
-  float DCDiff = motorDC - requestedMotorDC;
-  uint32_t currentMillis = millis();
-  float timeDiff = 0.001*(float(currentMillis) - float(lastMillis));
-  float DCChange = timeDiff*slewRate;
-  if(DCDiff > 0)
-  {
-    DCChange *= -1;
-  }
-  if(abs(DCDiff) < abs(DCChange))
-  {
-    motorDC = requestedMotorDC;
-  }
-  else
-  {
-    motorDC += DCChange;
-  }
-  lastMillis = currentMillis;
+
 
   if(!overload)
   {
@@ -245,17 +220,17 @@ void loop()
   Serial.println(ampmeterCurrent);
 */
 
-#ifdef PIDControl
+
 /*
   Serial.print(" T:");
   Serial.print(torqueTarget);
   Serial.print(" O:");
   Serial.println(50.0*PIDoutput);
 */
-#else
+
   //Serial.print(" motorDC:");
   //Serial.print(motorDC);
-#endif
+
   //Serial.println("");
 
 #ifdef timeMeasure
@@ -274,7 +249,6 @@ void loop()
 #ifdef thermometer
   if(millis() - thermometerLastMillis > thermometerDelay)
   {
-
     motorTemperature = dallasTemperatureThermometer.getTempC(thermometerAddress);
     //Serial.println(motorTemperature);
     dallasTemperatureThermometer.requestTemperaturesByAddress(thermometerAddress);
@@ -309,19 +283,7 @@ void receiveEvent(int howMany)
     Serial.print("Received torque: ");
     Serial.println(receivedFloat);
     */
-  #ifdef PIDControl
-    torqueTarget = receivedFloat;
-
-  #else
-    if(receivedFloat >= -255 && receivedFloat <= 255)
-    {
-      requestedMotorDC = receivedFloat;
-    }
-    else
-    {
-      requestedMotorDC = 0;
-    } 
-  #endif
+    currentTarget = receivedFloat/currentToTorqueCoeff;
   }
 }
 
@@ -336,6 +298,7 @@ void requestEvent()
     outputArray[0] = 1;
   }
 
+  float torque = ampmeterCurrent*currentToTorqueCoeff;
   memcpy(outputArray + 1, &torque, sizeof(torque));
   Wire.write(outputArray, outputArraySize);
 }
