@@ -2,4 +2,7 @@
   (version 7)
   (lib (name "drill_T-DEAN")(type "KiCad")(uri "${KIPRJMOD}/libs/T-DEAN")(options "")(descr ""))
   (lib (name "drill_IFX007T")(type "KiCad")(uri "${KIPRJMOD}/libs/IFX007T")(options "")(descr ""))
+  (lib (name "drill_i2c_level_shifter")(type "KiCad")(uri "${KIPRJMOD}/libs/i2c_level_shifter")(options "")(descr ""))
+  (lib (name "drill_RP-Pico Libraries")(type "KiCad")(uri "${KIPRJMOD}/libs/RP-Pico Libraries/MCU_RaspberryPi_and_Boards.pretty")(options "")(descr ""))
+  (lib (name "drill_dcdc_converter_LM2596")(type "KiCad")(uri "${KIPRJMOD}/libs/dcdc_converter_LM2596")(options "")(descr ""))
 )
