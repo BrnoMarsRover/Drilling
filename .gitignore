@@ -1,5 +1,6 @@
 /build
 /drill_pcb/drill_pcb-backups
+/drill_pcb/fp-info-cache
 pico-sdk
 .vscode
 .DS_Store
