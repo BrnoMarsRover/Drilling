@@ -43,7 +43,7 @@ float ammeterCurrent = 0; // v amperech
 const float Vcc = 4.5;
 const float ammeterVoltsToAmps = 10.0;
 const double currentToTorqueCoeff = 1;
-double torque = 0;
+double torque = 0.4833;
 
 //PID   //Kp = 0.15; Ki = 0.0005
 const double Kp=0.15, Ki=0.0005, Kd=0.00;
