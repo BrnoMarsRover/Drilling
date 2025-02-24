@@ -16,12 +16,12 @@ const uint8_t InPin_Thermometer = 7;
 
 const uint8_t InPin_L_IS = A0;
 const uint8_t InPin_R_IS = A1;
-const uint8_t InPin_AmpmeterFiltered = A2;
-const uint8_t InPin_AmpmeterDirect = A3;
+const uint8_t InPin_AmmeterRC = A2;
+const uint8_t InPin_AmmeterDirect = A3;
 
 //MOTOR CONTROL
 bool dir = false;
-float motorDC = 0;
+uint8_t motorDC = 0;
 
 //OVERLOAD PROTECTION
 bool overload = false;
@@ -32,16 +32,16 @@ uint32_t overloadEndTime = 0; //ms
 
 
 //AMPMETER
-uint16_t ampmeterFiltered = 0;
-uint16_t ampmeterDirect = 0;
-const uint16_t ampmeterFilteredScale = 32;
-MovingAverage <uint16_t, 16> ampmeterFilter;
-uint16_t ampmeterAvg = 0;
-uint16_t ampmeterFilteredZero = 500;
-//float ampmeterVoltage = 0;
-float ampmeterCurrent = 0; // v amperech
+uint16_t ammeterRC = 0;
+uint16_t ammeterDirect = 0;
+const uint16_t ammeterDigitalFilterScale = 32;
+MovingAverage <uint16_t, 16> ammeterDigitalFilter;
+uint16_t ammeterRCAvg = 0;
+uint16_t ammeterRCZero = 500;
+//float ammeterVoltage = 0;
+float ammeterCurrent = 0; // v amperech
 const float Vcc = 4.5;
-const float ampmeterVoltsToAmps = 10.0;
+const float ammeterVoltsToAmps = 10.0;
 const double currentToTorqueCoeff = 1;
 double torque = 0;
 
@@ -99,20 +99,20 @@ void setDriver(bool adir, uint8_t amotorDC)
   }
 }
 
-void calibrateAmpmeter()
+void calibrateAmmeter()
 {
   setDriver(false, 0);
   delay(100);
 
   const uint8_t avgCount = 16;
-  MovingAverage <uint16_t, avgCount> ampmeterZeroFilter;
+  MovingAverage <uint16_t, avgCount> ammeterZeroFilter;
   for(uint8_t i = 0; i < avgCount; i++)
   {
     delay(10);
-    ampmeterZeroFilter.add(ampmeterFilteredScale*analogRead(InPin_AmpmeterFiltered));
+    ammeterZeroFilter.add(ammeterDigitalFilterScale*analogRead(InPin_AmmeterRC));
   }
 
-  ampmeterFilteredZero = ampmeterZeroFilter.get();
+  ammeterRCZero = ammeterZeroFilter.get();
 }
 
 void setup()
@@ -122,15 +122,15 @@ void setup()
   pinMode(OutPin_R_EN, OUTPUT);
   pinMode(OutPin_R_PWM, OUTPUT);
 
-  pinMode(InPin_AmpmeterFiltered, INPUT);
-  pinMode(InPin_AmpmeterDirect, INPUT);  
+  pinMode(InPin_AmmeterRC, INPUT);
+  pinMode(InPin_AmmeterDirect, INPUT);  
 
   digitalWrite(OutPin_R_EN, HIGH);
   digitalWrite(OutPin_L_EN, HIGH);
 
   Serial.begin(9600);
 
-  calibrateAmpmeter();
+  calibrateAmmeter();
 
 #ifdef thermometer
   dallasTemperatureThermometer.begin();
@@ -148,9 +148,9 @@ void setup()
 void loop()
 {
 
-  ampmeterDirect = analogRead(InPin_AmpmeterDirect);
+  ammeterDirect = analogRead(InPin_AmmeterDirect);
   /*
-  if(ampmeterDirect < overloadLow || ampmeterDirect > overloadHigh)
+  if(ammeterDirect < overloadLow || ammeterDirect > overloadHigh)
   {
     analogWrite(OutPin_L_PWM, 0);
     analogWrite(OutPin_R_PWM, 0);
@@ -158,12 +158,12 @@ void loop()
     overloadEndTime = millis() + overloadDelay;
   }
   */
-  ampmeterFiltered = ampmeterFilteredScale*analogRead(InPin_AmpmeterFiltered);
-  ampmeterAvg = ampmeterFilter.add(ampmeterFiltered);
-  //ampmeterVoltage = (ampmeterAvg)*(Vcc/1023.0);
-  ampmeterCurrent = abs((float(ampmeterAvg) - float(ampmeterFilteredZero)) * (1.0/float(ampmeterFilteredScale)) * (Vcc/1023.0) * ampmeterVoltsToAmps);
+  ammeterRC = ammeterDigitalFilterScale*analogRead(InPin_AmmeterRC);
+  ammeterRCAvg = ammeterDigitalFilter.add(ammeterRC);
+  //ammeterVoltage = (ammeterAvg)*(Vcc/1023.0);
+  ammeterCurrent = abs((float(ammeterRCAvg) - float(ammeterRCZero)) * (1.0/float(ammeterDigitalFilterScale)) * (Vcc/1023.0) * ammeterVoltsToAmps);
   
-  float currentDiff = currentTarget - ampmeterCurrent;
+  float currentDiff = currentTarget - ammeterCurrent;
 
   uint32_t currentMillis = millis();
   float timeDiff = 0.001*(float(currentMillis) - float(lastMillis));
@@ -180,7 +180,7 @@ void loop()
   }
   else
   {
-    motorDC = uint8_t(PIDoutput);
+    motorDC = constrain(uint8_t(PIDoutput), 20, 150);
   }
 
 
@@ -188,19 +188,12 @@ void loop()
   if(!overload)
   {
     //Serial.print("DC: ");
-    Serial.println(motorDC);
+    //Serial.println(motorDC);
     //Serial.print("dir: ");
     //Serial.println(uint8_t(dir));
     //setDriver(dir, uint8_t(motorDC));
 
-    if(motorDC < 0)
-    {
-      setDriver(false, uint8_t(-1*motorDC));
-    }
-    else
-    {
-      setDriver(true, uint8_t(motorDC));
-    }
+    setDriver(dir, motorDC);
   } 
   else
   {
@@ -277,13 +270,28 @@ void receiveEvent(int howMany)
     Wire.readBytes(inputArray, inputArraySize);
     float receivedFloat = *((float*)inputArray);
 
+    if (receivedFloat == 0)
+    {
+      currentTarget = 0;
+    }
+    else if(receivedFloat > 0)
+    {
+      dir = false;
+      currentTarget = receivedFloat/currentToTorqueCoeff;
+    }
+    else
+    {
+      dir = true;
+      currentTarget = abs(receivedFloat)/currentToTorqueCoeff;
+    }
+
     /*
     Serial.print("Received direction: ");
     Serial.println(dir);
     Serial.print("Received torque: ");
     Serial.println(receivedFloat);
     */
-    currentTarget = receivedFloat/currentToTorqueCoeff;
+
   }
 }
 
@@ -298,7 +306,7 @@ void requestEvent()
     outputArray[0] = 1;
   }
 
-  float torque = ampmeterCurrent*currentToTorqueCoeff;
+  float torque = ammeterCurrent*currentToTorqueCoeff;
   memcpy(outputArray + 1, &torque, sizeof(torque));
   Wire.write(outputArray, outputArraySize);
 }
