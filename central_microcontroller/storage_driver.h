@@ -10,9 +10,9 @@
 struct storage{
     uint8_t command;
     uint8_t active_slot;
-    uint8_t pos_to_store;
     uint8_t errors;
     uint16_t weight;
+    uint16_t old_weight;
     bool meas_ready;
     bool manual;
     uint16_t samples[3];

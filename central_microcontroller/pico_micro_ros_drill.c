@@ -6,6 +6,7 @@
 #include <rclc/executor.h>
 #include <std_msgs/msg/u_int8.h>
 #include <std_msgs/msg/int16.h>
+#include <std_msgs/msg/u_int16_multi_array.h>
 #include <sensor_msgs/msg/joy.h>
 #include <rmw_microros/rmw_microros.h>
 
@@ -19,6 +20,19 @@
 #include "math.h"
 
 #define I2C_PORT i2c0
+#define BUFFER_SIZE 10
+#define STRING_SIZE 30
+
+enum state_machine 
+{
+    driving,
+    drilling,
+    storing,
+    stop,
+    manual
+};
+
+enum state_machine states = stop;
 
 struct storage storage;
 struct linear linear;
@@ -26,32 +40,45 @@ struct motor motor;
 
 const uint LED_PIN = 25;
 
+rcl_subscription_t state_subscriber;
+std_msgs__msg__UInt8 msg_state;
+
+rcl_subscription_t parameters_subscriber;
+std_msgs__msg__UInt16MultiArray msg_parameters; 
+
 rcl_subscription_t joy_subscriber;
 sensor_msgs__msg__Joy msg_joy;
 
 rcl_publisher_t publisher;
-std_msgs__msg__Int16 weight;
+std_msgs__msg__UInt16MultiArray msg_data; 
 
 void timer_callback(rcl_timer_t *timer, int64_t last_call_time)
 {
-    if (storage_read(&storage) < 0)
-    //if (motor_write(&motor) < 0)
-    //if (linear_read(&linear) < 0)
-    {
-        weight.data = 68;
-        rcl_ret_t ret = rcl_publish(&publisher, &weight, NULL);
-    }
-    else
-    {
-    //weight.data = storage.raw;
-    weight.data = storage.weight;
-    //weight.data = linear.states;
-    //weight.data = storage.command;
-    //weight.data = motor.torque;
-    //weight.data = motor.direction;
-    rcl_ret_t ret = rcl_publish(&publisher, &weight, NULL);
-    }
-    
+    msg_data.data.data[0] = motor.torque_meas;
+    msg_data.data.data[1] = linear.height;
+    msg_data.data.data[2] = storage.active_slot;
+    msg_data.data.data[3] = storage.samples[0];
+    msg_data.data.data[4] = storage.samples[1];
+    msg_data.data.data[5] = storage.samples[2];
+    msg_data.data.data[6] = storage.samples[3];
+    rcl_ret_t ret = rcl_publish(&publisher, &msg_data, NULL);  
+}
+
+void state_callback(const void * msgin)
+{
+    const std_msgs__msg__UInt8 * msg = (const std_msgs__msg__UInt8 *)msgin;
+
+    states = msg->data;
+    storage.samples[1] = msg->data;
+}
+
+void parameters_callback(const void * msgin)
+{
+    const std_msgs__msg__UInt16MultiArray * msg = (const std_msgs__msg__UInt16MultiArray *)msgin;
+
+    motor.torque_meas = msg->data.data[0]; //talk about data type
+    linear.speed = msg->data.data[1];
+    linear.height = msg->data.data[2];
 }
 
 void joy_callback(sensor_msgs__msg__Joy* msgin)
@@ -129,13 +156,77 @@ int main()
     rclc_support_init(&support, 0, NULL, &allocator);
 
     rclc_node_init_default(&node, "pico_node", "", &support);
+    
+    rclc_subscription_init_default(
+        &state_subscriber, &node,
+        ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, UInt8),
+        "drill_state");
+
+    rclc_subscription_init_default(
+        &parameters_subscriber, &node,
+        ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, UInt16MultiArray),
+        "drill_parameters");
+
+    // alocation memory to msg_parameters
+    int16_t buffer[BUFFER_SIZE] = {};
+    msg_parameters.data.data = buffer;
+    msg_parameters.data.size = 3;
+    msg_parameters.data.capacity = BUFFER_SIZE;
+        
+    std_msgs__msg__MultiArrayDimension dim[BUFFER_SIZE] = {};
+    msg_parameters.layout.dim.data = dim;
+    msg_parameters.layout.dim.size = 0;
+    msg_parameters.layout.dim.capacity = BUFFER_SIZE;
+        
+    char labels[BUFFER_SIZE][STRING_SIZE] = {};
+    for (size_t i = 0; i < BUFFER_SIZE; i++)
+    {
+        msg_parameters.layout.dim.data[i].label.data = labels[i];
+        msg_parameters.layout.dim.data[i].label.size = 0;
+        msg_parameters.layout.dim.data[i].label.capacity = STRING_SIZE;
+    }
+        
+    msg_parameters.layout.data_offset = 0;
+    for (size_t i = 0; i < BUFFER_SIZE; i++)
+    {
+        snprintf(msg_parameters.layout.dim.data[i].label.data, STRING_SIZE, "label_%lu", i);
+        msg_parameters.layout.dim.data[i].label.size = strlen(msg_parameters.layout.dim.data[i].label.data);
+        msg_parameters.layout.dim.data[i].size = 42;
+        msg_parameters.layout.dim.data[i].stride = 42;
+    }
+
     rclc_publisher_init_default(
         &publisher,
         &node,
-        ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, Int16),
-        "sample_weight");
+        ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, UInt16MultiArray),
+        "drill_data");
+    
+    // alocation memory to msg
+    msg_data.data.data = buffer;
+    msg_data.data.size = 7;
+    msg_data.data.capacity = BUFFER_SIZE;
+        
+    msg_data.layout.dim.data = dim;
+    msg_data.layout.dim.size = 0;
+    msg_data.layout.dim.capacity = BUFFER_SIZE;
+        
+    for (size_t i = 0; i < BUFFER_SIZE; i++)
+    {
+        msg_data.layout.dim.data[i].label.data = labels[i];
+        msg_data.layout.dim.data[i].label.size = 0;
+        msg_data.layout.dim.data[i].label.capacity = STRING_SIZE;
+    }
+        
+    msg_data.layout.data_offset = 0;
+    for (size_t i = 0; i < BUFFER_SIZE; i++)
+    {
+        snprintf(msg_data.layout.dim.data[i].label.data, STRING_SIZE, "label_%lu", i);
+        msg_data.layout.dim.data[i].label.size = strlen(msg_data.layout.dim.data[i].label.data);
+        msg_data.layout.dim.data[i].size = 42;
+        msg_data.layout.dim.data[i].stride = 42;
+    }
 
-   rclc_subscription_init_default(
+    rclc_subscription_init_default(
         &joy_subscriber, &node,
         ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, Joy),
         "joy");
@@ -166,13 +257,21 @@ int main()
         RCL_MS_TO_NS(1000),
         timer_callback);
 
-    rclc_executor_init(&executor, &support.context, 2, &allocator); //the number of executors
+    rclc_executor_init(&executor, &support.context, 4, &allocator); //the number of executors
     rclc_executor_add_timer(&executor, &timer);
     //init executor for subscriber
     //init executor for joy sub
     rclc_executor_add_subscription(
         &executor, &joy_subscriber, &msg_joy,
         &joy_callback, ON_NEW_DATA);
+
+    rclc_executor_add_subscription(
+        &executor, &state_subscriber, &msg_state,
+        &state_callback, ON_NEW_DATA);
+
+    rclc_executor_add_subscription(
+        &executor, &parameters_subscriber, &msg_parameters,
+        &parameters_callback, ON_NEW_DATA);
 
     //init i2c
     i2c_init(I2C_PORT, 100000);

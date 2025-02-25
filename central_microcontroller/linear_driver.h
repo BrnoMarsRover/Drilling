@@ -11,6 +11,7 @@ struct linear{
     uint8_t speed;
     uint8_t states;
     uint16_t height;
+    uint16_t goal_height;
 };
 
 int linear_read(struct linear* linear);

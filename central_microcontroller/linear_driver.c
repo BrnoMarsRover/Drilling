@@ -41,4 +41,5 @@ void linear_init(struct linear* linear)
     linear->speed = 0;
     linear->states = 0;
     linear->height = 0;
+    linear->goal_height = 0;
 }
