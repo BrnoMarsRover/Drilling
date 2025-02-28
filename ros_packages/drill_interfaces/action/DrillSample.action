@@ -1,0 +1,7 @@
+float32 torque 
+uint16 height       
+---
+uint16 finalheight        
+---
+float32 actual_torque 
+uint16 actual_height
