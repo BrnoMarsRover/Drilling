@@ -18,6 +18,16 @@ int linear_read(struct linear* linear);
 int linear_write(struct linear* linear);
 void linear_init(struct linear* linear);
 
+void linear_stop(struct linear* linear);
+void linear_go_down(struct linear* linear);
+void linear_go_up(struct linear* linear);
+bool is_linear_stucked(struct linear* linear);
+bool linear_reached_goal(struct linear* linear);
+bool is_linear_home(struct linear* linear);
+
+
+
+
 
 
 

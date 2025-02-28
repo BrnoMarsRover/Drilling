@@ -25,14 +25,17 @@
 
 enum state_machine 
 {
-    driving,
-    drilling,
-    storing,
     stop,
+    drilling,
+    go_down,
+    go_up,
+    turn_right,
+    turn_left,
+    storing,
     manual
 };
 
-enum state_machine states = stop;
+enum state_machine currentState = stop;
 
 struct storage storage;
 struct linear linear;
@@ -54,7 +57,7 @@ std_msgs__msg__UInt16MultiArray msg_data;
 
 void timer_callback(rcl_timer_t *timer, int64_t last_call_time)
 {
-    msg_data.data.data[0] = motor.torque_meas;
+    msg_data.data.data[0] = float_code(motor.torque_meas);
     msg_data.data.data[1] = linear.height;
     msg_data.data.data[2] = storage.active_slot;
     msg_data.data.data[3] = storage.samples[0];
@@ -64,19 +67,90 @@ void timer_callback(rcl_timer_t *timer, int64_t last_call_time)
     rcl_ret_t ret = rcl_publish(&publisher, &msg_data, NULL);  
 }
 
+void timer_callback_coroutines(rcl_timer_t *timer, int64_t last_call_time)
+{
+    switch (currentState) 
+    {
+        case stop:
+            motor_stop(&motor);
+            linear_stop(&linear);
+            break;
+
+        case drilling:
+            if(is_motor_stucked(&motor) || is_linear_stucked(&linear) || linear_reached_goal(&linear))
+            {
+                motor_stop(&motor);
+                linear_stop(&linear);
+            }
+            else
+            {
+                motor_right(&motor);
+                linear_go_down(&linear);
+            }
+            break;
+        
+        case go_down:
+            motor_stop(&motor);
+            if(!is_linear_stucked(&linear))
+                linear_go_down(&linear);
+            else
+                linear_stop(&linear);
+            break;    
+
+        case go_up:
+            motor_stop(&motor);
+            if(is_linear_home(&linear))
+                linear_stop(&linear);
+            else
+                linear_go_up(&linear);
+            break;
+            
+        case turn_left:
+            linear_stop(&linear);
+            motor_left(&motor);
+            break;
+
+        case turn_right:
+            linear_stop(&linear);
+            if(is_motor_stucked(&motor))
+                motor_stop(&motor);
+            else
+                motor_right(&motor);
+            break;
+
+        case storing:
+            break;
+        case manual:
+            break;
+        default:
+            printf("Neznámý stav!\n");
+            break;
+    }
+
+    if(currentState != manual)
+    {
+        motor_write(&motor);    
+        linear_write(&linear);
+        
+    }
+    motor_read(&motor);
+    linear_read(&linear);
+    storage_read(&storage);
+
+
+}
+
 void state_callback(const void * msgin)
 {
     const std_msgs__msg__UInt8 * msg = (const std_msgs__msg__UInt8 *)msgin;
-
-    states = msg->data;
-    storage.samples[1] = msg->data;
+    currentState = msg->data;
 }
 
 void parameters_callback(const void * msgin)
 {
     const std_msgs__msg__UInt16MultiArray * msg = (const std_msgs__msg__UInt16MultiArray *)msgin;
 
-    motor.torque_meas = msg->data.data[0]; //talk about data type
+    motor.torque_goal = float_decode(msg->data.data[0]); //talk about data type
     linear.speed = msg->data.data[1];
     linear.height = msg->data.data[2];
 }
@@ -91,7 +165,7 @@ void joy_callback(sensor_msgs__msg__Joy* msgin)
     // Set the linear speed
     linear.speed = (uint8_t)(fabs(msgin->axes.data[1]) * 100.0f); //calculating speed
 
-    linear_read(&linear);
+    //linear_read(&linear);
     if(linear.states == 1 && linear.command == 1) { linear.command = 4; } //kontrola koncaku
     linear_write(&linear);
 
@@ -134,6 +208,7 @@ int main()
     gpio_init(LED_PIN);
     gpio_set_dir(LED_PIN, GPIO_OUT);
     rcl_timer_t timer;
+    rcl_timer_t timer_coroutines;
     rcl_node_t node;
     rcl_allocator_t allocator;
     rclc_support_t support;
@@ -257,10 +332,16 @@ int main()
         RCL_MS_TO_NS(1000),
         timer_callback);
 
-    rclc_executor_init(&executor, &support.context, 4, &allocator); //the number of executors
+    rclc_timer_init_default(
+        &timer_coroutines,
+        &support,
+        RCL_MS_TO_NS(100),
+        timer_callback_coroutines);
+
+    rclc_executor_init(&executor, &support.context, 5, &allocator); //the number of executors
     rclc_executor_add_timer(&executor, &timer);
-    //init executor for subscriber
-    //init executor for joy sub
+    rclc_executor_add_timer(&executor, &timer_coroutines);
+
     rclc_executor_add_subscription(
         &executor, &joy_subscriber, &msg_joy,
         &joy_callback, ON_NEW_DATA);

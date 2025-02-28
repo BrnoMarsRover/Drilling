@@ -43,3 +43,39 @@ void linear_init(struct linear* linear)
     linear->height = 0;
     linear->goal_height = 0;
 }
+
+void linear_stop(struct linear* linear)
+{
+    linear->command = 4;
+}
+
+void linear_go_down(struct linear* linear)
+{
+    linear->command = 2;
+}
+
+void linear_go_up(struct linear* linear)
+{
+    linear->command = 1;
+}
+
+bool is_linear_stucked(struct linear* linear)
+{
+    if(linear->states == 1)
+        return true;
+    return false;
+}
+
+bool linear_reached_goal(struct linear* linear)
+{
+    if(linear->goal_height == linear->height)
+        return true;
+    return false;
+}
+
+bool is_linear_home(struct linear* linear) 
+{
+    if(linear->states == 4) //maybe it will be different number
+        return true;
+    return false;
+}
