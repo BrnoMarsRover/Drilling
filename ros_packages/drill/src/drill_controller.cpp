@@ -8,9 +8,13 @@
 #include "drill_interfaces/action/store_sample.hpp"
 #include "drill_interfaces/srv/get_sample_weight.hpp"
 
-#define STORING_POS 30 // [mm]
+#define MAX_SLOT 4 //Total number of slots
+#define DEF_SLOT 0 //Default slot, when the drilling is possible
+#define SAFE_POS 20 // [mm] height when the turning with the storage is possible
+#define STORING_POS 30 // [mm] height when the drill is the storage
 #define MAX_TORQUE 2.5
-#define RANGE 1000
+#define MAX_HEIGHT 500 // [mm]
+#define RANGE 1000 // to code the float number
 
 enum state_machine 
 {
@@ -21,6 +25,8 @@ enum state_machine
     turn_right,
     turn_left,
     slot_select,
+    get_weight,
+    reset_weight,
     manual
 };
 
@@ -103,7 +109,8 @@ private:
   rclcpp_action::GoalResponse handle_goal_drill_sample(
       const rclcpp_action::GoalUUID & uuid,
       std::shared_ptr<const DrillSample::Goal> goal) {
-      RCLCPP_INFO(this->get_logger(), "Received DrillSample request.");
+      RCLCPP_INFO(this->get_logger(), "Received DrillSample request to drill %d mm with maximal torque %f .", goal->height, goal->torque);
+      (void)uuid;
 
       if (drill_is_busy) {
         RCLCPP_WARN(this->get_logger(), "Drill is busy or in manual mode. Rejecting request.");
@@ -117,6 +124,7 @@ private:
   // Stop the drill when the action is canceled
   rclcpp_action::CancelResponse handle_cancel_drill_sample(const std::shared_ptr<GoalHandleDrillSample> goal_handle) {
       RCLCPP_INFO(this->get_logger(), "DrillSample canceled.");
+      (void)goal_handle;
       drill_is_busy = false;
       return rclcpp_action::CancelResponse::ACCEPT;
   }
@@ -180,6 +188,7 @@ private:
     goal_handle->succeed(result);
     currentState = stop;
     publish_drill_state(currentState);
+    drill_is_busy = false;
     RCLCPP_INFO(this->get_logger(), "DrillSample action completed.");
 }
 
@@ -187,7 +196,8 @@ private:
   rclcpp_action::GoalResponse handle_goal_store_sample(
       const rclcpp_action::GoalUUID & uuid,
       std::shared_ptr<const StoreSample::Goal> goal) {
-      RCLCPP_INFO(this->get_logger(), "Received StoreSample request.");
+      RCLCPP_INFO(this->get_logger(), "Received StoreSample request to store sample on slot number %d." , goal->slot);
+      (void)uuid;
 
       if (drill_is_busy) {
         RCLCPP_WARN(this->get_logger(), "Drill is busy or in manual mode. Rejecting request.");
@@ -201,6 +211,7 @@ private:
     // Stop the drill when the action is canceled
   rclcpp_action::CancelResponse handle_cancel_store_sample(const std::shared_ptr<GoalHandleStoreSample> goal_handle) {
       RCLCPP_INFO(this->get_logger(), "StoreSample canceled.");
+      (void)goal_handle;
       drill_is_busy = false;
       return rclcpp_action::CancelResponse::ACCEPT;
   }
@@ -221,11 +232,18 @@ private:
     enum state_machine currentState;
     int state = 0;
 
-    while(true)
+    auto storing_slot = goal->slot;
+    if (storing_slot > MAX_SLOT)
+    {
+        RCLCPP_WARN(this->get_logger(), "Storage doesn't have that many slots, sample will be thrown away.");
+        storing_slot = DEF_SLOT;
+    }
+
+    while(state < 7)
     {
         //Checking if there is a cancel request
         if (goal_handle->is_canceling()) {
-            result->finalheight = 0;
+            result->weight = 0;
             goal_handle->canceled(result);
             currentState = stop;
             publish_drill_state(currentState);
@@ -235,8 +253,8 @@ private:
 
         switch (state)
         {
-            case 0: //jizda do pozice home
-                if(actual_height = 0)
+            case 0: //premisteni vrtacky nad zasobnik
+                if(actual_height < SAFE_POS)
                     state = 1;
                 else
                 {
@@ -244,13 +262,13 @@ private:
                     {
                         currentState = go_up;
                         publish_drill_state(currentState);
-                        publish_drill_param(0, 100, 0);
+                        publish_drill_param(0, 100, 0, DEF_SLOT);
                     }
                 }
             break; 
             
             case 1: //nastaveni slotu pro zasobnik
-                if(active_slot == goal->slot)
+                if(active_slot == storing_slot)
                     state = 2;
                 else
                 {
@@ -258,7 +276,7 @@ private:
                     {
                         currentState = slot_select;
                         publish_drill_state(currentState);
-                        publish_drill_param(0, 0, 0, goal->slot);
+                        publish_drill_param(0, 0, SAFE_POS, storing_slot);
                     }
                 }    
             break;
@@ -272,7 +290,7 @@ private:
                     {
                         currentState = go_down;
                         publish_drill_state(currentState);
-                        publish_drill_param(0, 50, STORING_POS, goal->slot);
+                        publish_drill_param(0, 50, STORING_POS, storing_slot);
                     }
                 }
             break;
@@ -286,66 +304,166 @@ private:
                     {
                         currentState = turn_left;
                         publish_drill_state(currentState);
-                        publish_drill_param(1, 0, STORING_POS, goal->slot);
+                        publish_drill_param(1, 0, STORING_POS, storing_slot);
                     }
                 }
             break;
 
-        }
+            case 4: //zvednuti vrtaku, aby se mohlo tocit se zasobnikem
+                if(actual_height < SAFE_POS)
+                    state = 5;
+                else
+                {
+                    if(currentState != go_up)
+                    {
+                        currentState = go_up;
+                        publish_drill_state(currentState);
+                        publish_drill_param(0, 100, SAFE_POS, storing_slot);
+                    }
+                }
+            break;
 
-        if(actual_height < 100)
-        {
-            if (currentState != go_down)
-            {
-                currentState = go_down;
-                publish_drill_state(currentState);
-                publish_drill_param(0, 100, goal->height);
-            }
-        }
-        else
-        {
-            if (currentState != drilling)
-            {
-                currentState = drilling;
-                publish_drill_state(currentState);
-                publish_drill_param(goal->torque, 70, goal->height);
-            }
+            case 5: //zasobnik zpet na default slot
+                if(active_slot == DEF_SLOT)
+                    state = 6;
+                else
+                {
+                    if(currentState != slot_select)
+                    {
+                        currentState = slot_select;
+                        publish_drill_state(currentState);
+                        publish_drill_param(0, 0, SAFE_POS, DEF_SLOT);
+                    }
+                }    
+            break;
+
+            case 6: //vazeni
+                if(samples[storing_slot] || storing_slot == DEF_SLOT)
+                    state = 7;
+                else
+                {
+                    if(currentState != get_weight)
+                    {
+                        currentState = get_weight;
+                        publish_drill_state(currentState);
+                        publish_drill_param(0, 0, SAFE_POS, storing_slot);
+                    }
+                }    
+            break;
+
         }
         
         // Sending feedback
-        feedback->actual_torque = actual_torque;
         feedback->actual_height = actual_height;
         goal_handle->publish_feedback(feedback);
-        RCLCPP_INFO(this->get_logger(), "Drilling progress torque: %f height: %d", actual_torque, actual_height);
+        RCLCPP_INFO(this->get_logger(), "Storing sample, drill height: %d", actual_height);
         loop_rate.sleep();
 
     }
 
     
     // Drilling complete
-    result->finalheight = actual_height;
+    result->weight = samples[storing_slot];
     goal_handle->succeed(result);
     currentState = stop;
     publish_drill_state(currentState);
-    RCLCPP_INFO(this->get_logger(), "DrillSample action completed.");
+    drill_is_busy = false;
+    RCLCPP_INFO(this->get_logger(), "StoreSample action completed.");
 }
 
 
   rclcpp_action::GoalResponse handle_goal_drill_calibration(
       const rclcpp_action::GoalUUID & uuid,
       std::shared_ptr<const DrillCalibration::Goal> goal) {
-      RCLCPP_INFO(this->get_logger(), "Received DrillCalibration request.");
-      return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
-  }
+        RCLCPP_INFO(this->get_logger(), "Received DrillCalibration request. Weights will be: %s", goal->reset_weights ? "erased" : "kept");      
+        (void)uuid;
+
+        if (drill_is_busy) 
+        {
+            RCLCPP_WARN(this->get_logger(), "Drill is busy or in manual mode. Rejecting request.");
+            return rclcpp_action::GoalResponse::REJECT;
+        }
+        RCLCPP_INFO(this->get_logger(), "Drill is ready. Accepting request.");
+        drill_is_busy = true;
+        return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;  
+    }
 
   rclcpp_action::CancelResponse handle_cancel_drill_calibration(const std::shared_ptr<GoalHandleDrillCalibration> goal_handle) {
       RCLCPP_INFO(this->get_logger(), "DrillCalibration canceled.");
+      (void)goal_handle;
+      drill_is_busy = false;
       return rclcpp_action::CancelResponse::ACCEPT;
   }
 
   void handle_accepted_drill_calibration(const std::shared_ptr<GoalHandleDrillCalibration> goal_handle) {
-      RCLCPP_INFO(this->get_logger(), "Executing DrillCalibration action...");
-  }
+    std::thread{std::bind(&DrillController::execute_drill_calibration, this, std::placeholders::_1), goal_handle}.detach();
+}
+
+  //executing the DrillCalibration service
+  void execute_drill_calibration(const std::shared_ptr<GoalHandleDrillCalibration> goal_handle) {
+    RCLCPP_INFO(this->get_logger(), "Executing DrillCalibration action...");
+    const auto goal = goal_handle->get_goal();
+    auto result = std::make_shared<DrillCalibration::Result>();
+    auto feedback = std::make_shared<DrillCalibration::Feedback>();
+    rclcpp::Rate loop_rate(1);
+
+    enum state_machine currentState;
+
+    while(actual_height != 0)
+    {
+        //Checking if there is a cancel request
+        if (goal_handle->is_canceling()) {
+            result->success = false;
+            goal_handle->canceled(result);
+            currentState = stop;
+            publish_drill_state(currentState);
+            RCLCPP_INFO(this->get_logger(), "DrillCalibration action canceled.");
+            return;
+        }
+        
+        if (currentState != go_up)
+            {
+                currentState = go_up;
+                publish_drill_state(currentState);
+                publish_drill_param(0, 100, 0, DEF_SLOT);
+            }
+        
+
+        // Sending feedback
+        feedback->actual_height = actual_height;
+        goal_handle->publish_feedback(feedback);
+        RCLCPP_INFO(this->get_logger(), "Calibration progress height: %d mm", actual_height);
+        loop_rate.sleep();
+    }
+
+    if(goal->reset_weights)
+    {        
+        while (samples[0] && samples[1] && samples[2] && samples[3])
+        {
+            if (currentState != reset_weight)
+            {
+                currentState = reset_weight;
+                publish_drill_state(currentState);
+                publish_drill_param(0, 0, 0, DEF_SLOT);
+            }
+
+            // Sending feedback
+            feedback->actual_height = actual_height;
+            goal_handle->publish_feedback(feedback);
+            RCLCPP_INFO(this->get_logger(), "Reseting the weights");
+            loop_rate.sleep();
+        }
+    }
+
+    
+    // Calibration complete
+    result->success = true;
+    goal_handle->succeed(result);
+    currentState = stop;
+    publish_drill_state(currentState);
+    drill_is_busy = false;
+    RCLCPP_INFO(this->get_logger(), "DrillCalibration action completed.");
+}
 
   void get_sample_weight_callback(
       const std::shared_ptr<GetSampleWeight::Request> request,
@@ -373,8 +491,8 @@ private:
 
 
         drill_params_pub_->publish(message);
-        RCLCPP_INFO(this->get_logger(), "Published drill parameters torque %f, speed %d, height %d, slot %d" 
-                    torque, speed, height, slot);
+        RCLCPP_INFO(this->get_logger(), "Published drill parameters torque %f, speed %d, height %d, slot %d", 
+        torque, speed, height, slot);
     }
 
     float float_decode(uint16_t aNum)
