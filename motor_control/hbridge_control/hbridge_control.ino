@@ -21,7 +21,9 @@ const uint8_t InPin_AmmeterDirect = A3;
 
 //MOTOR CONTROL
 bool dir = false;
-uint8_t motorDC = 0;
+uint8_t bridgeDC = 0;
+uint8_t lastbridgeDC = 0;
+float bridgeDCMaxChange = 60;
 
 //OVERLOAD PROTECTION
 bool overload = false;
@@ -34,7 +36,7 @@ uint32_t overloadEndTime = 0; //ms
 //AMPMETER
 uint16_t ammeterRC = 0;
 uint16_t ammeterDirect = 0;
-const uint16_t ammeterDigitalFilterScale = 32;
+const uint16_t ammeterDigitalFilterScale = 8;
 MovingAverage <uint16_t, 16> ammeterDigitalFilter;
 uint16_t ammeterRCAvg = 0;
 uint16_t ammeterRCZero = 500;
@@ -78,24 +80,24 @@ uint32_t thermometerLastMillis = 0;
 uint32_t thermometerDelay = 5000;
 #endif
 
-void setDriver(bool adir, uint8_t amotorDC)
+void setDriver(bool adir, uint8_t abridgeDC)
 {
   /* REDUNDANT??
-  if (amotorDC > 255)
-    amotorDC = 255;
-  if (amotorDC < 0)
-    amotorDC = 0;
+  if (abridgeDC > 255)
+    abridgeDC = 255;
+  if (abridgeDC < 0)
+    abridgeDC = 0;
   */
 
   if (adir)
   {
-    analogWrite(OutPin_L_PWM, amotorDC);
+    analogWrite(OutPin_L_PWM, abridgeDC);
     analogWrite(OutPin_R_PWM, 0);
   }
   else
   {
     analogWrite(OutPin_L_PWM, 0);
-    analogWrite(OutPin_R_PWM, amotorDC);
+    analogWrite(OutPin_R_PWM, abridgeDC);
   }
 }
 
@@ -147,53 +149,59 @@ void setup()
 
 void loop()
 {
-
-  ammeterDirect = analogRead(InPin_AmmeterDirect);
-  /*
-  if(ammeterDirect < overloadLow || ammeterDirect > overloadHigh)
-  {
-    analogWrite(OutPin_L_PWM, 0);
-    analogWrite(OutPin_R_PWM, 0);
-    overload = true;
-    overloadEndTime = millis() + overloadDelay;
-  }
-  */
-  ammeterRC = ammeterDigitalFilterScale*analogRead(InPin_AmmeterRC);
-  ammeterRCAvg = ammeterDigitalFilter.add(ammeterRC);
-  //ammeterVoltage = (ammeterAvg)*(Vcc/1023.0);
-  ammeterCurrent = abs((float(ammeterRCAvg) - float(ammeterRCZero)) * (1.0/float(ammeterDigitalFilterScale)) * (Vcc/1023.0) * ammeterVoltsToAmps);
-  
-  float currentDiff = currentTarget - ammeterCurrent;
-
-  uint32_t currentMillis = millis();
-  float timeDiff = 0.001*(float(currentMillis) - float(lastMillis));
-
-  errorSum += currentDiff * timeDiff;
-
-  lastMillis = currentMillis;
-
-  PIDoutput = Kp * currentDiff + Ki * errorSum;
-
   if(currentTarget == 0)
   {
-    motorDC = 0;
+    bridgeDC = 0;
+    errorSum = 0;
   }
   else
   {
-    motorDC = constrain(uint8_t(PIDoutput), 20, 150);
+    ammeterDirect = analogRead(InPin_AmmeterDirect);
+    /*
+    if(ammeterDirect < overloadLow || ammeterDirect > overloadHigh || motorTemperature > 70)
+    {
+      analogWrite(OutPin_L_PWM, 0);
+      analogWrite(OutPin_R_PWM, 0);
+      overload = true;
+      overloadEndTime = millis() + overloadDelay;
+    }
+    */
+    ammeterRC = ammeterDigitalFilterScale*analogRead(InPin_AmmeterRC);
+    ammeterRCAvg = ammeterDigitalFilter.add(ammeterRC);
+    //ammeterVoltage = (ammeterAvg)*(Vcc/1023.0);
+    ammeterCurrent = (float(ammeterRCAvg) - float(ammeterRCZero)) * (1.0/float(ammeterDigitalFilterScale)) * (Vcc/1023.0) * ammeterVoltsToAmps;
+    
+    float currentDiff = currentTarget - ammeterCurrent;
+
+    uint32_t currentMillis = millis();
+    float timeDiff = 0.001*(float(currentMillis) - float(lastMillis));
+    errorSum += currentDiff * timeDiff;
+    lastMillis = currentMillis;
+    PIDoutput = Kp * currentDiff + Ki * errorSum;
+
+    if(PIDoutput > 0)
+    {
+      dir = true;
+    }
+    if(PIDoutput < 0)
+    {
+      dir = false;
+    }
+
+    bridgeDC = constrain(uint8_t(abs(PIDoutput)), lastbridgeDC - timeDiff*bridgeDCMaxChange, lastbridgeDC + timeDiff*bridgeDCMaxChange);
+    bridgeDC = constrain(bridgeDC, 20, 150);
   }
-
-
 
   if(!overload)
   {
     //Serial.print("DC: ");
-    //Serial.println(motorDC);
+    //Serial.println(bridgeDC);
     //Serial.print("dir: ");
     //Serial.println(uint8_t(dir));
-    //setDriver(dir, uint8_t(motorDC));
+    //setDriver(dir, uint8_t(bridgeDC));
 
-    setDriver(dir, motorDC);
+    setDriver(dir, bridgeDC);
+    lastbridgeDC = bridgeDC;
   } 
   else
   {
@@ -221,8 +229,8 @@ void loop()
   Serial.println(50.0*PIDoutput);
 */
 
-  //Serial.print(" motorDC:");
-  //Serial.print(motorDC);
+  //Serial.print(" bridgeDC:");
+  //Serial.print(bridgeDC);
 
   //Serial.println("");
 
@@ -270,20 +278,8 @@ void receiveEvent(int howMany)
     Wire.readBytes(inputArray, inputArraySize);
     float receivedFloat = *((float*)inputArray);
 
-    if (receivedFloat == 0)
-    {
-      currentTarget = 0;
-    }
-    else if(receivedFloat > 0)
-    {
-      dir = false;
-      currentTarget = receivedFloat/currentToTorqueCoeff;
-    }
-    else
-    {
-      dir = true;
-      currentTarget = abs(receivedFloat)/currentToTorqueCoeff;
-    }
+    currentTarget = receivedFloat/currentToTorqueCoeff;
+
 
     /*
     Serial.print("Received direction: ");
@@ -297,7 +293,7 @@ void receiveEvent(int howMany)
 
 void requestEvent()
 {
-  if(motorDC == 0)
+  if(bridgeDC == 0)
   {
     outputArray[0] = 0;
   }
