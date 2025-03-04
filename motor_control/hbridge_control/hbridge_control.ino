@@ -21,9 +21,9 @@ const uint8_t InPin_AmmeterDirect = A3;
 
 //MOTOR CONTROL
 bool dir = false;
-uint8_t bridgeDC = 0;
-uint8_t lastbridgeDC = 0;
-float bridgeDCMaxChange = 60;
+float bridgeDC = 0;
+float lastbridgeDC = 0;
+float bridgeDCMaxChange = 18;
 
 //OVERLOAD PROTECTION
 bool overload = false;
@@ -44,13 +44,13 @@ uint16_t ammeterRCZero = 500;
 float ammeterCurrent = 0; // v amperech
 const float Vcc = 4.5;
 const float ammeterVoltsToAmps = 10.0;
-const double currentToTorqueCoeff = 1;
+const double currentToTorqueCoeff = 0.4833;
 double torque = 0.4833;
 
-//PID   //Kp = 0.15; Ki = 0.0005
-const double Kp=0.15, Ki=0.0005, Kd=0.00;
+const float Kp=10, Ki=5;
 float currentTarget = 0;
 uint32_t lastMillis = 0;
+float timeDiff = 0;
 float errorSum = 0;
 float PIDoutput = 0;
 
@@ -77,7 +77,7 @@ DallasTemperature dallasTemperatureThermometer(&oneWireThermometer);
 DeviceAddress thermometerAddress;
 float motorTemperature;
 uint32_t thermometerLastMillis = 0;
-uint32_t thermometerDelay = 5000;
+uint32_t thermometerDelay = 2000;
 #endif
 
 void setDriver(bool adir, uint8_t abridgeDC)
@@ -149,9 +149,13 @@ void setup()
 
 void loop()
 {
+  uint32_t currentMillis = millis();
+  timeDiff = 0.001*(float(currentMillis) - float(lastMillis));
+  lastMillis = currentMillis;
+
   if(currentTarget == 0)
   {
-    bridgeDC = 0;
+    PIDoutput = 0;
     errorSum = 0;
   }
   else
@@ -172,36 +176,29 @@ void loop()
     ammeterCurrent = (float(ammeterRCAvg) - float(ammeterRCZero)) * (1.0/float(ammeterDigitalFilterScale)) * (Vcc/1023.0) * ammeterVoltsToAmps;
     
     float currentDiff = currentTarget - ammeterCurrent;
-
-    uint32_t currentMillis = millis();
-    float timeDiff = 0.001*(float(currentMillis) - float(lastMillis));
+    Serial.print(" E:");
+    Serial.print(currentDiff);
     errorSum += currentDiff * timeDiff;
-    lastMillis = currentMillis;
     PIDoutput = Kp * currentDiff + Ki * errorSum;
-
-    if(PIDoutput > 0)
-    {
-      dir = true;
-    }
-    if(PIDoutput < 0)
-    {
-      dir = false;
-    }
-
-    bridgeDC = constrain(uint8_t(abs(PIDoutput)), lastbridgeDC - timeDiff*bridgeDCMaxChange, lastbridgeDC + timeDiff*bridgeDCMaxChange);
-    bridgeDC = constrain(bridgeDC, 20, 150);
   }
+
+  bridgeDC = constrain(PIDoutput, lastbridgeDC - timeDiff*bridgeDCMaxChange, lastbridgeDC + timeDiff*bridgeDCMaxChange);
+  bridgeDC = constrain(bridgeDC, -150, 150);
+  lastbridgeDC = bridgeDC;
+
+  if(bridgeDC > 0)
+  {
+    dir = true;
+  }
+  else if(bridgeDC < 0)
+  {
+    dir = false;
+  } 
+
 
   if(!overload)
   {
-    //Serial.print("DC: ");
-    //Serial.println(bridgeDC);
-    //Serial.print("dir: ");
-    //Serial.println(uint8_t(dir));
-    //setDriver(dir, uint8_t(bridgeDC));
-
-    setDriver(dir, bridgeDC);
-    lastbridgeDC = bridgeDC;
+    setDriver(dir, uint8_t(abs(bridgeDC)));
   } 
   else
   {
@@ -216,23 +213,25 @@ void loop()
   Serial.print(6000); // To freeze the lower limit
   Serial.print(" m:");
   Serial.print(-6000); // To freeze the upper limit
-
+*/
   Serial.print(" I:");  
-  Serial.println(ampmeterCurrent);
-*/
+  Serial.print(ammeterCurrent);
 
 
-/*
   Serial.print(" T:");
-  Serial.print(torqueTarget);
+  Serial.print(currentTarget);
+  Serial.print(" Es:");
+  Serial.print(errorSum);
   Serial.print(" O:");
-  Serial.println(50.0*PIDoutput);
-*/
+  Serial.print(PIDoutput);
 
-  //Serial.print(" bridgeDC:");
-  //Serial.print(bridgeDC);
 
-  //Serial.println("");
+  Serial.print(" DC:");
+  Serial.print(bridgeDC);
+
+
+
+  Serial.println("");
 
 #ifdef timeMeasure
   long currentMillis = millis();
@@ -254,10 +253,16 @@ void loop()
     //Serial.println(motorTemperature);
     dallasTemperatureThermometer.requestTemperaturesByAddress(thermometerAddress);
     thermometerLastMillis = millis();
+
+    if (Serial.available() > 0)
+    {
+      float receivedFloat = Serial.parseFloat();
+
+      currentTarget = receivedFloat/currentToTorqueCoeff;
+    }
   }
 #endif
 }
-
 
 void receiveEvent(int howMany)
 {
