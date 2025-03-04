@@ -19,7 +19,8 @@ find_package(drill_interfaces REQUIRED)
 
 include_directories(include)
 
-add_executable(drill_controller src/drill_controller.cpp)
+add_executable(drill_controller src/drill_controller.cpp
+        include/drill/drill_controller.h)
 ####
 #ament_target_dependencies(drill_controller rclcpp)
 ament_target_dependencies(drill_controller rclcpp rclcpp_action std_msgs sensor_msgs drill_interfaces)
