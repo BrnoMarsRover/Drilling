@@ -24,6 +24,8 @@ void linear_go_up(struct linear* linear);
 bool is_linear_stucked(struct linear* linear);
 bool linear_reached_goal(struct linear* linear);
 bool is_linear_home(struct linear* linear);
+bool is_linear_safe(struct linear* linear);
+
 
 
 

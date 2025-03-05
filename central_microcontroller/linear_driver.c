@@ -8,6 +8,8 @@
 #define I2C_PORT i2c0
 #define LINEAR_ADDR 0x09
 
+#define SAFE_POS 50 // [mm]
+
 int linear_read(struct linear* linear)
 {
     uint8_t buffer[3];
@@ -76,6 +78,13 @@ bool linear_reached_goal(struct linear* linear)
 bool is_linear_home(struct linear* linear) 
 {
     if(linear->states == 4) //maybe it will be different number
+        return true;
+    return false;
+}
+
+bool is_linear_safe(struct linear* linear) 
+{
+    if(linear->height < SAFE_POS)
         return true;
     return false;
 }

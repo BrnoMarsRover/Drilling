@@ -1,10 +1,10 @@
 #include <Wire.h>
 
-
 int x = 3;
 uint16_t height = 101;
-unsigned long startTime = 0;
-unsigned long elapsedTime = 0;
+unsigned long elapsedTime_request = 0;
+unsigned long elapsedTime_recieve = 0;
+
 
 void setup() {
   // put your setup code here, to run once:
@@ -19,27 +19,31 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
+  Serial.print("Elapsed Time request: ");
+  Serial.print(elapsedTime_request);
+  Serial.println(" ms");
+
+  Serial.print("Elapsed Time recieve: ");
+  Serial.print(elapsedTime_recieve);
+  Serial.println(" ms");
   delay(100);
 }
 
 void receiveEvent(int howMany) {
-    elapsedTime = millis() - startTime;
+    elapsedTime_request = millis() - elapsedTime_request;
     const uint8_t inputArraySize = 2;
     char inputArray[inputArraySize] = {0};
-
     Serial.println("Recieved");
     Serial.println(howMany);
     uint8_t a = Wire.read();
     uint8_t b = Wire.read();
-    Serial.print("Elapsed Time: ");
-    Serial.print(elapsedTime);
-    Serial.println(" ms");
+
     x = a + b;
-    startTime = 0;
     }
 
 
 void requestEvent(){
+  elapsedTime_recieve = millis() - elapsedTime_recieve;
   const uint8_t outputArraySize = 3;
   uint8_t outputArray[outputArraySize] = {0};
 

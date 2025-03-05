@@ -23,7 +23,7 @@
 #define BUFFER_SIZE 10
 #define STRING_SIZE 30
 
-enum state_machine 
+enum state_machine
 {
     stop,
     drilling,
@@ -31,7 +31,9 @@ enum state_machine
     go_up,
     turn_right,
     turn_left,
-    storing,
+    slot_select,
+    get_weight,
+    reset_weight,
     manual
 };
 
@@ -118,12 +120,22 @@ void timer_callback_coroutines(rcl_timer_t *timer, int64_t last_call_time)
                 motor_right(&motor);
             break;
 
-        case storing:
+        case slot_select:
+            motor_stop(&motor);
+            linear_stop(&linear);
+            if (is_linear_safe(&linear))
+                storage_goto(&storage);
+    
             break;
-        case manual:
+
+        case get_weight:
+            motor_stop(&motor);
+            linear_stop(&linear);
+            storage_get_weight(&storage);
             break;
+
         default:
-            printf("Neznámý stav!\n");
+            // manual mode
             break;
     }
 
@@ -131,6 +143,8 @@ void timer_callback_coroutines(rcl_timer_t *timer, int64_t last_call_time)
     {
         motor_write(&motor);    
         linear_write(&linear);
+        if (storage.command != storage.old_command)
+            storage_write(&storage);
         
     }
     motor_read(&motor);
@@ -153,42 +167,46 @@ void parameters_callback(const void * msgin)
     motor.torque_goal = float_decode(msg->data.data[0]); //talk about data type
     linear.speed = msg->data.data[1];
     linear.height = msg->data.data[2];
+    storage.demand_pos = msg->data.data[3];
 }
 
 void joy_callback(sensor_msgs__msg__Joy* msgin)
 {
-    // Set linear state
-    if (msgin->axes.data[1] == 0.0) { linear.command = 4; }      // stop linear
-    else if (msgin->axes.data[1] > 0.0) { linear.command = 1; }  // up linear
-    else { linear.command = 2; }                                 // down linear
-
-    // Set the linear speed
-    linear.speed = (uint8_t)(fabs(msgin->axes.data[1]) * 100.0f); //calculating speed
-
-    //linear_read(&linear);
-    if(linear.states == 1 && linear.command == 1) { linear.command = 4; } //kontrola koncaku
-    linear_write(&linear);
-
-    // Set the motor
-    if (msgin->axes.data[5] < 1)    //left 
-    { 
-        motor.torque =  (1 - msgin->axes.data[5]) / 2 * 125; 
+    if (currentState == manual)
+    {
+        // Set linear state
+        if (msgin->axes.data[1] == 0.0) { linear.command = 4; }      // stop linear
+        else if (msgin->axes.data[1] > 0.0) { linear.command = 1; }  // up linear
+        else { linear.command = 2; }                                 // down linear
+    
+        // Set the linear speed
+        linear.speed = (uint8_t)(fabs(msgin->axes.data[1]) * 100.0f); //calculating speed
+    
+        //linear_read(&linear);
+        if(linear.states == 1 && linear.command == 1) { linear.command = 4; } //kontrola koncaku
+        linear_write(&linear);
+    
+        // Set the motor
+        if (msgin->axes.data[5] < 1)    //left 
+        { 
+            motor.torque =  (1 - msgin->axes.data[5]) / 2 * 125; 
+        }
+        else    //right
+        { 
+            motor.torque = - ((1 - msgin->axes.data[2]) / 2 * 125);
+        }
+        motor_write(&motor);
+    
+        // Set the storage command
+        uint8_t old_command = storage.command;
+        if (msgin->buttons.data[1] == 1) { storage.command = 31; }          //pos 1
+        else if (msgin->buttons.data[2] == 1) {storage.command = 32;}       //pos 2
+        else if (msgin->buttons.data[0] == 1) {storage.command = 33;}       //pos 3
+        else if (msgin->buttons.data[3] == 1) {storage.command = 30;}       //pos 0
+        else if (msgin->buttons.data[4] == 1) {storage.command = 20;}       //get weight
+        else if (msgin->buttons.data[5] == 1) {storage.command = 40;}       //hold pos
+        if(old_command != storage.command) { storage_write(&storage); }  
     }
-    else    //right
-    { 
-        motor.torque = - ((1 - msgin->axes.data[2]) / 2 * 125);
-    }
-    motor_write(&motor);
-
-    // Set the storage command
-    uint8_t old_command = storage.command;
-    if (msgin->buttons.data[1] == 1) { storage.command = 31; }          //pos 1
-    else if (msgin->buttons.data[2] == 1) {storage.command = 32;}       //pos 2
-    else if (msgin->buttons.data[0] == 1) {storage.command = 33;}       //pos 3
-    else if (msgin->buttons.data[3] == 1) {storage.command = 30;}       //pos 0
-    else if (msgin->buttons.data[4] == 1) {storage.command = 20;}       //get weight
-    else if (msgin->buttons.data[5] == 1) {storage.command = 40;}       //hold pos
-    if(old_command != storage.command) { storage_write(&storage); }  
        
 }
 
@@ -245,7 +263,7 @@ int main()
     // alocation memory to msg_parameters
     int16_t buffer[BUFFER_SIZE] = {};
     msg_parameters.data.data = buffer;
-    msg_parameters.data.size = 3;
+    msg_parameters.data.size = 4;
     msg_parameters.data.capacity = BUFFER_SIZE;
         
     std_msgs__msg__MultiArrayDimension dim[BUFFER_SIZE] = {};
