@@ -1,10 +1,9 @@
 #include <Wire.h>
 
 
-int x = 3;
-uint16_t ahoj = 101;
-unsigned long startTime = 0;
-unsigned long elapsedTime = 0;
+int command = 3;
+uint16_t weight = 56;
+
 
 void setup() {
   // put your setup code here, to run once:
@@ -14,7 +13,6 @@ void setup() {
   Wire.onRequest(requestEvent);
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, LOW);
-  Serial.println(x);
 }
 
 void loop() {
@@ -23,15 +21,11 @@ void loop() {
 }
 
 void receiveEvent(int howMany) {
-    elapsedTime = millis() - startTime;
     Serial.println("Recieved");
-    Serial.println(howMany);
-    uint8_t a = Wire.read();
-    Serial.print("Elapsed Time: ");
-    Serial.print(elapsedTime);
-    Serial.println(" ms");
-    x = a + 1;
-    startTime = 0;
+    //Serial.println(howMany);
+    command = Wire.read();
+    Serial.println("command: ");
+    Serial.println(command);
     }
 
 
@@ -39,8 +33,8 @@ void requestEvent(){
   const uint8_t outputArraySize = 3;
   uint8_t outputArray[outputArraySize] = {0};
 
-  outputArray[0] = x;
-  memcpy((outputArray+1), &ahoj, sizeof(ahoj));
+  outputArray[0] = command;
+  memcpy((outputArray+1), &weight, sizeof(weight));
   Wire.write(outputArray, 3);
-  Serial.println("Finito");
+  //Serial.println("Finito");
   }
