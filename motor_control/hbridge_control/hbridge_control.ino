@@ -3,6 +3,8 @@
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
+#include "PIController.h"
+
 //#define timeMeasure //mereni delky loopu/poctu loopu za sekundu
 #define thermometer
 
@@ -20,13 +22,16 @@ const uint8_t InPin_AmmeterRC = A2;
 const uint8_t InPin_AmmeterDirect = A3;
 
 //MOTOR CONTROL
-bool dir = false;
 float bridgeDC = 0.0;
-float lastbridgeDC = 0.0;
-float bridgeDCMaxChange = 25.0;
 float motorSpeed = 0.0; //[rad/s]
 float sourceVoltage = 20.0;
 float windingResistance = 0.2608;
+//CONTROLLERS
+PIController speedController(1,1,1,5);
+PIController currentController(50,25,1,150);
+//SETPOINT FILTER
+float speedTarget = 0;
+float controllerSetpointSR = 0.5;
 
 //OVERLOAD PROTECTION
 bool overload = false;
@@ -48,14 +53,6 @@ const float Vcc = 4.5;
 const float ammeterVoltsToAmps = 10.0;
 const double CPhi = 0.4834;
 
-const float Kp=50, Ki=25;
-float currentTarget = 0;
-uint32_t lastMillis = 0;
-float timeDiff = 0;
-float errorSum = 0;
-float PIDoutput = 0;
-
-
 //I2C
 const uint8_t I2CAddress = 10;
 const uint8_t inputArraySize = 4;
@@ -63,9 +60,9 @@ uint8_t inputArray[inputArraySize] = {0};
 const uint8_t outputArraySize = 5;
 uint8_t outputArray[outputArraySize] = {0};
 
-
-
 //TIME
+uint32_t lastMillis = 0;
+float timeDiff = 0;
 #ifdef timeMeasure
 uint32_t lastMillis_timeMeasure = 0;
 uint32_t loops = 0;
@@ -153,44 +150,31 @@ void loop()
   Serial.print(" t:");  
   Serial.print(timeDiff);
 
-  if(currentTarget == 0)
+
+  ammeterDirect = analogRead(InPin_AmmeterDirect);
+  /*
+  if(ammeterDirect < overloadLow || ammeterDirect > overloadHigh || motorTemperature > 70)
   {
-    PIDoutput = 0;
-    errorSum = 0;
+    analogWrite(OutPin_L_PWM, 0);
+    analogWrite(OutPin_R_PWM, 0);
+    overload = true;
+    overloadEndTime = millis() + overloadDelay;
   }
-  else
-  {
-    ammeterDirect = analogRead(InPin_AmmeterDirect);
-    /*
-    if(ammeterDirect < overloadLow || ammeterDirect > overloadHigh || motorTemperature > 70)
-    {
-      analogWrite(OutPin_L_PWM, 0);
-      analogWrite(OutPin_R_PWM, 0);
-      overload = true;
-      overloadEndTime = millis() + overloadDelay;
-    }
-    */
-    ammeterRC = ammeterDigitalFilterScale*analogRead(InPin_AmmeterRC);
-    ammeterRCAvg = ammeterDigitalFilter.add(ammeterRC);
-    //ammeterVoltage = (ammeterAvg)*(Vcc/1023.0);
-    ammeterCurrent = (float(ammeterRCAvg) - float(ammeterRCZero)) * (1.0/float(ammeterDigitalFilterScale)) * (Vcc/1023.0) * ammeterVoltsToAmps;
+  */
+  ammeterRC = ammeterDigitalFilterScale*analogRead(InPin_AmmeterRC);
+  ammeterRCAvg = ammeterDigitalFilter.add(ammeterRC);
+  //ammeterVoltage = (ammeterAvg)*(Vcc/1023.0);
+  ammeterCurrent = (float(ammeterRCAvg) - float(ammeterRCZero)) * (1.0/float(ammeterDigitalFilterScale)) * (Vcc/1023.0) * ammeterVoltsToAmps;
     
-    motorSpeed = ((sourceVoltage*(lastbridgeDC/255)) - windingResistance*ammeterCurrent)/CPhi;
-    Serial.print(" Sp:");
-    Serial.print(motorSpeed);
+  motorSpeed = ((sourceVoltage*(bridgeDC/255)) - windingResistance*ammeterCurrent)/(CPhi);
+  Serial.print(" Sp:");
+  Serial.print(motorSpeed);
 
-    float currentDiff = currentTarget - ammeterCurrent;
-    Serial.print(" E:");
-    Serial.print(currentDiff);
-    errorSum = constrain(errorSum += currentDiff * timeDiff, -5, 5);
-    PIDoutput = Kp * currentDiff + Ki * errorSum;
-  }
+  float ControllerSetpointMaxChange = constrain(timeDiff*controllerSetpointSR, 0.0, 0.2);
+  speedController.setpoint = constrain(speedTarget, speedController.setpoint - ControllerSetpointMaxChange, speedController.setpoint + ControllerSetpointMaxChange);
 
-  float DCMaxChange = constrain(timeDiff*bridgeDCMaxChange, 0.0, 5.0);
-
-  bridgeDC = constrain(PIDoutput, lastbridgeDC - DCMaxChange, lastbridgeDC + DCMaxChange);
-  bridgeDC = constrain(bridgeDC, -150, 150);
-  lastbridgeDC = bridgeDC;
+  currentController.setpoint = speedController.compute(motorSpeed, timeDiff);
+  bridgeDC = currentController.compute(ammeterCurrent, timeDiff);
 
   if(!overload)
   {
@@ -213,20 +197,11 @@ void loop()
   Serial.print(" I:");  
   Serial.print(ammeterCurrent);
 
-
   Serial.print(" T:");
-  Serial.print(currentTarget);
-  Serial.print(" Es:");
-  Serial.print(errorSum);
-  Serial.print(" O:");
-  Serial.print(PIDoutput);
-
+  Serial.print(speedTarget);
 
   Serial.print(" DC:");
   Serial.print(bridgeDC);
-
-
-
 
 
 #ifdef timeMeasure
@@ -251,13 +226,6 @@ void loop()
 
     Serial.print(" tmp:");
     Serial.print(motorTemperature);
-
-    if (Serial.available() > 0)
-    {
-      float receivedFloat = Serial.parseFloat();
-
-      currentTarget = receivedFloat/CPhi;
-    }
   }
 #endif
 
@@ -282,13 +250,9 @@ void receiveEvent(int howMany)
   {
     Wire.readBytes(inputArray, inputArraySize);
     float receivedFloat = *((float*)inputArray);
-
-    currentTarget = receivedFloat/CPhi;
-
+    speedTarget = receivedFloat;
 
     /*
-    Serial.print("Received direction: ");
-    Serial.println(dir);
     Serial.print("Received torque: ");
     Serial.println(receivedFloat);
     */
