@@ -21,9 +21,12 @@ const uint8_t InPin_AmmeterDirect = A3;
 
 //MOTOR CONTROL
 bool dir = false;
-float bridgeDC = 0;
-float lastbridgeDC = 0;
-float bridgeDCMaxChange = 18;
+float bridgeDC = 0.0;
+float lastbridgeDC = 0.0;
+float bridgeDCMaxChange = 25.0;
+float motorSpeed = 0.0; //[rad/s]
+float sourceVoltage = 20.0;
+float windingResistance = 0.2608;
 
 //OVERLOAD PROTECTION
 bool overload = false;
@@ -31,7 +34,6 @@ uint16_t overloadHigh = 750;
 uint16_t overloadLow = 273;
 uint16_t overloadDelay = 1000; //ms
 uint32_t overloadEndTime = 0; //ms
-
 
 //AMPMETER
 uint16_t ammeterRC = 0;
@@ -44,10 +46,9 @@ uint16_t ammeterRCZero = 500;
 float ammeterCurrent = 0; // v amperech
 const float Vcc = 4.5;
 const float ammeterVoltsToAmps = 10.0;
-const double currentToTorqueCoeff = 0.4833;
-double torque = 0.4833;
+const double CPhi = 0.4834;
 
-const float Kp=10, Ki=5;
+const float Kp=50, Ki=25;
 float currentTarget = 0;
 uint32_t lastMillis = 0;
 float timeDiff = 0;
@@ -80,30 +81,26 @@ uint32_t thermometerLastMillis = 0;
 uint32_t thermometerDelay = 2000;
 #endif
 
-void setDriver(bool adir, uint8_t abridgeDC)
+void setBridge(float aVal)
 {
-  /* REDUNDANT??
-  if (abridgeDC > 255)
-    abridgeDC = 255;
-  if (abridgeDC < 0)
-    abridgeDC = 0;
-  */
+  aVal = constrain(aVal, -255.0, 255.0);
 
-  if (adir)
+  if (aVal < 0)
   {
-    analogWrite(OutPin_L_PWM, abridgeDC);
-    analogWrite(OutPin_R_PWM, 0);
+    analogWrite(OutPin_L_PWM, 0);
+    analogWrite(OutPin_R_PWM, uint8_t(abs(aVal)));
+
   }
   else
   {
-    analogWrite(OutPin_L_PWM, 0);
-    analogWrite(OutPin_R_PWM, abridgeDC);
+    analogWrite(OutPin_L_PWM, uint8_t(aVal));
+    analogWrite(OutPin_R_PWM, 0);
   }
 }
 
 void calibrateAmmeter()
 {
-  setDriver(false, 0);
+  setBridge(0);
   delay(100);
 
   const uint8_t avgCount = 16;
@@ -153,6 +150,9 @@ void loop()
   timeDiff = 0.001*(float(currentMillis) - float(lastMillis));
   lastMillis = currentMillis;
 
+  Serial.print(" t:");  
+  Serial.print(timeDiff);
+
   if(currentTarget == 0)
   {
     PIDoutput = 0;
@@ -175,30 +175,26 @@ void loop()
     //ammeterVoltage = (ammeterAvg)*(Vcc/1023.0);
     ammeterCurrent = (float(ammeterRCAvg) - float(ammeterRCZero)) * (1.0/float(ammeterDigitalFilterScale)) * (Vcc/1023.0) * ammeterVoltsToAmps;
     
+    motorSpeed = ((sourceVoltage*(lastbridgeDC/255)) - windingResistance*ammeterCurrent)/CPhi;
+    Serial.print(" Sp:");
+    Serial.print(motorSpeed);
+
     float currentDiff = currentTarget - ammeterCurrent;
     Serial.print(" E:");
     Serial.print(currentDiff);
-    errorSum += currentDiff * timeDiff;
+    errorSum = constrain(errorSum += currentDiff * timeDiff, -5, 5);
     PIDoutput = Kp * currentDiff + Ki * errorSum;
   }
 
-  bridgeDC = constrain(PIDoutput, lastbridgeDC - timeDiff*bridgeDCMaxChange, lastbridgeDC + timeDiff*bridgeDCMaxChange);
+  float DCMaxChange = constrain(timeDiff*bridgeDCMaxChange, 0.0, 5.0);
+
+  bridgeDC = constrain(PIDoutput, lastbridgeDC - DCMaxChange, lastbridgeDC + DCMaxChange);
   bridgeDC = constrain(bridgeDC, -150, 150);
   lastbridgeDC = bridgeDC;
 
-  if(bridgeDC > 0)
-  {
-    dir = true;
-  }
-  else if(bridgeDC < 0)
-  {
-    dir = false;
-  } 
-
-
   if(!overload)
   {
-    setDriver(dir, uint8_t(abs(bridgeDC)));
+    setBridge(bridgeDC);
   } 
   else
   {
@@ -231,7 +227,7 @@ void loop()
 
 
 
-  Serial.println("");
+
 
 #ifdef timeMeasure
   long currentMillis = millis();
@@ -249,19 +245,23 @@ void loop()
 #ifdef thermometer
   if(millis() - thermometerLastMillis > thermometerDelay)
   {
-    motorTemperature = dallasTemperatureThermometer.getTempC(thermometerAddress);
-    //Serial.println(motorTemperature);
+    motorTemperature = dallasTemperatureThermometer.getTempC(thermometerAddress);   
     dallasTemperatureThermometer.requestTemperaturesByAddress(thermometerAddress);
     thermometerLastMillis = millis();
+
+    Serial.print(" tmp:");
+    Serial.print(motorTemperature);
 
     if (Serial.available() > 0)
     {
       float receivedFloat = Serial.parseFloat();
 
-      currentTarget = receivedFloat/currentToTorqueCoeff;
+      currentTarget = receivedFloat/CPhi;
     }
   }
 #endif
+
+  Serial.println("");
 }
 
 void receiveEvent(int howMany)
@@ -283,7 +283,7 @@ void receiveEvent(int howMany)
     Wire.readBytes(inputArray, inputArraySize);
     float receivedFloat = *((float*)inputArray);
 
-    currentTarget = receivedFloat/currentToTorqueCoeff;
+    currentTarget = receivedFloat/CPhi;
 
 
     /*
@@ -307,7 +307,7 @@ void requestEvent()
     outputArray[0] = 1;
   }
 
-  float torque = ammeterCurrent*currentToTorqueCoeff;
+  float torque = ammeterCurrent*CPhi;
   memcpy(outputArray + 1, &torque, sizeof(torque));
   Wire.write(outputArray, outputArraySize);
 }

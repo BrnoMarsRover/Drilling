@@ -1,7 +1,6 @@
 #include <Wire.h>
 
 uint8_t state = 0;
-uint8_t dir = 0;
 float requestedTorque = 0;
 
 uint8_t waitForByte()
@@ -14,7 +13,8 @@ uint8_t waitForByte()
     }
     else
     {
-      delay(50);
+      delay(1000);
+      Serial.println("cekam");
     }
   }
 }
@@ -46,22 +46,13 @@ void loop()
       break;
 
     case 2:
-      Serial.println("zadejte smer 0/jine");
-      if(waitForByte() == 0)
-      {
-        dir = 0;
-      }
-      else
-      {
-        dir = 1;
-      }
+      Serial.println("zadejte pozadovany moment: |0 ... 200| -> |-2 ... 2|");
+      uint8_t torqueByte = waitForByte();
+      Serial.println("moment zadan");
 
-      Serial.println("zadejte pozadovany moment: |cislo 0 - 200| --> |0 - 2 Nm|");
-      requestedTorque = constrain((waitForByte() * 0.01), 0.0, 200.0);
-
-      Serial.print("nastavuji smer = ");
-      Serial.print(dir);
-      Serial.print(", moment = ");
+      requestedTorque = constrain((torqueByte * 0.02) - 2.0, -2.0, 2.0);
+      
+      Serial.print("nastavuji moment = ");
       Serial.println(requestedTorque);
 
       Wire.beginTransmission(10);
