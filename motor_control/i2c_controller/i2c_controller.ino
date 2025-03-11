@@ -1,7 +1,9 @@
 #include <Wire.h>
 
 uint8_t state = 0;
-float requestedTorque = 0;
+
+const uint8_t slaveAddress = 10;
+const uint8_t inputArraySize = 9;
 
 uint8_t waitForByte()
 {
@@ -9,7 +11,10 @@ uint8_t waitForByte()
   {
     if (Serial.available() > 0)
     {
-      return Serial.parseInt();
+      uint8_t receivedByte = Serial.parseInt();
+      //Serial.print("precteno ");
+      //Serial.println(receivedByte);
+      return receivedByte;
     }
     else
     {
@@ -26,66 +31,74 @@ void setup() {
 
 void loop()
 {
-  switch(state)
+  //Serial.print("jsem ve stavu:");
+  //Serial.println(state);
+
+  if(state == 0)
   {
-    case 0:
-      Serial.println("0 pro zjisteni proudu, jine pro nastaveni motoru");
-      state = 1;
-      break;
+    Serial.println("0 pro cteni dat, jine pro nastaveni motoru");
 
-    case 1:
-      if (waitForByte() == 0)
-      {
-        state = 3;
-      }
-      else
-      {
-        state = 2;
-      }
+    uint8_t receivedByte = waitForByte();
+    //Serial.print("dostal jsem ");
+    //Serial.println(receivedByte);
+    if (receivedByte == 0)
+    {
+      //Serial.println("jdu do stavu 3 ");
+      state = 3;
+    }
+    else
+    {
+      //Serial.println("jdu do stavu 2 ");
+      state = 2;
+    }
+  }
+  else if(state == 2)
+  {
+    Serial.println("zadejte pozadovanou rychlost: |0 ... 60| -> |-3 ... 3|");
+    uint8_t setpointByte = waitForByte();
+    //Serial.println("rychlost zadana");
 
-      break;
-
-    case 2:
-      Serial.println("zadejte pozadovany moment: |0 ... 200| -> |-2 ... 2|");
-      uint8_t torqueByte = waitForByte();
-      Serial.println("moment zadan");
-
-      requestedTorque = constrain((torqueByte * 0.02) - 2.0, -2.0, 2.0);
+    float newSetpoint = constrain((setpointByte * 0.1) - 3.0, -3.0, 3.0);
       
-      Serial.print("nastavuji moment = ");
-      Serial.println(requestedTorque);
+    Serial.print("nastavuji rychlost = ");
+    Serial.println(newSetpoint);
 
-      Wire.beginTransmission(10);
-      Wire.write((uint8_t*)&requestedTorque, 4);
-      Wire.endTransmission(); 
+    Wire.beginTransmission(10);
+    Wire.write((uint8_t*)&newSetpoint, 4);
+    Wire.endTransmission(); 
 
-      state = 0;
-      break;
-
-    case 3:
-      Wire.requestFrom(1, 4);
-      state = 0;
-      Serial.println("pozadano o data");
-      break;
+    state = 0;
+  }
+  else if(state == 3)
+  {
+    Serial.println("zadam o data");
+    Wire.requestFrom(slaveAddress, inputArraySize);
+    state = 0;
+    Serial.println("pozadano o data");
   }
 
-  if(Wire.available() == 5)
+  if(Wire.available() == inputArraySize)
   {
     Serial.println("data prisla");
-    uint8_t receivedBytes[5];
+    uint8_t receivedBytes[inputArraySize];
 
-    for(uint8_t i = 0; i < 5; i++)
+    for(uint8_t i = 0; i < inputArraySize; i++)
     {
       receivedBytes[i] = Wire.read();
       Serial.println(receivedBytes[i]);
     }
 
-    float receivedFloat;
-    memcpy(&receivedFloat, receivedBytes + 1, sizeof(receivedFloat));
+    float receivedFloat1;
+    float receivedFloat2;
+    memcpy(&receivedFloat1, receivedBytes + 1, sizeof(receivedFloat1));
+    memcpy(&receivedFloat2, receivedBytes + 5, sizeof(receivedFloat2));
     Serial.print("Stav: ");
     Serial.print(receivedBytes[0]);
+    Serial.print(", rychlost: ");
+    Serial.print(receivedFloat1);
+    Serial.print(" ot/s");
     Serial.print(", moment: ");
-    Serial.print(receivedFloat);
+    Serial.print(receivedFloat2);
     Serial.println(" Nm");
   }
 

@@ -1,9 +1,11 @@
 #include "MovingAverage.h"
+#include "PIController.h"
+#include "FIR.h"
 #include <Wire.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
-#include "PIController.h"
+
 
 //#define timeMeasure //mereni delky loopu/poctu loopu za sekundu
 #define thermometer
@@ -23,15 +25,16 @@ const uint8_t InPin_AmmeterDirect = A3;
 
 //MOTOR CONTROL
 float bridgeDC = 0.0;
-float motorSpeed = 0.0; //[rad/s]
-float sourceVoltage = 20.0;
+float motorSpeed = 0.0; //[ot./s]
+FIR motorSpeedFilter(10);
+float sourceVoltage = 24.0;
 float windingResistance = 0.2608;
 //CONTROLLERS
-PIController speedController(1,1,1,5);
-PIController currentController(50,25,1,150);
+PIController speedController(1.5, 3, 5, 2.0);
+PIController currentController(60, 30, 150, 3.0);
 //SETPOINT FILTER
 float speedTarget = 0;
-float controllerSetpointSR = 0.5;
+float controllerSetpointSR = 0.3;
 
 //OVERLOAD PROTECTION
 bool overload = false;
@@ -57,7 +60,7 @@ const double CPhi = 0.4834;
 const uint8_t I2CAddress = 10;
 const uint8_t inputArraySize = 4;
 uint8_t inputArray[inputArraySize] = {0};
-const uint8_t outputArraySize = 5;
+const uint8_t outputArraySize = 1 + 2*sizeof(float);
 uint8_t outputArray[outputArraySize] = {0};
 
 //TIME
@@ -150,31 +153,45 @@ void loop()
   Serial.print(" t:");  
   Serial.print(timeDiff);
 
-
-  ammeterDirect = analogRead(InPin_AmmeterDirect);
-  /*
-  if(ammeterDirect < overloadLow || ammeterDirect > overloadHigh || motorTemperature > 70)
+  if(speedController.setpoint == 0.0 && speedTarget == 0.0)
   {
-    analogWrite(OutPin_L_PWM, 0);
-    analogWrite(OutPin_R_PWM, 0);
-    overload = true;
-    overloadEndTime = millis() + overloadDelay;
+    speedController.reset();
+    currentController.reset();
+    motorSpeedFilter.updateOutput(0.0);
+    ammeterDigitalFilter.reset();
+    ammeterCurrent = 0.0;
+    bridgeDC = 0.0;
+    motorSpeed = 0.0;
   }
-  */
-  ammeterRC = ammeterDigitalFilterScale*analogRead(InPin_AmmeterRC);
-  ammeterRCAvg = ammeterDigitalFilter.add(ammeterRC);
-  //ammeterVoltage = (ammeterAvg)*(Vcc/1023.0);
-  ammeterCurrent = (float(ammeterRCAvg) - float(ammeterRCZero)) * (1.0/float(ammeterDigitalFilterScale)) * (Vcc/1023.0) * ammeterVoltsToAmps;
-    
-  motorSpeed = ((sourceVoltage*(bridgeDC/255)) - windingResistance*ammeterCurrent)/(CPhi);
-  Serial.print(" Sp:");
-  Serial.print(motorSpeed);
+  else
+  {
+    //Data acquisition
+    ammeterDirect = analogRead(InPin_AmmeterDirect);
+    /* //Safety
+    if(ammeterDirect < overloadLow || ammeterDirect > overloadHigh || motorTemperature > 70)
+    {
+      analogWrite(OutPin_L_PWM, 0);
+      analogWrite(OutPin_R_PWM, 0);
+      overload = true;
+      overloadEndTime = millis() + overloadDelay;
+    }
+    */
+    ammeterRC = ammeterDigitalFilterScale*analogRead(InPin_AmmeterRC);
+    ammeterRCAvg = ammeterDigitalFilter.add(ammeterRC);
+    //ammeterVoltage = (ammeterAvg)*(Vcc/1023.0);
+    ammeterCurrent = (float(ammeterRCAvg) - float(ammeterRCZero)) * (1.0/float(ammeterDigitalFilterScale)) * (Vcc/1023.0) * ammeterVoltsToAmps;
+    float calculatedMotorSpeed = ((sourceVoltage*(bridgeDC/255)) - windingResistance*ammeterCurrent)/(CPhi*2*3.14);
+    motorSpeed = motorSpeedFilter.updateOutput(calculatedMotorSpeed);
 
-  float ControllerSetpointMaxChange = constrain(timeDiff*controllerSetpointSR, 0.0, 0.2);
-  speedController.setpoint = constrain(speedTarget, speedController.setpoint - ControllerSetpointMaxChange, speedController.setpoint + ControllerSetpointMaxChange);
+    //Setpoint filter
+    float controllerSetpointMaxChange = constrain(timeDiff*controllerSetpointSR, 0.0, 0.2);
+    speedController.setpoint = constrain(speedTarget, speedController.setpoint - controllerSetpointMaxChange, speedController.setpoint + controllerSetpointMaxChange);
 
-  currentController.setpoint = speedController.compute(motorSpeed, timeDiff);
-  bridgeDC = currentController.compute(ammeterCurrent, timeDiff);
+    //Controller action
+    currentController.setpoint = speedController.compute(motorSpeed, timeDiff);
+    bridgeDC = currentController.compute(ammeterCurrent, timeDiff);
+  }
+
 
   if(!overload)
   {
@@ -194,11 +211,20 @@ void loop()
   Serial.print(" m:");
   Serial.print(-6000); // To freeze the upper limit
 */
+  Serial.print(" SpT:");
+  Serial.print(speedController.setpoint);
+
+  Serial.print(" Sp:");
+  Serial.print(motorSpeed);
+
+  Serial.print(" SpEs:");
+  Serial.print(speedController.getErrorSum());
+
+  Serial.print(" IT:");  
+  Serial.print(currentController.setpoint);
+
   Serial.print(" I:");  
   Serial.print(ammeterCurrent);
-
-  Serial.print(" T:");
-  Serial.print(speedTarget);
 
   Serial.print(" DC:");
   Serial.print(bridgeDC);
@@ -253,10 +279,9 @@ void receiveEvent(int howMany)
     speedTarget = receivedFloat;
 
     /*
-    Serial.print("Received torque: ");
+    Serial.print("Received float: ");
     Serial.println(receivedFloat);
     */
-
   }
 }
 
@@ -272,6 +297,8 @@ void requestEvent()
   }
 
   float torque = ammeterCurrent*CPhi;
-  memcpy(outputArray + 1, &torque, sizeof(torque));
+  memcpy(outputArray + 1, &motorSpeed, sizeof(motorSpeed));
+  memcpy(outputArray + 5, &torque, sizeof(torque));
+
   Wire.write(outputArray, outputArraySize);
 }
