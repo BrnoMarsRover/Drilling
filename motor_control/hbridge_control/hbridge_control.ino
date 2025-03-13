@@ -1,11 +1,8 @@
-#include "MovingAverage.h"
 #include "PIController.h"
 #include "FIR.h"
 #include <Wire.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
-
-
 
 //#define timeMeasure //mereni delky loopu/poctu loopu za sekundu
 #define thermometer
@@ -25,8 +22,9 @@ const uint8_t InPin_AmmeterDirect = A3;
 
 //MOTOR CONTROL
 float bridgeDC = 0.0;
+uint8_t avgCount = 10;
+FIR bridgeDCAvg(avgCount);
 float motorSpeed = 0.0; //[ot./s]
-FIR motorSpeedFilter(10);
 float sourceVoltage = 24.0;
 float windingResistance = 0.2608;
 //CONTROLLERS
@@ -44,12 +42,10 @@ uint16_t overloadDelay = 1000; //ms
 uint32_t overloadEndTime = 0; //ms
 
 //AMPMETER
-uint16_t ammeterRC = 0;
 uint16_t ammeterDirect = 0;
-const uint16_t ammeterDigitalFilterScale = 8;
-MovingAverage <uint16_t, 16> ammeterDigitalFilter;
-uint16_t ammeterRCAvg = 0;
-uint16_t ammeterRCZero = 500;
+float ammeterRC = 0;
+float ammeterRCZero = 500;
+FIR ammeterRCAvg(avgCount);
 //float ammeterVoltage = 0;
 float ammeterCurrent = 0; // v amperech
 const float Vcc = 4.5;
@@ -104,14 +100,14 @@ void calibrateAmmeter()
   delay(100);
 
   const uint8_t avgCount = 16;
-  MovingAverage <uint16_t, avgCount> ammeterZeroFilter;
+  FIR ammeterZeroAvg(avgCount);
   for(uint8_t i = 0; i < avgCount; i++)
   {
     delay(10);
-    ammeterZeroFilter.add(ammeterDigitalFilterScale*analogRead(InPin_AmmeterRC));
+    ammeterZeroAvg.updateOutput(float(analogRead(InPin_AmmeterRC)));
   }
 
-  ammeterRCZero = ammeterZeroFilter.get();
+  ammeterRCZero = ammeterZeroAvg.getOutput();
 }
 
 void setup()
@@ -157,8 +153,8 @@ void loop()
   {
     speedController.reset();
     currentController.reset();
-    motorSpeedFilter.updateOutput(0.0);
-    ammeterDigitalFilter.reset();
+    bridgeDCAvg.updateOutput(0.0);
+    ammeterRCAvg.updateOutput(0.0);
     ammeterCurrent = 0.0;
     bridgeDC = 0.0;
     motorSpeed = 0.0;
@@ -176,12 +172,10 @@ void loop()
       overloadEndTime = millis() + overloadDelay;
     }
     */
-    ammeterRC = ammeterDigitalFilterScale*analogRead(InPin_AmmeterRC);
-    ammeterRCAvg = ammeterDigitalFilter.add(ammeterRC);
+    ammeterRC = float(analogRead(InPin_AmmeterRC));
     //ammeterVoltage = (ammeterAvg)*(Vcc/1023.0);
-    ammeterCurrent = (float(ammeterRCAvg) - float(ammeterRCZero)) * (1.0/float(ammeterDigitalFilterScale)) * (Vcc/1023.0) * ammeterVoltsToAmps;
-    float calculatedMotorSpeed = ((sourceVoltage*(bridgeDC/255)) - windingResistance*ammeterCurrent)/(CPhi*2*3.14);
-    motorSpeed = motorSpeedFilter.updateOutput(calculatedMotorSpeed);
+    ammeterCurrent = (ammeterRCAvg.updateOutput(ammeterRC) - ammeterRCZero) * (Vcc/1023.0) * ammeterVoltsToAmps;
+    motorSpeed = ((sourceVoltage*(bridgeDCAvg.updateOutput(bridgeDC)/255.0)) - windingResistance*ammeterCurrent)/(CPhi*2*3.14);
 
     //Setpoint filter
     float controllerSetpointMaxChange = constrain(timeDiff*controllerSetpointSR, 0.0, 0.2);
