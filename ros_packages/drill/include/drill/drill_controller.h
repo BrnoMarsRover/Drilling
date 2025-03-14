@@ -7,6 +7,7 @@
 #pragma once
 
 #include "rclcpp/rclcpp.hpp"
+#include "drill_logger.h"
 #include "rclcpp_action/rclcpp_action.hpp"
 #include "rclcpp/service.hpp"
 #include "std_msgs/msg/u_int8.hpp"
@@ -56,6 +57,7 @@ public:
     ~DrillController() override = default;
 
 private:
+    std::shared_ptr<DrillLogger> DrillLogger_;
     //Controller variables
     bool drill_is_busy;
     float actual_torque;

@@ -36,10 +36,14 @@ DrillController::DrillController(): Node("drill_controller") {
     get_sample_weight_srv_ = this->create_service<GetSampleWeight>(
       "get_sample_weight",
       std::bind(&DrillController::get_sample_weight_callback, this, std::placeholders::_1, std::placeholders::_2));
+
+    DrillLogger_ = std::make_shared<DrillLogger>();
+
 }
 
 void DrillController::execute_drill_sample(const std::shared_ptr<GoalHandleDrillSample> goal_handle) {
     RCLCPP_INFO(this->get_logger(), "Executing DrillSample action...");
+    DrillLogger_->logActionStamp(1);
     const auto goal = goal_handle->get_goal();
     auto result = std::make_shared<DrillSample::Result>();
     auto feedback = std::make_shared<DrillSample::Feedback>();
@@ -78,6 +82,7 @@ void DrillController::execute_drill_sample(const std::shared_ptr<GoalHandleDrill
         feedback->actual_torque = actual_torque;
         feedback->actual_height = actual_height;
         goal_handle->publish_feedback(feedback);
+        DrillLogger_->logDrillSampleData(actual_torque, 69, actual_height);
         RCLCPP_INFO(this->get_logger(), "Drilling progress torque: %f height: %d", actual_torque, actual_height);
         loop_rate.sleep();
     }
@@ -88,11 +93,13 @@ void DrillController::execute_drill_sample(const std::shared_ptr<GoalHandleDrill
     currentState = stop;
     publish_drill_state(currentState);
     drill_is_busy = false;
+    DrillLogger_->logDrillSampleResult(actual_height);
     RCLCPP_INFO(this->get_logger(), "DrillSample action completed.");
 }
 
 void DrillController::execute_store_sample(const std::shared_ptr<GoalHandleStoreSample> goal_handle) {
     RCLCPP_INFO(this->get_logger(), "Executing StoreSample action...");
+    DrillLogger_->logActionStamp(2);
     const auto goal = goal_handle->get_goal();
     auto result = std::make_shared<StoreSample::Result>();
     auto feedback = std::make_shared<StoreSample::Feedback>();
@@ -236,11 +243,13 @@ void DrillController::execute_store_sample(const std::shared_ptr<GoalHandleStore
     currentState = stop;
     publish_drill_state(currentState);
     drill_is_busy = false;
+    DrillLogger_->logStoreSampleResult(goal->slot, result->weight);
     RCLCPP_INFO(this->get_logger(), "StoreSample action completed.");
 }
 
 void DrillController::execute_drill_calibration(const std::shared_ptr<GoalHandleDrillCalibration> goal_handle) {
     RCLCPP_INFO(this->get_logger(), "Executing DrillCalibration action...");
+    DrillLogger_->logActionStamp(3);
     const auto goal = goal_handle->get_goal();
     auto result = std::make_shared<DrillCalibration::Result>();
     auto feedback = std::make_shared<DrillCalibration::Feedback>();
@@ -295,6 +304,7 @@ void DrillController::execute_drill_calibration(const std::shared_ptr<GoalHandle
     currentState = stop;
     publish_drill_state(currentState);
     drill_is_busy = false;
+    DrillLogger_->logDrillCalibration(goal->reset_weights);
     RCLCPP_INFO(this->get_logger(), "DrillCalibration action completed.");
 }
 
