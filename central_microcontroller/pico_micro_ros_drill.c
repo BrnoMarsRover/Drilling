@@ -26,6 +26,7 @@
 enum state_machine
 {
     stop,
+    manual,
     drilling,
     go_down,
     go_up,
@@ -33,8 +34,7 @@ enum state_machine
     turn_left,
     slot_select,
     get_weight,
-    reset_weight,
-    manual
+    reset_weight
 };
 
 enum state_machine currentState = stop;
@@ -57,7 +57,7 @@ sensor_msgs__msg__Joy msg_joy;
 rcl_publisher_t publisher;
 std_msgs__msg__UInt16MultiArray msg_data; 
 
-void timer_callback(rcl_timer_t *timer, int64_t last_call_time)
+void timerPublisher_callback(rcl_timer_t *timer, int64_t last_call_time)
 {
     msg_data.data.data[0] = float_code(motor.torque_meas);
     msg_data.data.data[1] = linear.height;
@@ -69,7 +69,7 @@ void timer_callback(rcl_timer_t *timer, int64_t last_call_time)
     rcl_ret_t ret = rcl_publish(&publisher, &msg_data, NULL);  
 }
 
-void timer_callback_coroutines(rcl_timer_t *timer, int64_t last_call_time)
+void timerMain_callback(rcl_timer_t *timer, int64_t last_call_time)
 {
     switch (currentState) 
     {
@@ -225,8 +225,8 @@ int main()
     stdio_init_all();
     gpio_init(LED_PIN);
     gpio_set_dir(LED_PIN, GPIO_OUT);
-    rcl_timer_t timer;
-    rcl_timer_t timer_coroutines;
+    rcl_timer_t timerPublisher;
+    rcl_timer_t timerMain;
     rcl_node_t node;
     rcl_allocator_t allocator;
     rclc_support_t support;
@@ -248,7 +248,7 @@ int main()
 
     rclc_support_init(&support, 0, NULL, &allocator);
 
-    rclc_node_init_default(&node, "pico_node", "", &support);
+    rclc_node_init_default(&node, "drill_rpiPico", "", &support);
     
     rclc_subscription_init_default(
         &state_subscriber, &node,
@@ -345,25 +345,20 @@ int main()
     msg_joy.header.stamp.nanosec = 20;
 
     rclc_timer_init_default(
-        &timer,
+        &timerPublisher,
         &support,
         RCL_MS_TO_NS(1000),
-        timer_callback);
+        timerPublisher_callback);
 
     rclc_timer_init_default(
-        &timer_coroutines,
+        &timerMain,
         &support,
         RCL_MS_TO_NS(100),
-        timer_callback_coroutines);
+        timerMain_callback);
 
     rclc_executor_init(&executor, &support.context, 5, &allocator); //the number of executors
-    rclc_executor_add_timer(&executor, &timer);
-    rclc_executor_add_timer(&executor, &timer_coroutines);
-
-    rclc_executor_add_subscription(
-        &executor, &joy_subscriber, &msg_joy,
-        &joy_callback, ON_NEW_DATA);
-
+    rclc_executor_add_timer(&executor, &timerMain);
+    
     rclc_executor_add_subscription(
         &executor, &state_subscriber, &msg_state,
         &state_callback, ON_NEW_DATA);
@@ -372,6 +367,12 @@ int main()
         &executor, &parameters_subscriber, &msg_parameters,
         &parameters_callback, ON_NEW_DATA);
 
+    rclc_executor_add_subscription(
+        &executor, &joy_subscriber, &msg_joy,
+        &joy_callback, ON_NEW_DATA);
+        
+    rclc_executor_add_timer(&executor, &timerPublisher);
+    
     //init i2c
     i2c_init(I2C_PORT, 100000);
     gpio_set_function(4, GPIO_FUNC_I2C);

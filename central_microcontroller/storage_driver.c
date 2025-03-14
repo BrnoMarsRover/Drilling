@@ -91,7 +91,7 @@ void storage_goto(struct storage *storage)
 
 void storage_get_weight(struct storage *storage)
 {
-    if (storage->command != 20)
+    if (storage->old_command != 20)
     {
         storage->old_weight = storage->weight;
         storage->old_command = storage->command;
