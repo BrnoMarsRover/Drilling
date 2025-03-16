@@ -12,23 +12,30 @@
 
 int motor_read(struct motor* motor)
 {
-    uint8_t buffer[5];
-    if (i2c_read_blocking(I2C_PORT, MOTOR_ADDR, buffer, 5, false) != 5)
+    if (!motor)
+        return -2;
+    uint8_t buffer[9];
+    if (i2c_read_blocking(I2C_PORT, MOTOR_ADDR, buffer, 9, false) != 9)
     {
         return -1;
     }
 
     motor->state = buffer[0];
 	float* floatPtr = (float*)(buffer + 1);
+    motor->rps_meas = *floatPtr;
+
+    floatPtr = (float*)(buffer + 5);
 	motor->torque_meas = *floatPtr;
     return 0;
 }
 
 int motor_write(struct motor* motor)
 {
+    if (!motor)
+        return -2;
     uint8_t buffer[4];
     //buffer[0] = motor->direction;
-	*(float*)(buffer) = motor->torque;
+	*(float*)(buffer) = motor->rps;
 
     if (i2c_write_blocking(I2C_PORT, MOTOR_ADDR, buffer, 4, false) != 4);
     {
@@ -39,32 +46,55 @@ int motor_write(struct motor* motor)
 
 void motor_init(struct motor* motor)
 {
-    motor->torque = 0;
-    motor->torque_goal = 0;
-	motor->torque_meas = 0;
-	motor->state = 0;
+    if (!motor)
+        return;
+    motor->rps = 0;
+    motor->rps_goal = 0;
+    motor_write(motor);
+    motor_read(motor);
+    motor->stucked = false;
 }
 
 void motor_stop(struct motor* motor)
 {
-    motor->torque = 0;
+    if (!motor)
+        return;
+    motor->rps = 0;
 }
 
 void motor_left(struct motor* motor)
 {
-    motor->torque = motor->torque_goal;
+    if (!motor)
+        return;
+    motor_unblock(motor);
+    motor->rps = motor->rps_goal;
 }
 
 void motor_right(struct motor* motor)
 {
-    motor->torque = - motor->torque_goal;
+    if (!motor)
+        return;
+    if (!motor->stucked)
+        motor->rps = - motor->rps_goal;
 }
 
 bool is_motor_stucked(struct motor* motor)
 {
-    if(motor->state == 2)
+    if (!motor)
         return true;
+    if(motor->state > 1)
+    {
+        motor->stucked = true;
+        return true;
+    }
     return false;
+}
+
+void motor_unblock(struct motor* motor)
+{
+    if (!motor)
+        return true;
+    motor->stucked = false;
 }
 
 float float_decode(uint16_t aNum)

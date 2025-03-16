@@ -59,13 +59,14 @@ std_msgs__msg__UInt16MultiArray msg_data;
 
 void timerPublisher_callback(rcl_timer_t *timer, int64_t last_call_time)
 {
-    msg_data.data.data[0] = float_code(motor.torque_meas);
-    msg_data.data.data[1] = linear.height;
-    msg_data.data.data[2] = storage.active_slot;
-    msg_data.data.data[3] = storage.samples[0];
-    msg_data.data.data[4] = storage.samples[1];
-    msg_data.data.data[5] = storage.samples[2];
-    msg_data.data.data[6] = storage.samples[3];
+    msg_data.data.data[0] = float_code(motor.rps_meas);
+    msg_data.data.data[1] = float_code(motor.torque_meas);
+    msg_data.data.data[2] = linear.height;
+    msg_data.data.data[3] = storage.active_slot;
+    msg_data.data.data[4] = storage.samples[0];
+    msg_data.data.data[5] = storage.samples[1];
+    msg_data.data.data[6] = storage.samples[2];
+    msg_data.data.data[7] = storage.samples[3];
     rcl_ret_t ret = rcl_publish(&publisher, &msg_data, NULL);  
 }
 
@@ -104,7 +105,10 @@ void timerMain_callback(rcl_timer_t *timer, int64_t last_call_time)
             if(is_linear_home(&linear))
                 linear_stop(&linear);
             else
+            {
+                motor_unblock(&motor);
                 linear_go_up(&linear);
+            }
             break;
             
         case turn_left:
@@ -164,7 +168,7 @@ void parameters_callback(const void * msgin)
 {
     const std_msgs__msg__UInt16MultiArray * msg = (const std_msgs__msg__UInt16MultiArray *)msgin;
 
-    motor.torque_goal = float_decode(msg->data.data[0]); //talk about data type
+    motor.rps_goal = float_decode(msg->data.data[0]);
     linear.speed = msg->data.data[1];
     linear.height = msg->data.data[2];
     storage.demand_pos = msg->data.data[3];
@@ -189,11 +193,11 @@ void joy_callback(sensor_msgs__msg__Joy* msgin)
         // Set the motor
         if (msgin->axes.data[5] < 1)    //left 
         { 
-            motor.torque =  (1 - msgin->axes.data[5]) / 2 * 125; 
+            motor.rps =  (1 - msgin->axes.data[5]) / 2 * 125; 
         }
         else    //right
         { 
-            motor.torque = - ((1 - msgin->axes.data[2]) / 2 * 125);
+            motor.rps = - ((1 - msgin->axes.data[2]) / 2 * 125);
         }
         motor_write(&motor);
     
@@ -296,7 +300,7 @@ int main()
     
     // alocation memory to msg
     msg_data.data.data = buffer;
-    msg_data.data.size = 7;
+    msg_data.data.size = 8;
     msg_data.data.capacity = BUFFER_SIZE;
         
     msg_data.layout.dim.data = dim;
