@@ -1,10 +1,11 @@
 #include <Wire.h>
 
 
-int x = 3;
+int x = 1;
+float rps = 2.3;
 float torque = 1.69;
-unsigned long startTime = 0;
-unsigned long elapsedTime = 0;
+unsigned long lastTime = 0; // Uloží čas posledního měření
+
 
 void setup() {
   // put your setup code here, to run once:
@@ -23,30 +24,34 @@ void loop() {
 }
 
 void receiveEvent(int howMany) {
-    elapsedTime = millis() - startTime;
+    time_measure();
     const uint8_t inputArraySize = 4;
     char inputArray[inputArraySize] = {0};
 
-    Serial.println("Recieved");
-    Serial.println(howMany);
     Wire.readBytes(inputArray, inputArraySize);
     float *floatPtr = (float *)inputArray;
     Serial.println(*floatPtr);
-    Serial.print("Elapsed Time: ");
-    Serial.print(elapsedTime);
-    Serial.println(" ms");
-    torque = *floatPtr + 0.2;
-    x = 1;
-    startTime = 0;
     }
 
 
 void requestEvent(){
-  const uint8_t outputArraySize = 5;
+  const uint8_t outputArraySize = 9;
   uint8_t outputArray[outputArraySize] = {0};
 
   outputArray[0] = x;
-  memcpy((outputArray+1), &torque, sizeof(torque));
-  Wire.write(outputArray, 5);
+  memcpy((outputArray+1), &rps, sizeof(rps));
+  memcpy((outputArray+5), &torque, sizeof(torque));
+  Wire.write(outputArray, 9);
   Serial.println("Finito");
+  }
+
+    void time_measure()
+  {
+    unsigned long currentTime = millis();
+    unsigned long interval = currentTime - lastTime; 
+    lastTime = currentTime; 
+
+    Serial.print("Interval mezi vzorky: ");
+    Serial.print(interval);
+    Serial.println(" ms");
   }
