@@ -26,7 +26,6 @@
 enum state_machine
 {
     stop,
-    manual,
     drilling,
     go_down,
     go_up,
@@ -34,7 +33,8 @@ enum state_machine
     turn_left,
     slot_select,
     get_weight,
-    reset_weight
+    reset_weight,
+    manual
 };
 
 enum state_machine currentState = stop;
@@ -136,6 +136,10 @@ void timerMain_callback(rcl_timer_t *timer, int64_t last_call_time)
             motor_stop(&motor);
             linear_stop(&linear);
             storage_get_weight(&storage);
+            break;
+
+        case reset_weight:
+            storage_wreset(&storage);
             break;
 
         default:
