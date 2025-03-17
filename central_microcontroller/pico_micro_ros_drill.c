@@ -62,11 +62,12 @@ void timerPublisher_callback(rcl_timer_t *timer, int64_t last_call_time)
     msg_data.data.data[0] = float_code(motor.rps_meas);
     msg_data.data.data[1] = float_code(motor.torque_meas);
     msg_data.data.data[2] = linear.height;
-    msg_data.data.data[3] = storage.active_slot;
-    msg_data.data.data[4] = storage.samples[0];
-    msg_data.data.data[5] = storage.samples[1];
-    msg_data.data.data[6] = storage.samples[2];
-    msg_data.data.data[7] = storage.samples[3];
+    msg_data.data.data[3] = linear.toGround;
+    msg_data.data.data[4] = storage.active_slot;
+    msg_data.data.data[5] = storage.samples[0];
+    msg_data.data.data[6] = storage.samples[1];
+    msg_data.data.data[7] = storage.samples[2];
+    msg_data.data.data[8] = storage.samples[3];
     rcl_ret_t ret = rcl_publish(&publisher, &msg_data, NULL);  
 }
 
@@ -304,7 +305,7 @@ int main()
     
     // alocation memory to msg
     msg_data.data.data = buffer;
-    msg_data.data.size = 8;
+    msg_data.data.size = 9;
     msg_data.data.capacity = BUFFER_SIZE;
         
     msg_data.layout.dim.data = dim;
