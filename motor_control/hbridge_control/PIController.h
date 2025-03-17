@@ -7,10 +7,6 @@ class PIController
 {
 public:
   float setpoint;
-  float Kp;
-  float Ki;
-  float outputLimit;
-  float sumClamp;
 
   PIController(float Kp, float Ki, float outputLimit, float sumClamp);
 
@@ -22,6 +18,11 @@ public:
 
 private:
   float errorSum;
+
+  float Kp;
+  float Ki;
+  float outputLimit;
+  float sumClamp;
 };
 
 

@@ -5,7 +5,7 @@
 #include <DallasTemperature.h>
 
 //#define timeMeasure //mereni delky loopu/poctu loopu za sekundu
-#define thermometer
+
 
 //PINS
 const uint8_t OutPin_L_EN = 3;
@@ -28,18 +28,12 @@ float motorSpeed = 0.0; //[ot./s]
 float sourceVoltage = 24.0;
 float windingResistance = 0.2608;
 //CONTROLLERS
-PIController speedController(1.5, 3, 5, 2.0);
+PIController speedController(2.0, 2.0, 5, 2.0);
 PIController currentController(60, 30, 150, 3.0);
 //SETPOINT FILTER
 float speedTarget = 0;
 float controllerSetpointSR = 0.3;
 
-//OVERLOAD PROTECTION
-bool overload = false;
-uint16_t overloadHigh = 750;
-uint16_t overloadLow = 273;
-uint16_t overloadDelay = 1000; //ms
-uint32_t overloadEndTime = 0; //ms
 
 //AMPMETER
 uint16_t ammeterDirect = 0;
@@ -58,6 +52,8 @@ const uint8_t inputArraySize = 4;
 uint8_t inputArray[inputArraySize] = {0};
 const uint8_t outputArraySize = 1 + 2*sizeof(float);
 uint8_t outputArray[outputArraySize] = {0};
+uint32_t lastMessageMillis = 0;
+const uint32_t messageIntervalMillis = 100; 
 
 //TIME
 uint32_t lastMillis = 0;
@@ -67,15 +63,21 @@ uint32_t lastMillis_timeMeasure = 0;
 uint32_t loops = 0;
 #endif
 
-#ifdef thermometer
+
 //THERMOMETER
 OneWire oneWireThermometer(InPin_Thermometer);
 DallasTemperature dallasTemperatureThermometer(&oneWireThermometer);
 DeviceAddress thermometerAddress;
-float motorTemperature;
+float motorTemperature; // [°C]
+float maxSafeTemperature = 70.0; // [°C]
+bool overheat = false;
 uint32_t thermometerLastMillis = 0;
 uint32_t thermometerDelay = 2000;
-#endif
+
+//PROTECTION
+uint16_t ISFaultThreshold = 500;
+bool bridgeFault = false;
+
 
 void setBridge(float aVal)
 {
@@ -112,6 +114,7 @@ void calibrateAmmeter()
 
 void setup()
 {
+  //PIN SETUP
   pinMode(OutPin_L_EN, OUTPUT);
   pinMode(OutPin_L_PWM, OUTPUT);
   pinMode(OutPin_R_EN, OUTPUT);
@@ -120,29 +123,49 @@ void setup()
   pinMode(InPin_AmmeterRC, INPUT);
   pinMode(InPin_AmmeterDirect, INPUT);  
 
+  pinMode(InPin_L_IS, INPUT);
+  pinMode(InPin_R_IS, INPUT);
+
+  //MOTOR SETUP
   digitalWrite(OutPin_R_EN, HIGH);
   digitalWrite(OutPin_L_EN, HIGH);
 
-  Serial.begin(9600);
-
   calibrateAmmeter();
 
-#ifdef thermometer
+  //THERMOMETER
   dallasTemperatureThermometer.begin();
   dallasTemperatureThermometer.setWaitForConversion(false);
   dallasTemperatureThermometer.getAddress(thermometerAddress, 0); 
   motorTemperature = 20;
   dallasTemperatureThermometer.requestTemperaturesByAddress(thermometerAddress);
-#endif
 
+  //I2C
   Wire.begin(I2CAddress);                
   Wire.onReceive(receiveEvent);
   Wire.onRequest(requestEvent);
+
+  Serial.begin(9600);
 }
 
 void loop()
 {
   uint32_t currentMillis = millis();
+
+  if((currentMillis - lastMessageMillis) > messageIntervalMillis)
+  {
+    speedTarget = 0.0;
+  } 
+
+  if(analogRead(InPin_L_IS) > ISFaultThreshold || analogRead(InPin_R_IS) > ISFaultThreshold)
+  {
+    bridgeFault = true;
+    speedTarget = 0.0;
+  }
+  else
+  {
+    bridgeFault = false;
+  }
+
   timeDiff = 0.001*(float(currentMillis) - float(lastMillis));
   lastMillis = currentMillis;
 
@@ -174,7 +197,7 @@ void loop()
     */
     ammeterRC = float(analogRead(InPin_AmmeterRC));
     //ammeterVoltage = (ammeterAvg)*(Vcc/1023.0);
-    ammeterCurrent = (ammeterRCAvg.updateOutput(ammeterRC) - ammeterRCZero) * (Vcc/1023.0) * ammeterVoltsToAmps;
+    ammeterCurrent = ammeterRCAvg.updateOutput((ammeterRC - ammeterRCZero) * (Vcc/1023.0) * ammeterVoltsToAmps);
     motorSpeed = ((sourceVoltage*(bridgeDCAvg.updateOutput(bridgeDC)/255.0)) - windingResistance*ammeterCurrent)/(CPhi*2*3.14);
 
     //Setpoint filter
@@ -186,18 +209,8 @@ void loop()
     bridgeDC = currentController.compute(ammeterCurrent, timeDiff);
   }
 
+  setBridge(bridgeDC);
 
-  if(!overload)
-  {
-    setBridge(bridgeDC);
-  } 
-  else
-  {
-    if(millis() > overloadEndTime)
-    {
-      overload = false;
-    }
-  }
   
   /*
   Serial.print(" M:");
@@ -225,8 +238,7 @@ void loop()
 
 
 #ifdef timeMeasure
-  long currentMillis = millis();
-  loops++;  
+  loops++;
 
   if(currentMillis - lastMillis_timeMeasure > 10000)
   {
@@ -237,17 +249,26 @@ void loop()
 #endif
   
 
-#ifdef thermometer
-  if(millis() - thermometerLastMillis > thermometerDelay)
+  if(currentMillis - thermometerLastMillis > thermometerDelay)
   {
     motorTemperature = dallasTemperatureThermometer.getTempC(thermometerAddress);   
     dallasTemperatureThermometer.requestTemperaturesByAddress(thermometerAddress);
     thermometerLastMillis = millis();
 
+    if (motorTemperature > maxSafeTemperature)
+    {
+      overheat = true;
+      speedTarget = 0.0;
+    }
+    else
+    {
+      overheat = false;
+    }
+
     Serial.print(" tmp:");
     Serial.print(motorTemperature);
   }
-#endif
+
 
   Serial.println("");
 }
@@ -268,27 +289,51 @@ void receiveEvent(int howMany)
   
   if (howMany == inputArraySize)
   {
-    Wire.readBytes(inputArray, inputArraySize);
-    float receivedFloat = *((float*)inputArray);
-    speedTarget = receivedFloat;
+    if (!overheat && !bridgeFault)
+    {
+      Wire.readBytes(inputArray, inputArraySize);
+      float receivedFloat = *((float*)inputArray);
+      speedTarget = constrain(receivedFloat, -3.0, 3.0);
 
-    /*
-    Serial.print("Received float: ");
-    Serial.println(receivedFloat);
-    */
+      lastMessageMillis = millis();
+
+      /*
+      Serial.print("Received float: ");
+      Serial.println(receivedFloat);
+      */
+    }
   }
 }
 
 void requestEvent()
 {
-  if(bridgeDC == 0)
+  uint8_t state = 0;
+
+  //IS STUCK?
+  if(speedController.setpoint != 0.0)
   {
-    outputArray[0] = 0;
+    if (motorSpeed > 0.1)
+      state |= B00000001;
+    else
+      state |= B00000010;
   }
+
+  //TEMPERATURE
+  if (motorTemperature < 30.0)
+    state |= B00000000;
+  else if (motorTemperature < 50.0)
+    state |= B00000100;
+  else if (motorTemperature < 60.0)
+    state |= B00001000;
   else
-  {
-    outputArray[0] = 1;
-  }
+    state |= B00001100;
+
+  //BRIDGE FAULT
+  if (bridgeFault)
+    state |= B00010000;
+
+  //SEND DATA
+  outputArray[0] = state;
 
   float torque = ammeterCurrent*CPhi;
   memcpy(outputArray + 1, &motorSpeed, sizeof(motorSpeed));
