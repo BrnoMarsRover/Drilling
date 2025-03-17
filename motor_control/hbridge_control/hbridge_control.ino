@@ -48,12 +48,12 @@ const double CPhi = 0.4834;
 
 //I2C
 const uint8_t I2CAddress = 10;
-const uint8_t inputArraySize = 4;
+const uint8_t inputArraySize = 1;
 uint8_t inputArray[inputArraySize] = {0};
-const uint8_t outputArraySize = 1 + 2*sizeof(float);
+const uint8_t outputArraySize = 3;
 uint8_t outputArray[outputArraySize] = {0};
 uint32_t lastMessageMillis = 0;
-const uint32_t messageIntervalMillis = 100; 
+const uint32_t maxMillisWithoutMessage = 500; 
 
 //TIME
 uint32_t lastMillis = 0;
@@ -151,7 +151,7 @@ void loop()
 {
   uint32_t currentMillis = millis();
 
-  if((currentMillis - lastMessageMillis) > messageIntervalMillis)
+  if((currentMillis - lastMessageMillis) > maxMillisWithoutMessage)
   {
     speedTarget = 0.0;
   } 
@@ -292,8 +292,8 @@ void receiveEvent(int howMany)
     if (!overheat && !bridgeFault)
     {
       Wire.readBytes(inputArray, inputArraySize);
-      float receivedFloat = *((float*)inputArray);
-      speedTarget = constrain(receivedFloat, -3.0, 3.0);
+      int8_t receivedInt = *((int8_t*)inputArray);
+      speedTarget = constrain(float(receivedInt)*0.03, -3.0, 3.0);
 
       lastMessageMillis = millis();
 
@@ -335,9 +335,11 @@ void requestEvent()
   //SEND DATA
   outputArray[0] = state;
 
-  float torque = ammeterCurrent*CPhi;
-  memcpy(outputArray + 1, &motorSpeed, sizeof(motorSpeed));
-  memcpy(outputArray + 5, &torque, sizeof(torque));
+  int8_t speedInt = int8_t(constrain(motorSpeed/0.03, -127.0, 128.0));
+  outputArray[1] = speedInt;
+
+  int8_t torqueInt = int8_t(constrain((ammeterCurrent*CPhi)/0.03, -127.0, 128.0));
+  outputArray[2] = torqueInt;
 
   Wire.write(outputArray, outputArraySize);
 }
