@@ -17,10 +17,13 @@
 #include "drill_interfaces/action/store_sample.hpp"
 #include "drill_interfaces/srv/get_sample_weight.hpp"
 
+#define LOOP_RATE 1 //Loop time
+
 #define MAX_SLOT 4 //Total number of slots
 #define DEF_SLOT 0 //Default slot, when the drilling is possible
 #define SAFE_POS 20 // [mm] height when the turning with the storage is possible
 #define STORING_POS 30 // [mm] height when the drill is the storage
+#define DUMPING_TIME 10 // [s] How long the drill dumping the sample from tube
 #define MAX_TORQUE 2.5
 #define MAX_HEIGHT 500 // [mm]
 #define RANGE 1000 // to code the float number
@@ -59,11 +62,14 @@ public:
 private:
     std::shared_ptr<DrillLogger> DrillLogger_;
     //Controller variables
-    bool drill_is_busy;
-    float actual_torque;
-    int actual_height;
-    int active_slot;
-    int samples[4];
+    bool drill_is_busy{};
+    float actual_torque{};
+    float actual_rps{};
+    int actual_height{};
+    int actualDepth{};
+    int toGround{};
+    int active_slot{};
+    int samples[4]{};
 
     // Publishers and subscribers
     // Publisher to publish state for drill
@@ -79,22 +85,40 @@ private:
     rclcpp_action::Server<DrillCalibration>::SharedPtr drill_calibration_server_;
     rclcpp::Service<GetSampleWeight>::SharedPtr get_sample_weight_srv_;
 
+
+    void set_depth()
+    {
+        if (const auto tmp = actual_height - toGround; tmp < 0)
+            actualDepth = 0;
+        else
+            actualDepth = tmp;
+    }
+
+    int calculate_height(const int depth) const
+    {
+        return toGround + depth;
+    }
+
     // Callback to handle output data from drill
-    void drill_data_callback(const std_msgs::msg::UInt16MultiArray::SharedPtr msg) {
+    void drill_data_callback(const std_msgs::msg::UInt16MultiArray::SharedPtr msg)
+    {
         RCLCPP_INFO(this->get_logger(), "Received drill data.");
-        actual_torque = float_decode(msg->data[0]);
-        actual_height = msg->data[1];;
-        active_slot = msg->data[2];;
-        samples[0] = msg->data[3];
-        samples[1] = msg->data[4];
-        samples[2] = msg->data[5];
-        samples[3] = msg->data[6];
+        actual_rps = float_decode(msg->data[0]);
+        actual_torque = float_decode(msg->data[1]);
+        actual_height = msg->data[2];;
+        if (actual_height == 0) toGround = msg->data[3];
+        set_depth();
+        active_slot = msg->data[4];;
+        samples[0] = msg->data[5];
+        samples[1] = msg->data[6];
+        samples[2] = msg->data[7];
+        samples[3] = msg->data[8];
     }
 
     // DRILL SAMPLE ACTION
     // If the drill is busy service will be refused
     rclcpp_action::GoalResponse handle_goal_drill_sample(const rclcpp_action::GoalUUID & uuid, std::shared_ptr<const DrillSample::Goal> goal) {
-        RCLCPP_INFO(this->get_logger(), "Received DrillSample request to drill %d mm with maximal torque %f .", goal->height, goal->torque);
+        RCLCPP_INFO(this->get_logger(), "Received DrillSample request to drill %d mm with maximal rps %f .", goal->depth, goal->max_rps);
         (void)uuid;
 
         if (drill_is_busy) {
@@ -198,7 +222,7 @@ private:
     }
 
     // Function to publish drill parameters
-    void publish_drill_param(float torque, uint16_t speed, uint16_t height, uint16_t slot) const;
+    void publish_drill_param(float rps, uint16_t speed, uint16_t height, uint16_t slot) const;
 
     static float float_decode(const uint16_t aNum) {
         constexpr  float constant = MAX_TORQUE/RANGE;

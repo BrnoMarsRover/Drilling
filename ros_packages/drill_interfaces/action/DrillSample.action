@@ -1,7 +1,8 @@
-float32 torque 
-uint16 height       
+float32 max_rps
+uint16 depth
 ---
-uint16 finalheight        
+uint16 final_depth
 ---
-float32 actual_torque 
+float32 actual_torque
+float32 actual_rps
 uint16 actual_height
