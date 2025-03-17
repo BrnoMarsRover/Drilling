@@ -21,7 +21,8 @@ const int tare_btn = 10;              // tlacitko povel tare a stop otaceni na 1
 
 long angle = 0;                       // aktualni poloha prepocet "poloha"
 int desired_angle = 0;
-int slot[4] = {32, 121, 212, 300}; // orig uhly 34 124 214 305 uhly zmeneny kvuli pólům motoru a jejich magnetizaci ve stavu bez napětí
+//int slot[4] = {32, 121, 212, 300}; // orig uhly 34 124 214 305 uhly zmeneny kvuli pólům motoru a jejich magnetizaci ve stavu bez napětí
+int slot[5] = {32, 122, 182, 242, 300}; // orig uhly 34 124 214 305 uhly zmeneny kvuli pólům motoru a jejich magnetizaci ve stavu bez napětí
 //bool full_slot[4] = {0, 0, 0, 0};
 float base_A;                         // weight of base -> weight on motor and storage torso, to be substracted from measured amount
 float base_B;                         
@@ -37,7 +38,12 @@ struct output_data{
   // XXXX XXXX binary means XX00 0000 = active slot, 
   //                        00X0 0000 = scale tared, 
   //                        000X 0000 = manual mode on, 
-  //                        0000 XXXX = error number, 1000 = Desired position not found, 0100 = unknown command, 0010 = magasine stuck, 0001 comm failiure (-> weight overload)
+  //                        0000 XXXX = error number, 1000 = Desired position not found, 0100 = unknown command, 0010 = magasine stuck, 0001 weight overload
+  // NEW
+  // XXXX XXXX binary means XXX0 0000 = active slot, 
+  //                        000X 0000 = tray active,
+  //                        0000 X000 = scale tared,
+  //                        0000 0XXX = error number, 000 = all OK, 001 = unknown command, 010 weight overload, 011 = des. pos. not found, 100 = maasine stuck
   };
 struct output_data output;        // od martina
 
@@ -46,6 +52,7 @@ struct inner_data{
   uint8_t active_slot = 0;
   bool scale_tared = 0;
   bool manual_mode = 0;
+  bool tray_active = 0;
   bool pos_not_found = 0;
   bool unknown_command = 0;
   bool magasine_stuck = 0;
@@ -97,9 +104,9 @@ void loop() {
   angle = (360.0 / 675.0) * analogRead(hall_senz);  // kontrola aktualniho uhlu
   //---------------- MANUAL MODE -----------------------------
   if(digitalRead(move45) == LOW){                   // pohyb na zadanou polohu (kdyz neni plna)
-    inner.manual_mode = 1;
+    inner.tray_active = 1;
     Serial.println("pohyb motoru o jednu pozici");
-    if(slot_i >= 3){
+    if(slot_i >= 4){
       slot_i = 0;
     }
     else{
@@ -107,33 +114,33 @@ void loop() {
     }
     if(move(slot[slot_i], 2500) < 0){               // fnc pohyb na zadaný úhel, timeout ma byt 1920
       if(slot_i <= 0){
-        slot_i = 3;
+        slot_i = 4;
       }
       else {
         slot_i = slot_i - 1;
       }
       Serial.print("nebyl dosazen zadany slot, aktivni slot: ");
       Serial.println(slot_i);
-      inner.manual_mode = 0;
+      inner.tray_active = 0;
     }
     else {
       Serial.print("aktivni slot");
       Serial.println(slot_i);
-      inner.manual_mode = 0;
+      inner.tray_active = 0;
     }
   }
   else if(digitalRead(measure_start) == LOW){            // mereni vahy zasobniku
-    inner.manual_mode = 1;
+    inner.tray_active = 1;
     Serial.println("detekce startu mereni");
     measure();
-    inner.manual_mode = 0;
+    inner.tray_active = 0;
   }
   else if(digitalRead(tare_btn) == LOW){                 // tare tenzometru (vynulovani)
-    inner.manual_mode = 1;
+    inner.tray_active = 1;
     Serial.println("Hold and Tare button pushed");
     hold_Xsec(10000);
     tare_bases();
-    inner.manual_mode = 0;
+    inner.tray_active = 0;
   }
   if(num_prijem == 0 && (desired_angle != angle && abs(desired_angle - angle) > 5)){  // hold storage torso from moving
   //if (inner.time > 20) {                          // jednou za dve vteriny projde if
@@ -161,7 +168,7 @@ void loop() {
 }
 
 void receive_data(int numBytes) {         // detekce a vypsani prichozi komunikace
-  if(inner.manual_mode == 0){ //inner.sound_of_silence == 0
+  if(inner.tray_active == 0){ //inner.sound_of_silence == 0
     inner.sound_of_silence = 1;
     num_prijem = Wire.read();
     Serial.print("Received data: ");
@@ -173,23 +180,42 @@ void send_data() {                        // odeslani vyzadanych dat
   uint8_t output_array[out_arr_size] = {0};
   // ------------nove---------------------------------------------
   output.data_out = inner.weight;
-  output.message = 1*inner.weight_overload + 2*inner.magasine_stuck + 4*inner.unknown_command + 8*inner.pos_not_found + 16*inner.manual_mode + 32*inner.scale_tared; 
-  if(output.message > 64){
+  output.message = 8*inner.scale_tared + 16*inner.tray_active; 
+  if(inner.weight_overload>1){
+    output.message = output.message + 1;
+  }
+  else if (inner.unknown_command>1) {
+    output.message = output.message + 2;
+  }
+  else if (inner.pos_not_found>1) {
+    output.message = output.message + 1 + 2;
+  }
+
+  
+  if(output.message > 32){
     output.message = output.message && B00111111;   // pre-inserted active slot 0
   }
   switch (inner.active_slot) {
     case 0:
+      output.message = output.message + 32; // slot 0 active
       // what R U doin'?
       // nothin' just hanging around
       break;
     case 1:
-      output.message = output.message + 64;
+      output.message = output.message + 64;  // slot 1 active
       break;
     case 2:
-      output.message = output.message + 128;
+      output.message = output.message + 32 + 64;  // slot 2 active
       break;
     case 3:
-      output.message = output.message + 64 + 128;
+      output.message = output.message + 128;   // slot 3 active 
+      break;
+    case 4:
+      output.message = output.message + 32 + 128;  // slot 4 active
+      break;
+    default:
+      // what R U doin'?                          // no slot active
+      // nothin' just hanging around
       break;
   }
   //------------end nove------------------------------------------
