@@ -67,6 +67,7 @@ void storage_init(struct storage *storage)
     storage->samples[1] = 0;
     storage->samples[2] = 0;
     storage->samples[3] = 0;
+    storage->samples[4] = 0;
 }
 
 void storage_goto(struct storage *storage)
@@ -89,8 +90,12 @@ void storage_goto(struct storage *storage)
             storage->command = 32;
             break;
 
-        default:
+        case 3:
             storage->command = 33;
+            break;
+
+        default:
+            storage->command = 34;
             break;
     }
 
@@ -131,6 +136,7 @@ void storage_wreset(struct storage *storage)
     storage->samples[1] = 0;
     storage->samples[2] = 0;
     storage->samples[3] = 0;
+    storage->samples[4] = 0;
     return;
 }
 

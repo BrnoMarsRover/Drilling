@@ -18,7 +18,7 @@ struct storage{
     uint16_t weight;
     bool meas_ready;
     bool busy;
-    uint16_t samples[4];
+    uint16_t samples[5];
     uint8_t raw;
 };
 
