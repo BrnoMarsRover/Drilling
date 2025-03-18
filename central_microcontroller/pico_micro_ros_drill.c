@@ -59,15 +59,17 @@ std_msgs__msg__UInt16MultiArray msg_data;
 
 void timerPublisher_callback(rcl_timer_t *timer, int64_t last_call_time)
 {
-    msg_data.data.data[0] = float_code(motor.rps_meas);
-    msg_data.data.data[1] = float_code(motor.torque_meas);
-    msg_data.data.data[2] = linear.height;
-    msg_data.data.data[3] = linear.toGround;
-    msg_data.data.data[4] = storage.active_slot;
-    msg_data.data.data[5] = storage.samples[0];
-    msg_data.data.data[6] = storage.samples[1];
-    msg_data.data.data[7] = storage.samples[2];
-    msg_data.data.data[8] = storage.samples[3];
+    msg_data.data.data[0] = motor.rpsMeas;
+    msg_data.data.data[1] = motor.torqueMeas;
+    msg_data.data.data[2] = motor.temperature;
+    msg_data.data.data[3] = linear.height;
+    msg_data.data.data[4] = linear.toGround;
+    msg_data.data.data[5] = storage.active_slot;
+    msg_data.data.data[6] = storage.samples[0];
+    msg_data.data.data[7] = storage.samples[1];
+    msg_data.data.data[8] = storage.samples[2];
+    msg_data.data.data[9] = storage.samples[3];
+    msg_data.data.data[10] = storage.samples[4];
     rcl_ret_t ret = rcl_publish(&publisher, &msg_data, NULL);  
 }
 
@@ -148,14 +150,14 @@ void timerMain_callback(rcl_timer_t *timer, int64_t last_call_time)
             break;
     }
 
-    if(currentState != manual)
-    {
+    //if(currentState != manual)
+    //{
         motor_write(&motor);    
         linear_write(&linear);
         if (storage.command != storage.old_command)
             storage_write(&storage);
         
-    }
+    //}
     motor_read(&motor);
     linear_read(&linear);
     storage_read(&storage);
@@ -173,7 +175,7 @@ void parameters_callback(const void * msgin)
 {
     const std_msgs__msg__UInt16MultiArray * msg = (const std_msgs__msg__UInt16MultiArray *)msgin;
 
-    motor.rps_goal = float_decode(msg->data.data[0]);
+    motor.rpsGoal = msg->data.data[0];
     linear.speed = msg->data.data[1];
     linear.height = msg->data.data[2];
     storage.demand_pos = msg->data.data[3];
@@ -184,27 +186,25 @@ void joy_callback(sensor_msgs__msg__Joy* msgin)
     if (currentState == manual)
     {
         // Set linear state
-        if (msgin->axes.data[1] == 0.0) { linear.command = 4; }      // stop linear
-        else if (msgin->axes.data[1] > 0.0) { linear.command = 1; }  // up linear
+        if (msgin->axes.data[1] == 0.0) { linear.command = 1; }      // stop linear
+        else if (msgin->axes.data[1] > 0.0) { linear.command = 3; }  // up linear
         else { linear.command = 2; }                                 // down linear
     
         // Set the linear speed
-        linear.speed = (uint8_t)(fabs(msgin->axes.data[1]) * 100.0f); //calculating speed
-    
-        //linear_read(&linear);
-        if(linear.states == 1 && linear.command == 1) { linear.command = 4; } //kontrola koncaku
-        linear_write(&linear);
+        linear.speed = (uint8_t)(fabs(msgin->axes.data[1]) * 255.0f); //calculating speed
+        if(linear.state == 0 && linear.command == 3) { linear.command = 1; } //kontrola koncaku
+        //linear_write(&linear);
     
         // Set the motor
         if (msgin->axes.data[5] < 1)    //left 
         { 
-            motor.rps =  (1 - msgin->axes.data[5]) / 2 * 125; 
+            motor.rps =  (int8_t)((1 - msgin->axes.data[5]) / 2.0f * 66.7f); 
         }
         else    //right
         { 
-            motor.rps = - ((1 - msgin->axes.data[2]) / 2 * 125);
+            motor.rps =  (int8_t)(-(1 - msgin->axes.data[2]) / 2.0f * 66.7f);
         }
-        motor_write(&motor);
+        //motor_write(&motor);
     
         // Set the storage command
         uint8_t old_command = storage.command;
@@ -214,7 +214,7 @@ void joy_callback(sensor_msgs__msg__Joy* msgin)
         else if (msgin->buttons.data[3] == 1) {storage.command = 30;}       //pos 0
         else if (msgin->buttons.data[4] == 1) {storage.command = 20;}       //get weight
         else if (msgin->buttons.data[5] == 1) {storage.command = 40;}       //hold pos
-        if(old_command != storage.command) { storage_write(&storage); }  
+        //if(old_command != storage.command) { storage_write(&storage); }  
     }
        
 }
@@ -305,7 +305,7 @@ int main()
     
     // alocation memory to msg
     msg_data.data.data = buffer;
-    msg_data.data.size = 9;
+    msg_data.data.size = 11;
     msg_data.data.capacity = BUFFER_SIZE;
         
     msg_data.layout.dim.data = dim;
