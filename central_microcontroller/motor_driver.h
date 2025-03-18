@@ -7,11 +7,16 @@
 #include "hardware/i2c.h"
 
 struct motor {
-	float rps;
-	float rps_goal;
-	float rps_meas;
-	float torque_meas;
+	//IN
+	int8_t rps;
+	//OUT
+	int8_t rpsMeas;
+	int8_t torqueMeas;
 	uint8_t state;
+	uint8_t temperature;
+	uint8_t error;
+	//INSIDE
+	int8_t rpsGoal;
 	bool stucked;
 	};
 
@@ -24,9 +29,5 @@ void motor_left(struct motor* motor);
 void motor_right(struct motor* motor);
 void motor_unblock(struct motor* motor);
 bool is_motor_stucked(struct motor* motor);
-
-float float_decode(uint16_t aNum);
-uint16_t float_code(float aNum);
-
 
 #endif
