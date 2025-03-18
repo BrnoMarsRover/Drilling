@@ -7,12 +7,16 @@
 #include "hardware/i2c.h"
 
 struct linear{
+    //IN
     uint8_t command;
     uint8_t speed;
-    uint8_t states;
+    //OUT
+    uint8_t state;
+    uint8_t error;
     uint16_t height;
     uint16_t toGround; // implementovat !!
-    uint16_t goal_height;
+    //INSIDE
+    uint16_t goalHeight;
 };
 
 int linear_read(struct linear* linear);
