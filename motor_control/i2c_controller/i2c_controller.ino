@@ -3,7 +3,7 @@
 uint8_t state = 0;
 
 const uint8_t slaveAddress = 10;
-const uint8_t inputArraySize = 9;
+const uint8_t inputArraySize = 4;
 
 uint8_t waitForByte()
 {
@@ -54,17 +54,17 @@ void loop()
   }
   else if(state == 2)
   {
-    Serial.println("zadejte pozadovanou rychlost: |0 ... 60| -> |-3 ... 3|");
+    Serial.println("zadejte pozadovanou rychlost: |0 ... 200| -> |-3 ... 3|");
     uint8_t setpointByte = waitForByte();
     //Serial.println("rychlost zadana");
 
-    float newSetpoint = constrain((setpointByte * 0.1) - 3.0, -3.0, 3.0);
+    int8_t newSetpoint = int8_t(constrain(int16_t(setpointByte) - 100, -100, 100));
       
     Serial.print("nastavuji rychlost = ");
     Serial.println(newSetpoint);
 
-    Wire.beginTransmission(10);
-    Wire.write((uint8_t*)&newSetpoint, 4);
+    Wire.beginTransmission(slaveAddress);
+    Wire.write(newSetpoint);
     Wire.endTransmission(); 
 
     state = 0;
@@ -88,18 +88,16 @@ void loop()
       Serial.println(receivedBytes[i]);
     }
 
-    float receivedFloat1;
-    float receivedFloat2;
-    memcpy(&receivedFloat1, receivedBytes + 1, sizeof(receivedFloat1));
-    memcpy(&receivedFloat2, receivedBytes + 5, sizeof(receivedFloat2));
     Serial.print("Stav: ");
     Serial.print(receivedBytes[0]);
     Serial.print(", rychlost: ");
-    Serial.print(receivedFloat1);
+    Serial.print((int8_t)receivedBytes[1]);
     Serial.print(" ot/s");
     Serial.print(", moment: ");
-    Serial.print(receivedFloat2);
+    Serial.print((int8_t)receivedBytes[2]);
     Serial.println(" Nm");
+    Serial.print(receivedBytes[3]);
+    Serial.println(" °C");
   }
 
   delay(100);

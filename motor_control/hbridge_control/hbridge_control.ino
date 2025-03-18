@@ -50,7 +50,7 @@ const double CPhi = 0.4834;
 const uint8_t I2CAddress = 10;
 const uint8_t inputArraySize = 1;
 uint8_t inputArray[inputArraySize] = {0};
-const uint8_t outputArraySize = 3;
+const uint8_t outputArraySize = 4;
 uint8_t outputArray[outputArraySize] = {0};
 uint32_t lastMessageMillis = 0;
 const uint32_t maxMillisWithoutMessage = 500; 
@@ -318,19 +318,9 @@ void requestEvent()
       state |= B00000010;
   }
 
-  //TEMPERATURE
-  if (motorTemperature < 30.0)
-    state |= B00000000;
-  else if (motorTemperature < 50.0)
-    state |= B00000100;
-  else if (motorTemperature < 60.0)
-    state |= B00001000;
-  else
-    state |= B00001100;
-
   //BRIDGE FAULT
   if (bridgeFault)
-    state |= B00010000;
+    state |= B00000100;
 
   //SEND DATA
   outputArray[0] = state;
@@ -340,6 +330,9 @@ void requestEvent()
 
   int8_t torqueInt = int8_t(constrain((ammeterCurrent*CPhi)/0.03, -127.0, 128.0));
   outputArray[2] = torqueInt;
+
+  uint8_t tempInt = uint8_t(constrain((motorTemperature, 0.0, 255.0));
+  outputArray[3] = tempInt;
 
   Wire.write(outputArray, outputArraySize);
 }
