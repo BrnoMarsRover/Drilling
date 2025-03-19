@@ -151,15 +151,18 @@ void loop()
 {
   uint32_t currentMillis = millis();
 
+  /*
   if((currentMillis - lastMessageMillis) > maxMillisWithoutMessage)
   {
     speedTarget = 0.0;
   } 
+  */
 
   if(analogRead(InPin_L_IS) > ISFaultThreshold || analogRead(InPin_R_IS) > ISFaultThreshold)
   {
     bridgeFault = true;
     speedTarget = 0.0;
+    Serial.println("HB ERR");
   }
   else
   {
@@ -219,6 +222,9 @@ void loop()
   Serial.print(-6000); // To freeze the upper limit
 */
   Serial.print(" SpT:");
+  Serial.print(speedTarget);
+
+  Serial.print(" SpSP:");
   Serial.print(speedController.setpoint);
 
   Serial.print(" Sp:");
@@ -312,7 +318,7 @@ void requestEvent()
   //IS STUCK?
   if(speedController.setpoint != 0.0)
   {
-    if (motorSpeed > 0.1)
+    if (abs(motorSpeed) > 0.1)
       state |= B00000001;
     else
       state |= B00000010;
@@ -331,7 +337,7 @@ void requestEvent()
   int8_t torqueInt = int8_t(constrain((ammeterCurrent*CPhi)/0.03, -127.0, 128.0));
   outputArray[2] = torqueInt;
 
-  uint8_t tempInt = uint8_t(constrain((motorTemperature, 0.0, 255.0));
+  uint8_t tempInt = uint8_t(constrain(motorTemperature, 0.0, 255.0));
   outputArray[3] = tempInt;
 
   Wire.write(outputArray, outputArraySize);

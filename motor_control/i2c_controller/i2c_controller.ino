@@ -61,7 +61,7 @@ void loop()
     int8_t newSetpoint = int8_t(constrain(int16_t(setpointByte) - 100, -100, 100));
       
     Serial.print("nastavuji rychlost = ");
-    Serial.println(newSetpoint);
+    Serial.println(newSetpoint*0.03);
 
     Wire.beginTransmission(slaveAddress);
     Wire.write(newSetpoint);
@@ -88,16 +88,47 @@ void loop()
       Serial.println(receivedBytes[i]);
     }
 
+    uint8_t state = receivedBytes[0];
+    uint8_t motorState = state & B00000011;
+    float speed = float((int8_t)receivedBytes[1])*0.03;
+    float torque = float((int8_t)receivedBytes[2])*0.03;
+
     Serial.print("Stav: ");
     Serial.print(receivedBytes[0]);
     Serial.print(", rychlost: ");
-    Serial.print((int8_t)receivedBytes[1]);
+    Serial.print(speed);
     Serial.print(" ot/s");
     Serial.print(", moment: ");
-    Serial.print((int8_t)receivedBytes[2]);
-    Serial.println(" Nm");
+    Serial.print(torque);
+    Serial.print(" Nm, teplota:");
     Serial.print(receivedBytes[3]);
     Serial.println(" °C");
+
+
+    Serial.print("Motor: ");
+    if(motorState == 0)
+    {
+      Serial.print("stoji");
+    }
+    else if(motorState == 1)
+    {
+      Serial.print("jede");
+    }
+    else
+    {
+      Serial.print("zaseknur");
+    }
+    Serial.print(", Hmustek: ");
+
+    if(state & B00000100)
+    {
+      Serial.print("NOK");
+    }
+    else
+    {
+      Serial.print("OK");
+    }
+    Serial.println("");
   }
 
   delay(100);
