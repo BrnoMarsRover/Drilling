@@ -12,8 +12,8 @@
 
 #include "pico/stdlib.h"
 #include "pico_uart_transports.h"
-#include "hardware/gpio.h"
-#include "hardware/i2c.h"
+//#include "hardware/gpio.h"
+//#include "hardware/i2c.h"
 #include "storage_driver.h"
 #include "linear_driver.h"
 #include "motor_driver.h"
@@ -59,17 +59,43 @@ std_msgs__msg__UInt16MultiArray msg_data;
 
 void timerPublisher_callback(rcl_timer_t *timer, int64_t last_call_time)
 {
-    msg_data.data.data[0] = motor.rpsMeas;
-    msg_data.data.data[1] = motor.torqueMeas;
-    msg_data.data.data[2] = motor.temperature;
-    msg_data.data.data[3] = linear.height;
-    msg_data.data.data[4] = linear.toGround;
-    msg_data.data.data[5] = storage.active_slot;
-    msg_data.data.data[6] = storage.samples[0];
-    msg_data.data.data[7] = storage.samples[1];
-    msg_data.data.data[8] = storage.samples[2];
-    msg_data.data.data[9] = storage.samples[3];
-    msg_data.data.data[10] = storage.samples[4];
+    if (motor.error == 44)
+    {
+        msg_data.data.data[0] = 44404;
+        msg_data.data.data[1] = 44404;
+        msg_data.data.data[2] = 44404;
+    }
+    else
+    {
+        msg_data.data.data[0] = abs(motor.rpsMeas);
+        msg_data.data.data[1] = abs(motor.torqueMeas);
+        msg_data.data.data[2] = motor.temperature;
+    }
+
+    if (linear.error == 44)
+    {
+        msg_data.data.data[3] = 44404;
+        msg_data.data.data[4] = 44404;
+    }
+    else
+    {
+        msg_data.data.data[3] = linear.height;
+        msg_data.data.data[4] = linear.toGround;
+    }
+
+    if (storage.errors == 44)
+    {
+        msg_data.data.data[5] = 44404;
+    }
+    else
+    {
+        msg_data.data.data[5] = storage.active_slot;
+    }
+
+    for (int i = 0; i < STORE_SLOTS; ++i) 
+    {
+        msg_data.data.data[6 + i] = storage.samples[0];
+    }
     rcl_ret_t ret = rcl_publish(&publisher, &msg_data, NULL);  
 }
 
@@ -152,15 +178,15 @@ void timerMain_callback(rcl_timer_t *timer, int64_t last_call_time)
 
     //if(currentState != manual)
     //{
-        motor_write(&motor);    
-        linear_write(&linear);
+        if(motor_write(&motor) < 0) {motor.error = 44;};    
+        if(linear_write(&linear) < 0) {linear.error = 44;};
         if (storage.command != storage.old_command)
-            storage_write(&storage);
+            if (storage_write(&storage) < 0) {storage.errors = 44;};
         
     //}
-    motor_read(&motor);
-    linear_read(&linear);
-    storage_read(&storage);
+    if(motor_read(&motor)) {motor.error = 44;};
+    if(linear_read(&linear)) {linear.error = 44;};
+    if(storage_read(&storage)) {storage.errors = 44;};
 
 
 }
@@ -305,7 +331,7 @@ int main()
     
     // alocation memory to msg
     msg_data.data.data = buffer;
-    msg_data.data.size = 11;
+    msg_data.data.size = 10;
     msg_data.data.capacity = BUFFER_SIZE;
         
     msg_data.layout.dim.data = dim;
@@ -356,7 +382,7 @@ int main()
     rclc_timer_init_default(
         &timerPublisher,
         &support,
-        RCL_MS_TO_NS(1000),
+        RCL_MS_TO_NS(500),
         timerPublisher_callback);
 
     rclc_timer_init_default(
@@ -389,11 +415,11 @@ int main()
     gpio_pull_up(4);
     gpio_pull_up(5);
 
-    gpio_put(LED_PIN, 1);
-
     storage_init(&storage);
     linear_init(&linear);
     motor_init(&motor);
+    
+    gpio_put(LED_PIN, 1);
 
     while (true)
     {

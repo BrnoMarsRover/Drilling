@@ -1,21 +1,18 @@
-#include <stdio.h>
-#include <time.h>
-#include "pico/stdlib.h"
-#include "hardware/gpio.h"
-#include "hardware/i2c.h"
+//#include <stdio.h>
+//#include <time.h>
+//#include "pico/stdlib.h"
+//#include "hardware/gpio.h"
+//#include "hardware/i2c.h"
 #include "linear_driver.h"
 
-#define I2C_PORT i2c0
-#define LINEAR_ADDR 0x09
 
-#define SAFE_POS 50 // [mm]
 
 int linear_read(struct linear* linear)
 {
     if (!linear)
         return -2;
     uint8_t buffer[5];
-    if (i2c_read_blocking(I2C_PORT, LINEAR_ADDR, buffer, 5, false) != 5)
+    if (i2c_read_timeout_us(I2C_PORT, LINEAR_ADDR, buffer, 5, false, 1000) != 5)
     {
         return -1;
     }
@@ -42,7 +39,7 @@ int linear_write(struct linear* linear)
     uint8_t buffer[2];
     buffer[0] = linear->command;
     buffer[1] = linear->speed;
-    if (i2c_write_blocking(I2C_PORT, LINEAR_ADDR, buffer, 2, false) != 2);
+    if (i2c_write_timeout_us(I2C_PORT, LINEAR_ADDR, buffer, 2, false, 1000) != 2);
     {
         return -1;
     }
@@ -64,7 +61,7 @@ void linear_stop(struct linear* linear)
 {
     if (!linear)
         return;
-    linear->command = 4;
+    linear->command = 1;
 }
 
 void linear_go_down(struct linear* linear)
@@ -78,7 +75,7 @@ void linear_go_up(struct linear* linear)
 {
     if (!linear)
         return;
-    linear->command = 1;
+    linear->command = 3;
 }
 
 bool is_linear_stucked(struct linear* linear)
@@ -94,7 +91,7 @@ bool linear_reached_goal(struct linear* linear)
 {
     if (!linear)
         return true;
-    if(linear->goalHeight == linear->height)
+    if(linear->goalHeight == linear->height-10 || linear->goalHeight == linear->height+10)
         return true;
     return false;
 }

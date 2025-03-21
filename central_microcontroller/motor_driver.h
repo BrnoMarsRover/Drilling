@@ -3,8 +3,13 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <time.h>
+#include "pico/stdlib.h"
 #include "hardware/gpio.h"
 #include "hardware/i2c.h"
+
+#define I2C_PORT i2c0
+#define MOTOR_ADDR 0x0A
 
 struct motor {
 	//IN

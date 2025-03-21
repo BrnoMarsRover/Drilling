@@ -1,22 +1,16 @@
-#include <stdio.h>
-#include <time.h>
-#include "pico/stdlib.h"
-#include "hardware/gpio.h"
-#include "hardware/i2c.h"
+//#include <stdio.h>
+//#include <time.h>
+//#include "pico/stdlib.h"
+//#include "hardware/gpio.h"
+//#include "hardware/i2c.h"
 #include "storage_driver.h"
-
-#define I2C_PORT i2c0
-#define STORAGE_ADDR 0x08
-
-#define DEF_POS 0
-
 
 int storage_read(struct storage* storage)
 {
     if (!storage)
         return -2;
     uint8_t buffer[3];
-    if (i2c_read_blocking(I2C_PORT, STORAGE_ADDR, buffer, 3, false) != 3)
+    if (i2c_read_timeout_us(I2C_PORT, STORAGE_ADDR, buffer, 3, false, 1000) != 3)
     {
         return -1;
     }
@@ -43,7 +37,7 @@ int storage_write(struct storage* storage)
     if (!storage)
         return -2;
     uint8_t buffer = storage->command;
-    if (i2c_write_blocking(I2C_PORT, STORAGE_ADDR, &buffer, 1, false) != 1);
+    if (i2c_write_timeout_us(I2C_PORT, STORAGE_ADDR, &buffer, 1, false, 1000) != 1);
     {
         return -1;
     }
@@ -63,11 +57,10 @@ void storage_init(struct storage *storage)
     
     storage_read(storage);
     
-    storage->samples[0] = 0;
-    storage->samples[1] = 0;
-    storage->samples[2] = 0;
-    storage->samples[3] = 0;
-    storage->samples[4] = 0;
+    for (int i = 0; i < STORE_SLOTS; ++i) 
+    {
+        storage->samples[i] = 0;
+    }
 }
 
 void storage_goto(struct storage *storage)
@@ -114,7 +107,8 @@ void storage_get_weight(struct storage *storage)
     }
 
     if (storage->old_weight != storage->weight)
-        storage->samples[storage->demand_pos] = storage->weight;
+        if (storage->demand_pos <= STORE_SLOTS && storage->demand_pos != 0)
+            storage->samples[storage->demand_pos - 1] = storage->weight;
 
     return;
 }
@@ -132,11 +126,10 @@ void storage_wreset(struct storage *storage)
 {
     if (!storage)
         return;
-    storage->samples[0] = 0;
-    storage->samples[1] = 0;
-    storage->samples[2] = 0;
-    storage->samples[3] = 0;
-    storage->samples[4] = 0;
+    for (int i = 0; i < STORE_SLOTS; ++i) 
+    {
+        storage->samples[i] = 0;
+    }
     return;
 }
 

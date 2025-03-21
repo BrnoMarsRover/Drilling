@@ -3,8 +3,16 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <time.h>
+#include "pico/stdlib.h"
 #include "hardware/gpio.h"
 #include "hardware/i2c.h"
+
+#define I2C_PORT i2c0
+#define STORAGE_ADDR 0x08
+
+#define STORE_SLOTS 4
+#define DEF_POS 0
 
 
 struct storage{
@@ -18,7 +26,7 @@ struct storage{
     uint16_t weight;
     bool meas_ready;
     bool busy;
-    uint16_t samples[5];
+    uint16_t samples[STORE_SLOTS];
     uint8_t raw;
 };
 

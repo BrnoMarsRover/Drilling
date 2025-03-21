@@ -1,22 +1,28 @@
-#include <stdio.h>
-#include <time.h>
-#include "pico/stdlib.h"
-#include "hardware/gpio.h"
-#include "hardware/i2c.h"
+//#include <stdio.h>
+//#include <time.h>
+//#include "pico/stdlib.h"
+//#include "hardware/gpio.h"
+//#include "hardware/i2c.h"
 #include "motor_driver.h"
 
-#define I2C_PORT i2c0
-#define MOTOR_ADDR 0x0A
+
 
 int motor_read(struct motor* motor)
 {
     if (!motor)
         return -2;
     uint8_t buffer[4];
+    
+    if (i2c_read_timeout_us(I2C_PORT, MOTOR_ADDR, buffer, 4, false, 1000) != 4)
+    {
+        return -1;
+    }
+    /*
     if (i2c_read_blocking(I2C_PORT, MOTOR_ADDR, buffer, 4, false) != 4)
     {
         return -1;
     }
+    */
 
     uint8_t tmp = 3 & buffer[0]; //3 = B'0000 0011'
     motor->state = tmp;
@@ -36,10 +42,17 @@ int motor_write(struct motor* motor)
         return -2;
 
     uint8_t buffer = motor->rps;
-    if (i2c_write_blocking(I2C_PORT, MOTOR_ADDR, buffer, 1, false) != 1);
+
+    if (i2c_write_timeout_us(I2C_PORT, MOTOR_ADDR, &buffer, 1, false, 1000) != 1);
     {
         return -1;
     }
+    /*
+    if (i2c_write_blocking(I2C_PORT, MOTOR_ADDR, &buffer, 1, false) != 1);
+    {
+        return -1;
+    }
+    */
     return 0;
 }
 
@@ -92,6 +105,6 @@ bool is_motor_stucked(struct motor* motor)
 void motor_unblock(struct motor* motor)
 {
     if (!motor)
-        return true;
+        return;
     motor->stucked = false;
 }
