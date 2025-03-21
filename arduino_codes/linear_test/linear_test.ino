@@ -1,7 +1,9 @@
 #include <Wire.h>
 
-int x = 3;
-uint16_t height = 1;
+uint8_t state = 4;
+uint8_t error = 1;
+uint16_t height = 5;
+uint16_t toGround = 10;
 unsigned long lastTime = 0; // Uloží čas posledního měření
 
 
@@ -13,7 +15,6 @@ void setup() {
   Wire.onRequest(requestEvent);
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, LOW);
-  Serial.println(x);
 }
 
 void loop() {
@@ -30,18 +31,18 @@ void receiveEvent(int howMany) {
     //Serial.println(howMany);
     uint8_t a = Wire.read();
     uint8_t b = Wire.read();
-
-    x = a + b;
     }
 
 
 void requestEvent(){
-  const uint8_t outputArraySize = 3;
+  const uint8_t outputArraySize = 5;
   uint8_t outputArray[outputArraySize] = {0};
 
+  uint8_t x = (error << 3) | state;
   outputArray[0] = x;
   memcpy((outputArray+1), &height, sizeof(height));
-  Wire.write(outputArray, 3);
+  memcpy((outputArray+3), &toGround, sizeof(toGround));
+  Wire.write(outputArray, 5);
   //Serial.println("Finito");
   }
 

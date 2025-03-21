@@ -1,9 +1,11 @@
 #include <Wire.h>
 
 
-int x = 1;
-float rps = 2.3;
-float torque = 1.69;
+uint8_t state = 1;
+uint8_t error = 0;
+int8_t rps = -100;
+int8_t torque = 75;
+uint8_t temperature = 25;
 unsigned long lastTime = 0; // Uloží čas posledního měření
 
 
@@ -15,7 +17,6 @@ void setup() {
   Wire.onRequest(requestEvent);
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, LOW);
-  Serial.println(x);
 }
 
 void loop() {
@@ -25,24 +26,23 @@ void loop() {
 
 void receiveEvent(int howMany) {
     time_measure();
-    const uint8_t inputArraySize = 4;
-    char inputArray[inputArraySize] = {0};
-
-    Wire.readBytes(inputArray, inputArraySize);
-    float *floatPtr = (float *)inputArray;
-    Serial.println(*floatPtr);
+    //Serial.println("Recieved");
+    //Serial.println(howMany);
+    int8_t a = Wire.read();
     }
 
 
 void requestEvent(){
-  const uint8_t outputArraySize = 9;
+  const uint8_t outputArraySize = 4;
   uint8_t outputArray[outputArraySize] = {0};
 
+  uint8_t x = (error << 2) | state;
   outputArray[0] = x;
   memcpy((outputArray+1), &rps, sizeof(rps));
-  memcpy((outputArray+5), &torque, sizeof(torque));
-  Wire.write(outputArray, 9);
-  Serial.println("Finito");
+  memcpy((outputArray+2), &torque, sizeof(torque));
+  memcpy((outputArray+3), &temperature, sizeof(temperature));
+  Wire.write(outputArray, 4);
+  //Serial.println("Finito");
   }
 
     void time_measure()
