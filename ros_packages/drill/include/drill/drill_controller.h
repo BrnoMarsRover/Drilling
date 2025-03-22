@@ -16,17 +16,16 @@
 #include "drill_interfaces/action/drill_sample.hpp"
 #include "drill_interfaces/action/store_sample.hpp"
 #include "drill_interfaces/srv/get_sample_weight.hpp"
+#include "atomic"
 
 #define LOOP_RATE 1 //Loop time
 
-#define MAX_SLOT 4 //Total number of slots
+#define MAX_SLOT 3 //Total number of slots
 #define DEF_SLOT 0 //Default slot, when the drilling is possible
 #define SAFE_POS 20 // [mm] height when the turning with the storage is possible
 #define STORING_POS 30 // [mm] height when the drill is the storage
 #define DUMPING_TIME 10 // [s] How long the drill dumping the sample from tube
-#define MAX_TORQUE 2.5
 #define MAX_HEIGHT 500 // [mm]
-#define RANGE 1000 // to code the float number
 
 enum state_machine
 {
@@ -42,7 +41,8 @@ enum state_machine
     manual
 };
 
-class DrillController : public rclcpp::Node {
+class DrillController : public rclcpp::Node
+{
 public:
     using DrillSample = drill_interfaces::action::DrillSample;
     using StoreSample = drill_interfaces::action::StoreSample;
@@ -62,14 +62,19 @@ public:
 private:
     std::shared_ptr<DrillLogger> DrillLogger_;
     //Controller variables
-    bool drill_is_busy{};
-    float actual_torque{};
-    float actual_rps{};
-    int actual_height{};
-    int actualDepth{};
-    int toGround{};
-    int active_slot{};
-    int samples[4]{};
+    std::atomic<bool> drill_is_busy{};
+    std::atomic<float> motorTorque{};
+    std::atomic<float> motorRPS{};
+    std::atomic<int> motorTemperature{};
+    std::atomic<int> drillHeight{};
+    std::atomic<int> drillDepth{};
+    std::atomic<int> toGround{};
+    std::atomic<int> activeSlot{};
+
+    std::atomic<int> sampleWeight1{};
+    std::atomic<int> sampleWeight2{};
+    std::atomic<int> sampleWeight3{};
+    std::atomic<int> sampleWeight4{};
 
     // Publishers and subscribers
     // Publisher to publish state for drill
@@ -88,10 +93,10 @@ private:
 
     void set_depth()
     {
-        if (const auto tmp = actual_height - toGround; tmp < 0)
-            actualDepth = 0;
+        if (const auto tmp = drillHeight - toGround; tmp < 0)
+            drillDepth = 0;
         else
-            actualDepth = tmp;
+            drillDepth = tmp;
     }
 
     int calculate_height(const int depth) const
@@ -103,16 +108,17 @@ private:
     void drill_data_callback(const std_msgs::msg::UInt16MultiArray::SharedPtr msg)
     {
         RCLCPP_INFO(this->get_logger(), "Received drill data.");
-        actual_rps = float_decode(msg->data[0]);
-        actual_torque = float_decode(msg->data[1]);
-        actual_height = msg->data[2];;
-        if (actual_height == 0) toGround = msg->data[3];
+        motorRPS = float_decode(msg->data[0]);
+        motorTorque = float_decode(msg->data[1]);
+        motorTemperature = msg->data[2];
+        drillHeight = msg->data[3];;
+        if (drillHeight == 0) toGround = msg->data[4];
         set_depth();
-        active_slot = msg->data[4];;
-        samples[0] = msg->data[5];
-        samples[1] = msg->data[6];
-        samples[2] = msg->data[7];
-        samples[3] = msg->data[8];
+        activeSlot = msg->data[5];;
+        sampleWeight1 = msg->data[6];
+        sampleWeight2 = msg->data[7];
+        sampleWeight3 = msg->data[8];
+        sampleWeight4 = msg->data[9];
     }
 
     // DRILL SAMPLE ACTION
@@ -210,7 +216,7 @@ private:
 
     void get_sample_weight_callback(const std::shared_ptr<GetSampleWeight::Request> request, std::shared_ptr<GetSampleWeight::Response> response) {
         RCLCPP_INFO(this->get_logger(), "Getting sample weight for slot %d", request->slot);
-        response->weight = samples[request->slot];
+        response->weight = get_sampleWeight(request->slot);
     }
 
     // Function for publish state to drill
@@ -224,16 +230,39 @@ private:
     // Function to publish drill parameters
     void publish_drill_param(float rps, uint16_t speed, uint16_t height, uint16_t slot) const;
 
+    int get_sampleWeight(const int slot)
+    {
+        switch (slot)
+        {
+        case 1:
+            return sampleWeight1;
+        case 2:
+            return sampleWeight2;
+        case 3:
+            return sampleWeight3;
+        case 4:
+            return sampleWeight4;
+        default:
+            return 0;
+        }
+    }
+
+    static uint16_t speed_code(const int speed)
+    {
+        //formula for linear speed will be
+        if (auto tmp = abs(speed) * (255 / 100); tmp < 256)
+            return tmp;
+        return 255;
+    }
+
     static float float_decode(const uint16_t aNum) {
-        constexpr  float constant = MAX_TORQUE/RANGE;
-        const float result =  constant * static_cast<float>(aNum);
+        const float result =  0.03f * static_cast<float>(aNum);
         return result;
     }
 
     static uint16_t float_code(const float aNum)
     {
-        constexpr float constant = RANGE/MAX_TORQUE;
-        const auto result =  static_cast<uint16_t>(constant * aNum);
+        const auto result =  static_cast<uint16_t>(aNum / 0.03f);
         return result;
     }
 };
