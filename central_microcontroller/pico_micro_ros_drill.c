@@ -94,7 +94,7 @@ void timerPublisher_callback(rcl_timer_t *timer, int64_t last_call_time)
 
     for (int i = 0; i < STORE_SLOTS; ++i) 
     {
-        msg_data.data.data[6 + i] = storage.samples[0];
+        msg_data.data.data[6 + i] = storage.samples[i];
     }
     rcl_ret_t ret = rcl_publish(&publisher, &msg_data, NULL);  
 }
@@ -233,14 +233,13 @@ void joy_callback(sensor_msgs__msg__Joy* msgin)
         //motor_write(&motor);
     
         // Set the storage command
-        uint8_t old_command = storage.command;
-        if (msgin->buttons.data[1] == 1) { storage.command = 31; }          //pos 1
-        else if (msgin->buttons.data[2] == 1) {storage.command = 32;}       //pos 2
-        else if (msgin->buttons.data[0] == 1) {storage.command = 33;}       //pos 3
-        else if (msgin->buttons.data[3] == 1) {storage.command = 30;}       //pos 0
-        else if (msgin->buttons.data[4] == 1) {storage.command = 20;}       //get weight
-        else if (msgin->buttons.data[5] == 1) {storage.command = 40;}       //hold pos
-        //if(old_command != storage.command) { storage_write(&storage); }  
+        if (msgin->buttons.data[0] == 1 && storage.demand_pos != 1) { storage.demand_pos = 1; storage_goto(&storage); }          //pos 1
+        else if (msgin->buttons.data[1] == 1 && storage.demand_pos != 2) {storage.demand_pos = 2; storage_goto(&storage);}       //pos 2
+        else if (msgin->buttons.data[2] == 1) {storage.demand_pos = 2; storage_goto(&storage);}       //pos 2
+        else if (msgin->buttons.data[3] == 1) {storage.demand_pos = 3; storage_goto(&storage);}       //pos 3
+        else if (msgin->buttons.data[6] == 1) {storage.demand_pos = 4; storage_goto(&storage);}       //pos 0
+        else if (msgin->buttons.data[4] == 1) {storage_get_weight(&storage);}       //get weight
+        else if (msgin->buttons.data[5] == 1) {storage_hold(&storage);}       //hold pos
     }
        
 }
