@@ -1,11 +1,4 @@
-//#include <stdio.h>
-//#include <time.h>
-//#include "pico/stdlib.h"
-//#include "hardware/gpio.h"
-//#include "hardware/i2c.h"
 #include "linear_driver.h"
-
-
 
 int linear_read(struct linear* linear)
 {
@@ -55,27 +48,41 @@ void linear_init(struct linear* linear)
     linear_write(linear);
     linear_read(linear);
     linear->goalHeight = 0;
+    linear->pid_integral = 0;
+    linear->pid_prevError = 0;
 }
 
 void linear_stop(struct linear* linear)
 {
     if (!linear)
         return;
+    linear->pid_integral = 0;
+    linear->pid_prevError = 0;
     linear->command = 1;
 }
 
-void linear_go_down(struct linear* linear)
+void linear_goto(struct linear* linear, float dt)
 {
     if (!linear)
-        return;
-    linear->command = 2;
-}
-
-void linear_go_up(struct linear* linear)
-{
-    if (!linear)
-        return;
-    linear->command = 3;
+    return;
+    
+    if (linear->goalHeight != 0)
+    {
+        float speed = linear_step(linear, dt);
+        linear->speed = speed/10000;
+        if (speed == 0) {linear->command = 1;}
+        else if (speed < 0) {linear->command = 3;}
+        else {linear->command = 2;}
+    
+        speed = fabs(speed);
+        if (speed > 255.0f) speed = 255.0f;
+    
+        //linear->speed = (uint8_t) speed;
+    }
+    else
+    {
+        linear->command = 0;
+    }
 }
 
 bool is_linear_stucked(struct linear* linear)
@@ -113,3 +120,13 @@ bool is_linear_safe(struct linear* linear)
         return true;
     return false;
 }
+
+float linear_step(struct linear* linear, float dt) {
+    float error = linear->goalHeight/1000 - linear->height/1000;
+    linear->pid_integral += error * dt;
+    float derivative = (error - linear->pid_prevError) / dt;
+    float output = LIN_Kp * error + LIN_Ki * linear->pid_integral + LIN_Kd * derivative;
+    linear->pid_prevError = error;
+    return output;
+}
+

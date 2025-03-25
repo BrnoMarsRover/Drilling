@@ -1,8 +1,3 @@
-//#include <stdio.h>
-//#include <time.h>
-//#include "pico/stdlib.h"
-//#include "hardware/gpio.h"
-//#include "hardware/i2c.h"
 #include "storage_driver.h"
 
 int storage_read(struct storage* storage)

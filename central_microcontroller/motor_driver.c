@@ -1,8 +1,3 @@
-//#include <stdio.h>
-//#include <time.h>
-//#include "pico/stdlib.h"
-//#include "hardware/gpio.h"
-//#include "hardware/i2c.h"
 #include "motor_driver.h"
 
 
@@ -17,12 +12,6 @@ int motor_read(struct motor* motor)
     {
         return -1;
     }
-    /*
-    if (i2c_read_blocking(I2C_PORT, MOTOR_ADDR, buffer, 4, false) != 4)
-    {
-        return -1;
-    }
-    */
 
     uint8_t tmp = 3 & buffer[0]; //3 = B'0000 0011'
     motor->state = tmp;
@@ -47,12 +36,7 @@ int motor_write(struct motor* motor)
     {
         return -1;
     }
-    /*
-    if (i2c_write_blocking(I2C_PORT, MOTOR_ADDR, &buffer, 1, false) != 1);
-    {
-        return -1;
-    }
-    */
+
     return 0;
 }
 

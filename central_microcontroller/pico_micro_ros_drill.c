@@ -1,5 +1,4 @@
 #include <stdio.h>
-
 #include <rcl/rcl.h>
 #include <rcl/error_handling.h>
 #include <rclc/rclc.h>
@@ -9,16 +8,14 @@
 #include <std_msgs/msg/u_int16_multi_array.h>
 #include <sensor_msgs/msg/joy.h>
 #include <rmw_microros/rmw_microros.h>
-
 #include "pico/stdlib.h"
 #include "pico_uart_transports.h"
-//#include "hardware/gpio.h"
-//#include "hardware/i2c.h"
 #include "storage_driver.h"
 #include "linear_driver.h"
 #include "motor_driver.h"
 #include "math.h"
 
+#define MAIN_LOOP_TIME_MS 100
 #define I2C_PORT i2c0
 #define BUFFER_SIZE 10
 #define STRING_SIZE 30
@@ -27,8 +24,7 @@ enum state_machine
 {
     stop,
     drilling,
-    go_down,
-    go_up,
+    goto_height,
     turn_right,
     turn_left,
     slot_select,
@@ -117,28 +113,17 @@ void timerMain_callback(rcl_timer_t *timer, int64_t last_call_time)
             else
             {
                 motor_right(&motor);
-                linear_go_down(&linear);
+                linear_goto(&linear, MAIN_LOOP_TIME_MS/1000); // in te future there will be some adjustable speed
             }
             break;
         
-        case go_down:
+        case goto_height:
             motor_stop(&motor);
             if(!is_linear_stucked(&linear))
-                linear_go_down(&linear);
+                linear_goto(&linear, MAIN_LOOP_TIME_MS/1000);
             else
                 linear_stop(&linear);
             break;    
-
-        case go_up:
-            motor_stop(&motor);
-            if(is_linear_home(&linear))
-                linear_stop(&linear);
-            else
-            {
-                motor_unblock(&motor);
-                linear_go_up(&linear);
-            }
-            break;
             
         case turn_left:
             linear_stop(&linear);
@@ -176,14 +161,12 @@ void timerMain_callback(rcl_timer_t *timer, int64_t last_call_time)
             break;
     }
 
-    //if(currentState != manual)
-    //{
-        if(motor_write(&motor) < 0) {motor.error = 44;};    
-        if(linear_write(&linear) < 0) {linear.error = 44;};
-        if (storage.command != storage.old_command)
-            if (storage_write(&storage) < 0) {storage.errors = 44;};
+
+    if(motor_write(&motor) < 0) {motor.error = 44;};    
+    if(linear_write(&linear) < 0) {linear.error = 44;};
+    if (storage.command != storage.old_command)
+        if (storage_write(&storage) < 0) {storage.errors = 44;};
         
-    //}
     if(motor_read(&motor)) {motor.error = 44;};
     if(linear_read(&linear)) {linear.error = 44;};
     if(storage_read(&storage)) {storage.errors = 44;};
@@ -202,44 +185,42 @@ void parameters_callback(const void * msgin)
     const std_msgs__msg__UInt16MultiArray * msg = (const std_msgs__msg__UInt16MultiArray *)msgin;
 
     motor.rpsGoal = msg->data.data[0];
-    linear.speed = msg->data.data[1];
-    linear.height = msg->data.data[2];
-    storage.demand_pos = msg->data.data[3];
+    linear.goalHeight = msg->data.data[1];
+    storage.demand_pos = msg->data.data[2];
 }
 
-void joy_callback(sensor_msgs__msg__Joy* msgin)
+void joy_callback(const void * msgin)
 {
+    const sensor_msgs__msg__Joy * msg = (const sensor_msgs__msg__Joy *)msgin;
     if (currentState == manual)
     {
         // Set linear state
-        if (msgin->axes.data[1] == 0.0) { linear.command = 1; }      // stop linear
-        else if (msgin->axes.data[1] > 0.0) { linear.command = 3; }  // up linear
+        if (msg->axes.data[1] == 0.0) { linear.command = 1; }      // stop linear
+        else if (msg->axes.data[1] > 0.0) { linear.command = 3; }  // up linear
         else { linear.command = 2; }                                 // down linear
     
         // Set the linear speed
-        linear.speed = (uint8_t)(fabs(msgin->axes.data[1]) * 255.0f); //calculating speed
+        linear.speed = (uint8_t)(fabs(msg->axes.data[1]) * 255.0f); //calculating speed
         if(linear.state == 0 && linear.command == 3) { linear.command = 1; } //kontrola koncaku
-        //linear_write(&linear);
     
         // Set the motor
-        if (msgin->axes.data[5] < 1)    //left 
+        if (msg->axes.data[5] < 1)    //left 
         { 
-            motor.rps =  (int8_t)((1 - msgin->axes.data[5]) / 2.0f * 66.7f); 
+            motor.rps =  (int8_t)((1 - msg->axes.data[5]) / 2.0f * 66.7f); 
         }
         else    //right
         { 
-            motor.rps =  (int8_t)(-(1 - msgin->axes.data[2]) / 2.0f * 66.7f);
+            motor.rps =  (int8_t)(-(1 - msg->axes.data[2]) / 2.0f * 66.7f);
         }
-        //motor_write(&motor);
     
         // Set the storage command
-        if (msgin->buttons.data[0] == 1 && storage.demand_pos != 1) { storage.demand_pos = 1; storage_goto(&storage); }          //pos 1
-        else if (msgin->buttons.data[1] == 1 && storage.demand_pos != 2) {storage.demand_pos = 2; storage_goto(&storage);}       //pos 2
-        else if (msgin->buttons.data[2] == 1) {storage.demand_pos = 2; storage_goto(&storage);}       //pos 2
-        else if (msgin->buttons.data[3] == 1) {storage.demand_pos = 3; storage_goto(&storage);}       //pos 3
-        else if (msgin->buttons.data[6] == 1) {storage.demand_pos = 4; storage_goto(&storage);}       //pos 0
-        else if (msgin->buttons.data[4] == 1) {storage_get_weight(&storage);}       //get weight
-        else if (msgin->buttons.data[5] == 1) {storage_hold(&storage);}       //hold pos
+        if (msg->buttons.data[0] == 1 && storage.demand_pos != 1) { storage.demand_pos = 1; storage_goto(&storage); }          //pos 1
+        else if (msg->buttons.data[1] == 1 && storage.demand_pos != 2) {storage.demand_pos = 2; storage_goto(&storage);}       //pos 2
+        else if (msg->buttons.data[2] == 1) {storage.demand_pos = 2; storage_goto(&storage);}       //pos 2
+        else if (msg->buttons.data[3] == 1) {storage.demand_pos = 3; storage_goto(&storage);}       //pos 3
+        else if (msg->buttons.data[6] == 1) {storage.demand_pos = 4; storage_goto(&storage);}       //pos 0
+        else if (msg->buttons.data[4] == 1) {storage_get_weight(&storage);}       //get weight
+        else if (msg->buttons.data[5] == 1) {storage_hold(&storage);}       //hold pos
     }
        
 }
@@ -297,7 +278,7 @@ int main()
     // alocation memory to msg_parameters
     int16_t buffer[BUFFER_SIZE] = {};
     msg_parameters.data.data = buffer;
-    msg_parameters.data.size = 4;
+    msg_parameters.data.size = 3;
     msg_parameters.data.capacity = BUFFER_SIZE;
         
     std_msgs__msg__MultiArrayDimension dim[BUFFER_SIZE] = {};
@@ -387,7 +368,7 @@ int main()
     rclc_timer_init_default(
         &timerMain,
         &support,
-        RCL_MS_TO_NS(100),
+        RCL_MS_TO_NS(MAIN_LOOP_TIME_MS),
         timerMain_callback);
 
     rclc_executor_init(&executor, &support.context, 5, &allocator); //the number of executors
