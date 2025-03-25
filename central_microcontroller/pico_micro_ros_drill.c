@@ -113,14 +113,14 @@ void timerMain_callback(rcl_timer_t *timer, int64_t last_call_time)
             else
             {
                 motor_right(&motor);
-                linear_goto(&linear, MAIN_LOOP_TIME_MS/1000); // in te future there will be some adjustable speed
+                linear_goto(&linear, MAIN_LOOP_TIME_MS/1000.0f); // in te future there will be some adjustable speed
             }
             break;
         
         case goto_height:
             motor_stop(&motor);
             if(!is_linear_stucked(&linear))
-                linear_goto(&linear, MAIN_LOOP_TIME_MS/1000);
+                linear_goto(&linear, MAIN_LOOP_TIME_MS/1000.0f);
             else
                 linear_stop(&linear);
             break;    

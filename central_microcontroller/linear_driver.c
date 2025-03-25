@@ -69,15 +69,16 @@ void linear_goto(struct linear* linear, float dt)
     if (linear->goalHeight != 0)
     {
         float speed = linear_step(linear, dt);
-        linear->speed = speed/10000;
+
         if (speed == 0) {linear->command = 1;}
         else if (speed < 0) {linear->command = 3;}
         else {linear->command = 2;}
     
+        speed = speed / 2 * 255.0f; 
         speed = fabs(speed);
         if (speed > 255.0f) speed = 255.0f;
     
-        //linear->speed = (uint8_t) speed;
+        linear->speed = (uint8_t) speed;
     }
     else
     {
@@ -122,7 +123,7 @@ bool is_linear_safe(struct linear* linear)
 }
 
 float linear_step(struct linear* linear, float dt) {
-    float error = linear->goalHeight/1000 - linear->height/1000;
+    float error = ((float)linear->goalHeight)/1000.0f - ((float)linear->height)/1000.0f;
     linear->pid_integral += error * dt;
     float derivative = (error - linear->pid_prevError) / dt;
     float output = LIN_Kp * error + LIN_Ki * linear->pid_integral + LIN_Kd * derivative;
