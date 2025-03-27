@@ -13,9 +13,9 @@
 #define LINEAR_ADDR 0x09
 
 #define SAFE_POS 50 // [mm]
-#define LIN_Kp 40
-#define LIN_Ki 0.4
-#define LIN_Kd 0
+#define LIN_Kp 1000
+#define LIN_Ki 0.05
+#define LIN_Kd 0.3
 
 struct linear{
     //IN

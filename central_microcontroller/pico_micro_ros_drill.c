@@ -65,7 +65,8 @@ void timerPublisher_callback(rcl_timer_t *timer, int64_t last_call_time)
     {
         msg_data.data.data[0] = abs(motor.rpsMeas);
         msg_data.data.data[1] = abs(motor.torqueMeas);
-        msg_data.data.data[2] = motor.temperature;
+        //msg_data.data.data[2] = motor.temperature;
+        msg_data.data.data[2] = motor.state;
     }
 
     if (linear.error == 44)
@@ -75,7 +76,7 @@ void timerPublisher_callback(rcl_timer_t *timer, int64_t last_call_time)
     }
     else
     {
-        msg_data.data.data[3] = linear.height;
+        msg_data.data.data[3] = linear.height; 
         msg_data.data.data[4] = linear.toGround;
     }
 
@@ -112,7 +113,7 @@ void timerMain_callback(rcl_timer_t *timer, int64_t last_call_time)
             }
             else
             {
-                motor_right(&motor);
+                motor_left(&motor);
                 linear_goto(&linear, MAIN_LOOP_TIME_MS/1000.0f); // in te future there will be some adjustable speed
             }
             break;
@@ -125,17 +126,17 @@ void timerMain_callback(rcl_timer_t *timer, int64_t last_call_time)
                 linear_stop(&linear);
             break;    
             
-        case turn_left:
+        case turn_right:
             linear_stop(&linear);
-            motor_left(&motor);
+            motor_right(&motor);
             break;
 
-        case turn_right:
+        case turn_left:
             linear_stop(&linear);
             if(is_motor_stucked(&motor))
                 motor_stop(&motor);
             else
-                motor_right(&motor);
+                motor_left(&motor);
             break;
 
         case slot_select:

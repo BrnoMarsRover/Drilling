@@ -19,6 +19,9 @@ int linear_read(struct linear* linear)
     uint16_t *ptr = (uint16_t*)(buffer + 1);
     linear->height = *ptr;
 
+    if (linear->height == 0 && linear->state != 1) linear->height = 1;
+    else if (linear->height > 50000) linear->height = 1;
+
     ptr = (uint16_t*)(buffer + 3);
     linear->toGround = *ptr;
     
@@ -99,7 +102,7 @@ bool linear_reached_goal(struct linear* linear)
 {
     if (!linear)
         return true;
-    if(linear->goalHeight == linear->height-10 || linear->goalHeight == linear->height+10)
+    if(linear->goalHeight > linear->height - 2 && linear->goalHeight < linear->height + 2)
         return true;
     return false;
 }
@@ -123,6 +126,10 @@ bool is_linear_safe(struct linear* linear)
 }
 
 float linear_step(struct linear* linear, float dt) {
+    if(linear->goalHeight > linear->height - 2 && linear->goalHeight < linear->height + 2)
+    {
+        return 0;
+    }
     float error = ((float)linear->goalHeight)/1000.0f - ((float)linear->height)/1000.0f;
     linear->pid_integral += error * dt;
     float derivative = (error - linear->pid_prevError) / dt;
