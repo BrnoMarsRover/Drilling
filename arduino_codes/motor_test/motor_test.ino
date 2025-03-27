@@ -29,6 +29,7 @@ void receiveEvent(int howMany) {
     //Serial.println("Recieved");
     //Serial.println(howMany);
     int8_t a = Wire.read();
+    Serial.println(a);
     }
 
 

@@ -1,8 +1,9 @@
 #include <Wire.h>
 
-uint8_t slot = 192;
+uint8_t slot = 1;
+
 uint8_t command = 3;
-uint16_t weight = 70;
+uint16_t weight = 69;
 
 
 void setup() {
@@ -34,7 +35,7 @@ void requestEvent(){
   uint8_t outputArray[outputArraySize] = {0};
 
   memcpy(outputArray, &weight, sizeof(weight));
-  outputArray[2] = slot;
+  outputArray[2] = slot << 6;
   Wire.write(outputArray, 3);
   //Serial.println("Finito");
   }
