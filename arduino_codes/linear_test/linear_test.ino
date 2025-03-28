@@ -1,8 +1,8 @@
 #include <Wire.h>
 
 uint8_t state = 4;
-uint8_t error = 1;
-uint16_t height = 5;
+uint8_t error = 0;
+uint16_t height = 300;
 uint16_t toGround = 10;
 unsigned long lastTime = 0; // Uloží čas posledního měření
 
@@ -19,7 +19,7 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-
+  height--;
   delay(100);
 }
 
@@ -31,6 +31,9 @@ void receiveEvent(int howMany) {
     //Serial.println(howMany);
     uint8_t a = Wire.read();
     uint8_t b = Wire.read();
+    Serial.println(a);
+    Serial.println(b);
+
     }
 
 
