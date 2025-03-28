@@ -53,45 +53,48 @@ sensor_msgs__msg__Joy msg_joy;
 rcl_publisher_t publisher;
 std_msgs__msg__UInt16MultiArray msg_data; 
 
+uint16_t drill_message(struct motor* motor, struct linear* linear, struct storage* storage);
+
 void timerPublisher_callback(rcl_timer_t *timer, int64_t last_call_time)
 {
+    msg_data.data.data[0] = drill_message(&motor, &linear, &storage);
+
     if (motor.error == 44)
     {
-        msg_data.data.data[0] = 44404;
         msg_data.data.data[1] = 44404;
         msg_data.data.data[2] = 44404;
+        msg_data.data.data[3] = 44404;
     }
     else
     {
-        msg_data.data.data[0] = abs(motor.rpsMeas);
-        msg_data.data.data[1] = abs(motor.torqueMeas);
-        //msg_data.data.data[2] = motor.temperature;
-        msg_data.data.data[2] = motor.state;
+        msg_data.data.data[1] = abs(motor.rpsMeas);
+        msg_data.data.data[2] = abs(motor.torqueMeas);
+        msg_data.data.data[3] = motor.temperature;
     }
 
     if (linear.error == 44)
     {
-        msg_data.data.data[3] = 44404;
         msg_data.data.data[4] = 44404;
-    }
-    else
-    {
-        msg_data.data.data[3] = linear.height; 
-        msg_data.data.data[4] = linear.toGround;
-    }
-
-    if (storage.errors == 44)
-    {
         msg_data.data.data[5] = 44404;
     }
     else
     {
-        msg_data.data.data[5] = storage.active_slot;
+        msg_data.data.data[4] = linear.height; 
+        msg_data.data.data[5] = linear.toGround;
+    }
+
+    if (storage.errors == 44)
+    {
+        msg_data.data.data[6] = 44404;
+    }
+    else
+    {
+        msg_data.data.data[6] = storage.active_slot;
     }
 
     for (int i = 0; i < STORE_SLOTS; ++i) 
     {
-        msg_data.data.data[6 + i] = storage.samples[i];
+        msg_data.data.data[7 + i] = storage.samples[i];
     }
     rcl_ret_t ret = rcl_publish(&publisher, &msg_data, NULL);  
 }
@@ -121,7 +124,11 @@ void timerMain_callback(rcl_timer_t *timer, int64_t last_call_time)
         case goto_height:
             motor_stop(&motor);
             if(!is_linear_stucked(&linear))
+            {
                 linear_goto(&linear, MAIN_LOOP_TIME_MS/1000.0f);
+                if (linear.command == 3)
+                    motor_unblock(&motor);
+            }
             else
                 linear_stop(&linear);
             break;    
@@ -312,7 +319,7 @@ int main()
     
     // alocation memory to msg
     msg_data.data.data = buffer;
-    msg_data.data.size = 10;
+    msg_data.data.size = 11;
     msg_data.data.capacity = BUFFER_SIZE;
         
     msg_data.layout.dim.data = dim;
@@ -406,5 +413,16 @@ int main()
     {
         rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100));
     }
+    return 0;
+}
+
+uint16_t drill_message(struct motor* motor, struct linear* linear, struct storage* storage)
+{
+    if(!motor || !linear || !storage)
+        return 0;
+
+    if(currentState == drilling && motor->stucked)
+        return 1;
+    
     return 0;
 }

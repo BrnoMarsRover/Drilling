@@ -59,20 +59,20 @@ void motor_stop(struct motor* motor)
     motor->rps = 0;
 }
 
-void motor_left(struct motor* motor)
-{
-    if (!motor)
-        return;
-    motor_unblock(motor);
-    motor->rps = motor->rpsGoal;
-}
-
 void motor_right(struct motor* motor)
 {
     if (!motor)
         return;
+    motor_unblock(motor);
+    motor->rps = - motor->rpsGoal;
+}
+
+void motor_left(struct motor* motor)
+{
+    if (!motor)
+        return;
     if (!motor->stucked)
-        motor->rps = - motor->rpsGoal;
+        motor->rps = motor->rpsGoal;
 }
 
 bool is_motor_stucked(struct motor* motor)
