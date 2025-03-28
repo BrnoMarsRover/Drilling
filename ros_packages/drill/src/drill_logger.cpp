@@ -55,9 +55,9 @@ void DrillLogger::logActionStamp(const int option)
 
 }
 
-void DrillLogger::logDrillSampleData(float actualTorque, float actualRPS, int actualHeight)
+void DrillLogger::logDrillSampleData(const float actualTorque, const float actualRPS, const int motorTemperature, const int actualHeight)
 {
-    file_ << actualTorque << "," << actualRPS << "," << actualHeight << ";";
+    file_ << actualTorque << "," << actualRPS << "," << motorTemperature << "," << actualHeight << ";";
 }
 
 void DrillLogger::logDrillSampleResult(const int depth)

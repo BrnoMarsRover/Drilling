@@ -31,8 +31,7 @@ enum state_machine
 {
     stop,
     drilling,
-    go_down,
-    go_up,
+    goto_height,
     turn_right,
     turn_left,
     slot_select,
@@ -63,6 +62,7 @@ private:
     std::shared_ptr<DrillLogger> DrillLogger_;
     //Controller variables
     std::atomic<bool> drill_is_busy{};
+    std::atomic<int> ack{};
     std::atomic<float> motorTorque{};
     std::atomic<float> motorRPS{};
     std::atomic<int> motorTemperature{};
@@ -108,17 +108,18 @@ private:
     void drill_data_callback(const std_msgs::msg::UInt16MultiArray::SharedPtr msg)
     {
         RCLCPP_INFO(this->get_logger(), "Received drill data.");
-        motorRPS = float_decode(msg->data[0]);
-        motorTorque = float_decode(msg->data[1]);
-        motorTemperature = msg->data[2];
-        drillHeight = msg->data[3];;
-        if (drillHeight == 0) toGround = msg->data[4];
+        state = msg->data[0];
+        motorRPS = float_decode(msg->data[1]);
+        motorTorque = float_decode(msg->data[2]);
+        motorTemperature = msg->data[3];
+        drillHeight = msg->data[4];;
+        if (drillHeight == 0) toGround = msg->data[5];
         set_depth();
-        activeSlot = msg->data[5];;
-        sampleWeight1 = msg->data[6];
-        sampleWeight2 = msg->data[7];
-        sampleWeight3 = msg->data[8];
-        sampleWeight4 = msg->data[9];
+        activeSlot = msg->data[6];;
+        sampleWeight1 = msg->data[7];
+        sampleWeight2 = msg->data[8];
+        sampleWeight3 = msg->data[9];
+        sampleWeight4 = msg->data[10];
     }
 
     // DRILL SAMPLE ACTION
@@ -128,7 +129,7 @@ private:
         (void)uuid;
 
         if (drill_is_busy) {
-            RCLCPP_WARN(this->get_logger(), "Drill is busy or in manual mode. Rejecting request.");
+            RCLCPP_WARN(this->get_logger(), "Drill is busy. Rejecting request.");
             return rclcpp_action::GoalResponse::REJECT;
         }
         RCLCPP_INFO(this->get_logger(), "Drill is ready. Accepting request.");
@@ -159,7 +160,7 @@ private:
         (void)uuid;
 
         if (drill_is_busy) {
-            RCLCPP_WARN(this->get_logger(), "Drill is busy or in manual mode. Rejecting request.");
+            RCLCPP_WARN(this->get_logger(), "Drill is busy. Rejecting request.");
             return rclcpp_action::GoalResponse::REJECT;
         }
 
@@ -181,7 +182,7 @@ private:
     }
 
     //executing the StoreSample action
-    void execute_store_sample(const std::shared_ptr<GoalHandleStoreSample> goal_handle);
+    void execute_store_sample(std::shared_ptr<GoalHandleStoreSample> goal_handle);
 
     // DRILL CALIBRATION ACTION
     // If the drill is busy action will be refused
@@ -228,7 +229,7 @@ private:
     }
 
     // Function to publish drill parameters
-    void publish_drill_param(float rps, uint16_t speed, uint16_t height, uint16_t slot) const;
+    void publish_drill_param(float rps, uint16_t height, uint16_t slot) const;
 
     int get_sampleWeight(const int slot)
     {
@@ -245,6 +246,13 @@ private:
         default:
             return 0;
         }
+    }
+
+    bool height_inTolerance(const int goalHeight) const
+    {
+        if (goalHeight > drillHeight - 4 || goalHeight < drillHeight + 4)
+            return true;
+        return false;
     }
 
     static uint16_t speed_code(const int speed)

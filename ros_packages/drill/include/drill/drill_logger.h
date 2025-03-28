@@ -23,7 +23,7 @@ public:
     void logActionStamp(int option);
 
     // Tisk dat z vrtani
-    void logDrillSampleData(float actualTorque, float actualRPS, int actualHeight);
+    void logDrillSampleData(float actualTorque, float actualRPS, int motorTemperature, int actualHeight);
     void logDrillSampleResult(int depth);
 
     void logStoreSampleResult(int slot, int weight);
