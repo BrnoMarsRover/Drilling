@@ -10800,16 +10800,6 @@
 		)
 		(uuid "45c57eda-dfd7-4f49-b66b-05d6ddc1d8c1")
 	)
-	(text "Pridame jeste ty kondiky jak tam ma Slima?"
-		(exclude_from_sim no)
-		(at 153.162 51.308 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-		)
-		(uuid "78775873-e2e4-4287-bd70-2a02879a7d0c")
-	)
 	(text "Motor control"
 		(exclude_from_sim no)
 		(at 29.972 279.654 0)
