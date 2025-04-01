@@ -22,16 +22,19 @@ const uint8_t InPin_AmmeterDirect = A3;
 
 //MOTOR CONTROL
 float bridgeDC = 0.0;
+float minimumBridgeDC = 8.0;
 uint8_t avgCount = 10;
 FIR bridgeDCAvg(avgCount);
 float motorSpeed = 0.0; //[ot./s]
 float sourceVoltage = 24.0;
 float windingResistance = 0.2608;
 //CONTROLLERS
-PIController speedController(2.0, 2.0, 5, 2.0);
-PIController currentController(60, 30, 150, 3.0);
+//Kp  Ki    outputLimit   sumClamp  
+PIController speedController(1.7, 2.5, 5, 2.0);
+PIController currentController(40, 30, 150, 4.0);
 //SETPOINT FILTER
 float speedTarget = 0;
+float minimumSpeedTarget = 0.2;
 float controllerSetpointSR = 0.3;
 
 
@@ -42,8 +45,8 @@ float ammeterRCZero = 500;
 FIR ammeterRCAvg(avgCount);
 //float ammeterVoltage = 0;
 float ammeterCurrent = 0; // v amperech
-const float Vcc = 4.5;
-const float ammeterVoltsToAmps = 10.0;
+const float Vcc = 4.66;
+const float ammeterVoltsToAmps = 12.0;//10.0;
 const double CPhi = 0.4834;
 
 //I2C
@@ -75,7 +78,7 @@ uint32_t thermometerLastMillis = 0;
 uint32_t thermometerDelay = 2000;
 
 //PROTECTION
-uint16_t ISFaultThreshold = 500;
+uint16_t ISFaultThreshold = 800;
 bool bridgeFault = false;
 
 
@@ -157,8 +160,16 @@ void loop()
     speedTarget = 0.0;
   } 
   */
+  uint16_t LISval = analogRead(InPin_L_IS);
+  uint16_t RISval = analogRead(InPin_R_IS);
 
-  if(analogRead(InPin_L_IS) > ISFaultThreshold || analogRead(InPin_R_IS) > ISFaultThreshold)
+  Serial.print(" LIS: ");  
+  Serial.print(LISval);
+
+  Serial.print(" RIS: ");  
+  Serial.print(RISval);
+
+  if(LISval > ISFaultThreshold || RISval > ISFaultThreshold)
   {
     bridgeFault = true;
     speedTarget = 0.0;
@@ -204,13 +215,46 @@ void loop()
     motorSpeed = ((sourceVoltage*(bridgeDCAvg.updateOutput(bridgeDC)/255.0)) - windingResistance*ammeterCurrent)/(CPhi*2*3.14);
 
     //Setpoint filter
-    float controllerSetpointMaxChange = constrain(timeDiff*controllerSetpointSR, 0.0, 0.2);
-    speedController.setpoint = constrain(speedTarget, speedController.setpoint - controllerSetpointMaxChange, speedController.setpoint + controllerSetpointMaxChange);
+    float setpointMaxChange = constrain(timeDiff*controllerSetpointSR, 0.0, 0.2);
+    float newSetpoint = constrain(speedTarget, speedController.setpoint - setpointMaxChange, speedController.setpoint + setpointMaxChange);
+
+    if(abs(newSetpoint) < minimumSpeedTarget)
+    {
+      if(speedTarget == 0)
+      {
+        newSetpoint = 0;
+      }
+      else if(speedTarget > 0)
+      {
+        newSetpoint = minimumSpeedTarget;
+      }
+      else
+      {
+        newSetpoint = -minimumSpeedTarget;
+      }
+    }
+    speedController.setpoint = newSetpoint;
 
     //Controller action
     currentController.setpoint = speedController.compute(motorSpeed, timeDiff);
     bridgeDC = currentController.compute(ammeterCurrent, timeDiff);
   }
+
+  if(abs(bridgeDC) < minimumBridgeDC)
+    {
+      if(speedTarget == 0)
+      {
+        bridgeDC = 0;
+      }
+      else if(speedTarget > 0)
+      {
+        bridgeDC = minimumBridgeDC;
+      }
+      else
+      {
+        bridgeDC = -minimumBridgeDC;
+      }
+    }
 
   setBridge(bridgeDC);
 
@@ -275,7 +319,6 @@ void loop()
     Serial.print(motorTemperature);
   }
 
-
   Serial.println("");
 }
 
@@ -300,6 +343,17 @@ void receiveEvent(int howMany)
       Wire.readBytes(inputArray, inputArraySize);
       int8_t receivedInt = *((int8_t*)inputArray);
       speedTarget = constrain(float(receivedInt)*0.03, -3.0, 3.0);
+      if(speedTarget != 0 && abs(speedTarget) < minimumSpeedTarget)
+      {
+        if(speedTarget > 0)
+        {
+          speedTarget = minimumSpeedTarget;
+        }
+        else
+        {
+          speedTarget = -minimumSpeedTarget;
+        }
+      }
 
       lastMessageMillis = millis();
 
