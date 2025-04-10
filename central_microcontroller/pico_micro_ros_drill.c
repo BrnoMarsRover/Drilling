@@ -28,6 +28,7 @@ enum state_machine
     turn_right,
     turn_left,
     slot_select,
+    tare_scale,
     get_weight,
     reset_weight,
     manual
@@ -83,7 +84,7 @@ void timerPublisher_callback(rcl_timer_t *timer, int64_t last_call_time)
         msg_data.data.data[5] = linear.toGround;
     }
 
-    if (storage.errors == 44)
+    if (storage.error == 44)
     {
         msg_data.data.data[6] = 44404;
     }
@@ -91,11 +92,17 @@ void timerPublisher_callback(rcl_timer_t *timer, int64_t last_call_time)
     {
         msg_data.data.data[6] = storage.active_slot;
     }
+    //msg_data.data.data[7] = storage.raw;
+    //msg_data.data.data[7] = storage.weighting;
+    //msg_data.data.data[8] = storage.weight;
+    //msg_data.data.data[9] = storage.active;
+    //msg_data.data.data[10] = storage.command;
 
     for (int i = 0; i < STORE_SLOTS; ++i) 
     {
         msg_data.data.data[7 + i] = storage.samples[i];
     }
+    
     rcl_ret_t ret = rcl_publish(&publisher, &msg_data, NULL);  
 }
 
@@ -151,13 +158,25 @@ void timerMain_callback(rcl_timer_t *timer, int64_t last_call_time)
             linear_stop(&linear);
             if (is_linear_safe(&linear))
                 storage_goto(&storage);
-    
+            break;
+
+        case tare_scale:
+            motor_stop(&motor);
+            linear_stop(&linear);
+            if (!storage.scaleTared)
+                storage_get_tared(&storage);
+                            
             break;
 
         case get_weight:
             motor_stop(&motor);
             linear_stop(&linear);
-            storage_get_weight(&storage);
+
+            if (!storage.weight_recieved)
+                storage_get_weight(&storage);
+            else if (storage.scaleTared)
+                    storage_reset(&storage);
+
             break;
 
         case reset_weight:
@@ -172,12 +191,13 @@ void timerMain_callback(rcl_timer_t *timer, int64_t last_call_time)
 
     if(motor_write(&motor) < 0) {motor.error = 44;};    
     if(linear_write(&linear) < 0) {linear.error = 44;};
-    if (storage.command != storage.old_command)
-        if (storage_write(&storage) < 0) {storage.errors = 44;};
         
-    if(motor_read(&motor)) {motor.error = 44;};
-    if(linear_read(&linear)) {linear.error = 44;};
-    if(storage_read(&storage)) {storage.errors = 44;};
+    if(motor_read(&motor) < 0) {motor.error = 44;};
+    if(linear_read(&linear) < 0) {linear.error = 44;};
+    
+    if(storage_read(&storage) < 0) {storage.error = 44;};
+    if (storage.command != 0)
+        if (storage_write(&storage) < 0) {storage.error = 44;};
 
 
 }
@@ -222,13 +242,16 @@ void joy_callback(const void * msgin)
         }
     
         // Set the storage command
-        if (msg->buttons.data[0] == 1 && storage.demand_pos != 1) { storage.demand_pos = 1; storage_goto(&storage); }          //pos 1
-        else if (msg->buttons.data[1] == 1 && storage.demand_pos != 2) {storage.demand_pos = 2; storage_goto(&storage);}       //pos 2
-        else if (msg->buttons.data[2] == 1) {storage.demand_pos = 2; storage_goto(&storage);}       //pos 2
-        else if (msg->buttons.data[3] == 1) {storage.demand_pos = 3; storage_goto(&storage);}       //pos 3
-        else if (msg->buttons.data[6] == 1) {storage.demand_pos = 4; storage_goto(&storage);}       //pos 0
+        if (msg->buttons.data[0] == 1) { storage.demand_pos = 1; storage_goto(&storage); }          //pos 1
+        else if (msg->buttons.data[1] == 1) {storage.demand_pos = 2; storage_goto(&storage);}       //pos 2
+        else if (msg->buttons.data[2] == 1) {storage.demand_pos = 3; storage_goto(&storage);}       //pos 2
+        else if (msg->buttons.data[3] == 1) {storage.demand_pos = 4; storage_goto(&storage);}       //pos 3
+        else if (msg->buttons.data[10] == 1) {storage.demand_pos = 0; storage_goto(&storage);}       //pos 0
+        else if (msg->buttons.data[9] == 1) {storage.command = 10;}               //tare
+        else if (msg->buttons.data[8] == 1) {storage.command = 50;}               //error clear
         else if (msg->buttons.data[4] == 1) {storage_get_weight(&storage);}       //get weight
-        else if (msg->buttons.data[5] == 1) {storage_hold(&storage);}       //hold pos
+        else if (msg->buttons.data[5] == 1) {storage_hold(&storage);}             //hold pos
+        else {storage.command = 0;}
     }
        
 }
@@ -422,6 +445,12 @@ uint16_t drill_message(struct motor* motor, struct linear* linear, struct storag
         return 0;
 
     if(currentState == drilling && motor->stucked)
+        return 1;
+
+    if(currentState == tare_scale && storage->scaleTared)
+        return 1;
+
+    if(currentState == get_weight && storage->weight_recieved && !storage->scaleTared)
         return 1;
     
     return 0;
