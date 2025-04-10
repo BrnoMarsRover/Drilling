@@ -5,7 +5,7 @@ int storage_read(struct storage* storage)
     if (!storage)
         return -2;
     uint8_t buffer[3];
-    if (i2c_read_timeout_us(I2C_PORT, STORAGE_ADDR, buffer, 3, false, 1000) != 3)
+    if (i2c_read_timeout_us(I2C_PORT, STORAGE_ADDR, buffer, 3, false, 10000) != 3)
     {
         return -1;
     }
@@ -13,17 +13,23 @@ int storage_read(struct storage* storage)
     storage->weight = *ptr;
     
     storage->raw = buffer[2];
-    uint8_t tmp = 192 & buffer[2]; //192 = B'1100 0000'
-    storage->active_slot = tmp >> 6;
-
-
-    tmp = 32 & buffer[2]; //32 = B'0010 0000'
-    storage->meas_ready = tmp >> 5;
+    uint8_t tmp = 224 & buffer[2]; //224 = B'1110 0000'
+    tmp = tmp >> 5;
+    if (tmp == 0)
+        storage->active_slot = 44;
+    else
+        storage->active_slot = tmp - 1;
 
     tmp = 16 & buffer[2]; //16 = B'0001 0000'
-    storage->busy = tmp >> 4;
+    storage->active = tmp >> 4;
 
-    storage->errors = 15 & buffer[2]; //15 = B'0000 1111'
+    if (storage->active)    // if the storage is active no command will be send
+        storage->command = 0;
+
+    tmp = 8 & buffer[2]; //8 = B'0000 1000'
+    storage->scaleTared = tmp >> 3;
+
+    storage->error = 7 & buffer[2]; //7 = B'0000 0111'
     return 0;
 }
 
@@ -47,9 +53,6 @@ void storage_init(struct storage *storage)
     storage->demand_pos = 0;
     
     storage_write(storage);
-    storage->old_command = 40;
-
-    
     storage_read(storage);
     
     for (int i = 0; i < STORE_SLOTS; ++i) 
@@ -62,8 +65,11 @@ void storage_goto(struct storage *storage)
 {
     if (!storage)
         return;
-    storage->old_command = storage->command;
     
+    storage->weight_recieved = false;
+    if (storage->demand_pos == storage->active_slot)
+        return;
+
     switch (storage->demand_pos)
     {
         case 0:
@@ -94,16 +100,20 @@ void storage_get_weight(struct storage *storage)
 {
     if (!storage)
         return;
-    if (storage->old_command != 20)
-    {
-        storage->old_weight = storage->weight;
-        storage->old_command = storage->command;
+    
+    if (!storage->weighting)
         storage->command = 20;
-    }
 
-    if (storage->old_weight != storage->weight)
+    if (storage->active)
+        storage->weighting = true;
+
+    if (storage->weighting && !storage->active)
+    {
         if (storage->demand_pos <= STORE_SLOTS && storage->demand_pos != 0)
             storage->samples[storage->demand_pos - 1] = storage->weight;
+        storage->weight_recieved = true;
+        storage->weighting = false;
+    }
 
     return;
 }
@@ -112,7 +122,6 @@ void storage_hold(struct storage *storage)
 {
     if (!storage)
         return;
-    storage->old_command = storage->command;
     storage->command = 40;
     return;
 }
@@ -136,6 +145,26 @@ bool is_storage_ok(struct storage *storage)
         return true;
     return false;
 }
+
+void storage_get_tared(struct storage *storage)
+{
+    if (!storage)
+        return;
+    if (!storage->scaleTared)
+        storage->command = 10;
+    return;
+}
+
+void storage_reset(struct storage *storage)
+{
+    if (!storage)
+        return;
+
+    storage->command = 50;
+    return;
+
+}
+    
 
 
 

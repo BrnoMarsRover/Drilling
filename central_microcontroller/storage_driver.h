@@ -17,15 +17,15 @@
 
 struct storage{
     uint8_t command;
-    uint8_t old_command;
     uint8_t demand_pos;
-    uint16_t old_weight;
+    bool weight_recieved;
+    bool weighting;
 
     uint8_t active_slot;
-    uint8_t errors;
+    uint8_t error;
     uint16_t weight;
-    bool meas_ready;
-    bool busy;
+    bool scaleTared;
+    bool active;
     uint16_t samples[STORE_SLOTS];
     uint8_t raw;
 };
@@ -40,6 +40,10 @@ void storage_get_weight(struct storage *storage);
 void storage_hold(struct storage *storage);
 void storage_wreset(struct storage *storage);
 bool is_storage_ok(struct storage *storage);
+void storage_reset(struct storage *storage);
+void storage_get_tared(struct storage *storage);
+
+
 
 
 
