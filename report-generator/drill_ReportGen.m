@@ -1,7 +1,7 @@
 clc; clear; close all;
 
 %Čas vykonávání smyčky v node drill_controller
-loop_time = 0.1;
+loop_time = 1;
 
 % Získání seznamu souborů ve složce
 files = dir('drillData*.txt');
@@ -37,7 +37,7 @@ for k = 1:length(files)
             torque = values(:, 1);
             rps = values(:, 2);
             temperature = values(:,3);
-            height = values(:, 4);
+            height = values(:, 3);
 
             % Vykreslení grafů
             f = figure;
@@ -86,15 +86,12 @@ for k = 1:length(files)
             annotation('textbox', [0.05, 0.8, 0.8, 0.05], 'String', data_raw(i), ...
            'EdgeColor', 'none', 'HorizontalAlignment', 'left', 'FontSize', 12);
 
+            annotation('textbox', [0.05, 0.77, 0.8, 0.05], 'String', data_raw(i+2), ...
+            'EdgeColor', 'none', 'HorizontalAlignment', 'left', 'FontSize', 12);
+
             if (contains(data_raw{i+4}, 'StoreSample'))
-                annotation('textbox', [0.05, 0.77, 0.8, 0.05], 'String', strcat(data_raw(i+2), ", ", data_raw(i+5)), ...
+                annotation('textbox', [0.05, 0.74, 0.8, 0.05], 'String', data_raw(i+5), ...
                 'EdgeColor', 'none', 'HorizontalAlignment', 'left', 'FontSize', 12);
-
-
-            else
-                annotation('textbox', [0.05, 0.77, 0.8, 0.05], 'String', data_raw(i+2), ...
-                'EdgeColor', 'none', 'HorizontalAlignment', 'left', 'FontSize', 12);
-
             end
    
        
