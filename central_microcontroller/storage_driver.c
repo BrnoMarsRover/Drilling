@@ -49,7 +49,7 @@ void storage_init(struct storage *storage)
 {
     if (!storage)
         return;
-    storage->command = 40;
+    storage->command = 0;
     storage->demand_pos = 0;
     
     storage_write(storage);
@@ -61,16 +61,16 @@ void storage_init(struct storage *storage)
     }
 }
 
-void storage_goto(struct storage *storage)
+void storage_goto(struct storage *storage, uint8_t pos)
 {
     if (!storage)
         return;
     
     storage->weight_recieved = false;
-    if (storage->demand_pos == storage->active_slot)
+    if (pos == storage->active_slot)
         return;
 
-    switch (storage->demand_pos)
+    switch (pos)
     {
         case 0:
             storage->command = 30;

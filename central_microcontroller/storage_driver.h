@@ -35,7 +35,7 @@ int storage_read(struct storage* storage);
 int storage_write(struct storage* storage);
 void storage_init(struct storage* storage);
 
-void storage_goto(struct storage *storage);
+void storage_goto(struct storage *storage, uint8_t pos);
 void storage_get_weight(struct storage *storage);
 void storage_hold(struct storage *storage);
 void storage_wreset(struct storage *storage);
