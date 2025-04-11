@@ -49,6 +49,7 @@ void motor_init(struct motor* motor)
     motor_write(motor);
     motor_read(motor);
     motor->deadTicks = 0;
+    motor->running = false;
     motor->stucked = false;
 }
 
@@ -57,6 +58,7 @@ void motor_stop(struct motor* motor)
     if (!motor)
         return;
     motor->rps = 0;
+    motor->running = false;
 }
 
 void motor_right(struct motor* motor)
@@ -80,12 +82,23 @@ bool is_motor_stucked(struct motor* motor)
     if (!motor)
         return true;
 
+    if (motor->state == 1)
+    {
+        motor->running = true;
+        motor->deadTicks = 0;
+    }
+
     if (motor->stucked)
         return true;
     
     if(motor->state > 1)
     {
-        if(motor->deadTicks > MAX_DEAD_TICKS)
+        if (motor->running)
+        {
+            motor->stucked = true;
+            return true;
+        }
+        else if(motor->deadTicks > MAX_DEAD_TICKS)
         {
             motor->stucked = true;
             return true;
