@@ -51,7 +51,7 @@ void DrillController::execute_drill_sample(const std::shared_ptr<GoalHandleDrill
 
     enum state_machine currentState = stop;
 
-    while(drillDepth < goal->depth) {
+    while(drillDepth < goal->depth-1) {
         //Checking if there is a cancel request
         if (goal_handle->is_canceling()) {
             result->final_depth = drillDepth;
@@ -126,7 +126,7 @@ void DrillController::execute_store_sample(const std::shared_ptr<GoalHandleStore
     }
     else if (goal->slot == 0) { toDo = 2; }
 
-    while(state < 7) {
+    while(state < 8) {
         //Checking if there is a cancel request
         if (goal_handle->is_canceling()) {
             result->weight = 0;
@@ -186,24 +186,38 @@ void DrillController::execute_store_sample(const std::shared_ptr<GoalHandleStore
                 }
             break;
 
-            case 3: //vysypani
-                if(ticks > dumpingTicks)
+            case 3: //tare vahy
+                if(ack == 1 && currentState == tare_scale)
                     state = 4;
                 else
                 {
-                    ++ticks;
-                    if(currentState != turn_left)
+                    if(currentState != tare_scale)
                     {
-                        currentState = turn_left;
+                        currentState = tare_scale;
                         publish_drill_param(1, STORING_POS, storing_slot);
                         publish_drill_state(currentState);
                     }
                 }
             break;
 
-            case 4: //zvednuti vrtaku, aby se mohlo tocit se zasobnikem
-                if(height_inTolerance(SAFE_POS))
+            case 4: //vysypani
+                if(ticks > dumpingTicks)
                     state = 5;
+                else
+                {
+                    ++ticks;
+                    if(currentState != turn_right)
+                    {
+                        currentState = turn_right;
+                        publish_drill_param(1, STORING_POS, storing_slot);
+                        publish_drill_state(currentState);
+                    }
+                }
+            break;
+
+            case 5: //zvednuti vrtaku, aby se mohlo tocit se zasobnikem
+                if(height_inTolerance(SAFE_POS))
+                    state = 6;
                 else
                 {
                     if(currentState != goto_height)
@@ -215,9 +229,9 @@ void DrillController::execute_store_sample(const std::shared_ptr<GoalHandleStore
                 }
             break;
 
-            case 5: //zasobnik zpet na default slot
+            case 7: //zasobnik zpet na default slot
                 if(activeSlot == DEF_SLOT)
-                    state = 6;
+                    state = 8;
                 else
                 {
                     if(currentState != slot_select)
@@ -229,8 +243,8 @@ void DrillController::execute_store_sample(const std::shared_ptr<GoalHandleStore
                 }
             break;
 
-            case 6: //vazeni, tady by to chtělo nejaký odpočet nebo jestli bue jasný okamžik kdy tam bude váha
-                if(get_sampleWeight(storing_slot) != 0 || storing_slot == DEF_SLOT)
+            case 6: //vazeni
+                if(ack == 1 && currentState == get_weight)
                     state = 7;
                 else
                 {
@@ -275,8 +289,9 @@ void DrillController::execute_drill_calibration(const std::shared_ptr<GoalHandle
     rclcpp::Rate loop_rate(LOOP_RATE);
 
     enum state_machine currentState = stop;
+    int state = 0;
 
-    while(drillHeight != 0)
+    while(state < 2)
     {
         //Checking if there is a cancel request
         if (goal_handle->is_canceling()) {
@@ -289,33 +304,34 @@ void DrillController::execute_drill_calibration(const std::shared_ptr<GoalHandle
             return;
         }
 
-        if (currentState != goto_height) {
-                currentState = goto_height;
-                publish_drill_state(currentState);
-                publish_drill_param(0, 0, DEF_SLOT);
-            }
-
+        switch (state)
+        {
+            case 0:
+                if (drillHeight == 0)
+                    state = 1;
+                else if (currentState != goto_height) {
+                    currentState = goto_height;
+                    publish_drill_state(currentState);
+                    publish_drill_param(0, 0, DEF_SLOT);
+                }
+                break;
+            case 1:
+                if (!goal->reset_weights || (get_sampleWeight(1) == 0 && get_sampleWeight(2) == 0 && get_sampleWeight(3) == 0 && get_sampleWeight(4) == 0) )
+                    state = 2;
+                else if (currentState != reset_weight) {
+                    currentState = reset_weight;
+                    publish_drill_param(0, 0, DEF_SLOT);
+                    publish_drill_state(currentState);
+                }
+                break;
+        default:
+            break;
+        }
         // Sending feedback
         feedback->actual_height = drillHeight;
         goal_handle->publish_feedback(feedback);
-        RCLCPP_INFO(this->get_logger(), "Calibration progress height: %d mm", drillHeight.load());
+        RCLCPP_INFO(this->get_logger(), "Erasing the weights");
         loop_rate.sleep();
-    }
-
-    if(goal->reset_weights) {
-        while (get_sampleWeight(1) && get_sampleWeight(2) && get_sampleWeight(3) && get_sampleWeight(4)) {
-            if (currentState != reset_weight) {
-                currentState = reset_weight;
-                publish_drill_param(0, 0, DEF_SLOT);
-                publish_drill_state(currentState);
-            }
-
-            // Sending feedback
-            feedback->actual_height = drillHeight;
-            goal_handle->publish_feedback(feedback);
-            RCLCPP_INFO(this->get_logger(), "Erasing the weights");
-            loop_rate.sleep();
-        }
     }
 
     // Calibration complete

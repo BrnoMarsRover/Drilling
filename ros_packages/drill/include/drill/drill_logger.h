@@ -26,7 +26,7 @@ public:
     void logDrillSampleData(float actualTorque, float actualRPS, int motorTemperature, int actualHeight);
     void logDrillSampleResult(int depth);
 
-    void logStoreSampleResult(int slot, int weight);
+    void logStoreSampleResult(int slot, float weight);
 
     void logDrillCalibration(bool weightReset);
 

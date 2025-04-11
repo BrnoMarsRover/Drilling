@@ -17,13 +17,14 @@
 #include "drill_interfaces/action/store_sample.hpp"
 #include "drill_interfaces/srv/get_sample_weight.hpp"
 #include "atomic"
+#include "cmath"
 
 #define LOOP_RATE 1 //Loop time
 
-#define MAX_SLOT 3 //Total number of slots
+#define MAX_SLOT 4 //Total number of slots
 #define DEF_SLOT 0 //Default slot, when the drilling is possible
-#define SAFE_POS 20 // [mm] height when the turning with the storage is possible
-#define STORING_POS 30 // [mm] height when the drill is the storage
+#define SAFE_POS 58 // [mm] height when the turning with the storage is possible
+#define STORING_POS 92 // [mm] height when the drill is the storage
 #define DUMPING_TIME 10 // [s] How long the drill dumping the sample from tube
 #define MAX_HEIGHT 500 // [mm]
 
@@ -35,6 +36,7 @@ enum state_machine
     turn_right,
     turn_left,
     slot_select,
+    tare_scale,
     get_weight,
     reset_weight,
     manual
@@ -71,10 +73,10 @@ private:
     std::atomic<int> toGround{};
     std::atomic<int> activeSlot{};
 
-    std::atomic<int> sampleWeight1{};
-    std::atomic<int> sampleWeight2{};
-    std::atomic<int> sampleWeight3{};
-    std::atomic<int> sampleWeight4{};
+    std::atomic<float> sampleWeight1{};
+    std::atomic<float> sampleWeight2{};
+    std::atomic<float> sampleWeight3{};
+    std::atomic<float> sampleWeight4{};
 
     // Publishers and subscribers
     // Publisher to publish state for drill
@@ -108,7 +110,7 @@ private:
     void drill_data_callback(const std_msgs::msg::UInt16MultiArray::SharedPtr msg)
     {
         RCLCPP_INFO(this->get_logger(), "Received drill data.");
-        state = msg->data[0];
+        ack = msg->data[0];
         motorRPS = float_decode(msg->data[1]);
         motorTorque = float_decode(msg->data[2]);
         motorTemperature = msg->data[3];
@@ -116,10 +118,10 @@ private:
         if (drillHeight == 0) toGround = msg->data[5];
         set_depth();
         activeSlot = msg->data[6];;
-        sampleWeight1 = msg->data[7];
-        sampleWeight2 = msg->data[8];
-        sampleWeight3 = msg->data[9];
-        sampleWeight4 = msg->data[10];
+        sampleWeight1 = roundf(static_cast<float>(msg->data[7]) / 10.0f * 10.0f) / 10.0f;
+        sampleWeight2 = roundf(static_cast<float>(msg->data[8]) / 10.0f * 10.0f) / 10.0f;
+        sampleWeight3 = roundf(static_cast<float>(msg->data[9]) / 10.0f * 10.0f) / 10.0f;
+        sampleWeight4 = roundf(static_cast<float>(msg->data[10]) / 10.0f * 10.0f) / 10.0f;
     }
 
     // DRILL SAMPLE ACTION
@@ -231,7 +233,7 @@ private:
     // Function to publish drill parameters
     void publish_drill_param(float rps, uint16_t height, uint16_t slot) const;
 
-    int get_sampleWeight(const int slot)
+    float get_sampleWeight(const int slot)
     {
         switch (slot)
         {
@@ -250,7 +252,7 @@ private:
 
     bool height_inTolerance(const int goalHeight) const
     {
-        if (goalHeight > drillHeight - 4 || goalHeight < drillHeight + 4)
+        if (goalHeight > drillHeight - 2 && goalHeight < drillHeight + 2)
             return true;
         return false;
     }

@@ -67,7 +67,7 @@ void DrillLogger::logDrillSampleResult(const int depth)
     file_ << std::endl;
 }
 
-void DrillLogger::logStoreSampleResult(const int slot, const int weight)
+void DrillLogger::logStoreSampleResult(const int slot, const float weight)
 {
     file_ << "Slot: " << slot << ", weight: " << weight << std::endl;
     file_ << std::endl;
