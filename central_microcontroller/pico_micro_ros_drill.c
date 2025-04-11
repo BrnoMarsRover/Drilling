@@ -92,16 +92,18 @@ void timerPublisher_callback(rcl_timer_t *timer, int64_t last_call_time)
     {
         msg_data.data.data[6] = storage.active_slot;
     }
-    //msg_data.data.data[7] = storage.raw;
-    //msg_data.data.data[7] = storage.weighting;
-    //msg_data.data.data[8] = storage.weight;
+    //msg_data.data.data[7] = linear.Wsum/linear.Wcounter;
+    //msg_data.data.data[8] = linear.Wtmax;
+    //msg_data.data.data[9] = linear.Wtmin;
     //msg_data.data.data[9] = storage.active;
     //msg_data.data.data[10] = storage.command;
 
+    
     for (int i = 0; i < STORE_SLOTS; ++i) 
     {
         msg_data.data.data[7 + i] = storage.samples[i];
     }
+    
     
     rcl_ret_t ret = rcl_publish(&publisher, &msg_data, NULL);  
 }
@@ -130,14 +132,37 @@ void timerMain_callback(rcl_timer_t *timer, int64_t last_call_time)
         
         case goto_height:
             motor_stop(&motor);
-            if(!is_linear_stucked(&linear))
+
+            if (can_linear_goDown(&linear))
             {
-                linear_goto(&linear, MAIN_LOOP_TIME_MS/1000.0f);
-                if (linear.command == 3)
-                    motor_unblock(&motor);
+                if(!is_linear_stucked(&linear))
+                {
+                    linear_goto(&linear, MAIN_LOOP_TIME_MS/1000.0f);
+                    if (linear.command == 3)
+                        motor_unblock(&motor);
+                }
+                else
+                    linear_stop(&linear);
             }
             else
-                linear_stop(&linear);
+            {
+                if (is_storage_ok(&storage))
+                {
+                    if(!is_linear_stucked(&linear))
+                    {
+                        linear_goto(&linear, MAIN_LOOP_TIME_MS/1000.0f);
+                        if (linear.command == 3)
+                            motor_unblock(&motor);
+                    }
+                    else
+                        linear_stop(&linear);
+                }
+                else
+                {
+                    linear_stop(&linear);
+                }
+            }
+
             break;    
             
         case turn_right:
@@ -156,8 +181,8 @@ void timerMain_callback(rcl_timer_t *timer, int64_t last_call_time)
         case slot_select:
             motor_stop(&motor);
             linear_stop(&linear);
-            if (is_linear_safe(&linear))
-                storage_goto(&storage);
+            if (can_storage_move(&linear))
+                storage_goto(&storage, storage.demand_pos);
             break;
 
         case tare_scale:
@@ -189,16 +214,32 @@ void timerMain_callback(rcl_timer_t *timer, int64_t last_call_time)
     }
 
 
-    if(motor_write(&motor) < 0) {motor.error = 44;};    
+    if(motor_write(&motor) < 0) {motor.error = 44;}; 
     if(linear_write(&linear) < 0) {linear.error = 44;};
-        
+    
     if(motor_read(&motor) < 0) {motor.error = 44;};
     if(linear_read(&linear) < 0) {linear.error = 44;};
     
     if(storage_read(&storage) < 0) {storage.error = 44;};
     if (storage.command != 0)
-        if (storage_write(&storage) < 0) {storage.error = 44;};
-
+    {
+        if (storage_write(&storage) < 0) {storage.error = 44;}; 
+    }
+    /*
+    absolute_time_t start = get_absolute_time();
+    //
+    absolute_time_t end = get_absolute_time();
+    int64_t elapsed_us = absolute_time_diff_us(start, end);
+    
+    linear.Wsum = linear.Wsum + elapsed_us;
+    linear.Wcounter++;
+    
+    if(linear.Wtmin > elapsed_us)
+    linear.Wtmin = elapsed_us;
+    
+    if(linear.Wtmax < elapsed_us)
+    linear.Wtmax = elapsed_us;
+    */
 
 }
 
@@ -242,11 +283,11 @@ void joy_callback(const void * msgin)
         }
     
         // Set the storage command
-        if (msg->buttons.data[0] == 1) { storage.demand_pos = 1; storage_goto(&storage); }          //pos 1
-        else if (msg->buttons.data[1] == 1) {storage.demand_pos = 2; storage_goto(&storage);}       //pos 2
-        else if (msg->buttons.data[2] == 1) {storage.demand_pos = 3; storage_goto(&storage);}       //pos 2
-        else if (msg->buttons.data[3] == 1) {storage.demand_pos = 4; storage_goto(&storage);}       //pos 3
-        else if (msg->buttons.data[10] == 1) {storage.demand_pos = 0; storage_goto(&storage);}       //pos 0
+        if (msg->buttons.data[0] == 1) { storage.demand_pos = 1; storage_goto(&storage, storage.demand_pos); }          //pos 1
+        else if (msg->buttons.data[1] == 1) {storage.demand_pos = 2; storage_goto(&storage, storage.demand_pos);}       //pos 2
+        else if (msg->buttons.data[2] == 1) {storage.demand_pos = 3; storage_goto(&storage, storage.demand_pos);}       //pos 2
+        else if (msg->buttons.data[3] == 1) {storage.demand_pos = 4; storage_goto(&storage, storage.demand_pos);}       //pos 3
+        else if (msg->buttons.data[10] == 1) {storage.demand_pos = 0; storage_goto(&storage, storage.demand_pos);}       //pos 0
         else if (msg->buttons.data[9] == 1) {storage.command = 10;}               //tare
         else if (msg->buttons.data[8] == 1) {storage.command = 50;}               //error clear
         else if (msg->buttons.data[4] == 1) {storage_get_weight(&storage);}       //get weight
