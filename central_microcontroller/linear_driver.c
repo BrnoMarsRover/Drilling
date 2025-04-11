@@ -2,9 +2,12 @@
 
 int linear_read(struct linear* linear)
 {
+
+    
     if (!linear)
-        return -2;
+    return -2;
     uint8_t buffer[5];
+        
     if (i2c_read_timeout_us(I2C_PORT, LINEAR_ADDR, buffer, 5, false, 1000) != 5)
     {
         return -1;
@@ -35,6 +38,8 @@ int linear_write(struct linear* linear)
     uint8_t buffer[2];
     buffer[0] = linear->command;
     buffer[1] = linear->speed;
+
+
     if (i2c_write_timeout_us(I2C_PORT, LINEAR_ADDR, buffer, 2, false, 1000) != 2);
     {
         return -1;
@@ -53,6 +58,17 @@ void linear_init(struct linear* linear)
     linear->goalHeight = 0;
     linear->pid_integral = 0;
     linear->pid_prevError = 0;
+
+    /*
+    linear->Wsum = 0;
+    linear->Wcounter = 0;
+    linear->Wtmin = 100000;
+    linear->Wtmax = 0;
+    linear->Rsum = 0;
+    linear->Rcounter = 0;
+    linear->Rtmin = 100000;
+    linear->Rtmax = 0;
+    */
 }
 
 void linear_stop(struct linear* linear)
@@ -116,11 +132,20 @@ bool is_linear_home(struct linear* linear)
     return false;
 }
 
-bool is_linear_safe(struct linear* linear) 
+bool can_storage_move(struct linear* linear) 
 {
     if (!linear)
         return false;
-    if(linear->height < SAFE_POS)
+    if(linear->height < SAFE_POS + 1)
+        return true;
+    return false;
+}
+
+bool can_linear_goDown(struct linear* linear) 
+{
+    if (!linear)
+        return false;
+    if(linear->height < STORE_POS || linear->height > linear->goalHeight)
         return true;
     return false;
 }

@@ -12,7 +12,8 @@
 #define I2C_PORT i2c0
 #define LINEAR_ADDR 0x09
 
-#define SAFE_POS 50 // [mm]
+#define SAFE_POS 58 // [mm]
+#define STORE_POS 92 // [mm]
 #define LIN_Kp 1000
 #define LIN_Ki 0.05
 #define LIN_Kd 0.3
@@ -30,6 +31,17 @@ struct linear{
     uint16_t goalHeight;
     float pid_prevError;
     float pid_integral;
+    /*
+    //MEASURE TIME
+    int64_t Wsum;
+    int64_t Wcounter;
+    int64_t Wtmin;
+    int64_t Wtmax;
+    int64_t Rsum;
+    int64_t Rcounter;
+    int64_t Rtmin;
+    int64_t Rtmax;
+    */
 };
 
 int linear_read(struct linear* linear);
@@ -41,7 +53,8 @@ void linear_goto(struct linear* linear, float dt);
 bool is_linear_stucked(struct linear* linear);
 bool linear_reached_goal(struct linear* linear);
 bool is_linear_home(struct linear* linear);
-bool is_linear_safe(struct linear* linear);
+bool can_storage_move(struct linear* linear) ;
+bool can_linear_goDown(struct linear* linear);
 float linear_step(struct linear* linear, float dt);
 
 
