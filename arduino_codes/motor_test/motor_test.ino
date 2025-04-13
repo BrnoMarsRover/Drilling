@@ -6,7 +6,12 @@ uint8_t error = 0;
 int8_t rps = -100;
 int8_t torque = 75;
 uint8_t temperature = 25;
+unsigned long firstTen = 0;
 unsigned long lastTime = 0; // Uloží čas posledního měření
+unsigned long sum = 0;
+unsigned long counter = 0;
+unsigned long tmax = 0;
+unsigned long tmin = 10000;
 
 
 void setup() {
@@ -21,11 +26,22 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
+  Serial.print("tavg: ");
+  Serial.print(sum/counter);
+  Serial.println(" ms");
+
+  Serial.print("tmin: ");
+  Serial.print(tmin);
+  Serial.println(" ms");
+
+    Serial.print("tmax: ");
+  Serial.print(tmax);
+  Serial.println(" ms");
   delay(100);
 }
 
 void receiveEvent(int howMany) {
-    time_measure();
+
     //Serial.println("Recieved");
     //Serial.println(howMany);
     int8_t a = Wire.read();
@@ -34,6 +50,8 @@ void receiveEvent(int howMany) {
 
 
 void requestEvent(){
+  time_measure();
+  firstTen++;
   const uint8_t outputArraySize = 4;
   uint8_t outputArray[outputArraySize] = {0};
 
@@ -52,7 +70,21 @@ void requestEvent(){
     unsigned long interval = currentTime - lastTime; 
     lastTime = currentTime; 
 
-    Serial.print("Interval mezi vzorky: ");
-    Serial.print(interval);
-    Serial.println(" ms");
+    if (firstTen > 10)
+    {
+      sum = sum + interval;
+      counter++;
+
+      if (interval > tmax)
+        tmax = interval;
+
+      if (interval < tmin)
+        tmin = interval;
+    }
+
+
+
+    //Serial.print("Interval mezi vzorky: ");
+    //Serial.print(interval);
+    //Serial.println(" ms");
   }
