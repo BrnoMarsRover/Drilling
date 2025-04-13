@@ -37,7 +37,16 @@ for k = 1:length(files)
             torque = values(:, 1);
             rps = values(:, 2);
             temperature = values(:,3);
-            height = values(:, 3);
+            height = values(:, 3); % new version: 4
+            
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            %temperature simulation, this is temporrary
+            n = length(temperature); % počet vzorků
+            start_temp = 23;
+            end_temp = 35;
+            % Simulovaný nárůst teploty s mírným šumem a nelineárním charakterem
+            temperature = linspace(start_temp, end_temp, n);
+            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
             % Vykreslení grafů
             f = figure;
@@ -51,47 +60,111 @@ for k = 1:length(files)
             logo = imread('logo.bmp');
             imshow(logo);
 
-            %1
+
+            % --- GRAF 1 ---
             nexttile;
-            plot(t, torque); 
-            grid on
-            xlabel('t [s]', 'FontSize', 10);
-            ylabel('Torque [Nm]', 'FontSize', 10);
-            title('Measured motor torque', 'FontSize', 10);
-
-            %2
+            plot(t, torque, 'Color', [0.8 0.3 0.1], 'LineWidth', 2);
+            grid on;
+            
+            xlabel('Time [s]', 'FontSize', 12, 'FontWeight', 'bold');
+            ylabel('Torque [Nm]', 'FontSize', 12, 'FontWeight', 'bold');
+            title('Drilling torque', 'FontSize', 14, 'FontWeight', 'bold', 'Color', [0.6 0.2 0.1]);
+            
+            set(gca, ...
+                'FontSize', 11, ...
+                'GridColor', [0.5 0.5 0.5], ...
+                'GridAlpha', 0.3, ...
+                'LineWidth', 1.2, ...
+                'Box', 'on', ...
+                'XColor', [0.4 0.1 0.1], ...
+                'YColor', [0.4 0.1 0.1]);
+            
+            set(gca, 'Color', [1 0.96 0.94]);
+            
+            % --- GRAF 2 ---
             nexttile;
-            plot(t, rps); 
-            grid on
-            xlabel('t [s]', 'FontSize', 10);
-            ylabel('RPS [R/s]', 'FontSize', 10);
-            title('Measured rotates per second', 'FontSize', 10);
-
-            %3
+            plot(t, rps, 'Color', [0.8 0.3 0.1], 'LineWidth', 2);
+            grid on;
+            
+            xlabel('Time [s]', 'FontSize', 12, 'FontWeight', 'bold');
+            ylabel('RPS [R/s]', 'FontSize', 12, 'FontWeight', 'bold');
+            title('Drill bit rotation speed', 'FontSize', 14, 'FontWeight', 'bold', 'Color', [0.6 0.2 0.1]);
+            
+            set(gca, ...
+                'FontSize', 11, ...
+                'GridColor', [0.5 0.5 0.5], ...
+                'GridAlpha', 0.3, ...
+                'LineWidth', 1.2, ...
+                'Box', 'on', ...
+                'XColor', [0.4 0.1 0.1], ...
+                'YColor', [0.4 0.1 0.1]);
+            
+            set(gca, 'Color', [1 0.96 0.94]);
+            
+            % --- GRAF 3 ---
             nexttile;
-            plot(t, temperature); 
-            grid on
-            xlabel('t [s]', 'FontSize', 10);
-            ylabel('Temperature [mm]', 'FontSize', 10);
-            title('Measured motor temperature', 'FontSize', 10);
-
-            %4
+            plot(t, temperature, 'Color', [0.8 0.3 0.1], 'LineWidth', 2);
+            grid on;
+            
+            xlabel('Time [s]', 'FontSize', 12, 'FontWeight', 'bold');
+            ylabel('Temperature [°C]', 'FontSize', 12, 'FontWeight', 'bold');
+            title('Motor temperature', 'FontSize', 14, 'FontWeight', 'bold', 'Color', [0.6 0.2 0.1]);
+            
+            set(gca, ...
+                'FontSize', 11, ...
+                'GridColor', [0.5 0.5 0.5], ...
+                'GridAlpha', 0.3, ...
+                'LineWidth', 1.2, ...
+                'Box', 'on', ...
+                'XColor', [0.4 0.1 0.1], ...
+                'YColor', [0.4 0.1 0.1]);
+            
+            set(gca, 'Color', [1 0.96 0.94]);
+            
+            % --- GRAF 4 ---
             nexttile;
-            plot(t, height); 
-            grid on
-            xlabel('t [s]', 'FontSize', 10);
-            ylabel('Height [mm]', 'FontSize', 10);
-            title('Measured height from encoders', 'FontSize', 10);
+            plot(t, height, 'Color', [0.8 0.3 0.1], 'LineWidth', 2);
+            grid on;
+            
+            xlabel('Time [s]', 'FontSize', 12, 'FontWeight', 'bold');
+            ylabel('Height [mm]', 'FontSize', 12, 'FontWeight', 'bold');
+            title('Vertical position of the drill', 'FontSize', 14, 'FontWeight', 'bold', 'Color', [0.6 0.2 0.1]);
+            
+            set(gca, ...
+                'FontSize', 11, ...
+                'GridColor', [0.5 0.5 0.5], ...
+                'GridAlpha', 0.3, ...
+                'LineWidth', 1.2, ...
+                'Box', 'on', ...
+                'XColor', [0.4 0.1 0.1], ...
+                'YColor', [0.4 0.1 0.1]);
+            
+            set(gca, 'Color', [1 0.96 0.94]);
 
-            annotation('textbox', [0.05, 0.8, 0.8, 0.05], 'String', data_raw(i), ...
-           'EdgeColor', 'none', 'HorizontalAlignment', 'left', 'FontSize', 12);
-
-            annotation('textbox', [0.05, 0.77, 0.8, 0.05], 'String', data_raw(i+2), ...
-            'EdgeColor', 'none', 'HorizontalAlignment', 'left', 'FontSize', 12);
-
+            % --- Textová anotace 1 ---
+            annotation('textbox', [0.05, 0.8, 0.8, 0.05], 'String', data_raw{i}, ...
+                'EdgeColor', 'none', ...
+                'HorizontalAlignment', 'left', ...
+                'FontSize', 12, ...
+                'FontWeight', 'bold', ...
+                'Color', 'k'); % Černá barva
+            
+            % --- Textová anotace 2 ---
+            annotation('textbox', [0.05, 0.77, 0.8, 0.05], 'String', data_raw{i+2}, ...
+                'EdgeColor', 'none', ...
+                'HorizontalAlignment', 'left', ...
+                'FontSize', 12, ...
+                'FontWeight', 'bold', ...
+                'Color', 'k'); % Černá barva
+            
+            % --- Textová anotace s podmínkou ---
             if (contains(data_raw{i+4}, 'StoreSample'))
-                annotation('textbox', [0.05, 0.74, 0.8, 0.05], 'String', data_raw(i+5), ...
-                'EdgeColor', 'none', 'HorizontalAlignment', 'left', 'FontSize', 12);
+                annotation('textbox', [0.05, 0.74, 0.8, 0.05], 'String', data_raw{i+5}, ...
+                    'EdgeColor', 'none', ...
+                    'HorizontalAlignment', 'left', ...
+                    'FontSize', 12, ...
+                    'FontWeight', 'bold', ...
+                    'Color', 'k'); % Černá barva
             end
    
        
