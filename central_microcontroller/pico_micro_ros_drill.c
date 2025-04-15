@@ -15,7 +15,7 @@
 #include "motor_driver.h"
 #include "math.h"
 
-#define MAIN_LOOP_TIME_MS 100
+#define MAIN_LOOP_TIME_MS 50
 #define I2C_PORT i2c0
 #define BUFFER_SIZE 10
 #define STRING_SIZE 30
@@ -434,7 +434,7 @@ int main()
     rclc_timer_init_default(
         &timerPublisher,
         &support,
-        RCL_MS_TO_NS(500),
+        RCL_MS_TO_NS(50),
         timerPublisher_callback);
 
     rclc_timer_init_default(
