@@ -5,7 +5,7 @@ int storage_read(struct storage* storage)
     if (!storage)
         return -2;
     uint8_t buffer[3];
-    if (i2c_read_timeout_us(I2C_PORT, STORAGE_ADDR, buffer, 3, false, 10000) != 3)
+    if (i2c_read_timeout_us(I2C_PORT, STORAGE_ADDR, buffer, 3, false, 8000) != 3)
     {
         return -1;
     }
