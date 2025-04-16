@@ -5,7 +5,20 @@
 #include <DallasTemperature.h>
 
 //#define timeMeasure //mereni delky loopu/poctu loopu za sekundu
+//#define printData
 
+static inline float sgn(float val) {
+  if (val < 0) return -1;
+  if (val==0) return 0;
+  return 1;
+}
+
+enum motorStateEnum
+{
+  Stopped,
+  Running,
+  Stopping,
+};
 
 //PINS
 const uint8_t OutPin_L_EN = 3;
@@ -22,17 +35,24 @@ const uint8_t InPin_AmmeterDirect = A3;
 
 //MOTOR CONTROL
 float bridgeDC = 0.0;
+float minimumBridgeDC = 0.0;
 uint8_t avgCount = 10;
 FIR bridgeDCAvg(avgCount);
 float motorSpeed = 0.0; //[ot./s]
 float sourceVoltage = 24.0;
 float windingResistance = 0.2608;
 //CONTROLLERS
-PIController speedController(2.0, 2.0, 5, 2.0);
-PIController currentController(60, 30, 150, 3.0);
+//Kp  Ki    outputLimit   sumClamp  
+PIController speedController(1.7, 2.5, 5, 2.0);
+PIController currentController(40, 30, 150, 4.0);
 //SETPOINT FILTER
-float speedTarget = 0;
-float controllerSetpointSR = 0.3;
+enum motorStateEnum motorState = Stopped;
+float requestedSpeed = 0;
+float newRequestedSpeed = 0;
+float speedSetpoint = 0;
+const float minimumSpeedFromHalt = 0.5;
+const float minimumSpeedRunning = 0.1;
+const float controllerSetpointSR = 0.3;
 
 
 //AMPMETER
@@ -42,8 +62,8 @@ float ammeterRCZero = 500;
 FIR ammeterRCAvg(avgCount);
 //float ammeterVoltage = 0;
 float ammeterCurrent = 0; // v amperech
-const float Vcc = 4.5;
-const float ammeterVoltsToAmps = 10.0;
+const float Vcc = 4.66;
+const float ammeterVoltsToAmps = 12.0;//10.0;
 const double CPhi = 0.4834;
 
 //I2C
@@ -75,9 +95,31 @@ uint32_t thermometerLastMillis = 0;
 uint32_t thermometerDelay = 2000;
 
 //PROTECTION
-uint16_t ISFaultThreshold = 500;
+uint16_t ISFaultThreshold = 800;
 bool bridgeFault = false;
 
+
+void updateMotorState()
+{
+  if(newRequestedSpeed != requestedSpeed)
+  {
+    if(motorState == motorStateEnum::Stopped)
+    {
+      motorState = motorStateEnum::Running;
+      requestedSpeed = newRequestedSpeed;
+      speedSetpoint = minimumSpeedFromHalt*sgn(requestedSpeed);
+    }
+    else if(newRequestedSpeed == 0 || sgn(newRequestedSpeed) != sgn(requestedSpeed))
+    {
+      requestedSpeed = 0;
+      motorState = motorStateEnum::Stopping;
+    }
+    else if(sgn(newRequestedSpeed) == sgn(requestedSpeed))
+    {
+      requestedSpeed = newRequestedSpeed;
+    }
+  }
+}
 
 void setBridge(float aVal)
 {
@@ -87,7 +129,6 @@ void setBridge(float aVal)
   {
     analogWrite(OutPin_L_PWM, 0);
     analogWrite(OutPin_R_PWM, uint8_t(abs(aVal)));
-
   }
   else
   {
@@ -126,6 +167,8 @@ void setup()
   pinMode(InPin_L_IS, INPUT);
   pinMode(InPin_R_IS, INPUT);
 
+  pinMode(13, INPUT);
+
   //MOTOR SETUP
   digitalWrite(OutPin_R_EN, HIGH);
   digitalWrite(OutPin_L_EN, HIGH);
@@ -154,15 +197,16 @@ void loop()
   /*
   if((currentMillis - lastMessageMillis) > maxMillisWithoutMessage)
   {
-    speedTarget = 0.0;
+    requestedSpeed = 0.0;
   } 
   */
+  uint16_t LISval = analogRead(InPin_L_IS);
+  uint16_t RISval = analogRead(InPin_R_IS);
 
-  if(analogRead(InPin_L_IS) > ISFaultThreshold || analogRead(InPin_R_IS) > ISFaultThreshold)
+  if(LISval > ISFaultThreshold || RISval > ISFaultThreshold)
   {
     bridgeFault = true;
-    speedTarget = 0.0;
-    Serial.println("HB ERR");
+    requestedSpeed = 0.0;
   }
   else
   {
@@ -172,10 +216,7 @@ void loop()
   timeDiff = 0.001*(float(currentMillis) - float(lastMillis));
   lastMillis = currentMillis;
 
-  Serial.print(" t:");  
-  Serial.print(timeDiff);
-
-  if(speedController.setpoint == 0.0 && speedTarget == 0.0)
+  if(speedController.setpoint == 0.0 && requestedSpeed == 0.0)
   {
     speedController.reset();
     currentController.reset();
@@ -184,6 +225,9 @@ void loop()
     ammeterCurrent = 0.0;
     bridgeDC = 0.0;
     motorSpeed = 0.0;
+
+    motorState = motorStateEnum::Stopped;
+    updateMotorState();
   }
   else
   {
@@ -204,56 +248,50 @@ void loop()
     motorSpeed = ((sourceVoltage*(bridgeDCAvg.updateOutput(bridgeDC)/255.0)) - windingResistance*ammeterCurrent)/(CPhi*2*3.14);
 
     //Setpoint filter
-    float controllerSetpointMaxChange = constrain(timeDiff*controllerSetpointSR, 0.0, 0.2);
-    speedController.setpoint = constrain(speedTarget, speedController.setpoint - controllerSetpointMaxChange, speedController.setpoint + controllerSetpointMaxChange);
+    float setpointMaxChange = constrain(timeDiff*controllerSetpointSR, 0.0, 0.1);
+    speedSetpoint = constrain(requestedSpeed, speedSetpoint - setpointMaxChange, speedSetpoint + setpointMaxChange);
+    if(motorState == motorStateEnum::Stopping)
+    {
+      if(abs(speedSetpoint) < minimumSpeedRunning)
+      {
+        speedSetpoint = 0;
+      }
+    }
+
+    speedController.setpoint = speedSetpoint;
 
     //Controller action
     currentController.setpoint = speedController.compute(motorSpeed, timeDiff);
     bridgeDC = currentController.compute(ammeterCurrent, timeDiff);
   }
+/*
+  if(abs(bridgeDC) < minimumBridgeDC)
+  {
+    if(requestedSpeed == 0)
+    {
+      bridgeDC = 0;
+    }
+    else if(requestedSpeed > 0)
+    {
+      bridgeDC = minimumBridgeDC;
+    }
+    else
+    {
+      bridgeDC = -minimumBridgeDC;
+    }
+  }
 
+  if(bridgeDC < 0)
+  {
+    digitalWrite(13, true);
+  }
+  else
+  {
+    digitalWrite(13, false);
+  }
+*/
   setBridge(bridgeDC);
 
-  
-  /*
-  Serial.print(" M:");
-  Serial.print(6000); // To freeze the lower limit
-  Serial.print(" m:");
-  Serial.print(-6000); // To freeze the upper limit
-*/
-  Serial.print(" SpT:");
-  Serial.print(speedTarget);
-
-  Serial.print(" SpSP:");
-  Serial.print(speedController.setpoint);
-
-  Serial.print(" Sp:");
-  Serial.print(motorSpeed);
-
-  Serial.print(" SpEs:");
-  Serial.print(speedController.getErrorSum());
-
-  Serial.print(" IT:");  
-  Serial.print(currentController.setpoint);
-
-  Serial.print(" I:");  
-  Serial.print(ammeterCurrent);
-
-  Serial.print(" DC:");
-  Serial.print(bridgeDC);
-
-
-#ifdef timeMeasure
-  loops++;
-
-  if(currentMillis - lastMillis_timeMeasure > 10000)
-  {
-    Serial.println(loops);   
-    lastMillis_timeMeasure = currentMillis;
-    loops = 0;
-  }
-#endif
-  
 
   if(currentMillis - thermometerLastMillis > thermometerDelay)
   {
@@ -264,19 +302,70 @@ void loop()
     if (motorTemperature > maxSafeTemperature)
     {
       overheat = true;
-      speedTarget = 0.0;
+      requestedSpeed = 0.0;
     }
     else
     {
       overheat = false;
     }
-
-    Serial.print(" tmp:");
-    Serial.print(motorTemperature);
   }
 
+  
+#ifdef printData
+  Serial.print(" t:");  
+  Serial.print(timeDiff);
+
+  Serial.print(" LIS: ");  
+  Serial.print(LISval);
+
+  Serial.print(" RIS: ");  
+  Serial.print(RISval);
+
+  Serial.print(" MSt:");
+  Serial.print(motorState);
+
+  Serial.print(" NRqSp:");
+  Serial.print(newRequestedSpeed);
+
+  Serial.print(" RqSp:");
+  Serial.print(requestedSpeed);
+
+  Serial.print(" SpSP:");
+  Serial.print(speedSetpoint);
+
+  Serial.print(" Sp:");
+  Serial.print(motorSpeed);
+
+  Serial.print(" SpErS:");
+  Serial.print(speedController.getErrorSum());
+
+  Serial.print(" ISP:");  
+  Serial.print(currentController.setpoint);
+
+  Serial.print(" I:");  
+  Serial.print(ammeterCurrent);
+
+  Serial.print(" DC:");
+  Serial.print(bridgeDC);
+
+  Serial.print(" tmp:");
+  Serial.print(motorTemperature);
 
   Serial.println("");
+#endif
+
+
+#ifdef timeMeasure
+  loops++;
+
+  if(currentMillis - lastMillis_timeMeasure > 5000)
+  {
+    Serial.println(loops);   
+    lastMillis_timeMeasure = currentMillis;
+    loops = 0;
+  }
+#endif
+  
 }
 
 void receiveEvent(int howMany)
@@ -299,14 +388,15 @@ void receiveEvent(int howMany)
     {
       Wire.readBytes(inputArray, inputArraySize);
       int8_t receivedInt = *((int8_t*)inputArray);
-      speedTarget = constrain(float(receivedInt)*0.03, -3.0, 3.0);
+      newRequestedSpeed = constrain(float(receivedInt)*0.03, -3.0, 3.0);
+      if(newRequestedSpeed != 0 && abs(newRequestedSpeed) < minimumSpeedFromHalt)
+      {
+        newRequestedSpeed = minimumSpeedFromHalt*sgn(newRequestedSpeed);
+      }
+
+      updateMotorState();
 
       lastMessageMillis = millis();
-
-      /*
-      Serial.print("Received float: ");
-      Serial.println(receivedFloat);
-      */
     }
   }
 }

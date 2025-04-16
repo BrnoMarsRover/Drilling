@@ -7387,7 +7387,7 @@
 				)
 			)
 		)
-		(property "Value" "W103 (10K)"
+		(property "Value" "W203 (20K)"
 			(at 193.04 19.05 90)
 			(effects
 				(font
@@ -10523,7 +10523,7 @@
 				)
 			)
 		)
-		(property "Value" "5K"
+		(property "Value" "1K"
 			(at 170.18 19.05 90)
 			(effects
 				(font
