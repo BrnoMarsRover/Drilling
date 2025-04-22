@@ -8,6 +8,7 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include "drill_logger.h"
+#include "drill_status.h"
 #include "rclcpp_action/rclcpp_action.hpp"
 #include "rclcpp/service.hpp"
 #include "std_msgs/msg/u_int8.hpp"
@@ -16,6 +17,7 @@
 #include "drill_interfaces/action/drill_sample.hpp"
 #include "drill_interfaces/action/store_sample.hpp"
 #include "drill_interfaces/srv/get_sample_weight.hpp"
+#include "drill_interfaces/srv/get_drill_status.hpp"
 #include "atomic"
 #include "cmath"
 
@@ -49,6 +51,7 @@ public:
     using StoreSample = drill_interfaces::action::StoreSample;
     using DrillCalibration = drill_interfaces::action::DrillCalibration;
     using GetSampleWeight = drill_interfaces::srv::GetSampleWeight;
+    using GetDrillStatus = drill_interfaces::srv::GetDrillStatus;
 
     using GoalHandleDrillSample = rclcpp_action::ServerGoalHandle<DrillSample>;
     using GoalHandleStoreSample = rclcpp_action::ServerGoalHandle<StoreSample>;
@@ -62,9 +65,10 @@ public:
 
 private:
     std::shared_ptr<DrillLogger> DrillLogger_;
+    std::shared_ptr<DrillStatus> DrillStatus_;
+
     //Controller variables
     std::atomic<bool> drill_is_busy{};
-    std::atomic<int> ack{};
     std::atomic<float> motorTorque{};
     std::atomic<float> motorRPS{};
     std::atomic<int> motorTemperature{};
@@ -91,6 +95,8 @@ private:
     rclcpp_action::Server<StoreSample>::SharedPtr store_sample_server_;
     rclcpp_action::Server<DrillCalibration>::SharedPtr drill_calibration_server_;
     rclcpp::Service<GetSampleWeight>::SharedPtr get_sample_weight_srv_;
+    rclcpp::Service<GetDrillStatus>::SharedPtr get_drill_status_srv_;
+
 
 
     void set_depth()
@@ -110,7 +116,7 @@ private:
     void drill_data_callback(const std_msgs::msg::UInt16MultiArray::SharedPtr msg)
     {
         RCLCPP_INFO(this->get_logger(), "Received drill data.");
-        ack = msg->data[0];
+        DrillStatus_->setStatus(msg->data[0]);
         motorRPS = float_decode(msg->data[1]);
         motorTorque = float_decode(msg->data[2]);
         motorTemperature = msg->data[3];
@@ -221,6 +227,9 @@ private:
         RCLCPP_INFO(this->get_logger(), "Getting sample weight for slot %d", request->slot);
         response->weight = get_sampleWeight(request->slot);
     }
+
+    void get_drill_status_callback(const std::shared_ptr<drill_interfaces::srv::GetDrillStatus::Request> request,
+        std::shared_ptr<drill_interfaces::srv::GetDrillStatus::Response> response);
 
     // Function for publish state to drill
     void publish_drill_state(const uint8_t state) const{

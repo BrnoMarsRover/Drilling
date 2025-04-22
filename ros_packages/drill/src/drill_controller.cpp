@@ -32,12 +32,19 @@ DrillController::DrillController(): Node("drill_controller") {
       std::bind(&DrillController::handle_cancel_drill_calibration, this, std::placeholders::_1),
       std::bind(&DrillController::handle_accepted_drill_calibration, this, std::placeholders::_1));
 
-    // Service Server
+    // Service Servers
     get_sample_weight_srv_ = this->create_service<GetSampleWeight>(
       "get_sample_weight",
       std::bind(&DrillController::get_sample_weight_callback, this, std::placeholders::_1, std::placeholders::_2));
 
+    get_drill_status_srv_ = this->create_service<GetDrillStatus>(
+        "get_drill_status",
+        std::bind(&DrillController::get_drill_status_callback, this, std::placeholders::_1, std::placeholders::_2)
+        );
+
     DrillLogger_ = std::make_shared<DrillLogger>();
+    DrillStatus_ = std::make_shared<DrillStatus>();
+
 
 }
 
@@ -77,7 +84,7 @@ void DrillController::execute_drill_sample(const std::shared_ptr<GoalHandleDrill
                 publish_drill_param(goal->max_rps, calculate_height(goal->depth), 0);
                 publish_drill_state(currentState);
             }
-            else if (ack == 1)
+            else if (DrillStatus_->isMotorStucked())
                 break;
         }
 
@@ -187,7 +194,7 @@ void DrillController::execute_store_sample(const std::shared_ptr<GoalHandleStore
             break;
 
             case 3: //tare vahy
-                if(ack == 1 && currentState == tare_scale)
+                if(DrillStatus_->isStorageTared() && currentState == tare_scale)
                     state = 4;
                 else
                 {
@@ -244,7 +251,7 @@ void DrillController::execute_store_sample(const std::shared_ptr<GoalHandleStore
             break;
 
             case 6: //vazeni
-                if(ack == 1 && currentState == get_weight)
+                if(!DrillStatus_->isStorageTared() == 1 && currentState == get_weight)
                     state = 7;
                 else
                 {
@@ -352,6 +359,23 @@ void DrillController::publish_drill_param(const float rps, const uint16_t height
     message.data[2] = slot;
     drill_params_pub_->publish(message);
     RCLCPP_INFO(this->get_logger(), "Published drill parameters rps %f, height %d, slot %d", rps, height, slot);
+}
+
+void DrillController::get_drill_status_callback(const std::shared_ptr<drill_interfaces::srv::GetDrillStatus::Request> request,
+    std::shared_ptr<drill_interfaces::srv::GetDrillStatus::Response> response)
+{
+    (void)request;
+    
+    response->motor_i2c = DrillStatus_->getMotorI2CStatus();
+    response->motor_stucked = DrillStatus_->getMotorStucked();
+    response->motor_error = DrillStatus_->getMotorError();
+
+    response->linear_i2c = DrillStatus_->getLinearI2CStatus();
+    response->linear_error = DrillStatus_->getLinearError();
+
+    response->storage_i2c = DrillStatus_->getStorageI2CStatus();
+    response->storage_scale_tared = DrillStatus_->getStorageScaleTared();
+    response->storage_error = DrillStatus_->getStorageError();
 }
 
 int main(int argc, char **argv) {

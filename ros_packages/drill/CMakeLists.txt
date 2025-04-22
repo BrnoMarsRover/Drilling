@@ -23,6 +23,8 @@ add_executable(drill_controller src/drill_controller.cpp
         include/drill/drill_controller.h
         include/drill/drill_logger.h
         src/drill_logger.cpp
+        include/drill/drill_status.h
+        src/drill_status.cpp
 
 )
 ####
