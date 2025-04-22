@@ -60,45 +60,21 @@ void timerPublisher_callback(rcl_timer_t *timer, int64_t last_call_time)
 {
     msg_data.data.data[0] = drill_message(&motor, &linear, &storage);
 
-    if (motor.error == 44)
-    {
-        msg_data.data.data[1] = 44404;
-        msg_data.data.data[2] = 44404;
-        msg_data.data.data[3] = 44404;
-    }
-    else
-    {
-        msg_data.data.data[1] = abs(motor.rpsMeas);
-        msg_data.data.data[2] = abs(motor.torqueMeas);
-        msg_data.data.data[3] = motor.temperature;
-    }
-
-    if (linear.error == 44)
-    {
-        msg_data.data.data[4] = 44404;
-        msg_data.data.data[5] = 44404;
-    }
-    else
-    {
-        msg_data.data.data[4] = linear.height; 
-        msg_data.data.data[5] = linear.toGround;
-    }
-
-    if (storage.error == 44)
-    {
-        msg_data.data.data[6] = 44404;
-    }
-    else
-    {
-        msg_data.data.data[6] = storage.active_slot;
-    }
+    msg_data.data.data[1] = abs(motor.rpsMeas);
+    msg_data.data.data[2] = abs(motor.torqueMeas);
+    msg_data.data.data[3] = motor.temperature;
+    
+    msg_data.data.data[4] = linear.height; 
+    msg_data.data.data[5] = linear.toGround;
+    
+    msg_data.data.data[6] = storage.active_slot;
+    
     //msg_data.data.data[7] = linear.Wsum/linear.Wcounter;
     //msg_data.data.data[8] = linear.Wtmax;
     //msg_data.data.data[9] = linear.Wtmin;
     //msg_data.data.data[9] = storage.active;
     //msg_data.data.data[10] = storage.command;
 
-    
     for (int i = 0; i < STORE_SLOTS; ++i) 
     {
         msg_data.data.data[7 + i] = storage.samples[i];
@@ -214,17 +190,19 @@ void timerMain_callback(rcl_timer_t *timer, int64_t last_call_time)
     }
 
 
-    if(motor_write(&motor) < 0) {motor.error = 44;}; 
-    if(linear_write(&linear) < 0) {linear.error = 44;};
+    motor_write(&motor); 
+    linear_write(&linear);
     
-    if(motor_read(&motor) < 0) {motor.error = 44;};
-    if(linear_read(&linear) < 0) {linear.error = 44;};
-    
-    if(storage_read(&storage) < 0) {storage.error = 44;};
-    if (storage.command != 0)
-    {
-        if (storage_write(&storage) < 0) {storage.error = 44;}; 
-    }
+    if(motor_read(&motor) < 0) {motor.i2cStatus = false;}
+    else {motor.i2cStatus = true;}
+
+    if(linear_read(&linear) < 0) {linear.i2cStatus = false;}
+    else {linear.i2cStatus = true;}
+
+    if(storage_read(&storage) < 0) {storage.i2cStatus = false;}
+    else {storage.i2cStatus = true;}
+
+    if (storage.command != 0) {storage_write(&storage);}
     /*
     absolute_time_t start = get_absolute_time();
     //
@@ -485,14 +463,46 @@ uint16_t drill_message(struct motor* motor, struct linear* linear, struct storag
     if(!motor || !linear || !storage)
         return 0;
 
-    if(currentState == drilling && motor->stucked)
-        return 1;
+    //if(currentState == drilling && motor->stucked)
+    //    return 1;
 
-    if(currentState == tare_scale && storage->scaleTared)
-        return 1;
+    //if(currentState == tare_scale && storage->scaleTared)
+    //    return 1;
 
-    if(currentState == get_weight && storage->weight_recieved && !storage->scaleTared)
-        return 1;
-    
-    return 0;
+    //if(currentState == get_weight && storage->weight_recieved && !storage->scaleTared)
+    //    return 1;
+
+    uint16_t storage_status = 0;
+    uint16_t linear_status = 0;
+    uint16_t motor_status = 0;
+
+    //MOTOR
+    if (motor->i2cStatus) motor_status |= (1 << 3);
+    else motor_status &= ~(1 << 3); 
+
+    if (motor->stucked) motor_status |= (1 << 2);
+    else motor_status &= ~(1 << 2); 
+
+    motor_status |= (motor->error & 0b11);
+
+    //LINEAR
+    if (linear->i2cStatus) linear_status |= (1 << 3);
+    else linear_status &= ~(1 << 3); 
+
+    linear_status |= (linear->error & 0b111);
+
+    linear_status = linear_status << 4;
+
+    //STORAGE
+    if (storage->i2cStatus) storage_status |= (1 << 3);
+    else storage_status &= ~(1 << 3); 
+
+    if (storage->scaleTared) storage_status |= (1 << 2);
+    else storage_status &= ~(1 << 2); 
+
+    storage_status |= (storage->error & 0b11);
+
+    storage_status = storage_status << 8;
+
+    return storage_status | linear_status | motor_status;
 }

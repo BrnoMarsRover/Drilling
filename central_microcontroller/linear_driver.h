@@ -28,6 +28,7 @@ struct linear{
     uint16_t height;
     uint16_t toGround;
     //INSIDE
+    uint8_t i2cStatus;
     uint16_t goalHeight;
     float pid_prevError;
     float pid_integral;

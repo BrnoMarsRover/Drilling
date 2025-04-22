@@ -11,7 +11,7 @@
 #define I2C_PORT i2c0
 #define MOTOR_ADDR 0x0A
 
-#define MAX_DEAD_TICKS 10 // max dead time in ms/loop time ms e.g. 3000/100
+#define MAX_DEAD_TICKS 20 // max dead time in ms/loop time ms e.g. 3000/100
 
 struct motor {
 	//IN
@@ -23,6 +23,7 @@ struct motor {
 	uint8_t temperature;
 	uint8_t error;
 	//INSIDE
+	uint8_t i2cStatus;
 	int8_t rpsGoal;
 	uint8_t deadTicks;
 	bool running;

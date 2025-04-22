@@ -16,16 +16,21 @@
 
 
 struct storage{
+    //IN
     uint8_t command;
+
+    //OUT
+    uint16_t weight;
+    uint8_t active_slot;
+    uint8_t error;
+    bool scaleTared;
+    bool active;
+
+    //INSIDE
+    bool i2cStatus;
     uint8_t demand_pos;
     bool weight_recieved;
     bool weighting;
-
-    uint8_t active_slot;
-    uint8_t error;
-    uint16_t weight;
-    bool scaleTared;
-    bool active;
     uint16_t samples[STORE_SLOTS];
     uint8_t raw;
 };
