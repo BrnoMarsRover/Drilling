@@ -3652,6 +3652,112 @@
 			)
 		)
 	)
+	(footprint "heatsink:drill_heatsink"
+		(layer "F.Cu")
+		(uuid "105e21ed-2e3a-45d3-abac-2a535cdd8fb8")
+		(at 348 85)
+		(property "Reference" "REF**"
+			(at 16.5 10 0)
+			(unlocked yes)
+			(layer "F.SilkS")
+			(uuid "1c16f506-aa8e-446b-a9a5-762bbf2de311")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.1)
+				)
+			)
+		)
+		(property "Value" "drill_heatsink"
+			(at 16.5 11.5 0)
+			(unlocked yes)
+			(layer "F.Fab")
+			(uuid "835b66f2-b2c6-4786-91ea-f65a9b5a237c")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Footprint" "heatsink:drill_heatsink"
+			(at 16.5 10.5 0)
+			(unlocked yes)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "7efb1b4a-6cd0-41a0-a5ca-f051792c0b86")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 16.5 10.5 0)
+			(unlocked yes)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "c23c027a-ca0a-46d2-af71-37f182d03792")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 16.5 10.5 0)
+			(unlocked yes)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "ba370380-d2b2-439b-953f-900817829942")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(attr smd)
+		(fp_rect
+			(start 0 0)
+			(end 51 32)
+			(stroke
+				(width 0.1)
+				(type default)
+			)
+			(fill none)
+			(layer "F.SilkS")
+			(uuid "a6da7a23-913d-4c49-a54a-01e01eb579e0")
+		)
+		(fp_text user "${REFERENCE}"
+			(at 16.5 13 0)
+			(unlocked yes)
+			(layer "F.Fab")
+			(uuid "ca531d47-4b3a-4898-a4cf-5edccc349036")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(pad "" np_thru_hole circle
+			(at 11.5 16)
+			(size 4 4)
+			(drill 4)
+			(layers "F&B.Cu" "*.Mask")
+			(uuid "e15e660f-dceb-4665-917b-1fe9be79a1f2")
+		)
+		(pad "" np_thru_hole circle
+			(at 39.5 16)
+			(size 4 4)
+			(drill 4)
+			(layers "F&B.Cu" "*.Mask")
+			(uuid "9ade8a92-8da5-4763-b486-e05c8e0d0561")
+		)
+	)
 	(footprint "Capacitor_THT:CP_Radial_D5.0mm_P2.50mm"
 		(layer "F.Cu")
 		(uuid "111fa61c-1822-42bc-b805-9bd088b2bc20")
@@ -27880,7 +27986,7 @@
 		(descr "Diode SMC (DO-214AB) Handsoldering")
 		(tags "Diode SMC (DO-214AB) Handsoldering")
 		(property "Reference" "D101"
-			(at 0 -4.1 360)
+			(at 0 -4.1 0)
 			(layer "F.SilkS")
 			(uuid "9cc2309f-9a9c-418b-bd3a-32ebad2434ed")
 			(effects
@@ -27891,7 +27997,7 @@
 			)
 		)
 		(property "Value" "3A"
-			(at 0 4.2 360)
+			(at 0 4.2 0)
 			(layer "F.Fab")
 			(uuid "e4090102-af77-459f-9292-98da089fc0a2")
 			(effects
@@ -28116,7 +28222,7 @@
 			(uuid "95d23759-4b88-4d34-8f31-2236b21b80ed")
 		)
 		(fp_text user "${REFERENCE}"
-			(at 0 -1.5 360)
+			(at 0 -1.5 0)
 			(layer "F.Fab")
 			(uuid "ba03dc00-2510-435c-9eeb-236947139203")
 			(effects
@@ -29532,7 +29638,7 @@
 	(footprint "Capacitor_THT:CP_Radial_D12.5mm_P5.00mm"
 		(layer "F.Cu")
 		(uuid "da07739f-0e77-4cb4-987e-605899bbfb18")
-		(at 354 61)
+		(at 360 62)
 		(descr "CP, Radial series, Radial, pin pitch=5.00mm, , diameter=12.5mm, Electrolytic Capacitor")
 		(tags "CP Radial series Radial pin pitch 5.00mm  diameter 12.5mm Electrolytic Capacitor")
 		(property "Reference" "C210"
@@ -35578,7 +35684,7 @@
 		(descr "car blade fuse direct solder")
 		(tags "car blade fuse")
 		(property "Reference" "F101"
-			(at 4.65 -3.9 360)
+			(at 4.65 -3.9 0)
 			(layer "F.SilkS")
 			(uuid "7dfd3ce1-236e-4a7a-818d-60770ee82ebd")
 			(effects
@@ -35589,7 +35695,7 @@
 			)
 		)
 		(property "Value" "5A"
-			(at 4.6 4 360)
+			(at 4.6 4 0)
 			(layer "F.Fab")
 			(uuid "7e00ebdc-3c79-4b43-a820-bc08fe59eb26")
 			(effects
@@ -35814,7 +35920,7 @@
 			(uuid "8e729e77-f0cf-4c8c-ac76-08e01ec64bba")
 		)
 		(fp_text user "${REFERENCE}"
-			(at 4.75 -1.5 360)
+			(at 4.75 -1.5 0)
 			(layer "F.Fab")
 			(uuid "6abc28b1-96f7-4797-9dfc-454eadceb87a")
 			(effects
