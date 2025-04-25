@@ -2680,6 +2680,12 @@
 		(uuid "ada22630-e130-4649-b624-684740850000")
 	)
 	(junction
+		(at 71.12 71.12)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "b4e3808a-7754-4e2b-9d12-9b1dba187d65")
+	)
+	(junction
 		(at 63.5 26.67)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -2756,10 +2762,6 @@
 		(uuid "1e57114a-c44d-4837-8b8e-901986e3b2ed")
 	)
 	(no_connect
-		(at 71.12 73.66)
-		(uuid "2ebbe033-6964-4654-912e-9ad42ec14630")
-	)
-	(no_connect
 		(at 143.51 44.45)
 		(uuid "349599ed-f2d6-44ab-bf98-4ca1cbb83aed")
 	)
@@ -2804,10 +2806,6 @@
 		(uuid "9a71d913-997f-41f1-a52e-280a7b431659")
 	)
 	(no_connect
-		(at 71.12 71.12)
-		(uuid "9ed3f7a1-f70c-4214-b47f-a4e99e7063fc")
-	)
-	(no_connect
 		(at 55.88 60.96)
 		(uuid "9fdf5818-50f0-4d66-81c1-c4e10974e398")
 	)
@@ -2845,7 +2843,7 @@
 	)
 	(wire
 		(pts
-			(xy 39.37 41.91) (xy 81.28 41.91)
+			(xy 39.37 41.91) (xy 91.44 41.91)
 		)
 		(stroke
 			(width 0)
@@ -3365,7 +3363,17 @@
 	)
 	(wire
 		(pts
-			(xy 81.28 76.2) (xy 105.41 76.2)
+			(xy 71.12 71.12) (xy 71.12 73.66)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "839fa4a6-87fd-4db4-b4d7-af78aa97b4d4")
+	)
+	(wire
+		(pts
+			(xy 91.44 76.2) (xy 105.41 76.2)
 		)
 		(stroke
 			(width 0)
@@ -3415,7 +3423,7 @@
 	)
 	(wire
 		(pts
-			(xy 80.01 44.45) (xy 80.01 78.74)
+			(xy 90.17 44.45) (xy 90.17 78.74)
 		)
 		(stroke
 			(width 0)
@@ -3522,6 +3530,16 @@
 			(type default)
 		)
 		(uuid "9e0702cd-3764-4450-b231-955837e5ca6c")
+	)
+	(wire
+		(pts
+			(xy 71.12 71.12) (xy 73.66 71.12)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9e14a44f-b24a-4c84-b203-398f0d21f9d2")
 	)
 	(wire
 		(pts
@@ -3745,7 +3763,7 @@
 	)
 	(wire
 		(pts
-			(xy 41.91 44.45) (xy 80.01 44.45)
+			(xy 41.91 44.45) (xy 90.17 44.45)
 		)
 		(stroke
 			(width 0)
@@ -3955,7 +3973,7 @@
 	)
 	(wire
 		(pts
-			(xy 81.28 41.91) (xy 81.28 76.2)
+			(xy 91.44 41.91) (xy 91.44 76.2)
 		)
 		(stroke
 			(width 0)
@@ -4005,13 +4023,25 @@
 	)
 	(wire
 		(pts
-			(xy 80.01 78.74) (xy 105.41 78.74)
+			(xy 90.17 78.74) (xy 105.41 78.74)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
 		(uuid "ff064bab-d1a2-420c-af25-bcc7cf94d1f5")
+	)
+	(hierarchical_label "RESET"
+		(shape input)
+		(at 73.66 71.12 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "2e85c276-eeea-468b-bd4a-34199d48c33a")
 	)
 	(hierarchical_label "SCL"
 		(shape bidirectional)

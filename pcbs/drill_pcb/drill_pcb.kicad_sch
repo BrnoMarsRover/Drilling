@@ -2579,16 +2579,16 @@
 		(uuid "1f84dc2c-55e0-4cef-8bb6-849c8292fbc0")
 	)
 	(junction
-		(at 133.35 74.93)
+		(at 135.89 80.01)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "45872a10-598f-4110-aba4-91053217599e")
+		(uuid "359eb4ec-3280-46e4-ab23-f722efe5f8d6")
 	)
 	(junction
-		(at 135.89 77.47)
+		(at 133.35 77.47)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "716c6b91-6c79-48f8-8383-78d1ffa24a20")
+		(uuid "c13fdcad-dd98-4dcf-a4b8-0202ae5fe86e")
 	)
 	(junction
 		(at 135.89 64.77)
@@ -2796,13 +2796,13 @@
 	)
 	(wire
 		(pts
-			(xy 133.35 62.23) (xy 133.35 74.93)
+			(xy 135.89 80.01) (xy 135.89 95.25)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "2a14ff82-6ba5-42ac-93ef-e3f037dadf55")
+		(uuid "1b6616e4-e0b8-4cef-943b-29a60cd67fb8")
 	)
 	(wire
 		(pts
@@ -2843,16 +2843,6 @@
 			(type default)
 		)
 		(uuid "37c3af0c-0810-4a7d-bc6c-94531e46b4fb")
-	)
-	(wire
-		(pts
-			(xy 135.89 64.77) (xy 135.89 77.47)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "380a7923-25b2-4b60-a66a-8ef13e052d63")
 	)
 	(wire
 		(pts
@@ -2916,7 +2906,7 @@
 	)
 	(wire
 		(pts
-			(xy 114.3 74.93) (xy 133.35 74.93)
+			(xy 114.3 77.47) (xy 133.35 77.47)
 		)
 		(stroke
 			(width 0)
@@ -2936,7 +2926,7 @@
 	)
 	(wire
 		(pts
-			(xy 133.35 74.93) (xy 133.35 87.63)
+			(xy 133.35 62.23) (xy 133.35 77.47)
 		)
 		(stroke
 			(width 0)
@@ -2976,7 +2966,7 @@
 	)
 	(wire
 		(pts
-			(xy 114.3 87.63) (xy 133.35 87.63)
+			(xy 114.3 92.71) (xy 133.35 92.71)
 		)
 		(stroke
 			(width 0)
@@ -2986,7 +2976,7 @@
 	)
 	(wire
 		(pts
-			(xy 114.3 77.47) (xy 135.89 77.47)
+			(xy 114.3 80.01) (xy 135.89 80.01)
 		)
 		(stroke
 			(width 0)
@@ -3016,13 +3006,13 @@
 	)
 	(wire
 		(pts
-			(xy 135.89 77.47) (xy 135.89 90.17)
+			(xy 135.89 64.77) (xy 135.89 80.01)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "9ed9cd0c-477b-49a6-b0ec-ed060898a8b8")
+		(uuid "a43dc3db-9530-4d51-ae0b-3a66fa370d4a")
 	)
 	(wire
 		(pts
@@ -3116,7 +3106,17 @@
 	)
 	(wire
 		(pts
-			(xy 114.3 90.17) (xy 135.89 90.17)
+			(xy 133.35 77.47) (xy 133.35 92.71)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "eae9052d-1546-4883-89b5-a98ea5ecdc56")
+	)
+	(wire
+		(pts
+			(xy 114.3 95.25) (xy 135.89 95.25)
 		)
 		(stroke
 			(width 0)
@@ -5204,7 +5204,7 @@
 	)
 	(sheet
 		(at 100.33 60.96)
-		(size 13.97 5.08)
+		(size 13.97 7.62)
 		(fields_autoplaced yes)
 		(stroke
 			(width 0.1)
@@ -5224,7 +5224,7 @@
 			)
 		)
 		(property "Sheetfile" "motorControl.kicad_sch"
-			(at 100.33 66.5984 0)
+			(at 100.33 69.1384 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5252,6 +5252,16 @@
 			)
 			(uuid "999ff640-32fa-4ecf-85f5-ede8ec93a260")
 		)
+		(pin "RESET" input
+			(at 114.3 67.31 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+			(uuid "d657fb41-f5bf-49b8-8d2f-e5173d6abec3")
+		)
 		(instances
 			(project "drill_pcb"
 				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313"
@@ -5261,8 +5271,8 @@
 		)
 	)
 	(sheet
-		(at 100.33 73.66)
-		(size 13.97 5.08)
+		(at 100.33 76.2)
+		(size 13.97 7.62)
 		(fields_autoplaced yes)
 		(stroke
 			(width 0.1524)
@@ -5273,7 +5283,7 @@
 		)
 		(uuid "4d3296cb-c53d-40d6-b459-0c8b208d28b7")
 		(property "Sheetname" "Linear drive control"
-			(at 100.33 72.9484 0)
+			(at 100.33 75.4884 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5282,7 +5292,7 @@
 			)
 		)
 		(property "Sheetfile" "linearDriveControl.kicad_sch"
-			(at 100.33 79.3246 0)
+			(at 100.33 84.4046 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5291,7 +5301,7 @@
 			)
 		)
 		(pin "SDA" bidirectional
-			(at 114.3 74.93 0)
+			(at 114.3 77.47 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5301,7 +5311,7 @@
 			(uuid "693b3c5a-22c4-4fee-b7bf-e6e7fc447283")
 		)
 		(pin "SCL" bidirectional
-			(at 114.3 77.47 0)
+			(at 114.3 80.01 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5309,6 +5319,16 @@
 				(justify right)
 			)
 			(uuid "fc751fcd-6331-4e26-99bd-482c4182c3b1")
+		)
+		(pin "RESET" input
+			(at 114.3 82.55 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+			(uuid "9d5d8960-db60-41b4-8c11-1324cfce86d3")
 		)
 		(instances
 			(project "drill_pcb"
@@ -5319,8 +5339,8 @@
 		)
 	)
 	(sheet
-		(at 100.33 86.36)
-		(size 13.97 5.08)
+		(at 100.33 91.44)
+		(size 13.97 7.62)
 		(fields_autoplaced yes)
 		(stroke
 			(width 0.1524)
@@ -5331,7 +5351,7 @@
 		)
 		(uuid "8a702047-5b96-48a0-a5d4-a2e886ec5e9e")
 		(property "Sheetname" "Storage and weighing"
-			(at 100.33 85.6484 0)
+			(at 100.33 90.7284 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5340,7 +5360,7 @@
 			)
 		)
 		(property "Sheetfile" "storageAndWeighing.kicad_sch"
-			(at 100.33 92.0246 0)
+			(at 100.33 99.6446 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5349,7 +5369,7 @@
 			)
 		)
 		(pin "SDA" bidirectional
-			(at 114.3 87.63 0)
+			(at 114.3 92.71 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5359,7 +5379,7 @@
 			(uuid "4f7b4d8a-3333-4503-8118-2c01afebcbe0")
 		)
 		(pin "SCL" bidirectional
-			(at 114.3 90.17 0)
+			(at 114.3 95.25 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5367,6 +5387,16 @@
 				(justify right)
 			)
 			(uuid "576c5e96-ad24-4f87-85b3-0391e50eb4bc")
+		)
+		(pin "RESET" input
+			(at 114.3 97.79 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+			(uuid "5d221eca-3094-44b3-8f28-c6531df28274")
 		)
 		(instances
 			(project "drill_pcb"

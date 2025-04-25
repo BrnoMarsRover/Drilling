@@ -2676,6 +2676,12 @@
 		(uuid "e62b1980-3153-4018-bcb5-1484a4351861")
 	)
 	(junction
+		(at 92.71 71.12)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "f7c29880-bbb3-4049-bd53-064357827602")
+	)
+	(junction
 		(at 198.12 125.73)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -2684,10 +2690,6 @@
 	(no_connect
 		(at 167.64 81.28)
 		(uuid "02651eb5-3174-44f0-88d6-c2f0bea7303f")
-	)
-	(no_connect
-		(at 92.71 73.66)
-		(uuid "0b4b08c0-64a2-44da-a29b-03c1ebde2e5f")
 	)
 	(no_connect
 		(at 80.01 111.76)
@@ -2740,10 +2742,6 @@
 	(no_connect
 		(at 92.71 93.98)
 		(uuid "a018d880-4d68-41e6-882a-ef972fcce1f9")
-	)
-	(no_connect
-		(at 92.71 71.12)
-		(uuid "b6243bbd-b4cf-4b2a-8c50-6d49708e9fee")
 	)
 	(no_connect
 		(at 82.55 60.96)
@@ -3220,6 +3218,16 @@
 			(type default)
 		)
 		(uuid "441202d7-5596-4947-a375-0041fa8c3637")
+	)
+	(wire
+		(pts
+			(xy 92.71 71.12) (xy 92.71 73.66)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4870b261-2ea6-41cc-80eb-d5cfb6191c43")
 	)
 	(wire
 		(pts
@@ -4183,6 +4191,16 @@
 	)
 	(wire
 		(pts
+			(xy 92.71 71.12) (xy 93.98 71.12)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f8c5bdda-f928-4097-ae93-1e2cb2772ca8")
+	)
+	(wire
+		(pts
 			(xy 74.93 140.97) (xy 74.93 135.89)
 		)
 		(stroke
@@ -4200,6 +4218,18 @@
 			(type default)
 		)
 		(uuid "ff3fbec4-cd66-420d-9fb0-d995d0d1a311")
+	)
+	(hierarchical_label "RESET"
+		(shape input)
+		(at 93.98 71.12 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "81909eb1-cf56-44db-bdbe-f63c513d7ad2")
 	)
 	(hierarchical_label "SCL"
 		(shape bidirectional)
