@@ -47,6 +47,22 @@ Same as here https://github.com/micro-ROS/micro_ros_raspberrypi_pico_sdk.git
 
 ## Project Structure
 
+├── CMakeLists.txt
+├── libmicroros
+├── LICENSE
+├── linear_driver.c
+├── linear_driver.h
+├── microros_static_library
+├── motor_driver.c
+├── motor_driver.h
+├── pico_micro_ros_drill.c
+├── pico_uart_transport.c
+├── pico_uart_transports.h
+├── README.md
+├── storage_driver.c
+└── storage_driver.h
+
+
 ## Communication
 
 ### Topics
@@ -94,8 +110,7 @@ Same as here https://github.com/micro-ROS/micro_ros_raspberrypi_pico_sdk.git
 | 6       | Storage Slot            | Currently active storage slot.                                        |
 | 7-10    | Slot Weights            | Weight on each storage slot (slot 1 → index 7, etc.), divided by 0.1. |
 
-#####
-## Drill Status Bits (Index 0 in `/drill_data`)
+#### Drill Status Bits (Index 0 in `/drill_data`)
 
 | Subsystem         | Bit(s)  | Meaning                                                                                |
 |-------------------|---------|----------------------------------------------------------------------------------------|
@@ -109,12 +124,37 @@ Same as here https://github.com/micro-ROS/micro_ros_raspberrypi_pico_sdk.git
 |                   | 2       | 0 = Spiral not blocked, 1 = Spiral blocked                                             |
 |                   | 1:0     | 00 = No error, 01 = H-bridge fault                                                     |
 
+### I2C
+
+| I/O  | Byte | Name       | Type        | Range      | Description                                  |
+|------|------|------------|-------------|------------|----------------------------------------------|
+| **0x0A DC Motor Control**                                                                          |
+| IN   | 0    | Speed      | `int8_t`    | -100…100   | RPS multiplied by 0.03                       |
+| OUT  | 0    | Status     | `uint8_t`   | 0…255      | Status                                       |
+|      | 1    | Speed      | `int8_t`    | -100…100   | RPS multiplied by 0.03                       |
+|      | 2    | Torque     | `int8_t`    | -83…83     | Torque (Nm) multiplied by 0.03               |
+|      | 3    | Temperature| `uint8_t`   | 0…255      | Motor temperature (°C)                       |
+
+| **0x09 Linear Actuator Control**                                                                   |
+| IN   | 0    | Command    | `uint8_t`   | 0…4        | Calibration, stop, move down, move up        |
+|      | 1    | Speed      | `uint8_t`   | 0…255      | Step speed                                   |
+| OUT  | 0    | Status     | `uint8_t`   | 0…255      | Status                                       |
+|      | 1    | Height     | `uint16_t`  | 0…500      | Distance from reference (mm)                 |
+|      | 2    | -          | -           | -          | -                                            |
+|      | 3    | Ground Height | `uint16_t`| 0…65535    | Distance to the ground (mm)                 |
+|      | 4    | -          | -           | -          | -                                            |
+
+| **0x08 Storage System**                                                                            |
+| IN   | 0    | Command    | `uint8_t`   | 0…255      | Rotation, zeroing, weighing                  |
+| OUT  | 0    | Weight     | `uint16_t`  | 0…65535    | Weight (g) multiplied by 0.1                 |
+|      | 1    | -          | -           | -          | -                                            |
+|      | 2    | Status     | `uint8_t`   | 0…255      | Status                                       |
+
 
 
 ## Acknowledgments
 - [Micro-ROS](https://micro-ros.github.io/) project for providing the base integration of Micro-ROS on Raspberry Pi Pico.
 - [micro_ros_raspberrypi_pico_sdk](https://github.com/micro-ROS/micro_ros_raspberrypi_pico_sdk) as the foundation for this project's firmware.
-- Brno Mars Rover.
 
 ## License
 
