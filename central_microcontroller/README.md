@@ -46,7 +46,7 @@ Same as here https://github.com/micro-ROS/micro_ros_raspberrypi_pico_sdk.git
     ```
 
 ## Project Structure
-    ```bash
+```bash
 ├── CMakeLists.txt
 ├── LICENSE
 ├── libmicroros     # MicroROS precompiled library for RPi Pico
@@ -61,7 +61,7 @@ Same as here https://github.com/micro-ROS/micro_ros_raspberrypi_pico_sdk.git
     ├── motor_driver.h          # Driver for motor subsystem
     ├── storage_driver.h        # Driver for storage unit subsystem
     └── pico_uart_transports.h  # Original header from MicroROS, UART transport handling
-    ```
+```
 
 ## Communication
 
