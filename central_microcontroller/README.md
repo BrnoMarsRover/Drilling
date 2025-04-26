@@ -46,22 +46,22 @@ Same as here https://github.com/micro-ROS/micro_ros_raspberrypi_pico_sdk.git
     ```
 
 ## Project Structure
-
+    ```bash
 ├── CMakeLists.txt
-├── libmicroros
 ├── LICENSE
-├── linear_driver.c
-├── linear_driver.h
-├── microros_static_library
-├── motor_driver.c
-├── motor_driver.h
-├── pico_micro_ros_drill.c
-├── pico_uart_transport.c
-├── pico_uart_transports.h
-├── README.md
-├── storage_driver.c
-└── storage_driver.h
-
+├── libmicroros     # MicroROS precompiled library for RPi Pico
+├── src/
+│   ├── pico_micro_ros_drill.c  # main, node init, i2c init, callbacks
+│   ├── linear_driver.c
+│   ├── motor_driver.c
+│   ├── storage_driver.c
+│   └── pico_uart_transport.c   # Original c-file from MicroROS, UART transport handling
+└── include/
+    ├── linear_driver.h         # Driver for linear subsystem
+    ├── motor_driver.h          # Driver for motor subsystem
+    ├── storage_driver.h        # Driver for storage unit subsystem
+    └── pico_uart_transports.h  # Original header from MicroROS, UART transport handling
+    ```
 
 ## Communication
 
@@ -134,7 +134,6 @@ Same as here https://github.com/micro-ROS/micro_ros_raspberrypi_pico_sdk.git
 |      | 1    | Speed      | `int8_t`    | -100…100   | RPS multiplied by 0.03                       |
 |      | 2    | Torque     | `int8_t`    | -83…83     | Torque (Nm) multiplied by 0.03               |
 |      | 3    | Temperature| `uint8_t`   | 0…255      | Motor temperature (°C)                       |
-
 | **0x09 Linear Actuator Control**                                                                   |
 | IN   | 0    | Command    | `uint8_t`   | 0…4        | Calibration, stop, move down, move up        |
 |      | 1    | Speed      | `uint8_t`   | 0…255      | Step speed                                   |
@@ -143,7 +142,6 @@ Same as here https://github.com/micro-ROS/micro_ros_raspberrypi_pico_sdk.git
 |      | 2    | -          | -           | -          | -                                            |
 |      | 3    | Ground Height | `uint16_t`| 0…65535    | Distance to the ground (mm)                 |
 |      | 4    | -          | -           | -          | -                                            |
-
 | **0x08 Storage System**                                                                            |
 | IN   | 0    | Command    | `uint8_t`   | 0…255      | Rotation, zeroing, weighing                  |
 | OUT  | 0    | Weight     | `uint16_t`  | 0…65535    | Weight (g) multiplied by 0.1                 |
