@@ -1,3 +1,10 @@
+/******************************************************************************
+ * @file    linear_driver.h
+ * @author  Martin Kriz
+ * @brief   Definitions and functions for controlling a linear actuator over I2C.
+ * @date    2025-04-26
+ ******************************************************************************/
+
 #ifndef kriz_linear
 #define kriz_linear
 
@@ -14,56 +21,100 @@
 
 #define SAFE_POS 58 // [mm]
 #define STORE_POS 92 // [mm]
-#define LIN_Kp 1000
-#define LIN_Ki 0.05
-#define LIN_Kd 0.3
+#define LIN_Kp 15
+
+#define MAX_OUTPUT  255.0f
+#define MIN_OUTPUT -255.0f
+#define MIN_SPEED 40.0f
 
 struct linear{
-    //IN
+    //In
     uint8_t command;
     uint8_t speed;
-    //OUT
+    //Output
     uint8_t state;
     uint8_t error;
     uint16_t height;
     uint16_t toGround;
-    //INSIDE
+    //Internal
     uint8_t i2cStatus;
     uint16_t goalHeight;
-    float pid_prevError;
-    float pid_integral;
-    /*
-    //MEASURE TIME
-    int64_t Wsum;
-    int64_t Wcounter;
-    int64_t Wtmin;
-    int64_t Wtmax;
-    int64_t Rsum;
-    int64_t Rcounter;
-    int64_t Rtmin;
-    int64_t Rtmax;
-    */
 };
 
+/**
+ * @brief   Reads linear actuator sensor data over I2C.
+ * @param   linear Pointer to the linear actuator structure.
+ * @return  0 on success, negative value on failure.
+ */
 int linear_read(struct linear* linear);
+
+/**
+ * @brief   Sends control commands to the linear actuator via I2C.
+ * @param   linear Pointer to the linear actuator structure.
+ * @return  0 on success, negative value on failure.
+ */
 int linear_write(struct linear* linear);
+
+/**
+ * @brief   Initializes the linear actuator structure and sets default values.
+ * @param   linear Pointer to the linear actuator structure.
+ */
 void linear_init(struct linear* linear);
 
+/**
+ * @brief   Stops linear actuator movement.
+ * @param   linear Pointer to the linear actuator structure.
+ */
 void linear_stop(struct linear* linear);
+
+/**
+ * @brief   Moves the linear actuator towards the goal height.
+ * @param   linear Pointer to the linear actuator structure.
+ * @param   dt Time delta for control calculation.
+ */
 void linear_goto(struct linear* linear, float dt);
+
+/**
+ * @brief   Checks if the linear actuator is stuck based on error codes.
+ * @param   linear Pointer to the linear actuator structure.
+ * @return  true if stuck, false otherwise.
+ */
 bool is_linear_stucked(struct linear* linear);
+
+/**
+ * @brief   Checks if the linear actuator has reached the goal height.
+ * @param   linear Pointer to the linear actuator structure.
+ * @return  true if the goal is reached, false otherwise.
+ */
 bool linear_reached_goal(struct linear* linear);
+
+/**
+ * @brief   Checks if the linear actuator is at its home (bottom) position.
+ * @param   linear Pointer to the linear actuator structure.
+ * @return  true if at home position, false otherwise.
+ */
 bool is_linear_home(struct linear* linear);
-bool can_storage_move(struct linear* linear) ;
+
+/**
+ * @brief   Checks if it is safe to move the storage system.
+ * @param   linear Pointer to the linear actuator structure.
+ * @return  true if safe to move, false otherwise.
+ */
+bool can_storage_move(struct linear* linear);
+
+/**
+ * @brief   Checks if the linear actuator can continue moving downwards.
+ * @param   linear Pointer to the linear actuator structure.
+ * @return  true if movement down is allowed, false otherwise.
+ */
 bool can_linear_goDown(struct linear* linear);
+
+/**
+ * @brief   Computes the control output for actuator movement based on goal error.
+ * @param   linear Pointer to the linear actuator structure.
+ * @param   dt Time delta for control update.
+ * @return  Control output (speed command).
+ */
 float linear_step(struct linear* linear, float dt);
-
-
-
-
-
-
-
-
 
 #endif

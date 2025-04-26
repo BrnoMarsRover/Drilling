@@ -1,6 +1,11 @@
+/******************************************************************************
+ * @file    motor_driver.c
+ * @author  Martin Kriz
+ * @brief   Functions for handling the DC motor subsystem.
+ * @date    2025-04-26
+ ******************************************************************************/
+
 #include "motor_driver.h"
-
-
 
 int motor_read(struct motor* motor)
 {

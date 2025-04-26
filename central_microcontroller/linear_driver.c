@@ -1,9 +1,14 @@
+/******************************************************************************
+ * @file    linear_driver.c
+ * @author  Martin Kriz
+ * @brief   Functions for handling the linear actuator subsystem.
+ * @date    2025-04-26
+ ******************************************************************************/
+
 #include "linear_driver.h"
 
 int linear_read(struct linear* linear)
 {
-
-    
     if (!linear)
     return -2;
     uint8_t buffer[5];
@@ -56,27 +61,12 @@ void linear_init(struct linear* linear)
     linear_write(linear);
     linear_read(linear);
     linear->goalHeight = 0;
-    linear->pid_integral = 0;
-    linear->pid_prevError = 0;
-
-    /*
-    linear->Wsum = 0;
-    linear->Wcounter = 0;
-    linear->Wtmin = 100000;
-    linear->Wtmax = 0;
-    linear->Rsum = 0;
-    linear->Rcounter = 0;
-    linear->Rtmin = 100000;
-    linear->Rtmax = 0;
-    */
 }
 
 void linear_stop(struct linear* linear)
 {
     if (!linear)
         return;
-    linear->pid_integral = 0;
-    linear->pid_prevError = 0;
     linear->command = 1;
 }
 
@@ -93,11 +83,7 @@ void linear_goto(struct linear* linear, float dt)
         else if (speed < 0) {linear->command = 3;}
         else {linear->command = 2;}
     
-        speed = speed / 2 * 255.0f; 
-        speed = fabs(speed);
-        if (speed > 255.0f) speed = 255.0f;
-    
-        linear->speed = (uint8_t) speed;
+        linear->speed = (uint8_t) fabs(speed);
     }
     else
     {
@@ -151,15 +137,26 @@ bool can_linear_goDown(struct linear* linear)
 }
 
 float linear_step(struct linear* linear, float dt) {
-    if(linear->goalHeight > linear->height - 2 && linear->goalHeight < linear->height + 2)
-    {
+    float error = (float)linear->goalHeight - (float)linear->height;
+    
+    if (error == 0)
         return 0;
+
+    float output = LIN_Kp * error;
+
+    // Saturace výstupu na výstupní rozsah
+    if (output > MAX_OUTPUT) {
+        output = MAX_OUTPUT;
+    } else if (output < MIN_OUTPUT) {
+        output = MIN_OUTPUT;
     }
-    float error = ((float)linear->goalHeight)/1000.0f - ((float)linear->height)/1000.0f;
-    linear->pid_integral += error * dt;
-    float derivative = (error - linear->pid_prevError) / dt;
-    float output = LIN_Kp * error + LIN_Ki * linear->pid_integral + LIN_Kd * derivative;
-    linear->pid_prevError = error;
+
+    // Nastaveni minimalni rychlosti
+    if (output < MIN_SPEED && output > 0)
+        output = MIN_SPEED;
+    if (output > -MIN_SPEED && output < 0)
+        output = -MIN_SPEED;
+
     return output;
 }
 

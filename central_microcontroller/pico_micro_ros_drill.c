@@ -1,3 +1,10 @@
+/******************************************************************************
+ * @file    pico_micro_ros_drill.c
+ * @author  Martin Kriz
+ * @brief   Main file containing the program's entry point and initialization routines.
+ * @date    2025-04-26
+ ******************************************************************************/
+
 #include <stdio.h>
 #include <rcl/rcl.h>
 #include <rcl/error_handling.h>
@@ -15,11 +22,12 @@
 #include "motor_driver.h"
 #include "math.h"
 
-#define MAIN_LOOP_TIME_MS 50
+#define MAIN_LOOP_TIME_MS 50    // Period of i2c communication
 #define I2C_PORT i2c0
 #define BUFFER_SIZE 10
 #define STRING_SIZE 30
 
+// Enum for /drill_state topic, must be same as enum in drill_controller node
 enum state_machine
 {
     stop,
@@ -34,14 +42,18 @@ enum state_machine
     manual
 };
 
+// State machine global variable
 enum state_machine currentState = stop;
 
+// Subsystems representation
 struct storage storage;
 struct linear linear;
 struct motor motor;
 
+// Green LED, RUN indicator
 const uint LED_PIN = 25;
 
+// Topics variables
 rcl_subscription_t state_subscriber;
 std_msgs__msg__UInt8 msg_state;
 
@@ -54,38 +66,49 @@ sensor_msgs__msg__Joy msg_joy;
 rcl_publisher_t publisher;
 std_msgs__msg__UInt16MultiArray msg_data; 
 
+// Status function declaration
 uint16_t drill_message(struct motor* motor, struct linear* linear, struct storage* storage);
 
+// Callback for publishing on /drill_data topic
 void timerPublisher_callback(rcl_timer_t *timer, int64_t last_call_time)
 {
+    // Status
     msg_data.data.data[0] = drill_message(&motor, &linear, &storage);
 
+    // Motor variables
     msg_data.data.data[1] = abs(motor.rpsMeas);
     msg_data.data.data[2] = abs(motor.torqueMeas);
     msg_data.data.data[3] = motor.temperature;
     
+    // Linear variables
     msg_data.data.data[4] = linear.height; 
     msg_data.data.data[5] = linear.toGround;
     
+    // Storage variables
     msg_data.data.data[6] = storage.active_slot;
-    
-    //msg_data.data.data[7] = linear.Wsum/linear.Wcounter;
-    //msg_data.data.data[8] = linear.Wtmax;
-    //msg_data.data.data[9] = linear.Wtmin;
-    //msg_data.data.data[9] = storage.active;
-    //msg_data.data.data[10] = storage.command;
-
     for (int i = 0; i < STORE_SLOTS; ++i) 
     {
         msg_data.data.data[7 + i] = storage.samples[i];
     }
     
-    
     rcl_ret_t ret = rcl_publish(&publisher, &msg_data, NULL);  
 }
 
+// Main callback, i2c communication and state machine
 void timerMain_callback(rcl_timer_t *timer, int64_t last_call_time)
 {
+
+    // Input reading
+    if(motor_read(&motor) < 0) {motor.i2cStatus = false;}
+    else {motor.i2cStatus = true;}
+
+    if(linear_read(&linear) < 0) {linear.i2cStatus = false;}
+    else {linear.i2cStatus = true;}
+
+    if(storage_read(&storage) < 0) {storage.i2cStatus = false;}
+    else {storage.i2cStatus = true;}
+
+    // State machine
     switch (currentState) 
     {
         case stop:
@@ -189,44 +212,21 @@ void timerMain_callback(rcl_timer_t *timer, int64_t last_call_time)
             break;
     }
 
-
+    // Writing outputs
     motor_write(&motor); 
     linear_write(&linear);
-    
-    if(motor_read(&motor) < 0) {motor.i2cStatus = false;}
-    else {motor.i2cStatus = true;}
-
-    if(linear_read(&linear) < 0) {linear.i2cStatus = false;}
-    else {linear.i2cStatus = true;}
-
-    if(storage_read(&storage) < 0) {storage.i2cStatus = false;}
-    else {storage.i2cStatus = true;}
-
     if (storage.command != 0) {storage_write(&storage);}
-    /*
-    absolute_time_t start = get_absolute_time();
-    //
-    absolute_time_t end = get_absolute_time();
-    int64_t elapsed_us = absolute_time_diff_us(start, end);
-    
-    linear.Wsum = linear.Wsum + elapsed_us;
-    linear.Wcounter++;
-    
-    if(linear.Wtmin > elapsed_us)
-    linear.Wtmin = elapsed_us;
-    
-    if(linear.Wtmax < elapsed_us)
-    linear.Wtmax = elapsed_us;
-    */
 
 }
 
+// Callback for recieving /drill_state
 void state_callback(const void * msgin)
 {
     const std_msgs__msg__UInt8 * msg = (const std_msgs__msg__UInt8 *)msgin;
     currentState = msg->data;
 }
 
+// Callback for recieving /drill_parameters
 void parameters_callback(const void * msgin)
 {
     const std_msgs__msg__UInt16MultiArray * msg = (const std_msgs__msg__UInt16MultiArray *)msgin;
@@ -236,6 +236,7 @@ void parameters_callback(const void * msgin)
     storage.demand_pos = msg->data.data[2];
 }
 
+// Callback for recieving /drill_joy and handle manual controlling
 void joy_callback(const void * msgin)
 {
     const sensor_msgs__msg__Joy * msg = (const sensor_msgs__msg__Joy *)msgin;
@@ -311,6 +312,7 @@ int main()
         return ret;
     }
 
+    // Setting up node
     rclc_support_init(&support, 0, NULL, &allocator);
 
     rclc_node_init_default(&node, "drill_rpiPico", "", &support);
@@ -325,7 +327,7 @@ int main()
         ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, UInt16MultiArray),
         "drill_parameters");
 
-    // alocation memory to msg_parameters
+    // alocation memory for msg_parameters
     int16_t buffer[BUFFER_SIZE] = {};
     msg_parameters.data.data = buffer;
     msg_parameters.data.size = 3;
@@ -359,7 +361,7 @@ int main()
         ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, UInt16MultiArray),
         "drill_data");
     
-    // alocation memory to msg
+    // alocation memory for msg_data
     msg_data.data.data = buffer;
     msg_data.data.size = 11;
     msg_data.data.capacity = BUFFER_SIZE;
@@ -402,13 +404,13 @@ int main()
     msg_joy.header.frame_id.data = (char*) malloc(msg_joy.header.frame_id.capacity * sizeof(char));
     msg_joy.header.frame_id.size = 0;
 
-    // Assigning value to the frame_id char sequence
     strcpy(msg_joy.header.frame_id.data, "Hello World");
     msg_joy.header.frame_id.size = strlen(msg_joy.header.frame_id.data);
 
     msg_joy.header.stamp.sec = 10;
     msg_joy.header.stamp.nanosec = 20;
 
+    // Setting timers
     rclc_timer_init_default(
         &timerPublisher,
         &support,
@@ -421,6 +423,7 @@ int main()
         RCL_MS_TO_NS(MAIN_LOOP_TIME_MS),
         timerMain_callback);
 
+    // Setting executor
     rclc_executor_init(&executor, &support.context, 5, &allocator); //the number of executors
     rclc_executor_add_timer(&executor, &timerMain);
     
@@ -438,17 +441,19 @@ int main()
         
     rclc_executor_add_timer(&executor, &timerPublisher);
     
-    //init i2c
+    // Setting I2C
     i2c_init(I2C_PORT, 100000);
     gpio_set_function(4, GPIO_FUNC_I2C);
     gpio_set_function(5, GPIO_FUNC_I2C);
     gpio_pull_up(4);
     gpio_pull_up(5);
 
+    // Subsystems init
     storage_init(&storage);
     linear_init(&linear);
     motor_init(&motor);
     
+    // Green LED on, starting executor spinning
     gpio_put(LED_PIN, 1);
 
     while (true)
@@ -458,6 +463,8 @@ int main()
     return 0;
 }
 
+
+// Make status message for topic /drill_data index 0
 uint16_t drill_message(struct motor* motor, struct linear* linear, struct storage* storage)
 {
     if(!motor || !linear || !storage)

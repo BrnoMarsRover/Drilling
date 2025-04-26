@@ -1,3 +1,10 @@
+/******************************************************************************
+ * @file    storage_driver.c
+ * @author  Martin Kriz
+ * @brief   Functions for handling the sample storage subsystem over I2C.
+ * @date    2025-04-26
+ ******************************************************************************/
+
 #include "storage_driver.h"
 
 int storage_read(struct storage* storage)
@@ -12,7 +19,6 @@ int storage_read(struct storage* storage)
     uint16_t *ptr = (uint16_t*) buffer;
     storage->weight = *ptr;
     
-    storage->raw = buffer[2];
     uint8_t tmp = 224 & buffer[2]; //224 = B'1110 0000'
     tmp = tmp >> 5;
     if (tmp == 0)
