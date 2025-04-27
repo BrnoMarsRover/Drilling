@@ -1,9 +1,7 @@
-# Drill RPi Node (Micro-ROS on Raspberry Pi Pico for Rover Freya Drill)
+# Drill RPi Node - Micro-ROS on Raspberry Pi Pico for Rover Freya Drill
 
 ## Introduction
-This project integrates Micro-ROS on a Raspberry Pi Pico to serve as the central microcontroller for the drill system of our rover Freya.
-The Pico communicates over I2C with subsystems responsible for controlling linear actuators, the drilling motor, and the storage mechanism.
-Acting as a lightweight and efficient control unit, it ensures smooth and reliable coordination of all subsystems.
+This software project is designed for the Raspberry Pi Pico, which serves as the central microcontroller for the drilling kit of our rover, Freya. The Pico communicates over I2C with subsystems responsible for controlling the linear actuators, the drilling motor, and the storage mechanism. It ensures smooth and reliable coordination of all subsystems.
 
 This project is based on the [micro_ros_raspberrypi_pico_sdk](https://github.com/micro-ROS/micro_ros_raspberrypi_pico_sdk) by the Micro-ROS team, and extends it with custom functionality for the rover's drilling operations.
 
@@ -24,10 +22,11 @@ This project is based on the [micro_ros_raspberrypi_pico_sdk](https://github.com
 - ROS 2 (tested with Humble/rolling).
 - `joy` package from joystick_drivers repo.
 - Micro-ROS client library.
-- Micro-ROS agent (can be run locally or in Docker).
+- Micro-ROS agent (can be run locally or in Docker) to install agent follow [this](https://micro.ros.org/docs/tutorials/core/first_application_linux/) tutorial.
+- `gcc-arm-none-eabi` to compile the firmware for the Raspberry Pi Pico.
 
 ## Installation
-Same as here https://github.com/micro-ROS/micro_ros_raspberrypi_pico_sdk.git
+Same as [here](https://github.com/micro-ROS/micro_ros_raspberrypi_pico_sdk.git)
 
 
 ## Usage
@@ -44,6 +43,7 @@ Same as here https://github.com/micro-ROS/micro_ros_raspberrypi_pico_sdk.git
     ```bash
     ros2 topic pub --once /drill_state std_msgs/msg/UInt8 data:\ 9\ 
     ```
+- Or for actions run drill_controller node
 
 ## Project Structure
 ```bash
