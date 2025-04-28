@@ -1,13 +1,12 @@
-//
-// Created by martin on 14.03.25.
-//
+/******************************************************************************
+* @file     drill_logger.cpp
+ * @author  Martin Kriz
+ * @brief   Cpp file for drill logger class
+ * @date    2025-04-28
+ *****************************************************************************/
 
 #include <drill/drill_logger.h>
-#include <fstream>
-#include <iostream>
-#include <chrono>
-#include <ctime>
-#include <sstream>
+
 
 DrillLogger::DrillLogger()
 {

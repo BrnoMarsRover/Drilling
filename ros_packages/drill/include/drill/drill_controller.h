@@ -1,6 +1,9 @@
-//
-// Created by martin on 04.03.25.
-//
+/******************************************************************************
+ * @file     drill_controller.h
+ * @author  Martin Kriz
+ * @brief   Header file of node drill_controller
+ * @date    2025-04-28
+ *****************************************************************************/
 
 #ifndef DRILL_CONTROLLER_H
 
@@ -21,16 +24,33 @@
 #include "atomic"
 #include "cmath"
 
-#define LOOP_RATE 1 //Loop time
+// Hardcoded constants
+namespace drill_constants {
 
-#define MAX_SLOT 4 //Total number of slots
-#define DEF_SLOT 0 //Default slot, when the drilling is possible
-#define SAFE_POS 58 // [mm] height when the turning with the storage is possible
-#define STORING_POS 92 // [mm] height when the drill is the storage
-#define DUMPING_TIME 10 // [s] How long the drill dumping the sample from tube
-#define MAX_HEIGHT 500 // [mm]
+    // [Hz] Main loop rate
+    constexpr int LOOP_RATE = 1;
 
-enum state_machine
+    // Maximum number of storage slots
+    constexpr int MAX_SLOT = 4;
+
+    // Default slot used when drilling is possible
+    constexpr int DEF_SLOT = 0;
+
+    // [mm] Safe height for rotating with the storage
+    constexpr int SAFE_POS = 58;
+
+    // [mm] Height when the drill reaches the storage
+    constexpr int STORING_POS = 92;
+
+    // [s] Time for dumping the material from the tube
+    constexpr int DUMPING_TIME = 10;
+
+    // [mm] Maximum travel height of the linear actuator
+    constexpr int MAX_HEIGHT = 500;
+
+}
+
+enum class state_machine
 {
     stop,
     drilling,
@@ -96,39 +116,6 @@ private:
     rclcpp_action::Server<DrillCalibration>::SharedPtr drill_calibration_server_;
     rclcpp::Service<GetSampleWeight>::SharedPtr get_sample_weight_srv_;
     rclcpp::Service<GetDrillStatus>::SharedPtr get_drill_status_srv_;
-
-
-
-    void set_depth()
-    {
-        if (const auto tmp = drillHeight - toGround; tmp < 0)
-            drillDepth = 0;
-        else
-            drillDepth = tmp;
-    }
-
-    int calculate_height(const int depth) const
-    {
-        return toGround + depth;
-    }
-
-    // Callback to handle output data from drill
-    void drill_data_callback(const std_msgs::msg::UInt16MultiArray::SharedPtr msg)
-    {
-        RCLCPP_INFO(this->get_logger(), "Received drill data.");
-        DrillStatus_->setStatus(msg->data[0]);
-        motorRPS = float_decode(msg->data[1]);
-        motorTorque = float_decode(msg->data[2]);
-        motorTemperature = msg->data[3];
-        drillHeight = msg->data[4];;
-        if (drillHeight == 0) toGround = msg->data[5];
-        set_depth();
-        activeSlot = msg->data[6];;
-        sampleWeight1 = roundf(static_cast<float>(msg->data[7]) / 10.0f * 10.0f) / 10.0f;
-        sampleWeight2 = roundf(static_cast<float>(msg->data[8]) / 10.0f * 10.0f) / 10.0f;
-        sampleWeight3 = roundf(static_cast<float>(msg->data[9]) / 10.0f * 10.0f) / 10.0f;
-        sampleWeight4 = roundf(static_cast<float>(msg->data[10]) / 10.0f * 10.0f) / 10.0f;
-    }
 
     // DRILL SAMPLE ACTION
     // If the drill is busy service will be refused
@@ -231,41 +218,57 @@ private:
     void get_drill_status_callback(const std::shared_ptr<drill_interfaces::srv::GetDrillStatus::Request> request,
         std::shared_ptr<drill_interfaces::srv::GetDrillStatus::Response> response);
 
-    // Function for publish state to drill
-    void publish_drill_state(const uint8_t state) const{
-        auto message = std_msgs::msg::UInt8();
-        message.data = state;
-        drill_state_pub_->publish(message);
-        RCLCPP_INFO(this->get_logger(), "Published drill state: %d", state);
-    }
+    // Publishes the current drill state to the "drill_state" topic
+    // @param state: The current state of the drill, represented by the state_machine enum
+    void publish_drill_state(state_machine state) const;
 
-    // Function to publish drill parameters
-    void publish_drill_param(float rps, uint16_t height, uint16_t slot) const;
+    // Callback function that handles incoming drill data
+    // @param msg: Shared pointer to the received UInt16MultiArray message
+    void drill_data_callback(std_msgs::msg::UInt16MultiArray::SharedPtr msg);
 
-    float get_sampleWeight(const int slot)
+    // Publishes drilling parameters (rotation speed, target height, storage slot)
+    // @param rps: Drill rotation speed in RPS
+    // @param height: Target drilling height in millimeters
+    // @param slot: Storage slot number
+    void publish_drill_param(float rps, int height, int slot) const;
+
+
+    // Sets the drillDepth variable based on the current height and distance to ground
+    // If calculated depth is negative, sets depth to zero
+    void set_depth()
     {
-        switch (slot)
-        {
-        case 1:
-            return sampleWeight1;
-        case 2:
-            return sampleWeight2;
-        case 3:
-            return sampleWeight3;
-        case 4:
-            return sampleWeight4;
-        default:
-            return 0;
-        }
+        if (const auto tmp = drillHeight - toGround; tmp < 0)
+            drillDepth = 0;
+        else
+            drillDepth = tmp;
     }
 
+    // Calculates absolute height based on target drilling depth
+    // @param depth: Desired drilling depth
+    // @return: Absolute height from the ground
+    int calculate_height(const int depth) const
+    {
+        return toGround + depth;
+    }
+
+    // Returns the sample weight for a given slot
+    // @param slot: Storage slot number
+    // @return: Sample weight in grams
+    float get_sampleWeight(int slot);
+
+    // Checks if the drill hits the target
+    // @param goalHeight: Target height
+    // @return: True if within tolerance, false otherwise
     bool height_inTolerance(const int goalHeight) const
     {
-        if (goalHeight > drillHeight - 2 && goalHeight < drillHeight + 2)
+        if (goalHeight == drillHeight)
             return true;
         return false;
     }
 
+    // Converts a linear speed percentage to a control code (0–255)
+    // @param speed: Speed percentage (0–100%)
+    // @return: Encoded speed as uint16_t
     static uint16_t speed_code(const int speed)
     {
         //formula for linear speed will be
@@ -274,11 +277,17 @@ private:
         return 255;
     }
 
+    // Decodes a sensor value to a float using a scale factor of 0.03
+    // @param aNum: Raw sensor value
+    // @return: Decoded float value
     static float float_decode(const uint16_t aNum) {
         const float result =  0.03f * static_cast<float>(aNum);
         return result;
     }
 
+    // Encodes a float value into a scaled uint16_t value
+    // @param aNum: Float value to encode
+    // @return: Encoded uint16_t value
     static uint16_t float_code(const float aNum)
     {
         const auto result =  static_cast<uint16_t>(aNum / 0.03f);

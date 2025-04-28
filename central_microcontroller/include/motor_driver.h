@@ -15,23 +15,26 @@
 #include "hardware/gpio.h"
 #include "hardware/i2c.h"
 
+// I2C adress
 #define I2C_PORT i2c0
 #define MOTOR_ADDR 0x0A
+
+// Hardcoded deadtime based on measurement
 #define MAX_DEAD_TICKS 20 // max dead time in ms/loop time ms e.g. 3000/100
 
 /**
- * @brief   Structure representing the DC motor state and control data.
+ * @brief   Structure representing the DC motor subsystem.
  */
 struct motor {
-	//Input
+	//PICO -> MOTOR
 	int8_t rps;
-	//Output
+	//PICO <- MOTOR
 	int8_t rpsMeas;
 	int8_t torqueMeas;
 	uint8_t state;
 	uint8_t temperature;
 	uint8_t error;
-	//Internal
+	//PICO
 	uint8_t i2cStatus;
 	int8_t rpsGoal;
 	uint8_t deadTicks;
@@ -40,14 +43,14 @@ struct motor {
 	};
 
 /**
- * @brief   Reads motor status and sensor values over I2C.
+ * @brief   Reads motor subsystem data over I2C.
  * @param   motor Pointer to the motor structure.
  * @return  0 on success, -1 on I2C error, -2 if motor pointer is NULL.
  */
 int motor_read(struct motor* motor);
 
 /**
- * @brief   Writes motor control data over I2C.
+ * @brief   Writes motor command over I2C.
  * @param   motor Pointer to the motor structure.
  * @return  0 on success, -1 on I2C error, -2 if motor pointer is NULL.
  */
@@ -66,13 +69,13 @@ void motor_init(struct motor* motor);
 void motor_stop(struct motor* motor);
 
 /**
- * @brief   Sets the motor to rotate to the left.
+ * @brief   Handles motor rotation to the left while checking overload.
  * @param   motor Pointer to the motor structure.
  */
 void motor_left(struct motor* motor);
 
 /**
- * @brief   Sets the motor to rotate to the right.
+ * @brief   Handles motor rotation to the right.
  * @param   motor Pointer to the motor structure.
  */
 void motor_right(struct motor* motor);

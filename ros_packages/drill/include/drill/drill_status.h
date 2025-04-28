@@ -1,3 +1,10 @@
+/******************************************************************************
+* @file     drill_status.h
+ * @author  Martin Kriz
+ * @brief   Header for drill status class
+ * @date    2025-04-28
+ *****************************************************************************/
+
 #ifndef DRILL_STATUS_H
 #define DRILL_STATUS_H
 
@@ -5,22 +12,26 @@
 #include <string>
 #include <atomic>
 
+
 class DrillStatus {
 public:
     DrillStatus();
     ~DrillStatus();
 
+    // Setter
     void setStatus(uint16_t status);
 
-    // Getter funkce (vrací stringy)
+    // Motor getter
     std::string getMotorI2CStatus() const;
     std::string getMotorStucked() const;
     std::string getMotorError() const;
     bool isMotorStucked() const;
 
+    // Linear getter
     std::string getLinearI2CStatus() const;
     std::string getLinearError() const;
 
+    // Storage getter
     std::string getStorageI2CStatus() const;
     std::string getStorageScaleTared() const;
     std::string getStorageError() const;

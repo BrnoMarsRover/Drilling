@@ -27,7 +27,9 @@
 #define BUFFER_SIZE 10
 #define STRING_SIZE 30
 
-// Enum for /drill_state topic, must be same as enum in drill_controller node
+/**
+ * @brief   Enum for /drill_state topic, must be same as enum in drill_controller node
+ */
 enum state_machine
 {
     stop,
@@ -66,7 +68,13 @@ sensor_msgs__msg__Joy msg_joy;
 rcl_publisher_t publisher;
 std_msgs__msg__UInt16MultiArray msg_data; 
 
-// Status function declaration
+/**
+ * @brief   Make status message for topic /drill_data index 0.
+ * @param   linear Pointer to the linear actuator structure.
+ * @param   motor Pointer to the motor structure.
+ * @param   storage Pointer to the storage structure.
+ * @return  Status message.
+ */
 uint16_t drill_message(struct motor* motor, struct linear* linear, struct storage* storage);
 
 // Callback for publishing on /drill_data topic
@@ -266,7 +274,7 @@ void joy_callback(const void * msgin)
         else if (msg->buttons.data[1] == 1) {storage.demand_pos = 2; storage_goto(&storage, storage.demand_pos);}       //pos 2
         else if (msg->buttons.data[2] == 1) {storage.demand_pos = 3; storage_goto(&storage, storage.demand_pos);}       //pos 2
         else if (msg->buttons.data[3] == 1) {storage.demand_pos = 4; storage_goto(&storage, storage.demand_pos);}       //pos 3
-        else if (msg->buttons.data[10] == 1) {storage.demand_pos = 0; storage_goto(&storage, storage.demand_pos);}       //pos 0
+        else if (msg->buttons.data[10] == 1) {storage.demand_pos = 0; storage_goto(&storage, storage.demand_pos);}      //pos 0
         else if (msg->buttons.data[9] == 1) {storage.command = 10;}               //tare
         else if (msg->buttons.data[8] == 1) {storage.command = 50;}               //error clear
         else if (msg->buttons.data[4] == 1) {storage_get_weight(&storage);}       //get weight
@@ -327,7 +335,7 @@ int main()
         ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, UInt16MultiArray),
         "drill_parameters");
 
-    // alocation memory for msg_parameters
+    // Alocation memory for msg_parameters
     int16_t buffer[BUFFER_SIZE] = {};
     msg_parameters.data.data = buffer;
     msg_parameters.data.size = 3;
@@ -361,7 +369,7 @@ int main()
         ROSIDL_GET_MSG_TYPE_SUPPORT(std_msgs, msg, UInt16MultiArray),
         "drill_data");
     
-    // alocation memory for msg_data
+    // Alocation memory for msg_data
     msg_data.data.data = buffer;
     msg_data.data.size = 11;
     msg_data.data.capacity = BUFFER_SIZE;
@@ -391,7 +399,7 @@ int main()
         ROSIDL_GET_MSG_TYPE_SUPPORT(sensor_msgs, msg, Joy),
         "joy");
 
-     //Allocation for joy message
+     // Allocation memmory for joy message
     msg_joy.axes.capacity=100;
     msg_joy.axes.size = 0;
     msg_joy.axes.data = (float*) malloc(msg_joy.axes.capacity * sizeof(float));
@@ -464,7 +472,6 @@ int main()
 }
 
 
-// Make status message for topic /drill_data index 0
 uint16_t drill_message(struct motor* motor, struct linear* linear, struct storage* storage)
 {
     if(!motor || !linear || !storage)

@@ -1,7 +1,7 @@
 /******************************************************************************
  * @file    storage_driver.h
  * @author  Martin Kriz
- * @brief   Definitions and functions for controlling a storage unit over I2C.
+ * @brief   Functions declaration for controlling a storage unit over I2C.
  * @date    2025-04-26
  ******************************************************************************/
 
@@ -15,23 +15,27 @@
 #include "hardware/gpio.h"
 #include "hardware/i2c.h"
 
+// I2C adress
 #define I2C_PORT i2c0
 #define STORAGE_ADDR 0x08
 
+// Hardcoded hardware construction
 #define STORE_SLOTS 4
 #define DEF_POS 0
 
-
+/**
+ * @brief   Structure representing subsystem of storage unit.
+ */
 struct storage{
-    //Input
+    //PICO -> STORAGE
     uint8_t command;
-    //Output
+    //PICO <- STORAGE
     uint16_t weight;
     uint8_t active_slot;
     uint8_t error;
     bool scaleTared;
     bool active;
-    //Internal
+    //PICO
     bool i2cStatus;
     uint8_t demand_pos;
     bool weight_recieved;
@@ -40,7 +44,7 @@ struct storage{
 };
 
 /**
- * @brief   Reads the status and data from the storage unit over I2C.
+ * @brief   Reads data from the storage unit over I2C.
  * @param   storage Pointer to the storage structure.
  * @return  0 on success, negative value on failure.
  */
@@ -67,7 +71,7 @@ void storage_init(struct storage* storage);
 void storage_goto(struct storage *storage, uint8_t pos);
 
 /**
- * @brief   Initiates or completes the weight measurement process.
+ * @brief   Handler of the weight measurement process.
  * @param   storage Pointer to the storage structure.
  */
 void storage_get_weight(struct storage *storage);
@@ -85,9 +89,9 @@ void storage_hold(struct storage *storage);
 void storage_wreset(struct storage *storage);
 
 /**
- * @brief   Checks if the storage unit is in a default, safe position.
+ * @brief   Checks if the storage unit is in default position.
  * @param   storage Pointer to the storage structure.
- * @return  true if storage is OK, false otherwise.
+ * @return  true if storage is in default pos, false otherwise.
  */
 bool is_storage_ok(struct storage *storage);
 

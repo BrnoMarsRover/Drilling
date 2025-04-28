@@ -1,3 +1,9 @@
+/******************************************************************************
+* @file     drill_controller.cpp
+ * @author  Martin Kriz
+ * @brief   Drill controller class file
+ * @date    2025-04-28
+ *****************************************************************************/
 
 #include "drill/drill_controller.h"
 
@@ -54,16 +60,16 @@ void DrillController::execute_drill_sample(const std::shared_ptr<GoalHandleDrill
     const auto goal = goal_handle->get_goal();
     auto result = std::make_shared<DrillSample::Result>();
     auto feedback = std::make_shared<DrillSample::Feedback>();
-    rclcpp::Rate loop_rate(LOOP_RATE);
+    rclcpp::Rate loop_rate(drill_constants::LOOP_RATE);
 
-    enum state_machine currentState = stop;
+    enum state_machine currentState = state_machine::stop;
 
     while(drillDepth < goal->depth-1) {
         //Checking if there is a cancel request
         if (goal_handle->is_canceling()) {
             result->final_depth = drillDepth;
             goal_handle->canceled(result);
-            currentState = stop;
+            currentState = state_machine::stop;
             publish_drill_state(currentState);
             DrillLogger_->logDrillSampleResult(drillDepth);
             RCLCPP_INFO(this->get_logger(), "DrillSample action canceled.");
@@ -71,16 +77,16 @@ void DrillController::execute_drill_sample(const std::shared_ptr<GoalHandleDrill
         }
 
         if(drillDepth == 0) {
-            if (currentState != goto_height) {
-                currentState = goto_height;
+            if (currentState != state_machine::goto_height) {
+                currentState = state_machine::goto_height;
                 publish_drill_param(0, calculate_height(goal->depth), 0);
                 publish_drill_state(currentState);
             }
         }
         else
         {
-            if (currentState != drilling) {
-                currentState = drilling;
+            if (currentState != state_machine::drilling) {
+                currentState = state_machine::drilling;
                 publish_drill_param(goal->max_rps, calculate_height(goal->depth), 0);
                 publish_drill_state(currentState);
             }
@@ -101,7 +107,7 @@ void DrillController::execute_drill_sample(const std::shared_ptr<GoalHandleDrill
     // Drilling complete
     result->final_depth = drillDepth;
     goal_handle->succeed(result);
-    currentState = stop;
+    currentState = state_machine::stop;
     publish_drill_state(currentState);
     drill_is_busy = false;
     DrillLogger_->logDrillSampleResult(drillDepth);
@@ -114,19 +120,19 @@ void DrillController::execute_store_sample(const std::shared_ptr<GoalHandleStore
     const auto goal = goal_handle->get_goal();
     auto result = std::make_shared<StoreSample::Result>();
     auto feedback = std::make_shared<StoreSample::Feedback>();
-    rclcpp::Rate loop_rate(LOOP_RATE);
+    rclcpp::Rate loop_rate(drill_constants::LOOP_RATE);
 
 
-    enum state_machine currentState = stop;
+    enum state_machine currentState = state_machine::stop;
     int state = 0;
 
     auto toDo = 0;
     auto storing_slot =  goal->slot;
 
-    constexpr auto dumpingTicks = DUMPING_TIME / LOOP_RATE;
+    constexpr auto dumpingTicks = drill_constants::DUMPING_TIME / drill_constants::LOOP_RATE;
     auto ticks = 0;
 
-    if (goal->slot > MAX_SLOT)
+    if (goal->slot > drill_constants::MAX_SLOT)
     {
         toDo = 1;
         storing_slot = 0;
@@ -138,7 +144,7 @@ void DrillController::execute_store_sample(const std::shared_ptr<GoalHandleStore
         if (goal_handle->is_canceling()) {
             result->weight = 0;
             goal_handle->canceled(result);
-            currentState = stop;
+            currentState = state_machine::stop;
             publish_drill_state(currentState);
             DrillLogger_->logStoreSampleResult(goal->slot, result->weight);
             RCLCPP_INFO(this->get_logger(), "StoreSample action canceled.");
@@ -147,7 +153,7 @@ void DrillController::execute_store_sample(const std::shared_ptr<GoalHandleStore
 
         switch (state) {
             case 0: //premisteni vrtacky nad zasobnik
-                if(height_inTolerance(SAFE_POS))
+                if(height_inTolerance(drill_constants::SAFE_POS))
                 {
                     if (toDo == 0) {state = 1;}
                     else if (toDo == 1) {state = 3;}
@@ -156,10 +162,10 @@ void DrillController::execute_store_sample(const std::shared_ptr<GoalHandleStore
 
                 else
                 {
-                    if(currentState != goto_height)
+                    if(currentState != state_machine::goto_height)
                     {
-                        currentState = goto_height;
-                        publish_drill_param(0, SAFE_POS, DEF_SLOT);
+                        currentState = state_machine::goto_height;
+                        publish_drill_param(0, drill_constants::SAFE_POS, drill_constants::DEF_SLOT);
                         publish_drill_state(currentState);
                     }
                 }
@@ -170,38 +176,38 @@ void DrillController::execute_store_sample(const std::shared_ptr<GoalHandleStore
                     state = 2;
                 else
                 {
-                    if(currentState != slot_select)
+                    if(currentState != state_machine::slot_select)
                     {
-                        currentState = slot_select;
-                        publish_drill_param(0, SAFE_POS, storing_slot);
+                        currentState = state_machine::slot_select;
+                        publish_drill_param(0, drill_constants::SAFE_POS, storing_slot);
                         publish_drill_state(currentState);
                     }
                 }
             break;
 
             case 2: //nastaveni pozice pro vysypani
-                if(height_inTolerance(STORING_POS))
+                if(height_inTolerance(drill_constants::STORING_POS))
                     state = 3;
                 else
                 {
-                    if(currentState != goto_height)
+                    if(currentState != state_machine::goto_height)
                     {
-                        currentState = goto_height;
-                        publish_drill_param(0, STORING_POS, storing_slot);
+                        currentState = state_machine::goto_height;
+                        publish_drill_param(0, drill_constants::STORING_POS, storing_slot);
                         publish_drill_state(currentState);
                     }
                 }
             break;
 
             case 3: //tare vahy
-                if(DrillStatus_->isStorageTared() && currentState == tare_scale)
+                if(DrillStatus_->isStorageTared() && currentState == state_machine::tare_scale)
                     state = 4;
                 else
                 {
-                    if(currentState != tare_scale)
+                    if(currentState != state_machine::tare_scale)
                     {
-                        currentState = tare_scale;
-                        publish_drill_param(1, STORING_POS, storing_slot);
+                        currentState = state_machine::tare_scale;
+                        publish_drill_param(1, drill_constants::STORING_POS, storing_slot);
                         publish_drill_state(currentState);
                     }
                 }
@@ -213,52 +219,52 @@ void DrillController::execute_store_sample(const std::shared_ptr<GoalHandleStore
                 else
                 {
                     ++ticks;
-                    if(currentState != turn_right)
+                    if(currentState != state_machine::turn_right)
                     {
-                        currentState = turn_right;
-                        publish_drill_param(1, STORING_POS, storing_slot);
+                        currentState = state_machine::turn_right;
+                        publish_drill_param(1, drill_constants::STORING_POS, storing_slot);
                         publish_drill_state(currentState);
                     }
                 }
             break;
 
             case 5: //zvednuti vrtaku, aby se mohlo tocit se zasobnikem
-                if(height_inTolerance(SAFE_POS))
+                if(height_inTolerance(drill_constants::SAFE_POS))
                     state = 6;
                 else
                 {
-                    if(currentState != goto_height)
+                    if(currentState != state_machine::goto_height)
                     {
-                        currentState = goto_height;
-                        publish_drill_param(0, SAFE_POS, storing_slot);
+                        currentState = state_machine::goto_height;
+                        publish_drill_param(0, drill_constants::SAFE_POS, storing_slot);
                         publish_drill_state(currentState);
                     }
                 }
             break;
 
             case 7: //zasobnik zpet na default slot
-                if(activeSlot == DEF_SLOT)
+                if(activeSlot == drill_constants::DEF_SLOT)
                     state = 8;
                 else
                 {
-                    if(currentState != slot_select)
+                    if(currentState != state_machine::slot_select)
                     {
-                        currentState = slot_select;
-                        publish_drill_param(0, SAFE_POS, DEF_SLOT);
+                        currentState = state_machine::slot_select;
+                        publish_drill_param(0, drill_constants::SAFE_POS, drill_constants::DEF_SLOT);
                         publish_drill_state(currentState);
                     }
                 }
             break;
 
             case 6: //vazeni
-                if(!DrillStatus_->isStorageTared() == 1 && currentState == get_weight)
+                if(!DrillStatus_->isStorageTared() == 1 && currentState == state_machine::get_weight)
                     state = 7;
                 else
                 {
-                    if(currentState != get_weight)
+                    if(currentState != state_machine::get_weight)
                     {
-                        currentState = get_weight;
-                        publish_drill_param(0, SAFE_POS, storing_slot);
+                        currentState = state_machine::get_weight;
+                        publish_drill_param(0, drill_constants::SAFE_POS, storing_slot);
                         publish_drill_state(currentState);
                     }
                 }
@@ -280,7 +286,7 @@ void DrillController::execute_store_sample(const std::shared_ptr<GoalHandleStore
     // Drilling complete
     result->weight = get_sampleWeight(storing_slot);
     goal_handle->succeed(result);
-    currentState = stop;
+    currentState = state_machine::stop;
     publish_drill_state(currentState);
     drill_is_busy = false;
     DrillLogger_->logStoreSampleResult(goal->slot, result->weight);
@@ -293,9 +299,9 @@ void DrillController::execute_drill_calibration(const std::shared_ptr<GoalHandle
     const auto goal = goal_handle->get_goal();
     auto result = std::make_shared<DrillCalibration::Result>();
     auto feedback = std::make_shared<DrillCalibration::Feedback>();
-    rclcpp::Rate loop_rate(LOOP_RATE);
+    rclcpp::Rate loop_rate(drill_constants::LOOP_RATE);
 
-    enum state_machine currentState = stop;
+    enum state_machine currentState = state_machine::stop;
     int state = 0;
 
     while(state < 2)
@@ -304,7 +310,7 @@ void DrillController::execute_drill_calibration(const std::shared_ptr<GoalHandle
         if (goal_handle->is_canceling()) {
             result->success = false;
             goal_handle->canceled(result);
-            currentState = stop;
+            currentState = state_machine::stop;
             publish_drill_state(currentState);
             DrillLogger_->logDrillCalibration(false);
             RCLCPP_INFO(this->get_logger(), "DrillCalibration action canceled.");
@@ -316,18 +322,18 @@ void DrillController::execute_drill_calibration(const std::shared_ptr<GoalHandle
             case 0:
                 if (drillHeight == 0)
                     state = 1;
-                else if (currentState != goto_height) {
-                    currentState = goto_height;
+                else if (currentState != state_machine::goto_height) {
+                    currentState = state_machine::goto_height;
                     publish_drill_state(currentState);
-                    publish_drill_param(0, 0, DEF_SLOT);
+                    publish_drill_param(0, 0, drill_constants::DEF_SLOT);
                 }
                 break;
             case 1:
                 if (!goal->reset_weights || (get_sampleWeight(1) == 0 && get_sampleWeight(2) == 0 && get_sampleWeight(3) == 0 && get_sampleWeight(4) == 0) )
                     state = 2;
-                else if (currentState != reset_weight) {
-                    currentState = reset_weight;
-                    publish_drill_param(0, 0, DEF_SLOT);
+                else if (currentState != state_machine::reset_weight) {
+                    currentState = state_machine::reset_weight;
+                    publish_drill_param(0, 0, drill_constants::DEF_SLOT);
                     publish_drill_state(currentState);
                 }
                 break;
@@ -344,14 +350,14 @@ void DrillController::execute_drill_calibration(const std::shared_ptr<GoalHandle
     // Calibration complete
     result->success = true;
     goal_handle->succeed(result);
-    currentState = stop;
+    currentState = state_machine::stop;
     publish_drill_state(currentState);
     drill_is_busy = false;
     DrillLogger_->logDrillCalibration(goal->reset_weights);
     RCLCPP_INFO(this->get_logger(), "DrillCalibration action completed.");
 }
 
-void DrillController::publish_drill_param(const float rps, const uint16_t height, const uint16_t slot) const{
+void DrillController::publish_drill_param(const float rps, const int height, const int slot) const{
     auto message = std_msgs::msg::UInt16MultiArray();
     message.data.resize(3);
     message.data[0] = float_code(rps);
@@ -376,6 +382,47 @@ void DrillController::get_drill_status_callback(const std::shared_ptr<drill_inte
     response->storage_i2c = DrillStatus_->getStorageI2CStatus();
     response->storage_scale_tared = DrillStatus_->getStorageScaleTared();
     response->storage_error = DrillStatus_->getStorageError();
+}
+
+void DrillController::publish_drill_state(const state_machine state) const{
+    auto message = std_msgs::msg::UInt8();
+    message.data = static_cast<uint8_t>(state);
+    drill_state_pub_->publish(message);
+    RCLCPP_INFO(this->get_logger(), "Published drill state: %d", static_cast<uint8_t>(state));
+}
+
+void DrillController::drill_data_callback(const std_msgs::msg::UInt16MultiArray::SharedPtr msg)
+{
+    RCLCPP_INFO(this->get_logger(), "Received drill data.");
+    DrillStatus_->setStatus(msg->data[0]);
+    motorRPS = float_decode(msg->data[1]);
+    motorTorque = float_decode(msg->data[2]);
+    motorTemperature = msg->data[3];
+    drillHeight = msg->data[4];;
+    if (drillHeight == 0) toGround = msg->data[5];
+    set_depth();
+    activeSlot = msg->data[6];;
+    sampleWeight1 = roundf(static_cast<float>(msg->data[7]) / 10.0f * 10.0f) / 10.0f;
+    sampleWeight2 = roundf(static_cast<float>(msg->data[8]) / 10.0f * 10.0f) / 10.0f;
+    sampleWeight3 = roundf(static_cast<float>(msg->data[9]) / 10.0f * 10.0f) / 10.0f;
+    sampleWeight4 = roundf(static_cast<float>(msg->data[10]) / 10.0f * 10.0f) / 10.0f;
+}
+
+float DrillController::get_sampleWeight(const int slot)
+{
+    switch (slot)
+    {
+    case 1:
+        return sampleWeight1;
+    case 2:
+        return sampleWeight2;
+    case 3:
+        return sampleWeight3;
+    case 4:
+        return sampleWeight4;
+    default:
+        return 0;
+    }
 }
 
 int main(int argc, char **argv) {

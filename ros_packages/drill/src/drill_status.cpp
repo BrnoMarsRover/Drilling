@@ -1,6 +1,9 @@
-//
-// Created by martin on 22.04.25.
-//
+/******************************************************************************
+* @file     drill_status.cpp
+ * @author  Martin Kriz
+ * @brief   Class for handling drill status register
+ * @date    2025-04-28
+ *****************************************************************************/
 
 #include "drill/drill_status.h"
 
