@@ -2568,12 +2568,6 @@
 		(uuid "29cc54d4-b2ed-43bb-ae87-db0e39a1f90a")
 	)
 	(junction
-		(at 195.58 128.27)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "33ca7fa0-312e-44e2-8f12-797032ebf486")
-	)
-	(junction
 		(at 114.3 57.15)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -2596,18 +2590,6 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "68fbfdec-01bf-48dc-a5d7-a2320d00ef43")
-	)
-	(junction
-		(at 198.12 137.16)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "698aab56-fa80-452c-b146-d39c887ac1d4")
-	)
-	(junction
-		(at 195.58 123.19)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "6a7bb3dd-7b56-4e45-b347-a4531a9ed471")
 	)
 	(junction
 		(at 101.6 113.03)
@@ -2664,12 +2646,6 @@
 		(uuid "db709b9f-d7f5-4133-997c-52c5b6787478")
 	)
 	(junction
-		(at 195.58 132.08)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "df548ed0-9a31-4961-9a29-8017dfa74b79")
-	)
-	(junction
 		(at 147.32 46.99)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -2680,12 +2656,6 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "f7c29880-bbb3-4049-bd53-064357827602")
-	)
-	(junction
-		(at 198.12 125.73)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "f81b3e3f-ae9e-435d-8035-c317375fa17d")
 	)
 	(no_connect
 		(at 167.64 81.28)
@@ -2801,16 +2771,6 @@
 	)
 	(wire
 		(pts
-			(xy 198.12 137.16) (xy 208.28 137.16)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "04d69ee7-0ef6-40ea-9825-763ec74a08b3")
-	)
-	(wire
-		(pts
 			(xy 119.38 118.11) (xy 55.88 118.11)
 		)
 		(stroke
@@ -2848,16 +2808,6 @@
 			(type default)
 		)
 		(uuid "0a047484-e630-435e-b379-f1c4aa546320")
-	)
-	(wire
-		(pts
-			(xy 190.5 123.19) (xy 190.5 121.92)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "0bbd8e92-1a55-4627-b7fd-d9bbb8c3fe78")
 	)
 	(wire
 		(pts
@@ -3021,16 +2971,6 @@
 	)
 	(wire
 		(pts
-			(xy 198.12 125.73) (xy 198.12 137.16)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "26b49788-dd6c-493a-9e16-11a0d5646c48")
-	)
-	(wire
-		(pts
 			(xy 101.6 48.26) (xy 148.59 48.26)
 		)
 		(stroke
@@ -3091,16 +3031,6 @@
 	)
 	(wire
 		(pts
-			(xy 184.15 132.08) (xy 195.58 132.08)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "353ac8ca-2c26-4bb8-83ad-e45bf8a77eb0")
-	)
-	(wire
-		(pts
 			(xy 142.24 81.28) (xy 149.86 81.28)
 		)
 		(stroke
@@ -3108,16 +3038,6 @@
 			(type default)
 		)
 		(uuid "3640e865-8809-4761-a790-a982d3f4c5b0")
-	)
-	(wire
-		(pts
-			(xy 200.66 134.62) (xy 200.66 121.92)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "36e62686-3243-48b9-81c6-b2df64926102")
 	)
 	(wire
 		(pts
@@ -3291,26 +3211,6 @@
 	)
 	(wire
 		(pts
-			(xy 195.58 123.19) (xy 208.28 123.19)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "5eede76f-7bba-4da7-b0f7-4baffe93557e")
-	)
-	(wire
-		(pts
-			(xy 208.28 134.62) (xy 200.66 134.62)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "5f0aa538-b22c-4240-b10f-7b3263c278da")
-	)
-	(wire
-		(pts
 			(xy 193.04 36.83) (xy 193.04 69.85)
 		)
 		(stroke
@@ -3378,16 +3278,6 @@
 			(type default)
 		)
 		(uuid "74d49891-d277-4461-b243-4ea282d8e74e")
-	)
-	(wire
-		(pts
-			(xy 184.15 125.73) (xy 198.12 125.73)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "74e031c5-d36a-4c89-ba8b-db7e9f6f7776")
 	)
 	(wire
 		(pts
@@ -3461,16 +3351,6 @@
 	)
 	(wire
 		(pts
-			(xy 184.15 128.27) (xy 195.58 128.27)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "7d04f46d-ad03-43df-bf10-18e9b6f9e060")
-	)
-	(wire
-		(pts
 			(xy 85.09 139.7) (xy 85.09 140.97)
 		)
 		(stroke
@@ -3498,16 +3378,6 @@
 			(type default)
 		)
 		(uuid "834d2ac3-ca81-4724-84cd-ffa766abcecb")
-	)
-	(wire
-		(pts
-			(xy 198.12 125.73) (xy 208.28 125.73)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "83d89bc7-db71-4785-9142-b92bb432dfe9")
 	)
 	(wire
 		(pts
@@ -3568,16 +3438,6 @@
 			(type default)
 		)
 		(uuid "8d070207-1e7b-4ed3-9acf-237d19f516de")
-	)
-	(wire
-		(pts
-			(xy 208.28 128.27) (xy 203.2 128.27)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "8d79f30c-7206-43bd-bd45-f1d620444ff4")
 	)
 	(wire
 		(pts
@@ -3691,26 +3551,6 @@
 	)
 	(wire
 		(pts
-			(xy 203.2 128.27) (xy 203.2 121.92)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "a0d75814-1235-455f-998d-59458742199b")
-	)
-	(wire
-		(pts
-			(xy 195.58 128.27) (xy 195.58 123.19)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "a1b51e11-cc95-4f0d-9cd5-78872b961a73")
-	)
-	(wire
-		(pts
 			(xy 142.24 69.85) (xy 144.78 69.85)
 		)
 		(stroke
@@ -3718,16 +3558,6 @@
 			(type default)
 		)
 		(uuid "a3cdf7b7-54b3-4953-badf-4f69bd4abac2")
-	)
-	(wire
-		(pts
-			(xy 195.58 132.08) (xy 208.28 132.08)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "a565c6c9-2aaf-4cd5-8c31-c34371a8683b")
 	)
 	(wire
 		(pts
@@ -3768,16 +3598,6 @@
 			(type default)
 		)
 		(uuid "abe1c0f1-ef8d-47ec-b2e1-95551885dca8")
-	)
-	(wire
-		(pts
-			(xy 184.15 123.19) (xy 190.5 123.19)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "ac12ba11-b2d4-4f90-aca4-ab44cc46c68c")
 	)
 	(wire
 		(pts
@@ -3891,16 +3711,6 @@
 	)
 	(wire
 		(pts
-			(xy 193.04 134.62) (xy 193.04 121.92)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "c29acba7-c621-456c-bdd7-4b42cecb49bf")
-	)
-	(wire
-		(pts
 			(xy 149.86 85.09) (xy 142.24 85.09)
 		)
 		(stroke
@@ -3918,16 +3728,6 @@
 			(type default)
 		)
 		(uuid "c4df1db7-0205-41c2-ac07-d2826f0df4e2")
-	)
-	(wire
-		(pts
-			(xy 195.58 128.27) (xy 195.58 132.08)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "c51c6566-c177-43c0-9a9c-aa41819a6d36")
 	)
 	(wire
 		(pts
@@ -3978,36 +3778,6 @@
 			(type default)
 		)
 		(uuid "d33c95ee-40b5-4732-a0e5-d8bc0907c908")
-	)
-	(wire
-		(pts
-			(xy 198.12 125.73) (xy 198.12 121.92)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "d542b58a-084d-4d9b-bc98-b2d6fafd86c7")
-	)
-	(wire
-		(pts
-			(xy 195.58 123.19) (xy 195.58 121.92)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "d713800c-6b8d-4abd-8efe-ccf199d1fe41")
-	)
-	(wire
-		(pts
-			(xy 184.15 137.16) (xy 198.12 137.16)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "d7c57509-4d3c-4a6e-8b54-70f46a6fceba")
 	)
 	(wire
 		(pts
@@ -4068,16 +3838,6 @@
 			(type default)
 		)
 		(uuid "e61405c0-4473-42a0-99a2-9df552e4f305")
-	)
-	(wire
-		(pts
-			(xy 184.15 134.62) (xy 193.04 134.62)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "e6bd1df3-c54b-45d7-9d6f-e256fa5cd496")
 	)
 	(wire
 		(pts
@@ -4822,151 +4582,6 @@
 		)
 	)
 	(symbol
-		(lib_id "Connector:Screw_Terminal_01x03")
-		(at 213.36 125.73 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "74f95026-bd69-4eb1-aa10-717414d83da3")
-		(property "Reference" "J308"
-			(at 215.9 125.7299 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "Screw_Terminal_01x03"
-			(at 215.9 126.9999 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-				(hide yes)
-			)
-		)
-		(property "Footprint" "Connector_JST:JST_XH_S3B-XH-A-1_1x03_P2.50mm_Horizontal"
-			(at 213.36 125.73 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 213.36 125.73 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Generic screw terminal, single row, 01x03, script generated (kicad-library-utils/schlib/autogen/connector/)"
-			(at 213.36 125.73 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "2"
-			(uuid "9b61bb1a-19b1-45c6-88a0-7703ae8dd950")
-		)
-		(pin "1"
-			(uuid "0adabe53-e125-4b91-a269-008d95417c65")
-		)
-		(pin "3"
-			(uuid "739b4339-0afe-4f91-96b2-d20a3f5cf8ef")
-		)
-		(instances
-			(project "drill_pcb"
-				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313/4d3296cb-c53d-40d6-b459-0c8b208d28b7"
-					(reference "J308")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Connector:Screw_Terminal_01x03")
-		(at 179.07 125.73 180)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "81bc6a9e-395f-4190-a9ee-43ae7baf10ad")
-		(property "Reference" "J303"
-			(at 174.498 125.73 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "Screw_Terminal_01x03"
-			(at 179.07 119.38 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Footprint" "Connector_JST:JST_XH_S3B-XH-A-1_1x03_P2.50mm_Horizontal"
-			(at 179.07 125.73 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 179.07 125.73 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Generic screw terminal, single row, 01x03, script generated (kicad-library-utils/schlib/autogen/connector/)"
-			(at 179.07 125.73 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "3"
-			(uuid "a1cd9885-9331-4f04-83d9-d830f5d2ef05")
-		)
-		(pin "1"
-			(uuid "940c4a0f-8d43-4d35-91e9-9d128e55f837")
-		)
-		(pin "2"
-			(uuid "9b26a94c-62f6-4920-a84f-39c6b87ddef8")
-		)
-		(instances
-			(project "drill_pcb"
-				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313/4d3296cb-c53d-40d6-b459-0c8b208d28b7"
-					(reference "J303")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "Connector:Screw_Terminal_01x06")
 		(at 80.01 146.05 270)
 		(unit 1)
@@ -5329,87 +4944,6 @@
 		)
 	)
 	(symbol
-		(lib_id "Connector:Screw_Terminal_01x06")
-		(at 195.58 116.84 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "b8da9a08-c7fe-42cc-af49-13b598433ef0")
-		(property "Reference" "J305"
-			(at 196.85 113.03 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "Screw_Terminal_01x06"
-			(at 196.85 113.03 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Footprint" "Connector_JST:JST_XH_S6B-XH-A-1_1x06_P2.50mm_Horizontal"
-			(at 195.58 116.84 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 195.58 116.84 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Generic screw terminal, single row, 01x06, script generated (kicad-library-utils/schlib/autogen/connector/)"
-			(at 195.58 116.84 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "6"
-			(uuid "4223f626-ebf0-4d86-b53e-923cf52f535b")
-		)
-		(pin "2"
-			(uuid "2dcd6cf6-0499-41a9-a6a3-13fc7428d8fa")
-		)
-		(pin "3"
-			(uuid "00207c6b-c747-4252-80bb-c51b028e1734")
-		)
-		(pin "1"
-			(uuid "5817ab5c-b0e6-410e-84a4-f722eebb380f")
-		)
-		(pin "4"
-			(uuid "c4cd29bd-3dfc-4ea2-8194-13ccaa8ba6e4")
-		)
-		(pin "5"
-			(uuid "f80631b3-9821-4929-bc67-17419aecefab")
-		)
-		(instances
-			(project "drill_pcb"
-				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313/4d3296cb-c53d-40d6-b459-0c8b208d28b7"
-					(reference "J305")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "mujDriver:mujDriver2")
 		(at 129.54 85.09 0)
 		(unit 1)
@@ -5624,148 +5158,6 @@
 			(project "drill_pcb"
 				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313/4d3296cb-c53d-40d6-b459-0c8b208d28b7"
 					(reference "A303")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Connector:Screw_Terminal_01x03")
-		(at 179.07 134.62 180)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "d34be1af-e113-4e14-b9a6-2ee03c261da4")
-		(property "Reference" "J304"
-			(at 174.498 134.62 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "Screw_Terminal_01x03"
-			(at 179.07 128.27 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Footprint" "Connector_JST:JST_XH_S3B-XH-A-1_1x03_P2.50mm_Horizontal"
-			(at 179.07 134.62 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 179.07 134.62 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Generic screw terminal, single row, 01x03, script generated (kicad-library-utils/schlib/autogen/connector/)"
-			(at 179.07 134.62 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "3"
-			(uuid "da47be3b-1e25-4653-b19e-2f02da634803")
-		)
-		(pin "1"
-			(uuid "2306d908-b6fc-4cf0-b4c4-64afd9d75a6f")
-		)
-		(pin "2"
-			(uuid "fa13b8fe-5bc6-4441-9a9a-c97760d6f416")
-		)
-		(instances
-			(project "drill_pcb"
-				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313/4d3296cb-c53d-40d6-b459-0c8b208d28b7"
-					(reference "J304")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Connector:Screw_Terminal_01x03")
-		(at 213.36 134.62 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "ec10881b-9c11-46be-a1c1-713b6d081fe8")
-		(property "Reference" "J309"
-			(at 217.932 134.62 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "Screw_Terminal_01x03"
-			(at 213.36 140.97 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Footprint" "Connector_JST:JST_XH_S3B-XH-A-1_1x03_P2.50mm_Horizontal"
-			(at 213.36 134.62 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 213.36 134.62 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Generic screw terminal, single row, 01x03, script generated (kicad-library-utils/schlib/autogen/connector/)"
-			(at 213.36 134.62 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "3"
-			(uuid "2d79e8e1-7b04-428b-9c9b-c657f7af9722")
-		)
-		(pin "1"
-			(uuid "b87785e3-c630-42c0-a75f-dea64843830b")
-		)
-		(pin "2"
-			(uuid "e25b8e34-5213-4433-aa97-df5754caf3c0")
-		)
-		(instances
-			(project "drill_pcb"
-				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313/4d3296cb-c53d-40d6-b459-0c8b208d28b7"
-					(reference "J309")
 					(unit 1)
 				)
 			)

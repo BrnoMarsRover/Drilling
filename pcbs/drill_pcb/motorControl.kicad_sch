@@ -847,6 +847,139 @@
 				)
 			)
 		)
+		(symbol "Diode:SMAJ24A"
+			(pin_numbers hide)
+			(pin_names
+				(offset 1.016) hide)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "D"
+				(at 0 2.54 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "SMAJ24A"
+				(at 0 -2.54 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" "Diode_SMD:D_SMA"
+				(at 0 -5.08 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "https://www.littelfuse.com/media?resourcetype=datasheets&itemid=75e32973-b177-4ee3-a0ff-cedaf1abdb93&filename=smaj-datasheet"
+				(at -1.27 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "400W unidirectional Transient Voltage Suppressor, 24.0Vr, SMA(DO-214AC)"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_keywords" "unidirectional diode TVS voltage suppressor"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_fp_filters" "D*SMA*"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "SMAJ24A_0_1"
+				(polyline
+					(pts
+						(xy -0.762 1.27) (xy -1.27 1.27) (xy -1.27 -1.27)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.27 1.27) (xy 1.27 -1.27) (xy -1.27 0) (xy 1.27 1.27)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "SMAJ24A_1_1"
+				(pin passive line
+					(at -3.81 0 0)
+					(length 2.54)
+					(name "A1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 3.81 0 180)
+					(length 2.54)
+					(name "A2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+		)
 		(symbol "Diode:SMAJ5.0CA"
 			(pin_numbers hide)
 			(pin_names
@@ -2566,6 +2699,18 @@
 		(uuid "26bb8cb4-7b34-4209-95fb-43dc56e2649a")
 	)
 	(junction
+		(at 234.95 124.46)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "37291d25-90bf-4b38-b072-83916a26925f")
+	)
+	(junction
+		(at 260.35 38.1)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "3909c307-9d0f-49b1-8155-5da800c06e79")
+	)
+	(junction
 		(at 60.96 148.59)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -2588,12 +2733,6 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "4a7286d6-d72f-41d0-b7ba-7eed3bccc39d")
-	)
-	(junction
-		(at 29.21 113.03)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "4b4642e6-0edf-4cc9-9d67-ccd8501b6806")
 	)
 	(junction
 		(at 190.5 148.59)
@@ -2650,10 +2789,10 @@
 		(uuid "914e6ee1-1f52-4b7f-95c2-409f46a24d7b")
 	)
 	(junction
-		(at 45.72 148.59)
+		(at 234.95 148.59)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "9b374b5b-5ba5-4534-bb70-057cedd4eb87")
+		(uuid "98380b7d-2f07-474c-ae9e-e593a6d5cd78")
 	)
 	(junction
 		(at 143.51 86.36)
@@ -2732,6 +2871,12 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "daf1a65e-629d-4412-a01a-5bf251e54297")
+	)
+	(junction
+		(at 260.35 148.59)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "e6b4b85b-9a78-4cc5-9aca-80eebd488480")
 	)
 	(junction
 		(at 60.96 111.76)
@@ -2873,7 +3018,7 @@
 	)
 	(wire
 		(pts
-			(xy 45.72 148.59) (xy 60.96 148.59)
+			(xy 43.18 148.59) (xy 60.96 148.59)
 		)
 		(stroke
 			(width 0)
@@ -2890,6 +3035,16 @@
 			(type default)
 		)
 		(uuid "0ea71554-5987-40d4-aaef-c9336b92bbaa")
+	)
+	(wire
+		(pts
+			(xy 43.18 128.27) (xy 45.72 128.27)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "11752627-b17f-4a44-a359-746e20269167")
 	)
 	(wire
 		(pts
@@ -2943,6 +3098,16 @@
 	)
 	(wire
 		(pts
+			(xy 29.21 123.19) (xy 45.72 123.19)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "160e3be3-f25a-4473-aabf-3ecb146fea9d")
+	)
+	(wire
+		(pts
 			(xy 113.03 146.05) (xy 113.03 148.59)
 		)
 		(stroke
@@ -2983,7 +3148,17 @@
 	)
 	(wire
 		(pts
-			(xy 240.03 38.1) (xy 240.03 102.87)
+			(xy 260.35 101.6) (xy 260.35 148.59)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "200d8e1b-865e-4456-b706-6a2ecc06124c")
+	)
+	(wire
+		(pts
+			(xy 240.03 38.1) (xy 240.03 93.98)
 		)
 		(stroke
 			(width 0)
@@ -3000,6 +3175,16 @@
 			(type default)
 		)
 		(uuid "225a5a9e-1f1c-4c27-ac2e-c69487182585")
+	)
+	(wire
+		(pts
+			(xy 260.35 148.59) (xy 240.03 148.59)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "2336cb2a-bd0a-4429-bb7a-4d4d14321f7a")
 	)
 	(wire
 		(pts
@@ -3053,7 +3238,7 @@
 	)
 	(wire
 		(pts
-			(xy 45.72 113.03) (xy 45.72 123.19)
+			(xy 29.21 88.9) (xy 29.21 123.19)
 		)
 		(stroke
 			(width 0)
@@ -3113,7 +3298,7 @@
 	)
 	(wire
 		(pts
-			(xy 240.03 110.49) (xy 240.03 148.59)
+			(xy 240.03 101.6) (xy 240.03 148.59)
 		)
 		(stroke
 			(width 0)
@@ -3333,16 +3518,6 @@
 	)
 	(wire
 		(pts
-			(xy 29.21 88.9) (xy 29.21 113.03)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "7ee08b60-cf8d-41da-843d-888c55c36aa5")
-	)
-	(wire
-		(pts
 			(xy 219.71 107.95) (xy 219.71 114.3)
 		)
 		(stroke
@@ -3403,7 +3578,7 @@
 	)
 	(wire
 		(pts
-			(xy 222.25 148.59) (xy 240.03 148.59)
+			(xy 222.25 148.59) (xy 234.95 148.59)
 		)
 		(stroke
 			(width 0)
@@ -3603,6 +3778,16 @@
 	)
 	(wire
 		(pts
+			(xy 260.35 38.1) (xy 240.03 38.1)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a6adcab8-e06b-4d06-a287-224da2c2f79e")
+	)
+	(wire
+		(pts
 			(xy 113.03 148.59) (xy 143.51 148.59)
 		)
 		(stroke
@@ -3623,7 +3808,7 @@
 	)
 	(wire
 		(pts
-			(xy 240.03 29.21) (xy 240.03 38.1)
+			(xy 260.35 29.21) (xy 260.35 38.1)
 		)
 		(stroke
 			(width 0)
@@ -3693,26 +3878,6 @@
 	)
 	(wire
 		(pts
-			(xy 29.21 148.59) (xy 45.72 148.59)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "c5248979-74ea-45a3-abf6-a2fe30a800b5")
-	)
-	(wire
-		(pts
-			(xy 29.21 113.03) (xy 29.21 129.54)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "c6a68648-ea23-4ebc-8739-0805a4d95fad")
-	)
-	(wire
-		(pts
 			(xy 113.03 81.28) (xy 113.03 137.16)
 		)
 		(stroke
@@ -3743,7 +3908,7 @@
 	)
 	(wire
 		(pts
-			(xy 45.72 128.27) (xy 45.72 148.59)
+			(xy 43.18 128.27) (xy 43.18 148.59)
 		)
 		(stroke
 			(width 0)
@@ -3770,6 +3935,16 @@
 			(type default)
 		)
 		(uuid "d0ea4fa0-c10f-4350-8a1f-3623c00d21d6")
+	)
+	(wire
+		(pts
+			(xy 260.35 38.1) (xy 260.35 93.98)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d2b318b6-a2d3-406b-a081-2b4bdf0fc609")
 	)
 	(wire
 		(pts
@@ -3853,6 +4028,16 @@
 	)
 	(wire
 		(pts
+			(xy 234.95 124.46) (xy 234.95 134.62)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "df3e38b9-ef47-4377-896a-e21d0d9af19e")
+	)
+	(wire
+		(pts
 			(xy 43.18 45.72) (xy 105.41 45.72)
 		)
 		(stroke
@@ -3883,7 +4068,7 @@
 	)
 	(wire
 		(pts
-			(xy 240.03 148.59) (xy 240.03 152.4)
+			(xy 260.35 148.59) (xy 260.35 151.13)
 		)
 		(stroke
 			(width 0)
@@ -3933,6 +4118,16 @@
 	)
 	(wire
 		(pts
+			(xy 234.95 142.24) (xy 234.95 148.59)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e998efc3-f4db-498a-8b78-03fffc29449c")
+	)
+	(wire
+		(pts
 			(xy 234.95 26.67) (xy 234.95 124.46)
 		)
 		(stroke
@@ -3940,16 +4135,6 @@
 			(type default)
 		)
 		(uuid "edb70232-4e79-4958-bdae-09a6e56b586b")
-	)
-	(wire
-		(pts
-			(xy 29.21 113.03) (xy 45.72 113.03)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "f060a6c1-b320-4139-b755-ee54e4658526")
 	)
 	(wire
 		(pts
@@ -3993,6 +4178,16 @@
 	)
 	(wire
 		(pts
+			(xy 234.95 148.59) (xy 240.03 148.59)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f5ae0905-b094-4450-ad36-299672de15c1")
+	)
+	(wire
+		(pts
 			(xy 40.64 43.18) (xy 105.41 43.18)
 		)
 		(stroke
@@ -4010,16 +4205,6 @@
 			(type default)
 		)
 		(uuid "f9f53539-acf4-4e82-8570-e786d0df45dc")
-	)
-	(wire
-		(pts
-			(xy 29.21 137.16) (xy 29.21 148.59)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "fc189c02-3049-4c01-9ec6-9b23867d80e5")
 	)
 	(wire
 		(pts
@@ -4136,7 +4321,7 @@
 	)
 	(symbol
 		(lib_id "power:+24V")
-		(at 240.03 29.21 0)
+		(at 260.35 29.21 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -4145,7 +4330,7 @@
 		(fields_autoplaced yes)
 		(uuid "0256c765-2241-43b4-af1c-1d1bd4cfec9e")
 		(property "Reference" "#PWR0202"
-			(at 240.03 33.02 0)
+			(at 260.35 33.02 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4154,7 +4339,7 @@
 			)
 		)
 		(property "Value" "+24V"
-			(at 240.03 24.13 0)
+			(at 260.35 24.13 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4162,7 +4347,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 240.03 29.21 0)
+			(at 260.35 29.21 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4171,7 +4356,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 240.03 29.21 0)
+			(at 260.35 29.21 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4180,7 +4365,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"+24V\""
-			(at 240.03 29.21 0)
+			(at 260.35 29.21 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4624,7 +4809,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 240.03 152.4 0)
+		(at 260.35 151.13 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -4633,7 +4818,7 @@
 		(fields_autoplaced yes)
 		(uuid "3ed3c320-4db6-4c6f-8d67-cd0868a64224")
 		(property "Reference" "#PWR0203"
-			(at 240.03 158.75 0)
+			(at 260.35 157.48 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4642,7 +4827,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 240.03 157.48 0)
+			(at 260.35 156.21 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4650,7 +4835,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 240.03 152.4 0)
+			(at 260.35 151.13 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4659,7 +4844,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 240.03 152.4 0)
+			(at 260.35 151.13 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4668,7 +4853,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 240.03 152.4 0)
+			(at 260.35 151.13 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4683,76 +4868,6 @@
 			(project "drill_pcb"
 				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313/03998a92-8610-4f09-9145-573c63e01d71"
 					(reference "#PWR0203")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:C")
-		(at 29.21 133.35 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "41c4688c-2265-49ab-bac8-c4787f9ebda7")
-		(property "Reference" "C201"
-			(at 33.02 132.0799 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "100n"
-			(at 33.02 134.6199 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Capacitor_SMD:C_1206_3216Metric_Pad1.33x1.80mm_HandSolder"
-			(at 30.1752 137.16 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 29.21 133.35 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Unpolarized capacitor"
-			(at 29.21 133.35 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "2"
-			(uuid "1e43c2eb-5e13-41a3-b8c0-8aa0f40e70bb")
-		)
-		(pin "1"
-			(uuid "795b52a2-d6c9-42b0-8a8a-ab303969ec4e")
-		)
-		(instances
-			(project "drill_pcb"
-				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313/03998a92-8610-4f09-9145-573c63e01d71"
-					(reference "C201")
 					(unit 1)
 				)
 			)
@@ -4977,7 +5092,7 @@
 	)
 	(symbol
 		(lib_id "Device:C_Polarized")
-		(at 240.03 106.68 0)
+		(at 240.03 97.79 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -4986,7 +5101,7 @@
 		(fields_autoplaced yes)
 		(uuid "49488472-ab95-45cf-b37d-5db84b801ea5")
 		(property "Reference" "C210"
-			(at 243.84 104.5209 0)
+			(at 243.84 95.6309 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4995,7 +5110,7 @@
 			)
 		)
 		(property "Value" "1000uF/50V"
-			(at 243.84 107.0609 0)
+			(at 243.84 98.1709 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5004,7 +5119,7 @@
 			)
 		)
 		(property "Footprint" "Capacitor_THT:CP_Radial_D12.5mm_P5.00mm"
-			(at 240.9952 110.49 0)
+			(at 240.9952 101.6 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5013,7 +5128,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 240.03 106.68 0)
+			(at 240.03 97.79 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5022,7 +5137,7 @@
 			)
 		)
 		(property "Description" "Polarized capacitor"
-			(at 240.03 106.68 0)
+			(at 240.03 97.79 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5388,6 +5503,76 @@
 			(project "drill_pcb"
 				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313/03998a92-8610-4f09-9145-573c63e01d71"
 					(reference "R207")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Diode:SMAJ24A")
+		(at 260.35 97.79 270)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "55fee349-51e7-4b8d-8213-da7044c6ded0")
+		(property "Reference" "D203"
+			(at 262.89 96.5199 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "SMAJ24A"
+			(at 262.89 99.0599 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Diode_SMD:D_SMA"
+			(at 255.27 97.79 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "https://www.littelfuse.com/media?resourcetype=datasheets&itemid=75e32973-b177-4ee3-a0ff-cedaf1abdb93&filename=smaj-datasheet"
+			(at 260.35 96.52 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "400W unidirectional Transient Voltage Suppressor, 24.0Vr, SMA(DO-214AC)"
+			(at 260.35 97.79 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "dd36a09f-4638-486f-af02-517c249daa70")
+		)
+		(pin "2"
+			(uuid "28d8d4c4-4734-4fd2-bdbc-a7fad559695f")
+		)
+		(instances
+			(project "drill_pcb"
+				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313/03998a92-8610-4f09-9145-573c63e01d71"
+					(reference "D203")
 					(unit 1)
 				)
 			)
@@ -6171,6 +6356,76 @@
 	)
 	(symbol
 		(lib_id "Device:C")
+		(at 234.95 138.43 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "d7f2ebf1-8aad-4082-aefe-9c89668dbf55")
+		(property "Reference" "C201"
+			(at 238.76 137.1599 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "100n"
+			(at 238.76 139.6999 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_1206_3216Metric_Pad1.33x1.80mm_HandSolder"
+			(at 235.9152 142.24 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 234.95 138.43 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Unpolarized capacitor"
+			(at 234.95 138.43 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "2"
+			(uuid "55cdc75d-4631-4116-9757-f23598efd6fd")
+		)
+		(pin "1"
+			(uuid "141cda03-214b-45d4-a6e3-c2588f75bcaf")
+		)
+		(instances
+			(project "drill_pcb"
+				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313/03998a92-8610-4f09-9145-573c63e01d71"
+					(reference "C201")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
 		(at 113.03 142.24 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -6316,7 +6571,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "edd5e467-c70c-46be-b7bf-592131f0929e")
-		(property "Reference" "JST201"
+		(property "Reference" "J201"
 			(at 53.34 124.4599 0)
 			(effects
 				(font
@@ -6373,7 +6628,7 @@
 		(instances
 			(project "drill_pcb"
 				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313/03998a92-8610-4f09-9145-573c63e01d71"
-					(reference "JST201")
+					(reference "J201")
 					(unit 1)
 				)
 			)
@@ -6389,7 +6644,7 @@
 		(dnp no)
 		(uuid "f2ecf3a8-4b91-46b8-900e-c7e0767001c2")
 		(property "Reference" "U203"
-			(at 228.346 133.858 90)
+			(at 213.868 120.65 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6397,7 +6652,7 @@
 			)
 		)
 		(property "Value" "ACS712xLCTR-20A"
-			(at 236.22 136.398 90)
+			(at 207.264 118.364 90)
 			(effects
 				(font
 					(size 1.27 1.27)
