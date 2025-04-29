@@ -8,4 +8,3 @@ pico-sdk
 ros_packages/drill/.idea/
 ros_packages/drill/build/
 ros_packages/drill/cmake-build-debug/
-report-generator/logo.bmp
