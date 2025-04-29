@@ -1461,7 +1461,7 @@
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
-			(property "Reference" ""
+			(property "Reference" "1111401"
 				(at 0 0 0)
 				(effects
 					(font
@@ -1470,7 +1470,7 @@
 					(hide yes)
 				)
 			)
-			(property "Value" ""
+			(property "Value" "~"
 				(at 0 0 0)
 				(effects
 					(font
@@ -1479,7 +1479,7 @@
 					(hide yes)
 				)
 			)
-			(property "Footprint" "HX711:HX711"
+			(property "Footprint" "drill_hx711footp:HX711"
 				(at 0 0 0)
 				(effects
 					(font
@@ -1564,7 +1564,7 @@
 					)
 				)
 				(text "NAME"
-					(at 2.54 22.86 0)
+					(at 14.224 17.526 0)
 					(effects
 						(font
 							(size 1.778 1.5113)
@@ -1573,102 +1573,12 @@
 					)
 				)
 				(text "VALUE"
-					(at 2.54 -2.54 0)
+					(at 13.97 1.27 0)
 					(effects
 						(font
 							(size 1.778 1.5113)
 						)
 						(justify left bottom)
-					)
-				)
-				(pin bidirectional line
-					(at -2.54 7.62 0)
-					(length 2.54)
-					(name "A+"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "A+"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at -2.54 10.16 0)
-					(length 2.54)
-					(name "A-"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "A-"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at -2.54 2.54 0)
-					(length 2.54)
-					(name "B+"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "B+"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at -2.54 5.08 0)
-					(length 2.54)
-					(name "B-"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "B-"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at 35.56 12.7 180)
-					(length 2.54)
-					(name "DT"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "DT"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
 					)
 				)
 				(pin bidirectional line
@@ -1681,7 +1591,25 @@
 							)
 						)
 					)
-					(number "E+"
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at 36.83 7.62 180)
+					(length 2.54)
+					(name "VCC"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "10"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -1699,7 +1627,7 @@
 							)
 						)
 					)
-					(number "E-"
+					(number "2"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -1708,7 +1636,79 @@
 					)
 				)
 				(pin bidirectional line
-					(at 35.56 15.24 180)
+					(at -2.54 10.16 0)
+					(length 2.54)
+					(name "A-"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at -2.54 7.62 0)
+					(length 2.54)
+					(name "A+"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at -2.54 5.08 0)
+					(length 2.54)
+					(name "B-"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "5"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at -2.54 2.54 0)
+					(length 2.54)
+					(name "B+"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "6"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at 36.83 15.24 180)
 					(length 2.54)
 					(name "GND"
 						(effects
@@ -1717,7 +1717,7 @@
 							)
 						)
 					)
-					(number "GND"
+					(number "7"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -1726,7 +1726,25 @@
 					)
 				)
 				(pin bidirectional line
-					(at 35.56 10.16 180)
+					(at 36.83 12.7 180)
+					(length 2.54)
+					(name "DT"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "8"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at 36.83 10.16 180)
 					(length 2.54)
 					(name "SCK"
 						(effects
@@ -1735,25 +1753,7 @@
 							)
 						)
 					)
-					(number "SCK"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at 35.56 7.62 180)
-					(length 2.54)
-					(name "VCC"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "VCC"
+					(number "9"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -3070,6 +3070,10 @@
 		(uuid "028a6e3e-9757-41da-93b0-681362cf7f3d")
 	)
 	(no_connect
+		(at 69.85 57.15)
+		(uuid "148b6ec1-bf11-4083-a2a5-685671e64c34")
+	)
+	(no_connect
 		(at 43.18 44.45)
 		(uuid "3b7b53fe-93bb-4404-93dd-ee51e6ab6522")
 	)
@@ -3080,6 +3084,10 @@
 	(no_connect
 		(at 68.58 49.53)
 		(uuid "49a73c91-5b07-4c24-9ea6-7cb575c72d4b")
+	)
+	(no_connect
+		(at 69.85 62.23)
+		(uuid "4b56efd0-1400-41aa-9467-2a6609a833d2")
 	)
 	(no_connect
 		(at 41.91 72.39)
@@ -3100,6 +3108,10 @@
 	(no_connect
 		(at 68.58 72.39)
 		(uuid "b1b6302a-dc89-4e5c-8434-ea97124897ee")
+	)
+	(no_connect
+		(at 69.85 59.69)
+		(uuid "b4387b35-63c2-46b9-b6b0-de8147ed24e4")
 	)
 	(no_connect
 		(at 68.58 69.85)
@@ -3155,7 +3167,7 @@
 	)
 	(wire
 		(pts
-			(xy 196.85 121.92) (xy 187.96 121.92)
+			(xy 196.85 121.92) (xy 189.23 121.92)
 		)
 		(stroke
 			(width 0)
@@ -3205,7 +3217,7 @@
 	)
 	(wire
 		(pts
-			(xy 196.85 114.3) (xy 187.96 114.3)
+			(xy 196.85 114.3) (xy 189.23 114.3)
 		)
 		(stroke
 			(width 0)
@@ -3265,7 +3277,7 @@
 	)
 	(wire
 		(pts
-			(xy 196.85 111.76) (xy 187.96 111.76)
+			(xy 196.85 111.76) (xy 189.23 111.76)
 		)
 		(stroke
 			(width 0)
@@ -3285,23 +3297,13 @@
 	)
 	(wire
 		(pts
-			(xy 196.85 119.38) (xy 187.96 119.38)
+			(xy 196.85 119.38) (xy 189.23 119.38)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
 		(uuid "38e12807-59ef-4e54-8800-a5eb401b1b48")
-	)
-	(wire
-		(pts
-			(xy 149.86 119.38) (xy 146.05 119.38)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "3c840c86-4484-4d20-8bcd-28c200cfb52f")
 	)
 	(wire
 		(pts
@@ -3405,16 +3407,6 @@
 	)
 	(wire
 		(pts
-			(xy 146.05 111.76) (xy 149.86 111.76)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "729a3932-6213-4126-aa13-802c9b492dd3")
-	)
-	(wire
-		(pts
 			(xy 85.09 104.14) (xy 74.93 104.14)
 		)
 		(stroke
@@ -3465,6 +3457,16 @@
 	)
 	(wire
 		(pts
+			(xy 146.05 119.38) (xy 149.86 119.38)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7cc73885-1027-46e4-b21f-d2aff280661b")
+	)
+	(wire
+		(pts
 			(xy 158.75 53.34) (xy 163.83 53.34)
 		)
 		(stroke
@@ -3482,6 +3484,16 @@
 			(type default)
 		)
 		(uuid "7f5dbb17-c844-416a-9e1d-c5d37657ffff")
+	)
+	(wire
+		(pts
+			(xy 146.05 111.76) (xy 149.86 111.76)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8188bbe0-5128-4131-843b-7fdd6611e1ba")
 	)
 	(wire
 		(pts
@@ -3545,7 +3557,7 @@
 	)
 	(wire
 		(pts
-			(xy 196.85 124.46) (xy 187.96 124.46)
+			(xy 196.85 124.46) (xy 189.23 124.46)
 		)
 		(stroke
 			(width 0)
@@ -3565,7 +3577,7 @@
 	)
 	(wire
 		(pts
-			(xy 196.85 116.84) (xy 187.96 116.84)
+			(xy 196.85 116.84) (xy 189.23 116.84)
 		)
 		(stroke
 			(width 0)
@@ -4989,7 +5001,7 @@
 	)
 	(symbol
 		(lib_id "HX711:HX711A")
-		(at 185.42 127 0)
+		(at 186.69 127 0)
 		(mirror y)
 		(unit 1)
 		(exclude_from_sim no)
@@ -4998,7 +5010,7 @@
 		(dnp no)
 		(uuid "6080e5f5-dc86-4283-80ca-ba42a457782f")
 		(property "Reference" "1111401"
-			(at 185.42 127 0)
+			(at 186.69 127 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5007,7 +5019,7 @@
 			)
 		)
 		(property "Value" "~"
-			(at 185.42 127 0)
+			(at 186.69 127 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5015,8 +5027,8 @@
 				(hide yes)
 			)
 		)
-		(property "Footprint" "hx711footp:HX711"
-			(at 185.42 127 0)
+		(property "Footprint" "drill_hx711footp:HX711"
+			(at 186.69 127 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5025,7 +5037,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 185.42 127 0)
+			(at 186.69 127 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5034,7 +5046,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 185.42 127 0)
+			(at 186.69 127 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5042,34 +5054,34 @@
 				(hide yes)
 			)
 		)
-		(pin "A+"
+		(pin "2"
 			(uuid "0b9cc0ac-5b68-45ec-bad8-a8453fee974f")
 		)
-		(pin "VCC"
+		(pin "6"
 			(uuid "39342bbb-1dc9-4f82-a5f0-c0105d055029")
 		)
-		(pin "DT"
+		(pin "9"
 			(uuid "fc7a09b4-0103-4f88-adb5-28dc88c626f5")
 		)
-		(pin "GND"
+		(pin "3"
 			(uuid "85a384fc-1645-4d8b-9a10-70b2a31cf9b4")
 		)
-		(pin "A-"
+		(pin "10"
 			(uuid "63cda413-c8aa-4c84-83ed-323786f60295")
 		)
-		(pin "B+"
+		(pin "1"
 			(uuid "c0265f74-3bdf-4a2c-bb44-df566a53520e")
 		)
-		(pin "B-"
+		(pin "7"
 			(uuid "d4b70719-2754-4a56-8703-3c73e81413bc")
 		)
-		(pin "SCK"
+		(pin "8"
 			(uuid "31e0d3a1-acff-4193-8092-a95e1c056ebb")
 		)
-		(pin "E-"
+		(pin "5"
 			(uuid "2a970c89-9679-4748-88bf-709b02f664c3")
 		)
-		(pin "E+"
+		(pin "4"
 			(uuid "e3aecd97-84dc-4d56-8a0b-70291aabe6b4")
 		)
 		(instances
@@ -5711,71 +5723,6 @@
 		)
 	)
 	(symbol
-		(lib_id "Connector:TestPoint")
-		(at 69.85 57.15 270)
-		(mirror x)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "af3f942b-905d-49c6-aab4-ad66df630007")
-		(property "Reference" "TP406"
-			(at 86.36 57.404 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "TestPoint"
-			(at 79.248 57.404 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "TestPoint:TestPoint_Pad_1.5x1.5mm"
-			(at 69.85 52.07 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 69.85 52.07 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "test point"
-			(at 69.85 57.15 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "0214107d-1edf-4ec5-85e5-be1545cd0bed")
-		)
-		(instances
-			(project "drill_pcb"
-				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313/8a702047-5b96-48a0-a5d4-a2e886ec5e9e"
-					(reference "TP406")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "power:+24V")
 		(at 151.13 31.75 0)
 		(unit 1)
@@ -6105,136 +6052,6 @@
 			(project "drill_pcb"
 				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313/8a702047-5b96-48a0-a5d4-a2e886ec5e9e"
 					(reference "TP405")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Connector:TestPoint")
-		(at 69.85 59.69 270)
-		(mirror x)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "e80039b5-e3b7-40d2-9b55-06862da9131d")
-		(property "Reference" "TP407"
-			(at 86.36 59.944 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "TestPoint"
-			(at 79.248 59.944 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "TestPoint:TestPoint_Pad_1.5x1.5mm"
-			(at 69.85 54.61 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 69.85 54.61 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "test point"
-			(at 69.85 59.69 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "e1534273-24b7-4b10-88de-fc392f01b690")
-		)
-		(instances
-			(project "drill_pcb"
-				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313/8a702047-5b96-48a0-a5d4-a2e886ec5e9e"
-					(reference "TP407")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Connector:TestPoint")
-		(at 69.85 62.23 270)
-		(mirror x)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "eb2ea34f-0980-404a-96b2-13f2fb93f8b7")
-		(property "Reference" "TP408"
-			(at 86.36 62.484 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "TestPoint"
-			(at 79.248 62.484 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "TestPoint:TestPoint_Pad_1.5x1.5mm"
-			(at 69.85 57.15 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 69.85 57.15 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "test point"
-			(at 69.85 62.23 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "8aa12e93-d001-48af-8fa0-644a0e3ef912")
-		)
-		(instances
-			(project "drill_pcb"
-				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313/8a702047-5b96-48a0-a5d4-a2e886ec5e9e"
-					(reference "TP408")
 					(unit 1)
 				)
 			)
