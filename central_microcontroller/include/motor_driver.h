@@ -93,4 +93,6 @@ void motor_unblock(struct motor* motor);
  */
 bool is_motor_stucked(struct motor* motor);
 
+float get_rps_error(struct motor* motor);
+
 #endif

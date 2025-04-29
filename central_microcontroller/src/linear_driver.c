@@ -91,6 +91,20 @@ void linear_goto(struct linear* linear, float dt)
     }
 }
 
+void set_drilling_speed(struct linear* linear, float error, float dt)
+{
+    if (!linear)
+    return;
+
+    float speed = linear_step_drilling(linear, error, dt);
+
+    if (speed == 0) {linear->command = 1;}
+    else if (speed < 0) {linear->command = 3;}
+    else {linear->command = 2;}
+
+    linear->speed = (uint8_t) fabs(speed);
+}
+
 bool is_linear_stucked(struct linear* linear)
 {
     if (!linear)
@@ -159,4 +173,36 @@ float linear_step(struct linear* linear, float dt) {
 
     return output;
 }
+
+float linear_step_drilling(struct linear* linear, float error, float dt) { 
+    if (linear->goalHeight > linear->height)
+        return 0;
+
+    float derivative_drilling = (error - linear->pid_prevError_drilling) / dt;
+    float integral_candidate = linear->pid_integral_drilling + error * dt;
+
+    float output = LIN_Kp_drilling * error 
+                 + LIN_Ki_drilling * integral_candidate 
+                 + LIN_Kd_drilling * derivative_drilling;
+
+    if (output > MAX_OUTPUT) 
+    {
+        output = MAX_OUTPUT;
+        if (error < 0)
+            linear->pid_integral_drilling = integral_candidate;
+    }
+    else if (output < MIN_OUTPUT) 
+    {
+        output = MIN_OUTPUT;
+        if (error > 0)
+            linear->pid_integral_drilling = integral_candidate;
+    }
+    else 
+        linear->pid_integral_drilling = integral_candidate;
+    
+    linear->pid_prevError_drilling = error;
+
+    return output;
+}
+
 

@@ -133,7 +133,7 @@ void timerMain_callback(rcl_timer_t *timer, int64_t last_call_time)
             else
             {
                 motor_left(&motor);
-                linear_goto(&linear, MAIN_LOOP_TIME_MS/1000.0f); // in te future there will be some adjustable speed
+                set_drilling_speed(&linear, get_rps_error(&motor), MAIN_LOOP_TIME_MS/1000.0f);
             }
             break;
         

@@ -26,9 +26,16 @@
 
 // Parameters for P-regulator
 #define LIN_Kp 15
+#define MIN_SPEED 40.0f
+
+// Parameters for drilling regulator
+#define LIN_Kp_drilling 15
+#define LIN_Ki_drilling 0.03f
+#define LIN_Kd_drilling 0.01f
+
+// Saturation
 #define MAX_OUTPUT  255.0f
 #define MIN_OUTPUT -255.0f
-#define MIN_SPEED 40.0f
 
 /**
  * @brief   Structure representing subsystem for linear actuator.
@@ -45,6 +52,8 @@ struct linear{
     //PICO
     uint8_t i2cStatus;
     uint16_t goalHeight;
+    uint16_t pid_integral_drilling;
+    uint16_t pid_prevError_drilling;
 };
 
 /**
@@ -79,6 +88,8 @@ void linear_stop(struct linear* linear);
  * @param   dt Time delta for control calculation.
  */
 void linear_goto(struct linear* linear, float dt);
+
+void set_drilling_speed(struct linear* linear, float error, float dt);
 
 /**
  * @brief   Checks if the linear actuator subsystem is stuck based on error code.
@@ -122,5 +133,7 @@ bool can_linear_goDown(struct linear* linear);
  * @return  Control output (speed command).
  */
 float linear_step(struct linear* linear, float dt);
+
+float linear_step_drilling(struct linear* linear, float error, float dt);
 
 #endif

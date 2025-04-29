@@ -120,3 +120,11 @@ void motor_unblock(struct motor* motor)
     motor->deadTicks = 0;
     motor->stucked = false;
 }
+
+float get_rps_error(struct motor* motor)
+{
+    if (!motor)
+        return;
+    
+    return motor->rpsGoal - motor->rps;
+}
