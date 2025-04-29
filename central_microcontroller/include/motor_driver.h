@@ -20,7 +20,7 @@
 #define MOTOR_ADDR 0x0A
 
 // Hardcoded deadtime based on measurement
-#define MAX_DEAD_TICKS 20 // max dead time in ms/loop time ms e.g. 3000/100
+#define MAX_DEAD_TICKS 50 // max dead time in ms/loop time ms e.g. 3000/100
 
 /**
  * @brief   Structure representing the DC motor subsystem.
@@ -93,6 +93,11 @@ void motor_unblock(struct motor* motor);
  */
 bool is_motor_stucked(struct motor* motor);
 
+/**
+ * @brief   Calculate the rps error, primary for adjustable speed of linear actuator.
+ * @param   motor Pointer to the motor structure.
+ * @return  Error (goal - meas).
+ */
 float get_rps_error(struct motor* motor);
 
 #endif

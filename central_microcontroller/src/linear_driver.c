@@ -175,32 +175,22 @@ float linear_step(struct linear* linear, float dt) {
 }
 
 float linear_step_drilling(struct linear* linear, float error, float dt) { 
-    if (linear->goalHeight > linear->height)
+    if (linear->goalHeight < linear->height)
         return 0;
 
-    float derivative_drilling = (error - linear->pid_prevError_drilling) / dt;
-    float integral_candidate = linear->pid_integral_drilling + error * dt;
+    float output = LIN_Kp_drilling * error;
 
-    float output = LIN_Kp_drilling * error 
-                 + LIN_Ki_drilling * integral_candidate 
-                 + LIN_Kd_drilling * derivative_drilling;
-
-    if (output > MAX_OUTPUT) 
-    {
-        output = MAX_OUTPUT;
-        if (error < 0)
-            linear->pid_integral_drilling = integral_candidate;
-    }
-    else if (output < MIN_OUTPUT) 
-    {
-        output = MIN_OUTPUT;
-        if (error > 0)
-            linear->pid_integral_drilling = integral_candidate;
-    }
-    else 
-        linear->pid_integral_drilling = integral_candidate;
+    if (output > MAX_DRILLING_SPEED)
+        output = MAX_DRILLING_SPEED;
     
-    linear->pid_prevError_drilling = error;
+    output = MAX_DRILLING_SPEED - output;
+
+    // Saturace výstupu na výstupní rozsah
+    if (output > MAX_OUTPUT) {
+        output = MAX_OUTPUT;
+    } else if (output < MIN_OUTPUT) {
+        output = MIN_OUTPUT;
+    }
 
     return output;
 }

@@ -30,8 +30,7 @@
 
 // Parameters for drilling regulator
 #define LIN_Kp_drilling 15
-#define LIN_Ki_drilling 0.03f
-#define LIN_Kd_drilling 0.01f
+#define MAX_DRILLING_SPEED 150.0f
 
 // Saturation
 #define MAX_OUTPUT  255.0f
@@ -89,6 +88,11 @@ void linear_stop(struct linear* linear);
  */
 void linear_goto(struct linear* linear, float dt);
 
+/**
+ * @brief   Adjust linear speed to motor performance.
+ * @param   linear Pointer to the linear actuator structure.
+ * @param   dt Time delta for control calculation.
+ */
 void set_drilling_speed(struct linear* linear, float error, float dt);
 
 /**
@@ -134,6 +138,13 @@ bool can_linear_goDown(struct linear* linear);
  */
 float linear_step(struct linear* linear, float dt);
 
-float linear_step_drilling(struct linear* linear, float error, float dt);
+/**
+ * @brief   Computes linear speed based on error from motor subsystem. When the error is zero the speed is defined by macro
+ * @param   linear Pointer to the linear actuator structure.
+ * @param   rps_error Error measured by motor subsystem goal - meas
+ * @param   dt Time delta for control update.
+ * @return  Control output (speed command).
+ */
+float linear_step_drilling(struct linear* linear, float rps_error, float dt);
 
 #endif

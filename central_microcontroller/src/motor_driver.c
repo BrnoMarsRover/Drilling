@@ -124,7 +124,7 @@ void motor_unblock(struct motor* motor)
 float get_rps_error(struct motor* motor)
 {
     if (!motor)
-        return;
+    return 0;
     
-    return motor->rpsGoal - motor->rps;
+    return (float)(motor->rpsGoal - motor->rpsMeas);
 }
