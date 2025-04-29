@@ -6,5 +6,6 @@
   (lib (name "drill_RP-Pico Libraries")(type "KiCad")(uri "${KIPRJMOD}/libs/RP-Pico Libraries/MCU_RaspberryPi_and_Boards.pretty")(options "")(descr ""))
   (lib (name "drill_dcdc_converter_LM2596")(type "KiCad")(uri "${KIPRJMOD}/libs/dcdc_converter_LM2596")(options "")(descr ""))
   (lib (name "drill_hx711footp")(type "KiCad")(uri "${KIPRJMOD}/libs/hx711footp.pretty")(options "")(descr ""))
-  (lib (name "heatsink")(type "KiCad")(uri "${KIPRJMOD}/libs/heatsink")(options "")(descr ""))
+  (lib (name "drill_heatsink")(type "KiCad")(uri "${KIPRJMOD}/libs/heatsink")(options "")(descr ""))
+  (lib (name "logo")(type "KiCad")(uri "${KIPRJMOD}/libs/logo")(options "")(descr ""))
 )
