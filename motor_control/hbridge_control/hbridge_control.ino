@@ -105,9 +105,9 @@ void updateMotorState()
   {
     if(motorState == motorStateEnum::Stopped)
     {
-      motorState = motorStateEnum::Running;
       requestedSpeed = newRequestedSpeed;
       speedSetpoint = minimumSpeedFromHalt*sgn(requestedSpeed);
+      motorState = motorStateEnum::Running;
     }
     else if(newRequestedSpeed == 0 || sgn(newRequestedSpeed) != sgn(requestedSpeed))
     {
@@ -117,6 +117,7 @@ void updateMotorState()
     else if(sgn(newRequestedSpeed) == sgn(requestedSpeed))
     {
       requestedSpeed = newRequestedSpeed;
+      motorState = motorStateEnum::Running;
     }
   }
 }
