@@ -156,16 +156,17 @@ float linear_step(struct linear* linear, float dt) {
     if (error == 0)
         return 0;
 
+    // P-regulator
     float output = LIN_Kp * error;
 
-    // Saturace výstupu na výstupní rozsah
+    // Output saturation
     if (output > MAX_OUTPUT) {
         output = MAX_OUTPUT;
     } else if (output < MIN_OUTPUT) {
         output = MIN_OUTPUT;
     }
 
-    // Nastaveni minimalni rychlosti
+    // Setting minimal speed
     if (output < MIN_SPEED && output > 0)
         output = MIN_SPEED;
     if (output > -MIN_SPEED && output < 0)
@@ -175,22 +176,19 @@ float linear_step(struct linear* linear, float dt) {
 }
 
 float linear_step_drilling(struct linear* linear, float error, float dt) { 
+    // Step only if the drill goes down
     if (linear->goalHeight < linear->height)
         return 0;
 
+    // P-regulator
     float output = LIN_Kp_drilling * error;
 
-    if (output > MAX_DRILLING_SPEED)
-        output = MAX_DRILLING_SPEED;
+    // Output saturation
+    if (output > MAX_DRILLING_SPEED) output = MAX_DRILLING_SPEED;
+    else if (output < 0) output = 0;
     
+    // Output inversion
     output = MAX_DRILLING_SPEED - output;
-
-    // Saturace výstupu na výstupní rozsah
-    if (output > MAX_OUTPUT) {
-        output = MAX_OUTPUT;
-    } else if (output < MIN_OUTPUT) {
-        output = MIN_OUTPUT;
-    }
 
     return output;
 }

@@ -1,7 +1,7 @@
 /******************************************************************************
 * @file     drill_controller.cpp
  * @author  Martin Kriz
- * @brief   Drill controller class file
+ * @brief   Drill controller node file
  * @date    2025-04-28
  *****************************************************************************/
 

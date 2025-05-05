@@ -33,14 +33,16 @@ void DrillStatus::setStatus(const uint16_t status) {
 }
 
 std::string DrillStatus::getMotorI2CStatus() const {
-    return motor_i2cStatus ? "OK" : "ERROR";
+    return motor_i2cStatus ? "CONNECTED" : "DISCONNECTED";
 }
 
 std::string DrillStatus::getMotorStucked() const {
+    if (!motor_i2cStatus) return "-";
     return motor_stucked ? "BLOCKED" : "FREE";
 }
 
 std::string DrillStatus::getMotorError() const {
+    if (!motor_i2cStatus) return "-";
     switch (motor_error) {
         case 0: return "NO ERROR";
         case 1: return "H-BRIDGE FAILED";
@@ -49,28 +51,33 @@ std::string DrillStatus::getMotorError() const {
 }
 
 std::string DrillStatus::getLinearI2CStatus() const {
-    return linear_i2cStatus ? "OK" : "ERROR";
+    return linear_i2cStatus ? "CONNECTED" : "DISCONNECTED";
 }
 
 std::string DrillStatus::getLinearError() const {
+    if (!linear_i2cStatus) return "-";
     switch (linear_error) {
         case 0: return "NO ERROR";
-        case 1: return "SLIMA1";
-        case 2: return "SLIMA2";
-        case 3: return "SLIMA3";
-        default: return "UNKNOWN";
+        case 1: return "COMMUNICATION FAILED";
+        case 2: return "UNKNOWN COMMAND";
+        case 3: return "MOTOR DE-SYNCHRONIZATION";
+        case 4: return "MOTOR OVERWEIGHT";
+        case 5: return "MOTOR FAILFED";
+        case 6: return "UNKNOWN";
     }
 }
 
 std::string DrillStatus::getStorageI2CStatus() const {
-    return storage_i2cStatus ? "OK" : "ERROR";
+    return storage_i2cStatus ? "CONNECTED" : "DISCONNECTED";
 }
 
 std::string DrillStatus::getStorageScaleTared() const {
+    if (!storage_i2cStatus) return "-";
     return storage_scaleTared ? "TARED" : "NOT TARED";
 }
 
 std::string DrillStatus::getStorageError() const {
+    if (!storage_i2cStatus) return "-";
     switch (storage_error) {
         case 0: return "NO ERROR";
         case 1: return "MAX WEIGHT EXCEEDED";
