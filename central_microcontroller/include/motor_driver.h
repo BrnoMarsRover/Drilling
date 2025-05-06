@@ -20,7 +20,7 @@
 #define MOTOR_ADDR 0x0A
 
 // Hardcoded deadtime based on measurement
-#define MAX_DEAD_TICKS 50 // max dead time in ms/loop time ms e.g. 3000/100
+#define MAX_DEAD_TICKS 200 // max dead time in ms/loop time ms e.g. 3000/100
 
 /**
  * @brief   Structure representing the DC motor subsystem.

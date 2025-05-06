@@ -63,7 +63,7 @@ std::string DrillStatus::getLinearError() const {
         case 3: return "MOTOR DE-SYNCHRONIZATION";
         case 4: return "MOTOR OVERWEIGHT";
         case 5: return "MOTOR FAILFED";
-        case 6: return "UNKNOWN";
+        default: return "UNKNOWN";
     }
 }
 

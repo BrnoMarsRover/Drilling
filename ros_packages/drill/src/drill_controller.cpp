@@ -76,7 +76,15 @@ void DrillController::execute_drill_sample(const std::shared_ptr<GoalHandleDrill
             return;
         }
 
-        if(drillDepth == 0) {
+        if (activeSlot != drill_constants::DEF_SLOT)
+        {
+            if (currentState != state_machine::slot_select) {
+                currentState = state_machine::slot_select;
+                publish_drill_param(0, 0, drill_constants::DEF_SLOT);
+                publish_drill_state(currentState);
+            }
+        }
+        else if(drillDepth == 0) {
             if (currentState != state_machine::goto_height) {
                 currentState = state_machine::goto_height;
                 publish_drill_param(0, calculate_height(goal->depth), 0);
@@ -129,7 +137,7 @@ void DrillController::execute_store_sample(const std::shared_ptr<GoalHandleStore
     auto toDo = 0;
     auto storing_slot =  goal->slot;
 
-    constexpr auto dumpingTicks = drill_constants::DUMPING_TIME / drill_constants::LOOP_RATE;
+    constexpr auto dumpingTicks = drill_constants::DUMPING_TIME * drill_constants::LOOP_RATE;
     auto ticks = 0;
 
     if (goal->slot > drill_constants::MAX_SLOT)

@@ -21,8 +21,8 @@
 #define LINEAR_ADDR 0x09
 
 // Hardcoded heights of important stuff
-#define SAFE_POS 58 // [mm]
-#define STORE_POS 92 // [mm]
+#define SAFE_POS 30 // [mm]
+#define STORE_POS 74 // [mm]
 
 // Parameters for P-regulator
 #define LIN_Kp 15

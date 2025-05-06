@@ -28,7 +28,7 @@
 namespace drill_constants {
 
     // [Hz] Main loop rate
-    constexpr int LOOP_RATE = 1;
+    constexpr int LOOP_RATE = 20;
 
     // Maximum number of storage slots
     constexpr int MAX_SLOT = 4;
@@ -37,15 +37,15 @@ namespace drill_constants {
     constexpr int DEF_SLOT = 0;
 
     // [mm] Safe height for rotating with the storage
-    constexpr int SAFE_POS = 58;
+    constexpr int SAFE_POS = 30;
 
     // [mm] Height when the drill reaches the storage
-    constexpr int STORING_POS = 92;
+    constexpr int STORING_POS = 74;
 
     // [s] Time for dumping the material from the tube
     constexpr int DUMPING_TIME = 10;
 
-    // [mm] Maximum travel height of the linear actuator
+    // [mm] Maximum height of the linear actuator
     constexpr int MAX_HEIGHT = 500;
 
 }
