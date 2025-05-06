@@ -21,8 +21,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clc; clear; close all;
 
-%Loop time in drill_controller
-loop_time = 1;
+% Define loop rate [Hz] from drill_controller node
+loop_rate = 20;
+
+%Loop time
+loop_time = 1/loop_rate;
 
 % Files with the right name
 files = dir('drillData*.txt');
@@ -58,17 +61,7 @@ for k = 1:length(files)
             torque = values(:, 1);
             rps = values(:, 2);
             temperature = values(:,3);
-            height = values(:, 3); % new version: 4
-            
-            % TEXT TO DELETE IN NEW VERSION
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            %temperature simulation, this is temporrary
-            n = length(temperature); % počet vzorků
-            start_temp = 23;
-            end_temp = 35;
-            % Simulovaný nárůst teploty s mírným šumem a nelineárním charakterem
-            temperature = linspace(start_temp, end_temp, n);
-            %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            height = values(:, 4);
 
             % Charts
             f = figure;
