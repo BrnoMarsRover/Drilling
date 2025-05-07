@@ -43,7 +43,7 @@ float sourceVoltage = 24.0;
 float windingResistance = 0.2608;
 //CONTROLLERS
 //Kp  Ki    outputLimit   sumClamp  
-PIController speedController(1.7, 2.5, 5, 2.0);
+PIController speedController(1.7, 2.5, 4.2, 2.0);
 PIController currentController(40, 30, 150, 4.0);
 //SETPOINT FILTER
 enum motorStateEnum motorState = Stopped;
