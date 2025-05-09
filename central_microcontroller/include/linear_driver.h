@@ -23,6 +23,7 @@
 // Hardcoded heights of important stuff
 #define SAFE_POS 30 // [mm]
 #define STORE_POS 74 // [mm]
+#define LOWEST_POS 576 // [mm]
 
 // Parameters for P-regulator
 #define LIN_Kp 15
@@ -129,6 +130,13 @@ bool can_storage_move(struct linear* linear);
  * @return  true if movement down is allowed, false otherwise.
  */
 bool can_linear_goDown(struct linear* linear);
+
+/**
+ * @brief   Checks if the linear actuator reached lowest position.
+ * @param   linear Pointer to the linear actuator structure.
+ * @return  true if reached, false otherwise.
+ */
+bool linear_reached_max(struct linear* linear);
 
 /**
  * @brief   Computes the control output with P-regulator for actuator movement based on goal error.

@@ -28,7 +28,7 @@ int linear_read(struct linear* linear)
     linear->height = *ptr;
 
     if (linear->height == 0 && linear->state != 1) linear->height = 1;
-    else if (linear->height > 50000) linear->height = 1;
+    else if (linear->height > 1000) linear->height = 1;
 
     ptr = (uint16_t*)(buffer + 3);
     linear->toGround = *ptr;
@@ -118,7 +118,7 @@ bool linear_reached_goal(struct linear* linear)
 {
     if (!linear)
         return true;
-    if(linear->goalHeight > linear->height - 2 && linear->goalHeight < linear->height + 2)
+    if(linear->goalHeight == linear->height || linear_reached_max(linear))
         return true;
     return false;
 }
@@ -145,7 +145,20 @@ bool can_linear_goDown(struct linear* linear)
 {
     if (!linear)
         return false;
+    
+    if (linear_reached_max(linear))
+        return false;
+        
     if(linear->height < STORE_POS || linear->height > linear->goalHeight)
+        return true;
+    return false;
+}
+
+bool linear_reached_max(struct linear* linear)
+{
+    if (!linear)
+        return true;
+    if(linear->height >= LOWEST_POS)
         return true;
     return false;
 }
