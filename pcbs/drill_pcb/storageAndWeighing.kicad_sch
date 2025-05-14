@@ -5377,7 +5377,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "Screw_Terminal_01x06"
+		(property "Value" "STRAIN GAUGE"
 			(at 204.47 119.3799 0)
 			(effects
 				(font
@@ -5529,7 +5529,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "Screw_Terminal_01x04"
+		(property "Value" "STORAGE STEPPER"
 			(at 171.45 55.8799 0)
 			(effects
 				(font
@@ -6143,7 +6143,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "Screw_Terminal_01x04"
+		(property "Value" "ROTARY ENCODER"
 			(at 92.71 109.2199 0)
 			(effects
 				(font
