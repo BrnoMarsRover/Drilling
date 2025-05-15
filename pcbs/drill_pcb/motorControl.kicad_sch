@@ -5435,7 +5435,7 @@
 		(dnp no)
 		(uuid "523ab315-bf8c-4901-a91c-8efd4a3d6a3e")
 		(property "Reference" "R205"
-			(at 108.204 51.308 0)
+			(at 107.95 52.578 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5644,7 +5644,7 @@
 		(dnp no)
 		(uuid "5545c8bb-9dcd-4525-9d1a-ef67b304dcc4")
 		(property "Reference" "R207"
-			(at 108.204 83.82 0)
+			(at 107.696 85.344 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5653,7 +5653,7 @@
 			)
 		)
 		(property "Value" "10k"
-			(at 110.744 83.566 0)
+			(at 110.236 84.074 0)
 			(effects
 				(font
 					(size 1.27 1.27)
