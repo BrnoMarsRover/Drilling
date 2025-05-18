@@ -20,12 +20,12 @@
 #define I2C_PORT i2c0
 #define LINEAR_ADDR 0x09
 
-// Hardcoded heights of important stuff
+// Hardcoded heights
 #define SAFE_POS 30 // [mm]
 #define STORE_POS 74 // [mm]
 #define LOWEST_POS 576 // [mm]
 
-// Parameters for P-regulator
+// Parameters for position P-regulator
 #define LIN_Kp 15
 #define MIN_SPEED 40.0f
 
@@ -83,7 +83,7 @@ void linear_init(struct linear* linear);
 void linear_stop(struct linear* linear);
 
 /**
- * @brief   Moves the linear actuator subsystem towards the goal height.
+ * @brief   Moves the linear actuator to goal position.
  * @param   linear Pointer to the linear actuator structure.
  * @param   dt Time delta for control calculation.
  */

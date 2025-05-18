@@ -44,21 +44,21 @@ struct storage{
 };
 
 /**
- * @brief   Reads data from the storage unit over I2C.
+ * @brief   Reads data from the storage subsystem over I2C.
  * @param   storage Pointer to the storage structure.
  * @return  0 on success, negative value on failure.
  */
 int storage_read(struct storage* storage);
 
 /**
- * @brief   Sends a control command to the storage unit over I2C.
+ * @brief   Sends a control command to the storage subsystem over I2C.
  * @param   storage Pointer to the storage structure.
  * @return  0 on success, negative value on failure.
  */
 int storage_write(struct storage* storage);
 
 /**
- * @brief   Initializes the storage structure and resets its internal state.
+ * @brief   Initializes the storage data.
  * @param   storage Pointer to the storage structure.
  */
 void storage_init(struct storage* storage);

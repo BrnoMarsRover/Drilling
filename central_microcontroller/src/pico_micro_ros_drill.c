@@ -21,6 +21,7 @@
 #include "linear_driver.h"
 #include "motor_driver.h"
 #include "math.h"
+#include "hardware/watchdog.h"
 
 #define MAIN_LOOP_TIME_MS 50    // Period of i2c communication
 #define I2C_PORT i2c0
@@ -316,8 +317,9 @@ int main()
 
     if (ret != RCL_RET_OK)
     {
-        // Unreachable agent, exiting program.
-        return ret;
+        // Unreachable agent, resetting pico.
+        watchdog_enable(1, 1);
+        while (true);     
     }
 
     // Setting up node
@@ -476,15 +478,6 @@ uint16_t drill_message(struct motor* motor, struct linear* linear, struct storag
 {
     if(!motor || !linear || !storage)
         return 0;
-
-    //if(currentState == drilling && motor->stucked)
-    //    return 1;
-
-    //if(currentState == tare_scale && storage->scaleTared)
-    //    return 1;
-
-    //if(currentState == get_weight && storage->weight_recieved && !storage->scaleTared)
-    //    return 1;
 
     uint16_t storage_status = 0;
     uint16_t linear_status = 0;

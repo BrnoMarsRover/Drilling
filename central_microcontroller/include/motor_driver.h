@@ -20,7 +20,7 @@
 #define MOTOR_ADDR 0x0A
 
 // Hardcoded deadtime based on measurement
-#define MAX_DEAD_TICKS 200 // max dead time in ms/loop time ms e.g. 3000/100
+#define MAX_DEAD_TICKS 100000 // max dead time in ms/loop time ms e.g. 3000/100
 
 /**
  * @brief   Structure representing the DC motor subsystem.
@@ -63,7 +63,7 @@ int motor_write(struct motor* motor);
 void motor_init(struct motor* motor);
 
 /**
- * @brief   Stops the motor by setting speed to zero and clearing the running flag.
+ * @brief   Stops the motor by setting speed to zero.
  * @param   motor Pointer to the motor structure.
  */
 void motor_stop(struct motor* motor);
