@@ -469,6 +469,15 @@ int main()
     while (true)
     {
         rclc_executor_spin_some(&executor, RCL_MS_TO_NS(100));
+
+        // Periodically check agent
+        rcl_ret_t ping_ret = rmw_uros_ping_agent(timeout_ms, 1);
+        if (ping_ret != RCL_RET_OK)
+        {
+            // Reset if agent is lost
+            watchdog_enable(1, 1);
+            while (true);
+        }
     }
     return 0;
 }

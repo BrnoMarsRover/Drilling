@@ -71,4 +71,4 @@ The client sends a slot number, and the service returns the weight assigned to t
 | error: `H-BRIDGE ERROR`|                       | error: `-`             |
 
 ## Topics
-Described in centrall_microcontroller project.
+Described in central_microcontroller project.
