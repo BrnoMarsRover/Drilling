@@ -1,14 +1,21 @@
+/******************************************************************************
+ * @file    linear_test.ino
+ * @author  Martin Kriz
+ * @brief   Code for arduino nano to test communication with linear subsystem.
+ * @date    2025-04-19
+ ******************************************************************************/
+
 #include <Wire.h>
 
+// Test variables with random values
 uint8_t state = 4;
 uint8_t error = 0;
 uint16_t height = 300;
 uint16_t toGround = 10;
-unsigned long lastTime = 0; // Uloží čas posledního měření
+unsigned long lastTime = 0;
 
 
 void setup() {
-  // put your setup code here, to run once:
   Wire.begin(9);
   Serial.begin(9600);
   Wire.onReceive(receiveEvent);
@@ -18,13 +25,16 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  height--;
+  height--; // Value change because of testing position regulator
   delay(100);
 }
 
+/**
+ * @brief   Handler of recieving messages from central microcontroller (nano <- pico).
+ * @param   howMany Number of bytes to recieve.
+ * @return  void
+ */
 void receiveEvent(int howMany) {
-    time_measure();
     const uint8_t inputArraySize = 2;
     char inputArray[inputArraySize] = {0};
     //Serial.println("Recieved");
@@ -33,10 +43,13 @@ void receiveEvent(int howMany) {
     uint8_t b = Wire.read();
     Serial.println(a);
     Serial.println(b);
-
     }
 
 
+/**
+ * @brief   Handler of requesting messages from central microcontroller (nano -> pico).
+ * @return  void
+ */
 void requestEvent(){
   const uint8_t outputArraySize = 5;
   uint8_t outputArray[outputArraySize] = {0};
@@ -46,16 +59,5 @@ void requestEvent(){
   memcpy((outputArray+1), &height, sizeof(height));
   memcpy((outputArray+3), &toGround, sizeof(toGround));
   Wire.write(outputArray, 5);
-  //Serial.println("Finito");
-  }
-
-  void time_measure()
-  {
-    unsigned long currentTime = millis();
-    unsigned long interval = currentTime - lastTime; 
-    lastTime = currentTime; 
-
-    Serial.print("Interval mezi vzorky: ");
-    Serial.print(interval);
-    Serial.println(" ms");
+  //Serial.println("Request done!");
   }
