@@ -1,13 +1,20 @@
+/******************************************************************************
+ * @file    motor_test.ino
+ * @author  Martin Kriz
+ * @brief   Code for arduino nano to test communication with motor subsystem.
+ * @date    2025-04-19
+ ******************************************************************************/
+
 #include <Wire.h>
 
-
+// Test variables with random values
 uint8_t state = 1;
 uint8_t error = 0;
 int8_t rps = -100;
 int8_t torque = 75;
 uint8_t temperature = 25;
 unsigned long firstTen = 0;
-unsigned long lastTime = 0; // Uloží čas posledního měření
+unsigned long lastTime = 0;
 unsigned long sum = 0;
 unsigned long counter = 0;
 unsigned long tmax = 0;
@@ -15,7 +22,6 @@ unsigned long tmin = 10000;
 
 
 void setup() {
-  // put your setup code here, to run once:
   Wire.begin(10);
   Serial.begin(9600);
   Wire.onReceive(receiveEvent);
@@ -25,7 +31,6 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
   Serial.print("tavg: ");
   Serial.print(sum/counter);
   Serial.println(" ms");
@@ -34,21 +39,28 @@ void loop() {
   Serial.print(tmin);
   Serial.println(" ms");
 
-    Serial.print("tmax: ");
+  Serial.print("tmax: ");
   Serial.print(tmax);
   Serial.println(" ms");
   delay(100);
 }
 
+/**
+ * @brief   Handler of recieving messages from central microcontroller (nano <- pico).
+ * @param   howMany Number of bytes to recieve.
+ * @return  void
+ */
 void receiveEvent(int howMany) {
-
     //Serial.println("Recieved");
     //Serial.println(howMany);
     int8_t a = Wire.read();
     Serial.println(a);
     }
 
-
+/**
+ * @brief   Handler of requesting messages from central microcontroller (nano -> pico).
+ * @return  void
+ */
 void requestEvent(){
   time_measure();
   firstTen++;
@@ -61,10 +73,14 @@ void requestEvent(){
   memcpy((outputArray+2), &torque, sizeof(torque));
   memcpy((outputArray+3), &temperature, sizeof(temperature));
   Wire.write(outputArray, 4);
-  //Serial.println("Finito");
+  //Serial.println("Request done!");
   }
 
-    void time_measure()
+/**
+ * @brief   Measures the time intervals between communication events.
+ * @return  void
+ */
+void time_measure()
   {
     unsigned long currentTime = millis();
     unsigned long interval = currentTime - lastTime; 
@@ -81,10 +97,4 @@ void requestEvent(){
       if (interval < tmin)
         tmin = interval;
     }
-
-
-
-    //Serial.print("Interval mezi vzorky: ");
-    //Serial.print(interval);
-    //Serial.println(" ms");
   }
