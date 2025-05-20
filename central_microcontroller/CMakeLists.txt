@@ -10,11 +10,11 @@ pico_sdk_init()
 
 link_directories(libmicroros)
 add_executable(pico_micro_ros_drill
-    pico_micro_ros_drill.c
-    pico_uart_transport.c
-    storage_driver.c
-    linear_driver.c
-    motor_driver.c
+    src/pico_micro_ros_drill.c
+    src/pico_uart_transport.c
+    src/storage_driver.c
+    src/linear_driver.c
+    src/motor_driver.c
 
 )
 target_link_libraries(pico_micro_ros_drill
@@ -25,6 +25,7 @@ target_link_libraries(pico_micro_ros_drill
 
 target_include_directories(pico_micro_ros_drill PUBLIC
     libmicroros/include
+    include
 )
 
 SET(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} -ffunction-sections -fdata-sections")

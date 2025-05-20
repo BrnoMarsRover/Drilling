@@ -1,3 +1,4 @@
+central_microcontroller/build/
 /build
 pcbs/drill_pcb/drill_pcb-backups
 pcbs/drill_pcb/fp-info-cache
@@ -6,4 +7,6 @@ pcbs/central_microcontroller/fp-info-cache
 pico-sdk
 .vscode
 .DS_Store
-
+ros_packages/drill/.idea/
+ros_packages/drill/build/
+ros_packages/drill/cmake-build-debug/
