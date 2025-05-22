@@ -14,10 +14,10 @@ DrillLogger::DrillLogger()
     file_.open(file_name_, std::ios::app); // Otevření v režimu přidávání dat
 
     if (!file_.is_open()) {
-        std::cerr << "Chyba: Nelze otevřít soubor: " << file_name_ << std::endl;
+        //std::cerr << "Chyba: Nelze otevřít soubor: " << file_name_ << std::endl;
     } else {
         file_ << "Drilling record" << std::endl << std::endl;
-        std::cout << "Soubor otevřen: " << file_name_ << std::endl;
+        //std::cout << "Soubor otevřen: " << file_name_ << std::endl;
     }
 }
 
@@ -25,7 +25,7 @@ DrillLogger::~DrillLogger()
 {
     if (file_.is_open()) {
         file_.close();
-        std::cout << "Soubor uzavřen: " << file_name_ << std::endl;
+        //std::cout << "Soubor uzavřen: " << file_name_ << std::endl;
     }
 }
 
@@ -50,7 +50,7 @@ void DrillLogger::logActionStamp(const int option)
     // Zápis do souboru s razítkem
     file_ << generateTimestamp() << message << std::endl;
 
-    std::cout << "Akce zapsána: " << message << " do souboru: " << file_name_ << std::endl;
+    //std::cout << "Akce zapsána: " << message << " do souboru: " << file_name_ << std::endl;
 
 }
 
@@ -62,13 +62,13 @@ void DrillLogger::logDrillSampleData(const float actualTorque, const float actua
 void DrillLogger::logDrillSampleResult(const int depth)
 {
     file_ << std::endl;
-    file_ << "Reached depth: " << depth << std::endl;
+    file_ << "Reached depth: " << depth << " mm" << std::endl;
     file_ << std::endl;
 }
 
 void DrillLogger::logStoreSampleResult(const int slot, const float weight)
 {
-    file_ << "Slot: " << slot << ", weight: " << weight << std::endl;
+    file_ << "Slot: " << slot << ", weight: " << weight << " g" << std::endl;
     file_ << std::endl;
 }
 

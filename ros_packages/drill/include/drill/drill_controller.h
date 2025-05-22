@@ -37,10 +37,10 @@ namespace drill_constants {
     constexpr int DEF_SLOT = 0;
 
     // [mm] Safe height for rotating with the storage
-    constexpr int SAFE_POS = 20;
+    constexpr int SAFE_POS = 10;
 
     // [mm] Height when the drill reaches the storage
-    constexpr int STORING_POS = 60;
+    constexpr int STORING_POS = 50;
 
     // [s] Time for dumping the material from the tube
     constexpr int DUMPING_TIME = 10;

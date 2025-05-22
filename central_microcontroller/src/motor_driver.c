@@ -108,7 +108,7 @@ bool is_motor_stucked(struct motor* motor)
             motor->stucked = true;
             return true;
         }
-        ++motor->deadTicks;
+        //++motor->deadTicks;
     }
     return false;
 }

@@ -108,7 +108,7 @@ void DrillController::execute_drill_sample(const std::shared_ptr<GoalHandleDrill
         feedback->actual_height = drillHeight;
         goal_handle->publish_feedback(feedback);
         DrillLogger_->logDrillSampleData(motorTorque, motorRPS, motorTemperature, drillHeight);
-        RCLCPP_INFO(this->get_logger(), "Drilling progress torque: %f rps: %f temp: %d height: %d", motorTorque.load(), motorRPS.load(), motorTemperature.load(),drillHeight.load());
+        //RCLCPP_INFO(this->get_logger(), "Drilling progress torque: %f rps: %f temp: %d height: %d", motorTorque.load(), motorRPS.load(), motorTemperature.load(),drillHeight.load());
         loop_rate.sleep();
     }
 
@@ -287,7 +287,7 @@ void DrillController::execute_store_sample(const std::shared_ptr<GoalHandleStore
         // Sending feedback
         feedback->actual_height = drillHeight;
         goal_handle->publish_feedback(feedback);
-        RCLCPP_INFO(this->get_logger(), "Storing sample, drill height: %d", drillHeight.load());
+        //RCLCPP_INFO(this->get_logger(), "Storing sample, drill height: %d", drillHeight.load());
         loop_rate.sleep();
     }
 
@@ -351,7 +351,7 @@ void DrillController::execute_drill_calibration(const std::shared_ptr<GoalHandle
         // Sending feedback
         feedback->actual_height = drillHeight;
         goal_handle->publish_feedback(feedback);
-        RCLCPP_INFO(this->get_logger(), "Erasing the weights");
+        //RCLCPP_INFO(this->get_logger(), "Erasing the weights");
         loop_rate.sleep();
     }
 
@@ -372,7 +372,7 @@ void DrillController::publish_drill_param(const float rps, const int height, con
     message.data[1] = height;
     message.data[2] = slot;
     drill_params_pub_->publish(message);
-    RCLCPP_INFO(this->get_logger(), "Published drill parameters rps %f, height %d, slot %d", rps, height, slot);
+    //RCLCPP_INFO(this->get_logger(), "Published drill parameters rps %f, height %d, slot %d", rps, height, slot);
 }
 
 void DrillController::get_drill_status_callback(const std::shared_ptr<drill_interfaces::srv::GetDrillStatus::Request> request,
@@ -396,12 +396,12 @@ void DrillController::publish_drill_state(const state_machine state) const{
     auto message = std_msgs::msg::UInt8();
     message.data = static_cast<uint8_t>(state);
     drill_state_pub_->publish(message);
-    RCLCPP_INFO(this->get_logger(), "Published drill state: %d", static_cast<uint8_t>(state));
+    //RCLCPP_INFO(this->get_logger(), "Published drill state: %d", static_cast<uint8_t>(state));
 }
 
 void DrillController::drill_data_callback(const std_msgs::msg::UInt16MultiArray::SharedPtr msg)
 {
-    RCLCPP_INFO(this->get_logger(), "Received drill data.");
+    //RCLCPP_INFO(this->get_logger(), "Received drill data.");
     DrillStatus_->setStatus(msg->data[0]);
     motorRPS = float_decode(msg->data[1]);
     motorTorque = float_decode(msg->data[2]);
