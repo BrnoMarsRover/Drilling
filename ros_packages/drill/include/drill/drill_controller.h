@@ -21,6 +21,7 @@
 #include "drill_interfaces/action/store_sample.hpp"
 #include "drill_interfaces/srv/get_sample_weight.hpp"
 #include "drill_interfaces/srv/get_drill_status.hpp"
+#include "drill_interfaces/srv/drill_reset.hpp"
 #include "atomic"
 #include "cmath"
 
@@ -72,6 +73,7 @@ public:
     using DrillCalibration = drill_interfaces::action::DrillCalibration;
     using GetSampleWeight = drill_interfaces::srv::GetSampleWeight;
     using GetDrillStatus = drill_interfaces::srv::GetDrillStatus;
+    using DrillReset = drill_interfaces::srv::DrillReset;
 
     using GoalHandleDrillSample = rclcpp_action::ServerGoalHandle<DrillSample>;
     using GoalHandleStoreSample = rclcpp_action::ServerGoalHandle<StoreSample>;
@@ -116,6 +118,7 @@ private:
     rclcpp_action::Server<DrillCalibration>::SharedPtr drill_calibration_server_;
     rclcpp::Service<GetSampleWeight>::SharedPtr get_sample_weight_srv_;
     rclcpp::Service<GetDrillStatus>::SharedPtr get_drill_status_srv_;
+    rclcpp::Service<DrillReset>::SharedPtr drill_reset_srv_;
 
     // DRILL SAMPLE ACTION
     // If the drill is busy service will be refused
@@ -123,8 +126,8 @@ private:
         RCLCPP_INFO(this->get_logger(), "Received DrillSample request to drill %d mm with maximal rps %f .", goal->depth, goal->max_rps);
         (void)uuid;
 
-        if (drill_is_busy) {
-            RCLCPP_WARN(this->get_logger(), "Drill is busy. Rejecting request.");
+        if (drill_is_busy || !DrillStatus_->is_drill_connected()) {
+            RCLCPP_WARN(this->get_logger(), "Drill is busy or not connected. Rejecting request.");
             return rclcpp_action::GoalResponse::REJECT;
         }
         RCLCPP_INFO(this->get_logger(), "Drill is ready. Accepting request.");
@@ -154,8 +157,8 @@ private:
         RCLCPP_INFO(this->get_logger(), "Received StoreSample request to store sample on slot number %d." , goal->slot);
         (void)uuid;
 
-        if (drill_is_busy) {
-            RCLCPP_WARN(this->get_logger(), "Drill is busy. Rejecting request.");
+        if (drill_is_busy || !DrillStatus_->is_drill_connected()) {
+            RCLCPP_WARN(this->get_logger(), "Drill is busy or not connected. Rejecting request.");
             return rclcpp_action::GoalResponse::REJECT;
         }
 
@@ -185,8 +188,8 @@ private:
         RCLCPP_INFO(this->get_logger(), "Received DrillCalibration request. Weights will be: %s", goal->reset_weights ? "erased" : "kept");
         (void)uuid;
 
-        if (drill_is_busy) {
-            RCLCPP_WARN(this->get_logger(), "Drill is busy or in manual mode. Rejecting request.");
+        if (drill_is_busy || !DrillStatus_->is_drill_connected()) {
+            RCLCPP_WARN(this->get_logger(), "Drill is busy or not connected. Rejecting request.");
             return rclcpp_action::GoalResponse::REJECT;
         }
 
@@ -217,6 +220,9 @@ private:
 
     void get_drill_status_callback(const std::shared_ptr<drill_interfaces::srv::GetDrillStatus::Request> request,
         std::shared_ptr<drill_interfaces::srv::GetDrillStatus::Response> response);
+
+    void drill_reset_callback(const std::shared_ptr<drill_interfaces::srv::DrillReset::Request> request,
+        std::shared_ptr<drill_interfaces::srv::DrillReset::Response> response);
 
     // Publishes the current drill state to the "drill_state" topic
     // @param state: The current state of the drill, represented by the state_machine enum

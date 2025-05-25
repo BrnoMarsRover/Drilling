@@ -48,10 +48,16 @@ DrillController::DrillController(): Node("drill_controller") {
         std::bind(&DrillController::get_drill_status_callback, this, std::placeholders::_1, std::placeholders::_2)
         );
 
+    drill_reset_srv_ = this->create_service<DrillReset>(
+        "drill_reset",
+        std::bind(&DrillController::drill_reset_callback, this, std::placeholders::_1, std::placeholders::_2)
+        );
+
+
     DrillLogger_ = std::make_shared<DrillLogger>();
     DrillStatus_ = std::make_shared<DrillStatus>();
 
-
+    RCLCPP_INFO(this->get_logger(), "Ready for drilling? Because I am!");
 }
 
 void DrillController::execute_drill_sample(const std::shared_ptr<GoalHandleDrillSample> goal_handle) {
@@ -66,7 +72,7 @@ void DrillController::execute_drill_sample(const std::shared_ptr<GoalHandleDrill
 
     while(drillDepth < goal->depth-1) {
         //Checking if there is a cancel request
-        if (goal_handle->is_canceling()) {
+        if (goal_handle->is_canceling() || !rclcpp::ok()) {
             result->final_depth = drillDepth;
             goal_handle->canceled(result);
             currentState = state_machine::stop;
@@ -149,7 +155,7 @@ void DrillController::execute_store_sample(const std::shared_ptr<GoalHandleStore
 
     while(state < 8) {
         //Checking if there is a cancel request
-        if (goal_handle->is_canceling()) {
+        if (goal_handle->is_canceling() || !rclcpp::ok()) {
             result->weight = 0;
             goal_handle->canceled(result);
             currentState = state_machine::stop;
@@ -315,7 +321,7 @@ void DrillController::execute_drill_calibration(const std::shared_ptr<GoalHandle
     while(state < 2)
     {
         //Checking if there is a cancel request
-        if (goal_handle->is_canceling()) {
+        if (goal_handle->is_canceling() || !rclcpp::ok()) {
             result->success = false;
             goal_handle->canceled(result);
             currentState = state_machine::stop;
@@ -392,6 +398,44 @@ void DrillController::get_drill_status_callback(const std::shared_ptr<drill_inte
     response->storage_error = DrillStatus_->getStorageError();
 }
 
+void DrillController::drill_reset_callback(const std::shared_ptr<drill_interfaces::srv::DrillReset::Request> request,
+    std::shared_ptr<drill_interfaces::srv::DrillReset::Response> response)
+{
+    if (request->target == "all") {
+        const char* command = "picotool reboot -f";
+
+        FILE* pipe = popen(command, "r");
+        if (!pipe) {
+            response->success = false;
+            response->message = "Failed to run picotool command.";
+            RCLCPP_ERROR(this->get_logger(), "popen() failed.");
+            return;
+        }
+
+        char buffer[128];
+        std::string result;
+        while (fgets(buffer, sizeof(buffer), pipe) != nullptr) {
+            result += buffer;
+        }
+
+        int return_code = pclose(pipe);
+        if (return_code == 0) {
+            response->success = true;
+            response->message = "Pico successfully rebooted.";
+            RCLCPP_INFO(this->get_logger(), "Pico rebooted successfully.");
+        } else {
+            response->success = false;
+            response->message = "picotool reboot failed. Output: " + result;
+            RCLCPP_ERROR(this->get_logger(), "picotool reboot failed. Output: %s", result.c_str());
+        }
+
+    } else {
+        response->success = false;
+        response->message = "Unsupported reset target: " + request->target;
+        RCLCPP_WARN(this->get_logger(), "Unknown reset target: %s", request->target.c_str());
+    }
+}
+
 void DrillController::publish_drill_state(const state_machine state) const{
     auto message = std_msgs::msg::UInt8();
     message.data = static_cast<uint8_t>(state);
@@ -415,6 +459,7 @@ void DrillController::drill_data_callback(const std_msgs::msg::UInt16MultiArray:
     sampleWeight3 = roundf(static_cast<float>(msg->data[9]) / 10.0f * 10.0f) / 10.0f;
     sampleWeight4 = roundf(static_cast<float>(msg->data[10]) / 10.0f * 10.0f) / 10.0f;
 }
+
 
 float DrillController::get_sampleWeight(const int slot)
 {

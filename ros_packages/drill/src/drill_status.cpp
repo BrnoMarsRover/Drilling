@@ -8,7 +8,8 @@
 #include "drill/drill_status.h"
 
 DrillStatus::DrillStatus()
-    : motor_i2cStatus(false),
+    : last_received_time_(std::chrono::steady_clock::now()),
+      motor_i2cStatus(false),
       motor_stucked(false),
       motor_error(0),
       linear_i2cStatus(false),
@@ -20,6 +21,8 @@ DrillStatus::DrillStatus()
 DrillStatus::~DrillStatus() = default;
 
 void DrillStatus::setStatus(const uint16_t status) {
+    last_received_time_ = std::chrono::steady_clock::now();
+
     motor_error      = status & 0b0000000000000011;
     motor_stucked    = (status >> 2) & 0b1;
     motor_i2cStatus  = (status >> 3) & 0b1;
@@ -30,6 +33,14 @@ void DrillStatus::setStatus(const uint16_t status) {
     storage_error      = (status >> 8) & 0b00000011;
     storage_scaleTared = (status >> 10) & 0b1;
     storage_i2cStatus  = (status >> 11) & 0b1;
+}
+
+bool DrillStatus::is_drill_connected() const
+{
+    constexpr std::chrono::seconds kTimeout(2);
+    if (const auto now = std::chrono::steady_clock::now(); (now - last_received_time_) < kTimeout)
+        return true;
+    return false;
 }
 
 std::string DrillStatus::getMotorI2CStatus() const {

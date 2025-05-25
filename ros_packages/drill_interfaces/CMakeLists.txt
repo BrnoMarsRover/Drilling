@@ -19,6 +19,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "action/StoreSample.action"
   "srv/GetSampleWeight.srv"
   "srv/GetDrillStatus.srv"
+  "srv/DrillReset.srv"
 )
 
 if(BUILD_TESTING)

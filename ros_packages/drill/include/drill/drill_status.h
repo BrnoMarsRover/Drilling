@@ -11,7 +11,7 @@
 #include <cstdint>
 #include <string>
 #include <atomic>
-
+#include <chrono>
 
 class DrillStatus {
 public:
@@ -20,6 +20,8 @@ public:
 
     // Setter
     void setStatus(uint16_t status);
+
+    bool is_drill_connected() const;
 
     // Motor getter
     std::string getMotorI2CStatus() const;
@@ -39,6 +41,8 @@ public:
 
 
 private:
+    std::chrono::steady_clock::time_point last_received_time_;
+
     std::atomic<bool> motor_i2cStatus;
     std::atomic<bool> motor_stucked;
     std::atomic<int> motor_error;
