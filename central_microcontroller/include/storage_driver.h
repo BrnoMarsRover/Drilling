@@ -19,6 +19,9 @@
 #define I2C_PORT i2c0
 #define STORAGE_ADDR 0x08
 
+// Reset Pins
+const uint STORAGE_RESET_PIN = 9;
+
 // Hardcoded hardware construction
 #define STORE_SLOTS 4
 #define DEF_POS 0

@@ -42,8 +42,11 @@ enum state_machine
     tare_scale,
     get_weight,
     reset_weight,
-    manual
+    reset_subsystems,
 };
+
+uint64_t last_joy_topic = 0;
+uint64_t last_state_topic = 0;
 
 // State machine global variable
 enum state_machine currentState = stop;
@@ -55,9 +58,10 @@ struct motor motor;
 
 // Green LED, RUN indicator
 const uint LED_PIN = 25;
-// Reset Pins
-const uint LINEAR_RESET_PIN = 2;
-const uint STORAGE_RESET_PIN = 3;
+
+// Output enable for logic converter
+const uint OE_PIN = 3;
+bool reset_done = false;
 
 // Topics variables
 rcl_subscription_t state_subscriber;
@@ -109,6 +113,13 @@ void timerPublisher_callback(rcl_timer_t *timer, int64_t last_call_time)
 // Main callback, i2c communication and state machine
 void timerMain_callback(rcl_timer_t *timer, int64_t last_call_time)
 {
+    // Checking connection with /drill_controller
+    uint64_t now = time_us_64();
+    if (now - last_state_topic > 1000000)
+        currentState = stop;
+    
+    if (currentState != reset_subsystems)
+        reset_done = false;
 
     // Input reading
     if(motor_read(&motor) < 0) {motor.i2cStatus = false;}
@@ -124,8 +135,11 @@ void timerMain_callback(rcl_timer_t *timer, int64_t last_call_time)
     switch (currentState) 
     {
         case stop:
-            motor_stop(&motor);
-            linear_stop(&linear);
+            if (now - last_joy_topic > 1000000) // More then one second
+            {
+                motor_stop(&motor);
+                linear_stop(&linear);
+            }
             break;
 
         case drilling:
@@ -220,7 +234,21 @@ void timerMain_callback(rcl_timer_t *timer, int64_t last_call_time)
             break;
 
         default:
-            // manual mode
+            if (!reset_done && gpio_get(MOTOR_RESET_PIN) == true)
+            {
+                gpio_put(MOTOR_RESET_PIN, 0);
+                gpio_put(LINEAR_RESET_PIN, 0);
+                gpio_put(STORAGE_RESET_PIN, 0);
+            }
+
+            else if (!motor.i2cStatus && !linear.i2cStatus && !storage.i2cStatus)
+            {
+                gpio_put(MOTOR_RESET_PIN, 1);
+                gpio_put(LINEAR_RESET_PIN, 1);
+                gpio_put(STORAGE_RESET_PIN, 1);
+                reset_done = true;
+            }
+
             break;
     }
 
@@ -234,6 +262,7 @@ void timerMain_callback(rcl_timer_t *timer, int64_t last_call_time)
 // Callback for recieving /drill_state
 void state_callback(const void * msgin)
 {
+    last_state_topic = time_us_64();
     const std_msgs__msg__UInt8 * msg = (const std_msgs__msg__UInt8 *)msgin;
     currentState = msg->data;
 }
@@ -252,7 +281,8 @@ void parameters_callback(const void * msgin)
 void joy_callback(const void * msgin)
 {
     const sensor_msgs__msg__Joy * msg = (const sensor_msgs__msg__Joy *)msgin;
-    if (currentState == manual)
+    last_joy_topic = time_us_64();
+    if (currentState == stop)
     {
         // Set linear state
         if (msg->axes.data[1] == 0.0) { linear.command = 1; }      // stop linear
@@ -313,6 +343,9 @@ int main()
 
     gpio_init(STORAGE_RESET_PIN);
     gpio_set_dir(STORAGE_RESET_PIN, GPIO_OUT);
+
+    gpio_init(OE_PIN);
+    gpio_set_dir(OE_PIN, GPIO_OUT);
 
     rcl_timer_t timerPublisher;
     rcl_timer_t timerMain;
@@ -465,6 +498,9 @@ int main()
         
     rclc_executor_add_timer(&executor, &timerPublisher);
     
+    // Enable logic converter
+    gpio_put(OE_PIN, 1);
+
     // Setting I2C
     i2c_init(I2C_PORT, 100000);
     gpio_set_function(4, GPIO_FUNC_I2C);

@@ -20,6 +20,9 @@
 #define I2C_PORT i2c0
 #define LINEAR_ADDR 0x09
 
+// Reset Pins
+const uint LINEAR_RESET_PIN = 8;
+
 // Hardcoded heights
 #define SAFE_POS 10 // [mm]
 #define STORE_POS 50 // [mm]
