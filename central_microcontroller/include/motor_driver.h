@@ -19,9 +19,6 @@
 #define I2C_PORT i2c0
 #define MOTOR_ADDR 0x0A
 
-// Reset pin
-const uint MOTOR_RESET_PIN = 7;
-
 /**
  * @brief   Structure representing the DC motor subsystem.
  */

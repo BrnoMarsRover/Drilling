@@ -22,7 +22,8 @@ int linear_read(struct linear* linear)
     linear->state = tmp;
 
     tmp = 248 & buffer[0]; //248 = B'1111 1000'
-    linear->error = tmp >> 3;
+    if (tmp > 2)
+        linear->error = tmp >> 3;
 
     linear->sensor_height = (int16_t)(((uint16_t)buffer[1]) | ((uint16_t)buffer[2] << 8));
 
@@ -109,6 +110,7 @@ void linear_goto(struct linear* linear, float dt)
     else
     {
         linear->command = 0;
+        linear->error = 0;
     }
 }
 

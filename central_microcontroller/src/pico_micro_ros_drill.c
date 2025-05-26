@@ -43,6 +43,7 @@ enum state_machine
     get_weight,
     reset_weight,
     reset_subsystems,
+    reset_pico
 };
 
 uint64_t last_joy_topic = 0;
@@ -58,6 +59,11 @@ struct motor motor;
 
 // Green LED, RUN indicator
 const uint LED_PIN = 25;
+
+// Reset Pins
+const uint MOTOR_RESET_PIN = 7;
+const uint LINEAR_RESET_PIN = 8;
+const uint STORAGE_RESET_PIN = 9;
 
 // Output enable for logic converter
 const uint OE_PIN = 3;
@@ -119,7 +125,12 @@ void timerMain_callback(rcl_timer_t *timer, int64_t last_call_time)
         currentState = stop;
     
     if (currentState != reset_subsystems)
+    {
         reset_done = false;
+        gpio_put(MOTOR_RESET_PIN, 1);
+        gpio_put(LINEAR_RESET_PIN, 1);
+        gpio_put(STORAGE_RESET_PIN, 1);
+    }
 
     // Input reading
     if(motor_read(&motor) < 0) {motor.i2cStatus = false;}
@@ -233,22 +244,19 @@ void timerMain_callback(rcl_timer_t *timer, int64_t last_call_time)
             storage_wreset(&storage);
             break;
 
+        case reset_pico:
+            watchdog_enable(1, 1);
+            while (true);
+            break;
+
         default:
             if (!reset_done && gpio_get(MOTOR_RESET_PIN) == true)
             {
                 gpio_put(MOTOR_RESET_PIN, 0);
                 gpio_put(LINEAR_RESET_PIN, 0);
                 gpio_put(STORAGE_RESET_PIN, 0);
-            }
-
-            else if (!motor.i2cStatus && !linear.i2cStatus && !storage.i2cStatus)
-            {
-                gpio_put(MOTOR_RESET_PIN, 1);
-                gpio_put(LINEAR_RESET_PIN, 1);
-                gpio_put(STORAGE_RESET_PIN, 1);
                 reset_done = true;
             }
-
             break;
     }
 
