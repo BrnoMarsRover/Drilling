@@ -38,6 +38,39 @@ The `drill_controller` node exposes actions and services and controls a Raspberr
         └── GetSampleWeight.srv
 ```
 
+## Commonly used commands
+- Run the Micro-ROS agent:
+    ```bash
+    ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/ttyACM0 -b 115200
+    ```
+- Run node drill_controller:
+    ```bash
+    ros2 run drill drill_controller 
+    ```
+- Call action for callibration:
+    ```bash
+    ros2 action send_goal /drill_calibration drill_interfaces/action/DrillCalibration "{reset_weights: false}"
+    ```
+- Call action to drill sample:
+    ```bash
+    ros2 action send_goal /drill_sample drill_interfaces/action/DrillSample "{max_rps: 2.0, depth: 300}"
+    ```
+- Call action to store sample:
+    ```bash
+    ros2 action send_goal /store_sample drill_interfaces/action/StoreSample "{slot: 1}"
+    ```
+- Call service to get weight:
+    ```bash
+    ros2 service call /get_sample_weight drill_interfaces/srv/GetSampleWeight "{slot: 1}"
+    ```
+- Call service to get drill status:
+    ```bash
+    ros2 service call /get_drill_status drill_interfaces/srv/GetDrillStatus 
+    ```
+- Call service to reset drill:
+    ```bash
+    ros2 service call /drill_reset drill_interfaces/srv/DrillReset target:\ \'all'\  # 'all', 'subsystems' 
+    ```
 
 ## Actions
 For the actual interface, check `/drill_interfaces/action`.
