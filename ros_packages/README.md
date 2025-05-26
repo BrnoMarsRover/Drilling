@@ -67,9 +67,9 @@ The `drill_controller` node exposes actions and services and controls a Raspberr
     ```bash
     ros2 service call /get_drill_status drill_interfaces/srv/GetDrillStatus 
     ```
-- Call service to reset drill:
+- Call service to reset drill ('all', 'subsystems'):
     ```bash
-    ros2 service call /drill_reset drill_interfaces/srv/DrillReset target:\ \'all'\  # 'all', 'subsystems' 
+    ros2 service call /drill_reset drill_interfaces/srv/DrillReset target:\ \'all'\
     ```
 
 ## Actions

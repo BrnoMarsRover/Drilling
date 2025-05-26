@@ -29,7 +29,7 @@
 namespace drill_constants {
 
     // [Hz] Main loop rate
-    constexpr int LOOP_RATE = 20;
+    constexpr int LOOP_RATE = 5;
 
     // Maximum number of storage slots
     constexpr int MAX_SLOT = 4;
@@ -62,7 +62,8 @@ enum class state_machine
     tare_scale,
     get_weight,
     reset_weight,
-    manual
+    reset_subsystems,
+    reset_pico
 };
 
 class DrillController : public rclcpp::Node

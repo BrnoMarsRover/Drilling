@@ -11,7 +11,7 @@ Each part has its own microcontroller, but they are all united on one PCB.
 
 ## Authors
 
-- **Vilem Strachon** *(Captain)*  
+- **Vilem Strachon** *(Leader)*  
   Responsible for the weighing and storing.
 
 - **Martin Kriz**  
@@ -20,6 +20,6 @@ Each part has its own microcontroller, but they are all united on one PCB.
 - **Filip Slima**  
   Responsible for mechanical construction, linear motion system.
 
-- **Ondřej Šťáva**  
+- **Ondřej Stafa**  
   Responsible for DC motor control.
 
