@@ -55,6 +55,9 @@ struct motor motor;
 
 // Green LED, RUN indicator
 const uint LED_PIN = 25;
+// Reset Pins
+const uint LINEAR_RESET_PIN = 2;
+const uint STORAGE_RESET_PIN = 3;
 
 // Topics variables
 rcl_subscription_t state_subscriber;
@@ -298,8 +301,19 @@ int main()
 	);
 
     stdio_init_all();
+
     gpio_init(LED_PIN);
     gpio_set_dir(LED_PIN, GPIO_OUT);
+
+    gpio_init(MOTOR_RESET_PIN);
+    gpio_set_dir(MOTOR_RESET_PIN, GPIO_OUT);
+
+    gpio_init(LINEAR_RESET_PIN);
+    gpio_set_dir(LINEAR_RESET_PIN, GPIO_OUT);
+
+    gpio_init(STORAGE_RESET_PIN);
+    gpio_set_dir(STORAGE_RESET_PIN, GPIO_OUT);
+
     rcl_timer_t timerPublisher;
     rcl_timer_t timerMain;
     rcl_node_t node;
@@ -457,6 +471,22 @@ int main()
     gpio_set_function(5, GPIO_FUNC_I2C);
     gpio_pull_up(4);
     gpio_pull_up(5);
+
+    // GND on Arduinos resets pins
+    gpio_put(MOTOR_RESET_PIN, 0);
+    gpio_put(LINEAR_RESET_PIN, 0);
+    gpio_put(STORAGE_RESET_PIN, 0);
+
+    // Wait for robust reset
+    sleep_ms(50);  
+
+    // Clear reset
+    gpio_put(MOTOR_RESET_PIN, 1);
+    gpio_put(LINEAR_RESET_PIN, 1);
+    gpio_put(STORAGE_RESET_PIN, 1);
+
+    // Make sure the subsystem booted successfully
+    sleep_ms(1000);
 
     // Subsystems init
     storage_init(&storage);

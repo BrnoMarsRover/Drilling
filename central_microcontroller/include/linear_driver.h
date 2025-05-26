@@ -47,11 +47,14 @@ struct linear{
     //PICO <- LINEAR
     uint8_t state;
     uint8_t error;
-    uint16_t height;
+    int16_t sensor_height;
     uint16_t toGround;
     //PICO
     uint8_t i2cStatus;
     uint16_t goalHeight;
+    uint16_t height;
+    int16_t offset;
+    bool calibrated;
     uint16_t pid_integral_drilling;
     uint16_t pid_prevError_drilling;
 };

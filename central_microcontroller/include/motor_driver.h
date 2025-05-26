@@ -19,8 +19,8 @@
 #define I2C_PORT i2c0
 #define MOTOR_ADDR 0x0A
 
-// Hardcoded deadtime based on measurement
-#define MAX_DEAD_TICKS 100000 // max dead time in ms/loop time ms e.g. 3000/100
+// Reset pin
+const uint MOTOR_RESET_PIN = 1;
 
 /**
  * @brief   Structure representing the DC motor subsystem.
@@ -36,8 +36,8 @@ struct motor {
 	uint8_t error;
 	//PICO
 	uint8_t i2cStatus;
+	bool reset;
 	int8_t rpsGoal;
-	uint8_t deadTicks;
 	bool running;
 	bool stucked;
 	};
