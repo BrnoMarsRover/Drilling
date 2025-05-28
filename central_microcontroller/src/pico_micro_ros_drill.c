@@ -127,9 +127,6 @@ void timerMain_callback(rcl_timer_t *timer, int64_t last_call_time)
     if (currentState != reset_subsystems)
     {
         reset_done = false;
-        gpio_put(MOTOR_RESET_PIN, 1);
-        gpio_put(LINEAR_RESET_PIN, 1);
-        gpio_put(STORAGE_RESET_PIN, 1);
     }
 
     // Input reading
@@ -250,13 +247,18 @@ void timerMain_callback(rcl_timer_t *timer, int64_t last_call_time)
             break;
 
         default:
+            motor.stucked = false;
             if (!reset_done && gpio_get(MOTOR_RESET_PIN) == true)
             {
                 gpio_put(MOTOR_RESET_PIN, 0);
                 gpio_put(LINEAR_RESET_PIN, 0);
                 gpio_put(STORAGE_RESET_PIN, 0);
+                sleep_ms(50);
                 reset_done = true;
             }
+            gpio_put(MOTOR_RESET_PIN, 1);
+            gpio_put(LINEAR_RESET_PIN, 1);
+            gpio_put(STORAGE_RESET_PIN, 1);
             break;
     }
 

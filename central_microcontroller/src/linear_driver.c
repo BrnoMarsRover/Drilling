@@ -26,6 +26,19 @@ int linear_read(struct linear* linear)
         linear->error = tmp >> 3;
 
     linear->sensor_height = (int16_t)(((uint16_t)buffer[1]) | ((uint16_t)buffer[2] << 8));
+    
+    
+    if (linear->calibrated)
+    {
+        if (linear->sensor_height == linear->offset + (int16_t)linear->height) {}
+        else if ((linear->sensor_height - 1) == linear->offset + (int16_t)linear->height)
+        ++linear->height;
+        else if ((linear->sensor_height + 1) == linear->offset + (int16_t)linear->height)
+        --linear->height;
+        else 
+        linear->offset = linear->sensor_height - (int16_t)linear->height;
+    }
+    else if (!linear->calibrated) linear->height = 1;
 
     if (linear->sensor_height == 0 && linear->state == 1)
     {
@@ -34,18 +47,12 @@ int linear_read(struct linear* linear)
         linear->height = 0;
     }
 
-    if (linear->calibrated)
+    if (linear->height > 1000 || (linear->height == 0 && linear->state != 1))
     {
-        if (linear->sensor_height == linear->offset + (int16_t)linear->height) {}
-        else if ((linear->sensor_height + 1) == linear->offset + (int16_t)linear->height)
-            ++linear->height;
-        else if ((linear->sensor_height - 1) == linear->offset + (int16_t)linear->height)
-            --linear->height;
-        else 
-            linear->offset = linear->sensor_height;
+        linear->height = 1;
+        linear->calibrated = false;
     }
-    else if (!linear->calibrated) linear->height = 1;
-
+    
     uint16_t *ptr = (uint16_t*)(buffer + 3);
     if (*ptr > 500)
         linear->toGround = 200;

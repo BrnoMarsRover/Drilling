@@ -20,6 +20,6 @@ Each part has its own microcontroller, but they are all united on one PCB.
 - **Filip Slima**  
   Responsible for mechanical construction, linear motion system.
 
-- **Ondřej Stafa**  
+- **Ondrej Stafa**  
   Responsible for DC motor control.
 

@@ -374,6 +374,9 @@ void DrillController::drill_reset_callback(const std::shared_ptr<drill_interface
         if (DrillStatus_->is_drill_connected())
         {
             publish_drill_state(state_machine::reset_pico);
+            response->success = true;
+            response->message = "Drill successfully rebooted.";
+            RCLCPP_INFO(this->get_logger(), "Drill successfully rebooted.");
         }
         else
         {
@@ -405,7 +408,7 @@ void DrillController::drill_reset_callback(const std::shared_ptr<drill_interface
             }
         }
     }
-    if (request->target == "subsystems")
+    else if (request->target == "subsystems")
     {
         if (DrillStatus_->is_drill_connected())
         {
