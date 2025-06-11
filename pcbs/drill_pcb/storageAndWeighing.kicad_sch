@@ -5458,14 +5458,13 @@
 				(justify left)
 			)
 		)
-		(property "Value" "C_Polarized"
-			(at 62.992 118.618 0)
+		(property "Value" "10u"
+			(at 72.136 118.11 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 				(justify left)
-				(hide yes)
 			)
 		)
 		(property "Footprint" "Capacitor_THT:CP_Radial_D5.0mm_P2.50mm"
@@ -5940,14 +5939,13 @@
 				(justify left)
 			)
 		)
-		(property "Value" "C_Polarized"
-			(at 35.052 118.364 0)
+		(property "Value" "10u"
+			(at 44.196 117.856 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 				(justify left)
-				(hide yes)
 			)
 		)
 		(property "Footprint" "Capacitor_THT:CP_Radial_D5.0mm_P2.50mm"
