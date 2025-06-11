@@ -3,6 +3,7 @@
 #include <Wire.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
+#include <AVR_PWM.h>
 
 //#define timeMeasure //mereni delky loopu/poctu loopu za sekundu
 //#define printData
@@ -23,8 +24,9 @@ enum motorStateEnum
 //PINS
 const uint8_t OutPin_L_EN = 3;
 const uint8_t OutPin_R_EN = 4;
-const uint8_t OutPin_L_PWM = 5;
-const uint8_t OutPin_R_PWM = 6;
+
+const uint8_t OutPin_L_PWM = 9;
+const uint8_t OutPin_R_PWM = 10;
 
 const uint8_t InPin_Thermometer = 7;
 
@@ -41,10 +43,13 @@ FIR bridgeDCAvg(avgCount);
 float motorSpeed = 0.0; //[ot./s]
 float sourceVoltage = 24.0;
 float windingResistance = 0.2608;
+
+AVR_PWM* PWMInst;
+float PWMFreq = 16000.0;
 //CONTROLLERS
 //Kp  Ki    outputLimit   sumClamp  
 PIController speedController(1.7, 2.5, 4.2, 2.0);
-PIController currentController(40, 30, 150, 4.0);
+PIController currentController(16, 12, 60, 1.6);
 //SETPOINT FILTER
 enum motorStateEnum motorState = Stopped;
 float requestedSpeed = 0;
@@ -55,7 +60,7 @@ const float minimumSpeedRunning = 0.1;
 const float controllerSetpointSR = 0.3;
 
 
-//AMPMETER
+//AMMETER
 uint16_t ammeterDirect = 0;
 float ammeterRC = 0;
 float ammeterRCZero = 500;
@@ -124,17 +129,17 @@ void updateMotorState()
 
 void setBridge(float aVal)
 {
-  aVal = constrain(aVal, -255.0, 255.0);
+  aVal = constrain(aVal, -100.0, 100.0);
 
   if (aVal < 0)
   {
-    analogWrite(OutPin_L_PWM, 0);
-    analogWrite(OutPin_R_PWM, uint8_t(abs(aVal)));
+    digitalWrite(OutPin_L_PWM2, LOW);
+    PWMInst->setPWM(OutPin_R_PWM, PWMFreq, aVal);  
   }
   else
   {
-    analogWrite(OutPin_L_PWM, uint8_t(aVal));
-    analogWrite(OutPin_R_PWM, 0);
+    PWMLeft->setPWM(OutPin_L_PWM, PWMFreq, aVal);
+    digitalWrite(OutPin_R_PWM, LOW);
   }
 }
 
@@ -158,8 +163,9 @@ void setup()
 {
   //PIN SETUP
   pinMode(OutPin_L_EN, OUTPUT);
-  pinMode(OutPin_L_PWM, OUTPUT);
   pinMode(OutPin_R_EN, OUTPUT);
+
+  pinMode(OutPin_L_PWM, OUTPUT);
   pinMode(OutPin_R_PWM, OUTPUT);
 
   pinMode(InPin_AmmeterRC, INPUT);
@@ -168,11 +174,16 @@ void setup()
   pinMode(InPin_L_IS, INPUT);
   pinMode(InPin_R_IS, INPUT);
 
-  pinMode(13, INPUT);
-
   //MOTOR SETUP
   digitalWrite(OutPin_R_EN, HIGH);
   digitalWrite(OutPin_L_EN, HIGH);
+
+  digitalWrite(OutPin_L_PWM, LOW);
+  digitalWrite(OutPin_R_PWM, LOW);
+
+  PWMInst = new AVR_PWM(OutPin_L_PWM, PWMFreq, 0.0);
+
+
 
   calibrateAmmeter();
 
@@ -237,8 +248,8 @@ void loop()
     /* //Safety
     if(ammeterDirect < overloadLow || ammeterDirect > overloadHigh || motorTemperature > 70)
     {
-      analogWrite(OutPin_L_PWM, 0);
-      analogWrite(OutPin_R_PWM, 0);
+      digitalWrite(OutPin_L_PWM, LOW);
+      digitalWrite(OutPin_R_PWM, LOW);
       overload = true;
       overloadEndTime = millis() + overloadDelay;
     }
@@ -263,7 +274,10 @@ void loop()
 
     //Controller action
     currentController.setpoint = speedController.compute(motorSpeed, timeDiff);
-    bridgeDC = currentController.compute(ammeterCurrent, timeDiff);
+
+    /////////////////////////////POTOM VRÁTIT!!!!
+    //bridgeDC = currentController.compute(ammeterCurrent, timeDiff);
+    ////////////////////////////
   }
 /*
   if(abs(bridgeDC) < minimumBridgeDC)
@@ -393,6 +407,10 @@ void receiveEvent(int howMany)
       if(newRequestedSpeed != 0 && abs(newRequestedSpeed) < minimumSpeedFromHalt)
       {
         newRequestedSpeed = minimumSpeedFromHalt*sgn(newRequestedSpeed);
+
+////////////////////////////////POTOM SMAZAT!!!!
+        bridgeDC = float(receivedInt)*0.7;
+        ///////////////////////////
       }
 
       updateMotorState();
