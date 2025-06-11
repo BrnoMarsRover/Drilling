@@ -1,0 +1,11 @@
+---
+string motor_i2c
+string motor_stucked          
+string motor_error           
+
+string linear_i2c  
+string linear_error             
+
+string storage_i2c
+string storage_scale_tared
+string storage_error 
