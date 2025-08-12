@@ -57,7 +57,7 @@ float newRequestedSpeed = 0;
 float speedSetpoint = 0;
 const float minimumSpeedFromHalt = 0.5;
 const float minimumSpeedRunning = 0.1;
-const float controllerSetpointSR = 0.3;
+const float controllerSetpointSR = 0.2;
 
 
 //AMMETER
@@ -133,12 +133,12 @@ void setBridge(float aVal)
 
   if (aVal < 0)
   {
-    digitalWrite(OutPin_L_PWM2, LOW);
+    digitalWrite(OutPin_L_PWM, LOW);
     PWMInst->setPWM(OutPin_R_PWM, PWMFreq, aVal);  
   }
   else
   {
-    PWMLeft->setPWM(OutPin_L_PWM, PWMFreq, aVal);
+    PWMInst->setPWM(OutPin_L_PWM, PWMFreq, aVal);
     digitalWrite(OutPin_R_PWM, LOW);
   }
 }
@@ -219,6 +219,7 @@ void loop()
   {
     bridgeFault = true;
     requestedSpeed = 0.0;
+    newRequestedSpeed = 0.0;
   }
   else
   {
@@ -275,11 +276,10 @@ void loop()
     //Controller action
     currentController.setpoint = speedController.compute(motorSpeed, timeDiff);
 
-    /////////////////////////////POTOM VRÁTIT!!!!
-    //bridgeDC = currentController.compute(ammeterCurrent, timeDiff);
-    ////////////////////////////
+    bridgeDC = currentController.compute(ammeterCurrent, timeDiff);
+
   }
-/*
+
   if(abs(bridgeDC) < minimumBridgeDC)
   {
     if(requestedSpeed == 0)
@@ -296,15 +296,6 @@ void loop()
     }
   }
 
-  if(bridgeDC < 0)
-  {
-    digitalWrite(13, true);
-  }
-  else
-  {
-    digitalWrite(13, false);
-  }
-*/
   setBridge(bridgeDC);
 
 
@@ -407,10 +398,6 @@ void receiveEvent(int howMany)
       if(newRequestedSpeed != 0 && abs(newRequestedSpeed) < minimumSpeedFromHalt)
       {
         newRequestedSpeed = minimumSpeedFromHalt*sgn(newRequestedSpeed);
-
-////////////////////////////////POTOM SMAZAT!!!!
-        bridgeDC = float(receivedInt)*0.7;
-        ///////////////////////////
       }
 
       updateMotorState();
