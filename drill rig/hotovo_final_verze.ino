@@ -257,7 +257,7 @@ bool synchronizeMotors() {
     }
 
     // Set direction
-    if (diff < 0) { 
+    if (diff > 0) { 
       stepper1->runBackward();
       stepper2->runForward();
       
@@ -309,7 +309,7 @@ void handleErrorRecovery() {
             errorStatus = 0;
             stepper1->setCurrentPosition(encoder1.totalAngle * stepsPerRevolution / 360);             // Resets current stepper positions based on encoder angles
             stepper2->setCurrentPosition(encoder2.totalAngle * stepsPerRevolution / 360);
-            currentState = 1;
+            currentState = 0; // přepsáno z 1 na 0
             fixed = true;
 
             errorStatus = compareEncoderAndSteps(getAngleSteps(stepper1), encoder1.totalAngle);  // Recheck encoder vs stepper alignment
@@ -363,7 +363,7 @@ void handleStartState() {
     currentState = WAIT_STATE;
     measured = false;
   } 
-  else if (limitSwitch2Pressed) { // Only limit switch 2 pressed
+  else if (limitSwitch1Pressed) { // Only limit switch 1 pressed
     Serial.print("limitSwitch1Pressed ");
     synchronizeEncoders(encoder1);
     stepper1->forceStop();
@@ -371,7 +371,7 @@ void handleStartState() {
     stepper2->setSpeedInHz(5000);
     stepper2->runBackward();
   } 
-  else if (limitSwitch1Pressed) { // Only limit switch 1 pressed
+  else if (limitSwitch2Pressed) { // Only limit switch 2 pressed
     Serial.print("limitSwitch2Pressed ");
     synchronizeEncoders(encoder2);
     stepper2->forceStop();
