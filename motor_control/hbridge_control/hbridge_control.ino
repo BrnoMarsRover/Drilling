@@ -6,7 +6,7 @@
 #include <AVR_PWM.h>
 
 //#define timeMeasure //mereni delky loopu/poctu loopu za sekundu
-//#define printData
+#define printData
 
 static inline float sgn(float val) {
   if (val < 0) return -1;
@@ -37,7 +37,6 @@ const uint8_t InPin_AmmeterDirect = A3;
 
 //MOTOR CONTROL
 float bridgeDC = 0.0;
-float minimumBridgeDC = 0.0;
 uint8_t avgCount = 10;
 FIR bridgeDCAvg(avgCount);
 float motorSpeed = 0.0; //[ot./s]
@@ -48,8 +47,7 @@ AVR_PWM* PWMInst;
 float PWMFreq = 16000.0;
 //CONTROLLERS
 //Kp  Ki    outputLimit   sumClamp  
-PIController speedController(1.7, 2.5, 4.2, 2.0);
-PIController currentController(16, 12, 60, 1.6);
+PIController speedController(50, 30, 80, 2.0);
 //SETPOINT FILTER
 enum motorStateEnum motorState = Stopped;
 float requestedSpeed = 0;
@@ -57,7 +55,7 @@ float newRequestedSpeed = 0;
 float speedSetpoint = 0;
 const float minimumSpeedFromHalt = 0.5;
 const float minimumSpeedRunning = 0.1;
-const float controllerSetpointSR = 0.2;
+const float controllerSetpointSR = 0.3;
 
 
 //AMMETER
@@ -232,7 +230,6 @@ void loop()
   if(speedController.setpoint == 0.0 && requestedSpeed == 0.0)
   {
     speedController.reset();
-    currentController.reset();
     bridgeDCAvg.updateOutput(0.0);
     ammeterRCAvg.updateOutput(0.0);
     ammeterCurrent = 0.0;
@@ -245,16 +242,9 @@ void loop()
   else
   {
     //Data acquisition
-    ammeterDirect = analogRead(InPin_AmmeterDirect);
-    /* //Safety
-    if(ammeterDirect < overloadLow || ammeterDirect > overloadHigh || motorTemperature > 70)
-    {
-      digitalWrite(OutPin_L_PWM, LOW);
-      digitalWrite(OutPin_R_PWM, LOW);
-      overload = true;
-      overloadEndTime = millis() + overloadDelay;
-    }
-    */
+    //ammeterDirect = analogRead(InPin_AmmeterDirect);
+    //Safety
+
     ammeterRC = float(analogRead(InPin_AmmeterRC));
     //ammeterVoltage = (ammeterAvg)*(Vcc/1023.0);
     ammeterCurrent = ammeterRCAvg.updateOutput((ammeterRC - ammeterRCZero) * (Vcc/1023.0) * ammeterVoltsToAmps);
@@ -270,30 +260,11 @@ void loop()
         speedSetpoint = 0;
       }
     }
-
+    //Controller action
     speedController.setpoint = speedSetpoint;
 
-    //Controller action
-    currentController.setpoint = speedController.compute(motorSpeed, timeDiff);
+    bridgeDC = speedController.compute(motorSpeed, timeDiff);
 
-    bridgeDC = currentController.compute(ammeterCurrent, timeDiff);
-
-  }
-
-  if(abs(bridgeDC) < minimumBridgeDC)
-  {
-    if(requestedSpeed == 0)
-    {
-      bridgeDC = 0;
-    }
-    else if(requestedSpeed > 0)
-    {
-      bridgeDC = minimumBridgeDC;
-    }
-    else
-    {
-      bridgeDC = -minimumBridgeDC;
-    }
   }
 
   setBridge(bridgeDC);
@@ -344,9 +315,6 @@ void loop()
 
   Serial.print(" SpErS:");
   Serial.print(speedController.getErrorSum());
-
-  Serial.print(" ISP:");  
-  Serial.print(currentController.setpoint);
 
   Serial.print(" I:");  
   Serial.print(ammeterCurrent);
