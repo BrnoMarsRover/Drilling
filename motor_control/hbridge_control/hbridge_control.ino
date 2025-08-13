@@ -3,9 +3,10 @@
 #include <Wire.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
+#include <AVR_PWM.h>
 
 //#define timeMeasure //mereni delky loopu/poctu loopu za sekundu
-//#define printData
+#define printData
 
 static inline float sgn(float val) {
   if (val < 0) return -1;
@@ -23,8 +24,9 @@ enum motorStateEnum
 //PINS
 const uint8_t OutPin_L_EN = 3;
 const uint8_t OutPin_R_EN = 4;
-const uint8_t OutPin_L_PWM = 5;
-const uint8_t OutPin_R_PWM = 6;
+
+const uint8_t OutPin_L_PWM = 9;
+const uint8_t OutPin_R_PWM = 10;
 
 const uint8_t InPin_Thermometer = 7;
 
@@ -35,16 +37,17 @@ const uint8_t InPin_AmmeterDirect = A3;
 
 //MOTOR CONTROL
 float bridgeDC = 0.0;
-float minimumBridgeDC = 0.0;
 uint8_t avgCount = 10;
 FIR bridgeDCAvg(avgCount);
 float motorSpeed = 0.0; //[ot./s]
 float sourceVoltage = 24.0;
 float windingResistance = 0.2608;
+
+AVR_PWM* PWMInst;
+float PWMFreq = 16000.0;
 //CONTROLLERS
 //Kp  Ki    outputLimit   sumClamp  
-PIController speedController(1.7, 2.5, 4.2, 2.0);
-PIController currentController(40, 30, 150, 4.0);
+PIController speedController(50, 30, 80, 2.0);
 //SETPOINT FILTER
 enum motorStateEnum motorState = Stopped;
 float requestedSpeed = 0;
@@ -55,7 +58,7 @@ const float minimumSpeedRunning = 0.1;
 const float controllerSetpointSR = 0.3;
 
 
-//AMPMETER
+//AMMETER
 uint16_t ammeterDirect = 0;
 float ammeterRC = 0;
 float ammeterRCZero = 500;
@@ -124,17 +127,17 @@ void updateMotorState()
 
 void setBridge(float aVal)
 {
-  aVal = constrain(aVal, -255.0, 255.0);
+  aVal = constrain(aVal, -100.0, 100.0);
 
   if (aVal < 0)
   {
-    analogWrite(OutPin_L_PWM, 0);
-    analogWrite(OutPin_R_PWM, uint8_t(abs(aVal)));
+    digitalWrite(OutPin_L_PWM, LOW);
+    PWMInst->setPWM(OutPin_R_PWM, PWMFreq, aVal);  
   }
   else
   {
-    analogWrite(OutPin_L_PWM, uint8_t(aVal));
-    analogWrite(OutPin_R_PWM, 0);
+    PWMInst->setPWM(OutPin_L_PWM, PWMFreq, aVal);
+    digitalWrite(OutPin_R_PWM, LOW);
   }
 }
 
@@ -158,8 +161,9 @@ void setup()
 {
   //PIN SETUP
   pinMode(OutPin_L_EN, OUTPUT);
-  pinMode(OutPin_L_PWM, OUTPUT);
   pinMode(OutPin_R_EN, OUTPUT);
+
+  pinMode(OutPin_L_PWM, OUTPUT);
   pinMode(OutPin_R_PWM, OUTPUT);
 
   pinMode(InPin_AmmeterRC, INPUT);
@@ -168,11 +172,16 @@ void setup()
   pinMode(InPin_L_IS, INPUT);
   pinMode(InPin_R_IS, INPUT);
 
-  pinMode(13, INPUT);
-
   //MOTOR SETUP
   digitalWrite(OutPin_R_EN, HIGH);
   digitalWrite(OutPin_L_EN, HIGH);
+
+  digitalWrite(OutPin_L_PWM, LOW);
+  digitalWrite(OutPin_R_PWM, LOW);
+
+  PWMInst = new AVR_PWM(OutPin_L_PWM, PWMFreq, 0.0);
+
+
 
   calibrateAmmeter();
 
@@ -208,6 +217,7 @@ void loop()
   {
     bridgeFault = true;
     requestedSpeed = 0.0;
+    newRequestedSpeed = 0.0;
   }
   else
   {
@@ -220,7 +230,6 @@ void loop()
   if(speedController.setpoint == 0.0 && requestedSpeed == 0.0)
   {
     speedController.reset();
-    currentController.reset();
     bridgeDCAvg.updateOutput(0.0);
     ammeterRCAvg.updateOutput(0.0);
     ammeterCurrent = 0.0;
@@ -233,16 +242,9 @@ void loop()
   else
   {
     //Data acquisition
-    ammeterDirect = analogRead(InPin_AmmeterDirect);
-    /* //Safety
-    if(ammeterDirect < overloadLow || ammeterDirect > overloadHigh || motorTemperature > 70)
-    {
-      analogWrite(OutPin_L_PWM, 0);
-      analogWrite(OutPin_R_PWM, 0);
-      overload = true;
-      overloadEndTime = millis() + overloadDelay;
-    }
-    */
+    //ammeterDirect = analogRead(InPin_AmmeterDirect);
+    //Safety
+
     ammeterRC = float(analogRead(InPin_AmmeterRC));
     //ammeterVoltage = (ammeterAvg)*(Vcc/1023.0);
     ammeterCurrent = ammeterRCAvg.updateOutput((ammeterRC - ammeterRCZero) * (Vcc/1023.0) * ammeterVoltsToAmps);
@@ -258,39 +260,13 @@ void loop()
         speedSetpoint = 0;
       }
     }
-
+    //Controller action
     speedController.setpoint = speedSetpoint;
 
-    //Controller action
-    currentController.setpoint = speedController.compute(motorSpeed, timeDiff);
-    bridgeDC = currentController.compute(ammeterCurrent, timeDiff);
-  }
-/*
-  if(abs(bridgeDC) < minimumBridgeDC)
-  {
-    if(requestedSpeed == 0)
-    {
-      bridgeDC = 0;
-    }
-    else if(requestedSpeed > 0)
-    {
-      bridgeDC = minimumBridgeDC;
-    }
-    else
-    {
-      bridgeDC = -minimumBridgeDC;
-    }
+    bridgeDC = speedController.compute(motorSpeed, timeDiff);
+
   }
 
-  if(bridgeDC < 0)
-  {
-    digitalWrite(13, true);
-  }
-  else
-  {
-    digitalWrite(13, false);
-  }
-*/
   setBridge(bridgeDC);
 
 
@@ -339,9 +315,6 @@ void loop()
 
   Serial.print(" SpErS:");
   Serial.print(speedController.getErrorSum());
-
-  Serial.print(" ISP:");  
-  Serial.print(currentController.setpoint);
 
   Serial.print(" I:");  
   Serial.print(ammeterCurrent);
