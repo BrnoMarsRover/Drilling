@@ -61,6 +61,7 @@ struct motor motor;
 const uint LED_PIN = 25;
 
 // Reset Pins
+const uint TMP_RESET_PIN;
 const uint MOTOR_RESET_PIN = 7;
 const uint LINEAR_RESET_PIN = 8;
 const uint STORAGE_RESET_PIN = 9;
@@ -248,17 +249,24 @@ void timerMain_callback(rcl_timer_t *timer, int64_t last_call_time)
 
         default:
             motor.stucked = false;
-            if (!reset_done && gpio_get(MOTOR_RESET_PIN) == true)
+            //if (!reset_done && gpio_get(MOTOR_RESET_PIN) == true)
+            if (!reset_done && gpio_get(TMP_RESET_PIN) == false)
             {
-                gpio_put(MOTOR_RESET_PIN, 0);
-                gpio_put(LINEAR_RESET_PIN, 0);
-                gpio_put(STORAGE_RESET_PIN, 0);
+                ///////////////////////////////
+                gpio_put(TMP_RESET_PIN, 1);
+                ///////////////////////////////
+                //gpio_put(MOTOR_RESET_PIN, 0);
+                //gpio_put(LINEAR_RESET_PIN, 0);
+                //gpio_put(STORAGE_RESET_PIN, 0);
                 sleep_ms(50);
                 reset_done = true;
             }
-            gpio_put(MOTOR_RESET_PIN, 1);
-            gpio_put(LINEAR_RESET_PIN, 1);
-            gpio_put(STORAGE_RESET_PIN, 1);
+            ////////////////////////////
+            gpio_put(TMP_RESET_PIN, 0);
+            ////////////////////////////
+            //gpio_put(MOTOR_RESET_PIN, 1);
+            //gpio_put(LINEAR_RESET_PIN, 1);
+            //gpio_put(STORAGE_RESET_PIN, 1);
             break;
     }
 
@@ -509,6 +517,7 @@ int main()
     rclc_executor_add_timer(&executor, &timerPublisher);
     
     // Enable logic converter
+    gpio_pull_up(OE_PIN);
     gpio_put(OE_PIN, 1);
 
     // Setting I2C
@@ -518,15 +527,28 @@ int main()
     gpio_pull_up(4);
     gpio_pull_up(5);
 
+    //////////////////////////////////
+    gpio_pull_up(TMP_RESET_PIN);
+    //////////////////////////////////
+    gpio_pull_up(MOTOR_RESET_PIN);
+    gpio_pull_up(LINEAR_RESET_PIN);
+    gpio_pull_up(STORAGE_RESET_PIN);
+
     // GND on Arduinos resets pins
-    gpio_put(MOTOR_RESET_PIN, 0);
-    gpio_put(LINEAR_RESET_PIN, 0);
-    gpio_put(STORAGE_RESET_PIN, 0);
+    //////////////////////////////////
+    gpio_put(TMP_RESET_PIN, 1);
+    //////////////////////////////////
+    //gpio_put(MOTOR_RESET_PIN, 0);
+    //gpio_put(LINEAR_RESET_PIN, 0);
+    //gpio_put(STORAGE_RESET_PIN, 0);
 
     // Wait for robust reset
     sleep_ms(50);  
 
     // Clear reset
+    //////////////////////////////////
+    gpio_put(TMP_RESET_PIN, 0);
+    //////////////////////////////////
     gpio_put(MOTOR_RESET_PIN, 1);
     gpio_put(LINEAR_RESET_PIN, 1);
     gpio_put(STORAGE_RESET_PIN, 1);
