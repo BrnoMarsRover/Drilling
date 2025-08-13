@@ -22,6 +22,7 @@
 #include "drill_interfaces/srv/get_sample_weight.hpp"
 #include "drill_interfaces/srv/get_drill_status.hpp"
 #include "drill_interfaces/srv/drill_reset.hpp"
+#include "drill_interfaces/action/store_sample_multiple.hpp"
 #include "atomic"
 #include "cmath"
 
@@ -41,10 +42,11 @@ namespace drill_constants {
     constexpr int SAFE_POS = 10;
 
     // [mm] Height when the drill reaches the storage
-    constexpr int STORING_POS = 50;
+    constexpr int STORING_POS = 24;
 
     // [s] Time for dumping the material from the tube
     constexpr int DUMPING_TIME = 10;
+    constexpr int DUMPING_TIME_MULTIPLE = 1;
 
     // [mm] Maximum height of the linear actuator
     constexpr int MAX_HEIGHT = 500;
@@ -72,6 +74,7 @@ public:
     using DrillSample = drill_interfaces::action::DrillSample;
     using StoreSample = drill_interfaces::action::StoreSample;
     using DrillCalibration = drill_interfaces::action::DrillCalibration;
+    using StoreSampleMultiple = drill_interfaces::action::StoreSampleMultiple;
     using GetSampleWeight = drill_interfaces::srv::GetSampleWeight;
     using GetDrillStatus = drill_interfaces::srv::GetDrillStatus;
     using DrillReset = drill_interfaces::srv::DrillReset;
@@ -79,6 +82,7 @@ public:
     using GoalHandleDrillSample = rclcpp_action::ServerGoalHandle<DrillSample>;
     using GoalHandleStoreSample = rclcpp_action::ServerGoalHandle<StoreSample>;
     using GoalHandleDrillCalibration = rclcpp_action::ServerGoalHandle<DrillCalibration>;
+    using GoalHandleStoreSampleMultiple = rclcpp_action::ServerGoalHandle<StoreSampleMultiple>;
 
     // Constructor
     DrillController();
@@ -117,6 +121,7 @@ private:
     rclcpp_action::Server<DrillSample>::SharedPtr drill_sample_server_;
     rclcpp_action::Server<StoreSample>::SharedPtr store_sample_server_;
     rclcpp_action::Server<DrillCalibration>::SharedPtr drill_calibration_server_;
+    rclcpp_action::Server<StoreSampleMultiple>::SharedPtr store_sample_multiple_server_;
     rclcpp::Service<GetSampleWeight>::SharedPtr get_sample_weight_srv_;
     rclcpp::Service<GetDrillStatus>::SharedPtr get_drill_status_srv_;
     rclcpp::Service<DrillReset>::SharedPtr drill_reset_srv_;
@@ -151,6 +156,42 @@ private:
 
     //executing the DrillSample service
     void execute_drill_sample(const std::shared_ptr<GoalHandleDrillSample> goal_handle);
+
+
+///////////
+    // STORE SAMPLE MUTIPLE ACTION
+    // If the drill is busy action will be refused
+    rclcpp_action::GoalResponse handle_goal_store_sample_multiple(const rclcpp_action::GoalUUID & uuid, std::shared_ptr<const StoreSampleMultiple::Goal> goal) {
+        RCLCPP_INFO(this->get_logger(), "Received StoreSampleMultiple request to store sample on slots.");
+        auto tmp = goal;
+        (void)uuid;
+
+        if (drill_is_busy || !DrillStatus_->is_drill_connected()) {
+            RCLCPP_WARN(this->get_logger(), "Drill is busy or not connected. Rejecting request.");
+            return rclcpp_action::GoalResponse::REJECT;
+        }
+
+        RCLCPP_INFO(this->get_logger(), "Drill is ready. Accepting request.");
+        drill_is_busy = true;
+        return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
+    }
+
+    // Stop the drill when the action is canceled
+    rclcpp_action::CancelResponse handle_cancel_store_sample_multiple(const std::shared_ptr<GoalHandleStoreSampleMultiple> goal_handle) {
+        RCLCPP_INFO(this->get_logger(), "StoreSampleMultiple canceled.");
+        (void)goal_handle;
+        drill_is_busy = false;
+        return rclcpp_action::CancelResponse::ACCEPT;
+    }
+
+    void handle_accepted_store_sample_multiple(const std::shared_ptr<GoalHandleStoreSampleMultiple> goal_handle) {
+        std::thread{std::bind(&DrillController::execute_store_sample_multiple, this, std::placeholders::_1), goal_handle}.detach();
+    }
+
+    //executing the StoreSample action
+    void execute_store_sample_multiple(std::shared_ptr<GoalHandleStoreSampleMultiple> goal_handle);
+///////////
+
 
     // STORE SAMPLE ACTION
     // If the drill is busy action will be refused

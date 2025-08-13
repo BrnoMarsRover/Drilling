@@ -22,7 +22,7 @@
 
 // Hardcoded heights
 #define SAFE_POS 10 // [mm]
-#define STORE_POS 50 // [mm]
+#define STORE_POS 24 // [mm]
 #define LOWEST_POS 576 // [mm]
 
 // Parameters for position P-regulator

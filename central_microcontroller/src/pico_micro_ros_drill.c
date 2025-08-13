@@ -61,7 +61,7 @@ struct motor motor;
 const uint LED_PIN = 25;
 
 // Reset Pins
-const uint TMP_RESET_PIN;
+const uint TMP_RESET_PIN = 6;
 const uint MOTOR_RESET_PIN = 7;
 const uint LINEAR_RESET_PIN = 8;
 const uint STORAGE_RESET_PIN = 9;
@@ -249,24 +249,24 @@ void timerMain_callback(rcl_timer_t *timer, int64_t last_call_time)
 
         default:
             motor.stucked = false;
-            //if (!reset_done && gpio_get(MOTOR_RESET_PIN) == true)
-            if (!reset_done && gpio_get(TMP_RESET_PIN) == false)
+            if (!reset_done && gpio_get(MOTOR_RESET_PIN) == true)
+            //if (!reset_done)
             {
                 ///////////////////////////////
                 gpio_put(TMP_RESET_PIN, 1);
                 ///////////////////////////////
-                //gpio_put(MOTOR_RESET_PIN, 0);
-                //gpio_put(LINEAR_RESET_PIN, 0);
-                //gpio_put(STORAGE_RESET_PIN, 0);
+                gpio_put(MOTOR_RESET_PIN, 0);
+                gpio_put(LINEAR_RESET_PIN, 0);
+                gpio_put(STORAGE_RESET_PIN, 0);
                 sleep_ms(50);
                 reset_done = true;
             }
             ////////////////////////////
             gpio_put(TMP_RESET_PIN, 0);
             ////////////////////////////
-            //gpio_put(MOTOR_RESET_PIN, 1);
-            //gpio_put(LINEAR_RESET_PIN, 1);
-            //gpio_put(STORAGE_RESET_PIN, 1);
+            gpio_put(MOTOR_RESET_PIN, 1);
+            gpio_put(LINEAR_RESET_PIN, 1);
+            gpio_put(STORAGE_RESET_PIN, 1);
             break;
     }
 
@@ -538,9 +538,9 @@ int main()
     //////////////////////////////////
     gpio_put(TMP_RESET_PIN, 1);
     //////////////////////////////////
-    //gpio_put(MOTOR_RESET_PIN, 0);
-    //gpio_put(LINEAR_RESET_PIN, 0);
-    //gpio_put(STORAGE_RESET_PIN, 0);
+    gpio_put(MOTOR_RESET_PIN, 0);
+    gpio_put(LINEAR_RESET_PIN, 0);
+    gpio_put(STORAGE_RESET_PIN, 0);
 
     // Wait for robust reset
     sleep_ms(50);  

@@ -26,6 +26,12 @@ DrillController::DrillController(): Node("drill_controller") {
       std::bind(&DrillController::handle_cancel_drill_sample, this, std::placeholders::_1),
       std::bind(&DrillController::handle_accepted_drill_sample, this, std::placeholders::_1));
 
+    store_sample_multiple_server_ = rclcpp_action::create_server<StoreSampleMultiple>(
+      this, "store_sample_multiple",
+      std::bind(&DrillController::handle_goal_store_sample_multiple, this, std::placeholders::_1, std::placeholders::_2),
+      std::bind(&DrillController::handle_cancel_store_sample_multiple, this, std::placeholders::_1),
+      std::bind(&DrillController::handle_accepted_store_sample_multiple, this, std::placeholders::_1));
+
     store_sample_server_ = rclcpp_action::create_server<StoreSample>(
       this, "store_sample",
       std::bind(&DrillController::handle_goal_store_sample, this, std::placeholders::_1, std::placeholders::_2),
@@ -121,6 +127,168 @@ void DrillController::execute_drill_sample(const std::shared_ptr<GoalHandleDrill
     DrillLogger_->logDrillSampleResult(drillDepth);
     RCLCPP_INFO(this->get_logger(), "DrillSample action completed.");
 }
+
+////////
+void DrillController::execute_store_sample_multiple(const std::shared_ptr<GoalHandleStoreSampleMultiple> goal_handle) {
+    RCLCPP_INFO(this->get_logger(), "Executing StoreSampleMultiple action...");
+    //DrillLogger_->logActionStamp(2);
+    const auto goal = goal_handle->get_goal();
+    auto result = std::make_shared<StoreSampleMultiple::Result>();
+    auto feedback = std::make_shared<StoreSampleMultiple::Feedback>();
+    rclcpp::Rate loop_rate(drill_constants::LOOP_RATE);
+
+    enum state_machine currentState = state_machine::stop;
+    int state = 0;
+
+    constexpr auto dumpingTicks = drill_constants::DUMPING_TIME_MULTIPLE * drill_constants::LOOP_RATE;
+    auto ticks = 0;
+
+    int num_slots = goal->slots.size();
+    int process = 0;
+    auto storing_slot =  goal->slots[process];
+    size_t attempts = 0;
+
+
+    while(state < 6) {
+       // Checking if there is a cancel request
+        if (goal_handle->is_canceling() || !rclcpp::ok()) {
+            result->weights.clear();   // prázdné pole vah
+            result->total_weight = 0.0; // celková váha na nulu
+            result->success = false;    // neúspěch
+
+            goal_handle->canceled(result);
+            currentState = state_machine::stop;
+            publish_drill_state(currentState);
+
+            RCLCPP_INFO(this->get_logger(), "StoreInSlots action canceled.");
+            return;
+        }
+
+
+        switch (state) {
+            case 0:
+                if(height_inTolerance(drill_constants::SAFE_POS))
+                {
+                    state = 1;
+                }
+
+                else
+                {
+                    currentState = state_machine::goto_height;
+                    publish_drill_param(0, drill_constants::SAFE_POS, drill_constants::DEF_SLOT);
+                    publish_drill_state(currentState);
+                }
+            break;
+
+            case 1: //nastaveni slotu pro zasobnik
+                if(activeSlot == storing_slot)
+                    state = 2;
+                else
+                {
+                    currentState = state_machine::slot_select;
+                    publish_drill_param(0, drill_constants::SAFE_POS, storing_slot);
+                    publish_drill_state(currentState);
+                }
+            break;
+
+            case 2: //tare vahy
+                if(DrillStatus_->isStorageTared() && currentState == state_machine::tare_scale)
+                    state = 3;
+                else
+                {
+                    currentState = state_machine::tare_scale;
+                    publish_drill_param(1, drill_constants::STORING_POS, storing_slot);
+                    publish_drill_state(currentState);
+                }
+            break;
+
+            case 3: //vysypani
+                if(ticks > dumpingTicks)
+                    state = 4;
+                else
+                {
+                    ++ticks;
+                    currentState = state_machine::turn_right;
+                    publish_drill_param(1, drill_constants::STORING_POS, storing_slot);
+                    publish_drill_state(currentState);
+                }
+            break;
+
+            case 4:
+                if(!DrillStatus_->isStorageTared() == 1 && currentState == state_machine::get_weight)
+                {
+                    if (get_sampleWeight(storing_slot) > 80)
+                    {
+                        process++;
+                        attempts++;
+                        if (process < num_slots)
+                        {
+                            storing_slot = goal->slots[process];
+                            state = 1;
+                            attempts = 0;
+                            break;
+                        }
+                        state = 5;
+                    }
+                    else if (attempts > 3)
+                        {
+                            state = 5;
+                        }
+                }
+
+                else
+                {
+                    currentState = state_machine::get_weight;
+                    publish_drill_param(0, drill_constants::SAFE_POS, storing_slot);
+                    publish_drill_state(currentState);
+                }
+            break;
+
+            case 5: //zasobnik zpet na default slot
+                if(activeSlot == drill_constants::DEF_SLOT)
+                    state = 6;
+                else
+                {
+                    currentState = state_machine::slot_select;
+                    publish_drill_param(0, drill_constants::SAFE_POS, drill_constants::DEF_SLOT);
+                    publish_drill_state(currentState);
+                }
+            break;
+
+            default:
+                state = 6;
+            break;
+
+        }
+
+        // Sending feedback
+        feedback->current_slot = goal->slots[storing_slot];
+        goal_handle->publish_feedback(feedback);
+        loop_rate.sleep();
+
+    }
+
+    // Drilling complete for all slots
+    result->weights.clear();
+    result->total_weight = 0.0f;
+
+    // Projdi všechny sloty a změř jejich váhu
+    for (size_t i = 0; i < goal->slots.size(); ++i) {
+        float sample_weight = get_sampleWeight(goal->slots[i]);
+        result->weights.push_back(sample_weight);
+        result->total_weight += sample_weight;
+    }
+
+    result->success = true;  // pokud jsi celou operaci dokončil bez chyby
+
+    goal_handle->succeed(result);
+    currentState = state_machine::stop;
+    publish_drill_state(currentState);
+    drill_is_busy = false;
+    RCLCPP_INFO(this->get_logger(), "StoreInSlots action completed.");
+
+}
+////////
 
 void DrillController::execute_store_sample(const std::shared_ptr<GoalHandleStoreSample> goal_handle) {
     RCLCPP_INFO(this->get_logger(), "Executing StoreSample action...");

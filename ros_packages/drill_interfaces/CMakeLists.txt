@@ -17,6 +17,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "action/DrillCalibration.action"
   "action/DrillSample.action"
   "action/StoreSample.action"
+  "action/StoreSampleMultiple.action"
   "srv/GetSampleWeight.srv"
   "srv/GetDrillStatus.srv"
   "srv/DrillReset.srv"

@@ -1,0 +1,8 @@
+uint8[] slots        
+float32 max_weight   
+---
+float32[] weights      
+float32 total_weight    
+bool success            
+---
+uint8 current_slot       
