@@ -6,7 +6,7 @@
 #include <AVR_PWM.h>
 
 //#define timeMeasure //mereni delky loopu/poctu loopu za sekundu
-#define printData
+//#define printData
 
 static inline float sgn(float val) {
   if (val < 0) return -1;
@@ -37,17 +37,17 @@ const uint8_t InPin_AmmeterDirect = A3;
 
 //MOTOR CONTROL
 float bridgeDC = 0.0;
-uint8_t avgCount = 10;
-FIR bridgeDCAvg(avgCount);
+uint8_t FIRAvgCount = 10;
+FIR bridgeDCAvg(FIRAvgCount);
 float motorSpeed = 0.0; //[ot./s]
-float sourceVoltage = 24.0;
+float sourceVoltage = 24.3;
 float windingResistance = 0.2608;
 
 AVR_PWM* PWMInst;
 float PWMFreq = 16000.0;
 //CONTROLLERS
 //Kp  Ki    outputLimit   sumClamp  
-PIController speedController(50, 30, 80, 2.0);
+PIController speedController(25, 25, 50, 1.0);
 //SETPOINT FILTER
 enum motorStateEnum motorState = Stopped;
 float requestedSpeed = 0;
@@ -62,11 +62,11 @@ const float controllerSetpointSR = 0.3;
 uint16_t ammeterDirect = 0;
 float ammeterRC = 0;
 float ammeterRCZero = 500;
-FIR ammeterRCAvg(avgCount);
+FIR ammeterRCAvg(FIRAvgCount);
 //float ammeterVoltage = 0;
 float ammeterCurrent = 0; // v amperech
-const float Vcc = 4.66;
-const float ammeterVoltsToAmps = 12.0;//10.0;
+const float Vcc = 5.0;
+const float ammeterVoltsToAmps = 10.0;
 const double CPhi = 0.4834;
 
 //I2C
@@ -132,7 +132,7 @@ void setBridge(float aVal)
   if (aVal < 0)
   {
     digitalWrite(OutPin_L_PWM, LOW);
-    PWMInst->setPWM(OutPin_R_PWM, PWMFreq, aVal);  
+    PWMInst->setPWM(OutPin_R_PWM, PWMFreq, abs(aVal));  
   }
   else
   {
@@ -155,6 +155,11 @@ void calibrateAmmeter()
   }
 
   ammeterRCZero = ammeterZeroAvg.getOutput();
+
+  if (ammeterRCZero < 450 || ammeterRCZero > 560)
+  {
+    ammeterRCZero = 510;
+  }
 }
 
 void setup()
@@ -248,7 +253,10 @@ void loop()
     ammeterRC = float(analogRead(InPin_AmmeterRC));
     //ammeterVoltage = (ammeterAvg)*(Vcc/1023.0);
     ammeterCurrent = ammeterRCAvg.updateOutput((ammeterRC - ammeterRCZero) * (Vcc/1023.0) * ammeterVoltsToAmps);
-    motorSpeed = ((sourceVoltage*(bridgeDCAvg.updateOutput(bridgeDC)/255.0)) - windingResistance*ammeterCurrent)/(CPhi*2*3.14);
+    Serial.print(" IrawC:");  
+    Serial.print((ammeterRC - ammeterRCZero) * (Vcc/1023.0) * ammeterVoltsToAmps);
+
+    motorSpeed = ((sourceVoltage*(bridgeDCAvg.updateOutput(bridgeDC)/100.0)) - windingResistance*ammeterCurrent)/(CPhi*2*3.14);
 
     //Setpoint filter
     float setpointMaxChange = constrain(timeDiff*controllerSetpointSR, 0.0, 0.1);
@@ -289,6 +297,7 @@ void loop()
 
   
 #ifdef printData
+
   Serial.print(" t:");  
   Serial.print(timeDiff);
 
@@ -315,6 +324,12 @@ void loop()
 
   Serial.print(" SpErS:");
   Serial.print(speedController.getErrorSum());
+
+  Serial.print(" Iraw:");  
+  Serial.print(ammeterRC);
+
+  Serial.print(" IrawZ:");  
+  Serial.print(ammeterRCZero);
 
   Serial.print(" I:");  
   Serial.print(ammeterCurrent);
