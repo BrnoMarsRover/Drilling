@@ -47,6 +47,10 @@ The `drill_controller` node exposes actions and services and controls a Raspberr
     ```bash
     ros2 run drill drill_controller 
     ```
+- Run node joy for manual controll:
+    ```bash
+    ros2 run joy joy_node 
+    ```
 - Call action for callibration:
     ```bash
     ros2 action send_goal /drill_calibration drill_interfaces/action/DrillCalibration "{reset_weights: false}"
@@ -58,6 +62,10 @@ The `drill_controller` node exposes actions and services and controls a Raspberr
 - Call action to store sample:
     ```bash
     ros2 action send_goal /store_sample drill_interfaces/action/StoreSample "{slot: 1}"
+    ```
+- Call action to store sample multiple (not tested):
+    ```bash
+    ros2 action send_goal /store_sample_multiple drill_interfaces/action/StoreSampleMultiple "{slots:[1,2,3], max_weight: 80}"
     ```
 - Call service to get weight:
     ```bash
