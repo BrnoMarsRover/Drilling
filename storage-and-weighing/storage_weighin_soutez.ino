@@ -7,6 +7,8 @@
 //            -recieve zbytek error
 #include "HX711.h"
 #include "Wire.h"
+#include "RunningMedian.h"
+
 #define SLAVE_ADD 0x08
 // ------------- Definition of I/O pins ---------------
 const int hall_senz = A0;             // z hall sondy
@@ -55,12 +57,19 @@ struct inner_data{
 struct inner_data inner;
 
 HX711 scale;                          // z knihovky pro ADC
+RunningMedian filter(5); // median of last 5 values
+
 
 // ----------- FUNKCE --------------
 void hold_Xsec(int m_seconds = 10000){  // holding the magasine for X sec, enabling manipulation with cells, has to be declared before main loop
   digitalWrite(wake_up, HIGH);           // cerveny HIGH
   delay(m_seconds);                     // nastavitelny cas
   digitalWrite(wake_up, LOW);          // cerveny LOW
+}
+
+int medianFilter() {
+  filter.add(analogRead(hall_senz));
+  return filter.getMedian();
 }
 
 void setup() {
@@ -85,7 +94,9 @@ void setup() {
   //measureWeights(); // fnc for calibration
   
   //desired_angle = 0;
-  angle = (360.0 / 675.0) * analogRead(hall_senz);        // 675 je max hodnota vstupu 3,3v do adc prevodniku arduina
+  int tmp_angle = medianFilter();
+  //angle = (360.0 / 675.0) * analogRead(hall_senz);        // 675 je max hodnota vstupu 3,3v do adc prevodniku arduina
+  angle = (360.0 / 675.0) * tmp_angle;
   //desired_angle = angle;
   move(slot[slot_i], 3840);
   Serial.println("slot 0 aktivni, program pripraven na funkci");
@@ -93,7 +104,7 @@ void setup() {
   Serial.println(analogRead(hall_senz));
   Serial.print("aktualni uhel: \t\t");
   Serial.println(angle);
-  Serial.println("Version 4m 6d");
+  Serial.println("Version 8m 14d");
 }
 
 void receive_data(int numBytes) {         // detekce a vypsani prichozi komunikace; v numBytes je pocet bytu prichozi zpravy
@@ -280,28 +291,36 @@ int move(int chci_sem, int timeout){           // Imax = 400mA; timeout 120 krok
         delay(1.5);//delay(12);
         digitalWrite(PUL, LOW);
         delay(1.5);//delay(12);
-        angle = (360.0 / 675.0) * analogRead(hall_senz);   // vypocet aktualniho uhlu od 0 do 360;  675 je maximalni hodnota ADC prevodniku arduina pro 3,3V ((3,3/5)*1024bit)
+        //angle = (360.0 / 675.0) * analogRead(hall_senz);   // vypocet aktualniho uhlu od 0 do 360;  675 je maximalni hodnota ADC prevodniku arduina pro 3,3V ((3,3/5)*1024bit)
+        int tmp_angle = medianFilter();
+        angle = (360.0 / 675.0) * tmp_angle;
       }
       else if((abs(chci_sem - angle) > 20) && (abs(orig_angle - angle) > 12)){ // bylo 15
         digitalWrite(PUL, HIGH);
         delay(5);//delay(12);
         digitalWrite(PUL, LOW);
         delay(5);//delay(12);
-        angle = (360.0 / 675.0) * analogRead(hall_senz);   // vypocet aktualniho uhlu od 0 do 360;  675 je maximalni hodnota ADC prevodniku arduina pro 3,3V ((3,3/5)*1024bit)
+        //angle = (360.0 / 675.0) * analogRead(hall_senz);   // vypocet aktualniho uhlu od 0 do 360;  675 je maximalni hodnota ADC prevodniku arduina pro 3,3V ((3,3/5)*1024bit)
+        int tmp_angle = medianFilter();
+        angle = (360.0 / 675.0) * tmp_angle;
       }
       else if((abs(chci_sem - angle) > 10) && (abs(orig_angle - angle) > 6)){
         digitalWrite(PUL, HIGH);
         delay(8);//delay(12);
         digitalWrite(PUL, LOW);
         delay(8);//delay(12);
-        angle = (360.0 / 675.0) * analogRead(hall_senz);   // vypocet aktualniho uhlu od 0 do 360;  675 je maximalni hodnota ADC prevodniku arduina pro 3,3V ((3,3/5)*1024bit)
+        //angle = (360.0 / 675.0) * analogRead(hall_senz);   // vypocet aktualniho uhlu od 0 do 360;  675 je maximalni hodnota ADC prevodniku arduina pro 3,3V ((3,3/5)*1024bit)
+        int tmp_angle = medianFilter();
+        angle = (360.0 / 675.0) * tmp_angle; 
       }
       else{
         digitalWrite(PUL, HIGH);
         delay(10);//delay(12);
         digitalWrite(PUL, LOW);
         delay(10);//delay(12);
-        angle = (360.0 / 675.0) * analogRead(hall_senz);   // vypocet aktualniho uhlu od 0 do 360;  675 je maximalni hodnota ADC prevodniku arduina pro 3,3V ((3,3/5)*1024bit)
+        //angle = (360.0 / 675.0) * analogRead(hall_senz);   // vypocet aktualniho uhlu od 0 do 360;  675 je maximalni hodnota ADC prevodniku arduina pro 3,3V ((3,3/5)*1024bit)
+        int tmp_angle = medianFilter();
+        angle = (360.0 / 675.0) * tmp_angle;
       }
     }
     else{
@@ -404,7 +423,9 @@ void measureWeights() {
 }
 
 void loop() {
-  angle = (360.0 / 675.0) * analogRead(hall_senz);  // kontrola aktualniho uhlu
+  //angle = (360.0 / 675.0) * analogRead(hall_senz);  // kontrola aktualniho uhlu
+  int tmp_angle = medianFilter();
+  angle = (360.0 / 675.0) * tmp_angle;
   //---------------- MANUAL MODE -----------------------------
   /*
   if(digitalRead(move45) == LOW){                   // pohyb na zadanou polohu (kdyz neni plna)
