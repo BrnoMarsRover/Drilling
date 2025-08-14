@@ -217,7 +217,7 @@ void DrillController::execute_store_sample_multiple(const std::shared_ptr<GoalHa
             case 4:
                 if(!DrillStatus_->isStorageTared() == 1 && currentState == state_machine::get_weight)
                 {
-                    if (get_sampleWeight(storing_slot) > 80)
+                    if (get_sampleWeight(storing_slot) > goal->max_weight)
                     {
                         process++;
                         attempts++;
