@@ -1,5 +1,0 @@
-uint8 slot
----
-float32 weight
----
-uint16 actual_height

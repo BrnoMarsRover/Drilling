@@ -1,5 +1,0 @@
-bool reset_weights
----
-bool success
----
-uint16 actual_height
