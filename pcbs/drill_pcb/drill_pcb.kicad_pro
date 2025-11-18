@@ -475,6 +475,7 @@
       "single_global_label": "ignore",
       "unannotated": "error",
       "unconnected_wire_endpoint": "warning",
+      "undefined_netclass": "error",
       "unit_value_mismatch": "error",
       "unresolved_variable": "error",
       "wire_dangling": "error"
@@ -635,18 +636,6 @@
     [
       "bebf97b1-2f7f-4d03-a427-fe976f4b2313",
       "Root"
-    ],
-    [
-      "03998a92-8610-4f09-9145-573c63e01d71",
-      "Motor control"
-    ],
-    [
-      "4d3296cb-c53d-40d6-b459-0c8b208d28b7",
-      "Linear drive control"
-    ],
-    [
-      "8a702047-5b96-48a0-a5d4-a2e886ec5e9e",
-      "Storage and weighing"
     ]
   ],
   "text_variables": {}
