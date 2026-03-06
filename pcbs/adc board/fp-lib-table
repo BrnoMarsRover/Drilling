@@ -1,0 +1,5 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "lib")(type "KiCad")(uri "${KIPRJMOD}/lib")(options "")(descr ""))
+  (lib (name "ADS122C04IPWR")(type "Legacy")(uri "${KIPRJMOD}/lib/ADS122C04IPWR.mod")(options "")(descr ""))
+)

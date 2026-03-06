@@ -1,0 +1,9 @@
+EESchema-DOCLIB  Version 2.0
+#
+$CMP ADS122C04IPWR
+D Analog to Digital Converters - ADC 24-Bit, 2kSPS, 4-Ch, Low-Power Delta-Sigma ADC With PGA, Voltage Reference, IDACs and I2C Interface 16-TSSOP -40 to 125
+K
+F http://www.ti.com/lit/gpn/ads122c04
+$ENDCMP
+#
+#End Doc Library
