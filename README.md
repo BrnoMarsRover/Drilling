@@ -9,7 +9,7 @@ Currently working on an overhauled design.
   Responsible for the weighing and storing.
 
 - **Martin Kriz**  
-  Responsible for ROS 2 integration, control algorithms.
+  Senior consultant.
 
 - **Filip Slima**  
   Responsible for mechanical construction, linear motion system.
