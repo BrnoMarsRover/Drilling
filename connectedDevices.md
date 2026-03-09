@@ -10,4 +10,4 @@ List of devices connected to the drill's microcontroller:
 |Storage stepper driver        |?                                         ||
 |Storage stepper encoder       |I2C                                       |Programmable I2C address|
 |Storage ADC                   |I2C                                       |3 possible I2C addresses|
-|Height sensor                 |I2C (possible analog and PWM)             ||
+|Height sensor                 |I2C (possible analog and PWM)             |Programmable I2C address|
