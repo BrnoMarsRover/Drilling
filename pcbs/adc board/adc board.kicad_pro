@@ -454,7 +454,7 @@
   },
   "meta": {
     "filename": "adc board.kicad_pro",
-    "version": 3
+    "version": 1
   },
   "net_settings": {
     "classes": [
@@ -469,7 +469,6 @@
         "microvia_drill": 0.1,
         "name": "Default",
         "pcb_color": "rgba(0, 0, 0, 0.000)",
-        "priority": 2147483647,
         "schematic_color": "rgba(0, 0, 0, 0.000)",
         "track_width": 0.2,
         "via_diameter": 0.6,
@@ -478,7 +477,7 @@
       }
     ],
     "meta": {
-      "version": 4
+      "version": 3
     },
     "net_colors": null,
     "netclass_assignments": null,
@@ -602,7 +601,7 @@
   "sheets": [
     [
       "3566a35a-83f7-4d2c-bcf0-46c05c0eb1e7",
-      "Root"
+      "Hlavní"
     ]
   ],
   "text_variables": {}
