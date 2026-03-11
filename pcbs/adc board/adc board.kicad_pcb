@@ -5200,6 +5200,14 @@
 		)
 	)
 	(segment
+		(start 27.293168 22.19178)
+		(end 27.293168 22.069332)
+		(width 0.2)
+		(layer "F.Cu")
+		(net 1)
+		(uuid "3e7b26a4-6464-4054-9093-c3e762604dc0")
+	)
+	(segment
 		(start 16.8125 25.8675)
 		(end 18.162 25.8675)
 		(width 0.2)
@@ -5224,6 +5232,14 @@
 		(uuid "875841d8-62d6-43e6-99f7-549d3de107e3")
 	)
 	(segment
+		(start 27.293168 22.069332)
+		(end 27.9825 21.38)
+		(width 0.2)
+		(layer "F.Cu")
+		(net 1)
+		(uuid "a70c8310-ef51-4398-a40f-ecae7a846791")
+	)
+	(segment
 		(start 18.162 23.2675)
 		(end 18.162 23.9175)
 		(width 0.2)
@@ -5240,12 +5256,36 @@
 		(uuid "e49e7230-2651-4d99-b775-4e820dc5ae6a")
 	)
 	(via
-		(at 16.83 17.36)
+		(at 17 20)
 		(size 0.6)
 		(drill 0.3)
 		(layers "F.Cu" "B.Cu")
 		(net 1)
 		(uuid "08ec7c7b-fa6f-4ae3-aafe-c246eab6e9fb")
+	)
+	(via
+		(at 27.293168 22.19178)
+		(size 0.6)
+		(drill 0.3)
+		(layers "F.Cu" "B.Cu")
+		(net 1)
+		(uuid "09bb32e1-a04c-4791-8a75-f6b05164966e")
+	)
+	(via
+		(at 30.510534 29.268248)
+		(size 0.6)
+		(drill 0.3)
+		(layers "F.Cu" "B.Cu")
+		(net 1)
+		(uuid "0e6f4ca9-7d5c-444b-870e-1e23584f2c1f")
+	)
+	(via
+		(at 26 27)
+		(size 0.6)
+		(drill 0.3)
+		(layers "F.Cu" "B.Cu")
+		(net 1)
+		(uuid "224c1ea0-a802-492b-aa85-1c24ad06c367")
 	)
 	(via
 		(at 33.87 24.69)
@@ -5256,7 +5296,7 @@
 		(uuid "58d9a89b-9fc4-47a8-989b-d0762063fafd")
 	)
 	(via
-		(at 28.72 34.01)
+		(at 27 31.5)
 		(size 0.6)
 		(drill 0.3)
 		(layers "F.Cu" "B.Cu")
@@ -5270,6 +5310,14 @@
 		(layers "F.Cu" "B.Cu")
 		(net 1)
 		(uuid "84424703-5b3a-4706-a79d-3d174c4c4f3a")
+	)
+	(via
+		(at 15.5 33.5)
+		(size 0.6)
+		(drill 0.3)
+		(layers "F.Cu" "B.Cu")
+		(net 1)
+		(uuid "a2086ce8-ef7c-4ed6-9ee2-0b85b498664f")
 	)
 	(via
 		(at 15.41 27.27)
@@ -6749,7 +6797,6 @@
 		)
 		(filled_polygon
 			(layer "B.Cu")
-			(island)
 			(pts
 				(xy 30.156941 19.461185) (xy 30.202696 19.513989) (xy 30.21264 19.583147) (xy 30.183615 19.646703)
 				(xy 30.177583 19.653181) (xy 30.039482 19.791281) (xy 30.03948 19.791283) (xy 30.02867 19.810007)
