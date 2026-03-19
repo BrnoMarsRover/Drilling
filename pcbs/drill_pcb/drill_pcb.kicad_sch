@@ -4444,13 +4444,13 @@
 		(uuid "11467791-68a6-474c-be0a-0aab226911d6")
 	)
 	(junction
-		(at 177.8 21.59)
+		(at 176.53 19.05)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "1a128d91-c995-4deb-8307-cdbc3d0f0316")
 	)
 	(junction
-		(at 177.8 29.21)
+		(at 176.53 26.67)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "22798ff3-dc1f-434b-9ad7-7c51fdcea955")
@@ -4601,7 +4601,7 @@
 	)
 	(wire
 		(pts
-			(xy 177.8 29.21) (xy 186.69 29.21)
+			(xy 176.53 26.67) (xy 187.96 26.67)
 		)
 		(stroke
 			(width 0)
@@ -4901,7 +4901,7 @@
 	)
 	(wire
 		(pts
-			(xy 173.99 21.59) (xy 177.8 21.59)
+			(xy 172.72 19.05) (xy 176.53 19.05)
 		)
 		(stroke
 			(width 0)
@@ -5058,16 +5058,6 @@
 			(type default)
 		)
 		(uuid "524dd639-2092-4796-b51d-781594fd4808")
-	)
-	(wire
-		(pts
-			(xy 186.69 29.21) (xy 186.69 26.67)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "52615c31-07c0-4ace-9644-aab2e8e9916e")
 	)
 	(wire
 		(pts
@@ -5311,16 +5301,6 @@
 	)
 	(wire
 		(pts
-			(xy 186.69 26.67) (xy 187.96 26.67)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "83f00d1d-a988-4557-9059-fbc9ba37cf37")
-	)
-	(wire
-		(pts
 			(xy 316.23 35.56) (xy 320.04 35.56)
 		)
 		(stroke
@@ -5461,7 +5441,7 @@
 	)
 	(wire
 		(pts
-			(xy 187.96 21.59) (xy 187.96 24.13)
+			(xy 187.96 19.05) (xy 187.96 24.13)
 		)
 		(stroke
 			(width 0)
@@ -5561,7 +5541,7 @@
 	)
 	(wire
 		(pts
-			(xy 177.8 21.59) (xy 187.96 21.59)
+			(xy 176.53 19.05) (xy 187.96 19.05)
 		)
 		(stroke
 			(width 0)
@@ -5571,7 +5551,7 @@
 	)
 	(wire
 		(pts
-			(xy 173.99 29.21) (xy 177.8 29.21)
+			(xy 172.72 26.67) (xy 176.53 26.67)
 		)
 		(stroke
 			(width 0)
@@ -7180,7 +7160,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Fuse:Fuse_Blade_ATO_directSolder"
+		(property "Footprint" "drill_fuseSlot:fuseSlot"
 			(at 36.83 34.798 90)
 			(effects
 				(font
@@ -9194,7 +9174,7 @@
 	)
 	(symbol
 		(lib_id "Device:C_Polarized")
-		(at 177.8 25.4 0)
+		(at 176.53 22.86 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -9202,7 +9182,7 @@
 		(dnp no)
 		(uuid "850881c6-42b0-4e45-86b1-b22399b2d9f4")
 		(property "Reference" "C7"
-			(at 181.356 24.384 0)
+			(at 180.086 21.844 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9210,8 +9190,8 @@
 				(justify left)
 			)
 		)
-		(property "Value" "100μ"
-			(at 181.356 26.5429 0)
+		(property "Value" "1000μ"
+			(at 180.086 24.0029 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9220,7 +9200,7 @@
 			)
 		)
 		(property "Footprint" "Capacitor_THT:CP_Radial_D12.5mm_P5.00mm"
-			(at 178.7652 29.21 0)
+			(at 177.4952 26.67 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9229,7 +9209,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 177.8 25.4 0)
+			(at 176.53 22.86 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9238,7 +9218,7 @@
 			)
 		)
 		(property "Description" "Polarized capacitor"
-			(at 177.8 25.4 0)
+			(at 176.53 22.86 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9524,7 +9504,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 173.99 29.21 270)
+		(at 172.72 26.67 270)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -9533,7 +9513,7 @@
 		(fields_autoplaced yes)
 		(uuid "a0e7dda0-12b8-467c-97e0-6ab83ca4ae11")
 		(property "Reference" "#PWR08"
-			(at 167.64 29.21 0)
+			(at 166.37 26.67 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9542,7 +9522,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 170.18 29.2099 90)
+			(at 168.91 26.6699 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9551,7 +9531,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 173.99 29.21 0)
+			(at 172.72 26.67 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9560,7 +9540,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 173.99 29.21 0)
+			(at 172.72 26.67 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9569,7 +9549,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 173.99 29.21 0)
+			(at 172.72 26.67 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10154,7 +10134,7 @@
 				)
 			)
 		)
-		(property "Footprint" "Fuse:Fuse_Blade_ATO_directSolder"
+		(property "Footprint" "drill_fuseSlot:fuseSlot"
 			(at 36.83 44.958 90)
 			(effects
 				(font
@@ -10198,7 +10178,7 @@
 	)
 	(symbol
 		(lib_id "power:+24V")
-		(at 173.99 21.59 90)
+		(at 172.72 19.05 90)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -10207,7 +10187,7 @@
 		(fields_autoplaced yes)
 		(uuid "cc2a0f9e-3021-41df-9114-ee7c441b4ddd")
 		(property "Reference" "#PWR07"
-			(at 177.8 21.59 0)
+			(at 176.53 19.05 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10216,7 +10196,7 @@
 			)
 		)
 		(property "Value" "+24V"
-			(at 170.18 21.5899 90)
+			(at 168.91 19.0499 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10225,7 +10205,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 173.99 21.59 0)
+			(at 172.72 19.05 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10234,7 +10214,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 173.99 21.59 0)
+			(at 172.72 19.05 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10243,7 +10223,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"+24V\""
-			(at 173.99 21.59 0)
+			(at 172.72 19.05 0)
 			(effects
 				(font
 					(size 1.27 1.27)

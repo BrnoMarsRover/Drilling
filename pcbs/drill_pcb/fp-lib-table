@@ -8,4 +8,5 @@
   (lib (name "drill_heatsink")(type "KiCad")(uri "${KIPRJMOD}/libs/heatsink")(options "")(descr ""))
   (lib (name "logo")(type "KiCad")(uri "${KIPRJMOD}/libs/logo")(options "")(descr ""))
   (lib (name "PCM_Espressif")(type "KiCad")(uri "${KIPRJMOD}/libs/espressif-kicad-addon/footprints/Espressif.pretty")(options "")(descr ""))
+  (lib (name "drill_fuseSlot")(type "KiCad")(uri "${KIPRJMOD}/libs/fuseSlot")(options "")(descr ""))
 )
