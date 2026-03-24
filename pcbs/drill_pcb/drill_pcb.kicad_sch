@@ -7160,7 +7160,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "drill_fuseSlot:fuseSlot"
+		(property "Footprint" "drill_fuseHolderATO:fuseHolderATO"
 			(at 36.83 34.798 90)
 			(effects
 				(font
@@ -10134,7 +10134,7 @@
 				)
 			)
 		)
-		(property "Footprint" "drill_fuseSlot:fuseSlot"
+		(property "Footprint" "drill_fuseHolderATO:fuseHolderATO"
 			(at 36.83 44.958 90)
 			(effects
 				(font

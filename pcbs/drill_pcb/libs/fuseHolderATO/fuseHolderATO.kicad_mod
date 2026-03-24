@@ -1,4 +1,4 @@
-(footprint "fuseSlot"
+(footprint "fuseHolderATO"
 	(version 20241229)
 	(generator "pcbnew")
 	(generator_version "9.0")
@@ -244,7 +244,7 @@
 		(uuid "eaaea96b-e797-406a-affa-d339293b31de")
 	)
 	(pad "2" thru_hole oval
-		(at 9.3 0)
+		(at 9.5 0)
 		(size 9.1 3.8)
 		(drill oval 7.1 2)
 		(layers "*.Cu" "*.Mask")
