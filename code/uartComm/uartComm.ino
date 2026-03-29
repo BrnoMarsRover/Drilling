@@ -63,6 +63,7 @@ void loop()
           case 2:
             Serial.println("Zadam o data");
             motorDriver.requestTmpCurrRPM();
+            printMotorData(motorDriver);
             mainMenuPrint();
             break;
           case 3:
@@ -84,7 +85,6 @@ void loop()
         mainMenuPrint();
       }
       break;
-
   }
 
 #else
@@ -104,12 +104,8 @@ void loop()
     int inByte = Serial2.read();
     Serial.println(inByte, HEX);
   }
-
-  //if(motorDriver.readTmpCurrRPM())
-  {
-    printMotorData(motorDriver);
-  }
-
+  
+  motorDriver.handleRX();
   motorDriver.setERPM(eRPM);
 
   delay(100);
