@@ -1,6 +1,8 @@
 #include <Arduino.h>
-#include "CubeMarsDriverV2_UART.h"
 #include <vector>
+#include <HardwareSerial.h>
+
+#include "CubeMarsV2.h"
 
 #define manualControl
 
@@ -19,22 +21,21 @@ void mainMenuPrint()
   Serial.print("\nMenu:\n1: zadat eRPM\n2: pozadat o malo dat\n3: pozadat o vsechna data\n");
 }
 
-void printMotorData(struct motorDataRaw* motorDataPtr)
+void printMotorData(CubeMarsV2 motorDriverArg)
 {
   Serial.print("MOS tmp: ");
-  Serial.println(motorDataPtr->MOSTmp);
+  Serial.println(motorDriverArg.getMOSTmp());
   Serial.print("Motor tmp: ");
-  Serial.println(motorDataPtr->motorTmp);
+  Serial.println(motorDriverArg.getMotorTmp());
   Serial.print("Current: ");
-  Serial.println(motorDataPtr->current);
+  Serial.println(motorDriverArg.getCurrent());
   Serial.print("Speed: ");
-  Serial.println(motorDataPtr->speed);
+  Serial.println(motorDriverArg.getRPM());
 }
 
-void setup() {
-  
-  uartInit();
+CubeMarsV2 motorDriver(Serial2, 16,17);
 
+void setup() {
   Serial.begin(921600);
   Serial2.begin(921600);
 
@@ -61,12 +62,12 @@ void loop()
             break;
           case 2:
             Serial.println("Zadam o data");
-            requestTmpCurrRPM();
+            motorDriver.requestTmpCurrRPM();
             mainMenuPrint();
             break;
           case 3:
             Serial.println("Zadam o vsechna data");
-            requestAllData();
+            motorDriver.requestAllData();
             mainMenuPrint();
             break;
         }
@@ -104,13 +105,12 @@ void loop()
     Serial.println(inByte, HEX);
   }
 
-  struct motorDataRaw motorData = readTmpCurrRPM();
-  if(motorData.valid)
+  //if(motorDriver.readTmpCurrRPM())
   {
-    printMotorData(&motorData);
+    printMotorData(motorDriver);
   }
 
-  setERPM(eRPM);
+  motorDriver.setERPM(eRPM);
 
   delay(100);
 }
