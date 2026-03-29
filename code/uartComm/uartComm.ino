@@ -1,5 +1,4 @@
 #include <Arduino.h>
-#include <vector>
 #include <HardwareSerial.h>
 
 #include "CubeMarsV2.h"

@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <HardwareSerial.h>
 #include "CubeMarsV2.h"
 
 #define RQMASK_MOSTMP 0x01
@@ -53,7 +54,6 @@ void CubeMarsV2::int32ToBytes(int32_t input, uint8_t* output)
   output[3] = input & 0xFF;
 }
 
-// ---------------- PARSER / STATE MACHINE ----------------
 
 void CubeMarsV2::handleRX()
 {
@@ -102,8 +102,6 @@ void CubeMarsV2::handleRX()
   }
 }
 
-// ---------------- INTERPRETER ----------------
-
 void CubeMarsV2::readTmpCurrRPM()
 {
   if (rxLength != 17 || rxBuffer[0] != 50) return;
@@ -115,6 +113,8 @@ void CubeMarsV2::readTmpCurrRPM()
   current = 0.01 * bytesToInt32(rxBuffer + begin + 4);
   RPM = (1.0 / (poleCount * gearboxRatio)) * bytesToInt32(rxBuffer + begin + 8);
 }
+
+
 
 // ---------------- PUBLIC ----------------
 
@@ -149,8 +149,6 @@ void CubeMarsV2::requestTmpCurrRPM()
   int32ToBytes(mask, txPayloadBuffer + 1);
   transmitPayload(5);
 }
-
-// ---------------- GETTERS ----------------
 
 float CubeMarsV2::getMOSTmp()  { return MOSTmp; }
 float CubeMarsV2::getMotorTmp() { return motorTmp; }
