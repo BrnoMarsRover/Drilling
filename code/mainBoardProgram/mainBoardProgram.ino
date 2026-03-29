@@ -2,6 +2,7 @@
 #include <HardwareSerial.h>
 
 #include "CubeMarsV2.h"
+#include "LimitSwitch.h"
 
 #define manualControl
 
@@ -32,11 +33,18 @@ void printMotorData(CubeMarsV2 motorDriverArg)
   Serial.println(motorDriverArg.getRPM());
 }
 
-CubeMarsV2 motorDriver(Serial2, 16,17);
+/*I2C
+SDA...GPIO21
+SCL...GPIO22
+*/
+
+LimitSwitch limitSwitchTop(15);
+LimitSwitch limitSwitchBottom(0);
+
+CubeMarsV2 motorDriver(Serial2, 16, 17);
 
 void setup() {
   Serial.begin(921600);
-  Serial2.begin(921600);
 
   delay(1000);
 
