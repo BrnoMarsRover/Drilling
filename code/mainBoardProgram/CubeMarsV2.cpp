@@ -9,7 +9,7 @@
 
 // ---------------- PRIVATE ----------------
 
-void CubeMarsV2::transmitPayload(uint8_t payloadLength)
+void CubeMarsV2::transmitPayload(uint8_t* payload, uint8_t payloadLength)
 {
   uint8_t msgLength = payloadLength + 5; //extended by start, length, 2 bytes for checksum, end
   uint8_t msg[msgLength];
@@ -18,9 +18,9 @@ void CubeMarsV2::transmitPayload(uint8_t payloadLength)
   msg[1] = payloadLength;
 
   for (size_t i = 0; i < payloadLength; i++)
-    msg[2 + i] = txPayloadBuffer[i];
+    msg[2 + i] = payload[i];
 
-  uint16_t cksum = crc16(txPayloadBuffer, payloadLength);
+  uint16_t cksum = crc16(payload, payloadLength);
   msg[payloadLength + 2] = (cksum >> 8) & 0xFF;   // CRC high byte
   msg[payloadLength + 3] = cksum & 0xFF;          // CRC low byte
   msg[payloadLength + 4] = 3;                     // ETX
@@ -32,7 +32,7 @@ uint16_t CubeMarsV2::crc16(uint8_t* buffer, uint8_t bufferLength)
 {
   uint16_t cksum = 0;
   for (size_t i = 0; i < bufferLength; i++)
-    cksum = crc16_tab[((cksum >> 8) ^ txPayloadBuffer[i]) & 0xFF] ^ (cksum << 8);
+    cksum = crc16_tab[((cksum >> 8) ^ buffer[i]) & 0xFF] ^ (cksum << 8);
   return cksum;
 }
 
@@ -70,7 +70,14 @@ void CubeMarsV2::handleRX()
       case READ_LENGTH:
         rxLength = b;
         rxIndex = 0;
-        parserState = (rxLength > 0) ? READ_PAYLOAD : READ_CRC1;
+        if(rxLength > 0)
+        {
+          parserState = READ_PAYLOAD;
+        }
+        else
+        {
+          parserState = READ_CRC1;
+        }
         break;
 
       case READ_PAYLOAD:
@@ -93,8 +100,8 @@ void CubeMarsV2::handleRX()
         if (b == 3) // ETX
         {
           uint16_t receivedCRC = (uint16_t)((rxBuffer[rxLength] << 8) | rxBuffer[rxLength + 1]);
-          if (receivedCRC == crc16(rxBuffer, rxLength))
-            readTmpCurrRPM(); // call interpreter
+          //if (receivedCRC == crc16(rxBuffer, rxLength))
+          readTmpCurrRPM(); // call interpreter
         }
         parserState = WAIT_START;
         break;
@@ -106,7 +113,7 @@ void CubeMarsV2::readTmpCurrRPM()
 {
   if (rxLength != 17 || rxBuffer[0] != 50) return;
 
-  size_t begin = 5;
+  uint8_t begin = 5;
 
   MOSTmp = 0.1 * bytesToInt16(rxBuffer + begin);
   motorTmp = 0.1 * bytesToInt16(rxBuffer + begin + 2);
@@ -118,17 +125,17 @@ void CubeMarsV2::readTmpCurrRPM()
 
 // ---------------- PUBLIC ----------------
 
-CubeMarsV2::CubeMarsV2(HardwareSerial& serialPort, uint8_t rxPin, uint8_t txPin)
-  : cubeMarsSerial(serialPort)
+CubeMarsV2::CubeMarsV2(HardwareSerial& serialPort, HardwareSerial& debugSerialPort, uint8_t rxPin, uint8_t txPin)
+  : cubeMarsSerial(serialPort), debugSerial(debugSerialPort)
 {
   cubeMarsSerial.begin(921600, SERIAL_8N1, rxPin, txPin);
 }
 
 void CubeMarsV2::setERPM(int32_t erpm)
 {
-  txPayloadBuffer[0] = 8;
-  int32ToBytes(erpm, txPayloadBuffer + 1);
-  transmitPayload(5);
+  uint8_t payload[5] = {8, 0,0,0,0};
+  int32ToBytes(erpm, payload + 1);
+  transmitPayload(payload, 5);
 }
 
 void CubeMarsV2::setRPM(float rpm)
@@ -138,16 +145,16 @@ void CubeMarsV2::setRPM(float rpm)
 
 void CubeMarsV2::requestAllData()
 {
-  txPayloadBuffer[0] = 4;
-  transmitPayload(1);
+  uint8_t payload[1] = {4};
+  transmitPayload(payload, 1);
 }
 
 void CubeMarsV2::requestTmpCurrRPM()
 {
-  txPayloadBuffer[0] = 50;
+  uint8_t payload[5] = {50, 0,0,0,0};
   int32_t mask = RQMASK_MOSTMP | RQMASK_MOTORTMP | RQMASK_OUTCURRENT | RQMASK_RPM;
-  int32ToBytes(mask, txPayloadBuffer + 1);
-  transmitPayload(5);
+  int32ToBytes(mask, payload + 1);
+  transmitPayload(payload, 5);
 }
 
 float CubeMarsV2::getMOSTmp()  { return MOSTmp; }
