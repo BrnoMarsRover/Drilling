@@ -26,4 +26,7 @@ Drill: 0 (The drive is in uppermost position)
 |-                    |-                   |-                             |-                         |
 | STOP - stops all drill's actions. Retracts the deep sample box. Returns the vertical drive to its uppermost position. Also serves to calibrate the vertical position value. | 1 | None | None |
 | DRILL - Extracts a deep sample from specified depth | 2 | uint8 - desired drill depth [cm] | None |
+| STATE - Requests the state of the drilling mechanism |  |  |  |
 | HEIGHT - Requests the height of the vertical drive | 3 | None | uint8 - current distance from the uppermost position (higher number means lower height) [cm] |
+| WEIGHT_DEEP - Requests the weight of the deep sample |   |   |  |
+| WEIGHT_SURF - Requests the weight of the surface sample |   |   |  |
