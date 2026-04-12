@@ -3,8 +3,26 @@
 
 #include "CubeMarsV2.h"
 #include "LimitSwitch.h"
+#include "as5600.h"
+#include "LinearAxis.h"
 
 #define manualControl
+
+// ===== LINEAR AXIS =====
+LinearAxis linearAxis(
+  13, // STEP
+  12, // DIR
+  14, // EN
+  5,  // CS (TMC5160)
+  18, // SCK
+  19, // MISO
+  23, // MOSI
+  15, // horní koncák
+  0,  // dolní koncák
+  21, // SDA encoder
+  22, // SCL encoder
+  0x40 // adresa AS5600
+);
 
 enum menuEnum
 {
@@ -33,6 +51,47 @@ void printMotorData(CubeMarsV2 motorDriverArg)
   Serial.println(motorDriverArg.getRPM());
 }
 
+void handleCommand(String cmd) {
+  cmd.trim();
+  cmd.toUpperCase();
+
+  if (cmd.length() == 0) return;
+
+  if (cmd == "U") {
+    linearAxis.moveUp();
+  }
+  else if (cmd == "D") {
+    linearAxis.moveDown();
+  }
+  else if (cmd == "S") {
+    linearAxis.stop();
+  }
+  else if (cmd == "+") {
+    linearAxis.changeSpeedRelative(100);
+  }
+  else if (cmd == "-") {
+    linearAxis.changeSpeedRelative(-100);
+  }
+  else if (cmd.startsWith("R")) {
+    int value = cmd.substring(1).toInt();
+    if (value > 0) {
+      linearAxis.setSpeed((uint32_t)value);
+    } else {
+      Serial.println("Chyba: pouzij napr. R100");
+    }
+  }
+  else if (cmd == "X") {
+    linearAxis.zero();
+  }
+  else if (cmd == "?") {
+    linearAxis.printStatus(Serial);
+  }
+  else {
+    Serial.println("Neznamy prikaz.");
+    Serial.println("Pouzij: U, D, S, R100, +, -, A2000, X, ?");
+  }
+}
+
 /*I2C
 SDA...GPIO21
 SCL...GPIO22
@@ -55,13 +114,31 @@ void setup() {
 
   delay(1000);
 
+  // linear axis
+  if (!linearAxis.begin(600, 16)) {
+    Serial.println("Linear axis FAILED");
+  }
+
   mainMenuPrint();
 }
 
 void loop()
 {
   motorDriver.handleRX();
+  linearAxis.update();
 
+  if (Serial.available()) {
+    String cmd = Serial.readStringUntil('\n');
+    handleCommand(cmd);
+  }
+}
+/*
+    motorDriver.setERPM(eRPM);
+    motorDriver.requestTmpCurrRPM();
+  }
+*/
+
+  /*
   if(millis() > nextLoopMillis)
   {
     nextLoopMillis += deltaMillis;
@@ -106,7 +183,7 @@ void loop()
     }
     #else
     #endif
-
+    */
     /*
     while(Serial1.available())
     {
@@ -121,8 +198,5 @@ void loop()
       Serial.println(inByte, HEX);
     }
   */
-    motorDriver.setERPM(eRPM);
-    motorDriver.requestTmpCurrRPM();
-  }
-}
+
 
