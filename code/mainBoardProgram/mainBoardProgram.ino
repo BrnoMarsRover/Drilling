@@ -34,11 +34,6 @@ enum menuEnum menuState = mainMenu;
 
 int32_t eRPM = 0;
 
-void mainMenuPrint()
-{
-  Serial.print("\nMenu:\n1: zadat eRPM\n2: vypsat malo dat\n3: pozadat o vsechna data\n");
-}
-
 void printMotorData(CubeMarsV2 motorDriverArg)
 {
   Serial.print("MOS tmp: ");
@@ -89,6 +84,15 @@ void handleCommand(String cmd) {
   else if (cmd == "SG") {
     linearAxis.setLoadPrintEnabled(true);
   }
+  else if (cmd.startsWith("M")) {   //CUBEMARS MOTOR COMMANDS
+    int value = cmd.substring(1).toInt();
+      eRPM = value
+  }
+  else if(cmd == "MD")
+  {
+    printMotorData(motorDriver);
+  }
+
   else {
     Serial.println("Neznamy prikaz.");
     Serial.println("Pouzij: U, D, S, R100, +, -, A2000, X, ?");
@@ -127,79 +131,24 @@ void setup() {
 
 void loop()
 {
-  motorDriver.handleRX();
-  linearAxis.update();
-
-  if (Serial.available()) {
-    String cmd = Serial.readStringUntil('\n');
-    handleCommand(cmd);
-  }
-}
-/*
-    motorDriver.setERPM(eRPM);
-    motorDriver.requestTmpCurrRPM();
-  }
-*/
-
-  /*
   if(millis() > nextLoopMillis)
   {
     nextLoopMillis += deltaMillis;
 
-    #if defined(manualControl)
-    switch(menuState)
-    {
-      case mainMenu:
-        if (Serial.available())
-        {
-          int32_t input = Serial.parseInt();
-          switch(input)
-          {
-            case 1:
-              Serial.println("Zadejte eRPM:");
-              menuState = speedSelection;
-              break;
-            case 2:
-              Serial.println("Vypisuji data:");
-              printMotorData(motorDriver);
-              mainMenuPrint();
-              break;
-            case 3:
-              Serial.println("Zadam o vsechna data");
-              motorDriver.requestAllData();
-              mainMenuPrint();
-              break;
-          }
-        }
-        break;
-      case speedSelection:
-        if (Serial.available())
-        {
-          eRPM = Serial.parseInt();
-          Serial.print("Zadavam eRPM: ");
-          Serial.println(eRPM);
+    motorDriver.handleRX();
+    motorDriver.setERPM(eRPM);
+    motorDriver.requestTmpCurrRPM();
 
-          menuState = mainMenu;
-          mainMenuPrint();
-        }
-        break;
-    }
-    #else
-    #endif
-    */
-    /*
-    while(Serial1.available())
+
+    linearAxis.update();
+
+    if (Serial.available())
     {
-      int inByte = Serial1.read();
-      Serial.println(inByte, HEX);
+      String cmd = Serial.readStringUntil('\n');
+      handleCommand(cmd);
     }
-  */
-  /*
-    while(Serial2.available())
-    {
-      int inByte = Serial2.read();
-      Serial.println(inByte, HEX);
-    }
-  */
+  }
+}
+
 
 
