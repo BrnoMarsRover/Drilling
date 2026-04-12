@@ -64,6 +64,10 @@ public:
     bool hasFatalError() const;
     void printStatus(Stream& out) const;
 
+    uint16_t getLoad() const;
+    void printLoad(Stream& out) const;
+    void setLoadPrintEnabled(bool enabled);
+
 private:
     enum MotionState : int8_t {
         Stop = 0,
@@ -102,6 +106,10 @@ private:
 
     bool _initialized = false;
     bool _fatalError = false;
+    bool _loadPrintEnabled = false;
+
+    uint32_t _loadPrintIntervalMs = 300;
+    uint32_t _lastLoadPrintMs = 0;
 
     TMC5160Stepper* _driver = nullptr;
     FastAccelStepper* _stepper = nullptr;

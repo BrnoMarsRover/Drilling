@@ -86,6 +86,9 @@ void handleCommand(String cmd) {
   else if (cmd == "?") {
     linearAxis.printStatus(Serial);
   }
+  else if (cmd == "SG") {
+    linearAxis.setLoadPrintEnabled(true);
+  }
   else {
     Serial.println("Neznamy prikaz.");
     Serial.println("Pouzij: U, D, S, R100, +, -, A2000, X, ?");

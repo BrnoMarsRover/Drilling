@@ -129,6 +129,15 @@ void LinearAxis::update() {
         stop();
         Serial.println(F("Dolni koncak sepnut"));
     }
+
+    if (_loadPrintEnabled) {
+        uint32_t now = millis();
+        if (now - _lastLoadPrintMs >= _loadPrintIntervalMs) {
+            _lastLoadPrintMs = now;
+            printLoad(Serial);
+        }
+    }
+
 }
 
 void LinearAxis::moveUp() {
@@ -255,6 +264,21 @@ uint32_t LinearAxis::getAccelerationHz() const {
 
 bool LinearAxis::hasFatalError() const {
     return _fatalError;
+}
+
+uint16_t LinearAxis::getLoad() const {
+    if (_driver == nullptr) return 0;
+    return _driver->sg_result();
+}
+
+void LinearAxis::printLoad(Stream& out) const {
+    out.print(F("Zatizeni (SG): "));
+    out.println(getLoad());
+}
+
+void LinearAxis::setLoadPrintEnabled(bool enabled) {
+    _loadPrintEnabled = enabled;
+    _lastLoadPrintMs = millis();
 }
 
 void LinearAxis::printStatus(Stream& out) const {
