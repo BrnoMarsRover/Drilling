@@ -68,6 +68,10 @@ public:
     void printLoad(Stream& out) const;
     void setLoadPrintEnabled(bool enabled);
 
+    long getAngleFromSteps() const;
+    long getAngleFromEncoder() const;
+    bool compareEncoderAndSteps(long angleSteps, long angleEncoder) const;
+
 private:
     enum MotionState : int8_t {
         Stop = 0,
@@ -110,6 +114,11 @@ private:
 
     uint32_t _loadPrintIntervalMs = 300;
     uint32_t _lastLoadPrintMs = 0;
+
+    long _stepCompareThresholdDeg = 90;
+    bool _stepComparePrintEnabled = false;
+
+    uint16_t _stepsPerRevolution = 3200;
 
     TMC5160Stepper* _driver = nullptr;
     FastAccelStepper* _stepper = nullptr;

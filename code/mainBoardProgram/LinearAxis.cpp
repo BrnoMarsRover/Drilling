@@ -67,6 +67,12 @@ bool LinearAxis::begin(uint16_t rmsCurrent, uint16_t microsteps) {
     _driver->rms_current(rmsCurrent);
     _driver->microsteps(microsteps);
 
+    if (microsteps == 0) {
+        _stepsPerRevolution = 200;
+    } else {
+        _stepsPerRevolution = 200U * microsteps;
+    }
+
     _initialized = true;
     return !_fatalError;
 }
@@ -135,6 +141,16 @@ void LinearAxis::update() {
         if (now - _lastLoadPrintMs >= _loadPrintIntervalMs) {
             _lastLoadPrintMs = now;
             printLoad(Serial);
+        }
+    }
+
+    if (isMoving()) {
+        long angleSteps = getAngleFromSteps();
+        long angleEncoder = getAngleFromEncoder();
+
+        if (compareEncoderAndSteps(angleSteps, angleEncoder)) {
+            Serial.println(F("VAROVANI: mozna ztrata kroku!"));
+            stop();
         }
     }
 
@@ -279,6 +295,31 @@ void LinearAxis::printLoad(Stream& out) const {
 void LinearAxis::setLoadPrintEnabled(bool enabled) {
     _loadPrintEnabled = enabled;
     _lastLoadPrintMs = millis();
+}
+
+long LinearAxis::getAngleFromSteps() const {
+    if (_stepper == nullptr || _stepsPerRevolution == 0) return 0;
+
+    long currentPosition = _stepper->getCurrentPosition();
+    long angle = (long)(currentPosition * (360.0 / _stepsPerRevolution));
+    return angle;
+}
+
+long LinearAxis::getAngleFromEncoder() const {
+    if (_encoder == nullptr) return 0;
+
+    // celkový úhel od setZero(), ne modulo 360
+    return (long)_encoder->getTotalAngleDegrees();
+}
+
+bool LinearAxis::compareEncoderAndSteps(long angleSteps, long angleEncoder) const {
+    long difference = labs(angleEncoder - angleSteps);
+
+    if (difference > _stepCompareThresholdDeg) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 void LinearAxis::printStatus(Stream& out) const {
