@@ -8,7 +8,7 @@ Uřezání nové trubky
 Upevnění koncáků\
 Upevnění řetězu k vozíku. Možná koupení novýho řetězu z laskakitu?\
 Kabeláž - nakrimpovat a oplést\
-Umístění PCB na vrtáku, přizpůsobení kabelů
+Umístění PCB na vrtáku, přizpůsobení kabelů, umístění měniče\
 Vyřešit spodní uložení závitoivé tyče
 
 Upevnění tenzometru na storage
