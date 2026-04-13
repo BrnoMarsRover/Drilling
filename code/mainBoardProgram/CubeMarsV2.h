@@ -11,6 +11,9 @@ private:
   float current;
   float RPM;
 
+  uint32_t requestedERPM;
+  void transmitERPM();
+
   // Parser state machine
   enum ParseState { WAIT_START, READ_LENGTH, READ_PAYLOAD, READ_CRC1, READ_CRC2, WAIT_END };
   ParseState parserState = WAIT_START;
@@ -35,8 +38,14 @@ private:
 
   void readTmpCurrRPM();
 
+  // TIMING
+  uint32_t commNextMillis;
+  static constexpr uint32_t commDeltaMillis = 500;
+
 public:
   CubeMarsV2(HardwareSerial& serialPort, HardwareSerial& debugSerialPort, uint8_t rxPin, uint8_t txPin);
+
+  void update();
 
   void setERPM(int32_t erpm);
   void setRPM(float rpm);

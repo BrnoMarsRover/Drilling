@@ -9,6 +9,13 @@
 
 // ---------------- PRIVATE ----------------
 
+void CubeMarsV2::transmitERPM()
+{
+  uint8_t payload[5] = {8, 0,0,0,0};
+  int32ToBytes(requestedERPM, payload + 1);
+  transmitPayload(payload, 5);
+}
+
 void CubeMarsV2::transmitPayload(uint8_t* payload, uint8_t payloadLength)
 {
   uint8_t msgLength = payloadLength + 5; //extended by start, length, 2 bytes for checksum, end
@@ -121,21 +128,31 @@ void CubeMarsV2::readTmpCurrRPM()
   RPM = (1.0 / (poleCount * gearboxRatio)) * bytesToInt32(rxBuffer + begin + 8);
 }
 
-
-
 // ---------------- PUBLIC ----------------
 
 CubeMarsV2::CubeMarsV2(HardwareSerial& serialPort, HardwareSerial& debugSerialPort, uint8_t rxPin, uint8_t txPin)
   : cubeMarsSerial(serialPort), debugSerial(debugSerialPort)
 {
   cubeMarsSerial.begin(921600, SERIAL_8N1, rxPin, txPin);
+  commNextMillis = millis();
+}
+
+void CubeMarsV2::update()
+{
+  handleRX();
+
+  if(millis() > commNextMillis)
+  {
+    commNextMillis += commDeltaMillis;
+    transmitERPM();
+    requestTmpCurrRPM();
+  }
 }
 
 void CubeMarsV2::setERPM(int32_t erpm)
 {
-  uint8_t payload[5] = {8, 0,0,0,0};
-  int32ToBytes(erpm, payload + 1);
-  transmitPayload(payload, 5);
+  requestedERPM = erpm;
+  transmitERPM();
 }
 
 void CubeMarsV2::setRPM(float rpm)
