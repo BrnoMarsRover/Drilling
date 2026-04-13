@@ -35,10 +35,6 @@ LimitSwitch limitSwitchBottom(0);
 
 CubeMarsV2 motorDriver(Serial2, Serial0, 16, 17);
 
-//---------TIMING
-uint32_t nextLoopMillis = 0;
-uint32_t deltaMillis = 100;
-
 enum menuEnum
 {
   mainMenu,
@@ -46,8 +42,6 @@ enum menuEnum
 };
 
 enum menuEnum menuState = mainMenu;
-
-int32_t eRPM = 0;
 
 void printMotorData(CubeMarsV2 motorDriverArg)
 {
@@ -112,11 +106,10 @@ void handleCommand(String cmd) {
   }
   else if (cmd.startsWith("M")) {   //CUBEMARS MOTOR COMMANDS
     int value = cmd.substring(1).toInt();
-      eRPM = value;
+      motorDriver.setRPM(value);
   }
   else if(cmd == "Z")
   {
-    Serial.println("Speed: ");
     printMotorData(motorDriver);
   }
 
@@ -130,8 +123,6 @@ void setup() {
   Serial.begin(115200);
   Serial.setTimeout(10);
 
-  delay(1000);
-
   // linear axis
   if (!linearAxis.begin(600, 16)) {
     Serial.println("Linear axis FAILED");
@@ -141,22 +132,14 @@ void setup() {
 
 void loop()
 {
-  if(millis() > nextLoopMillis)
+  motorDriver.update();
+
+  linearAxis.update();
+
+  if (Serial.available())
   {
-    nextLoopMillis += deltaMillis;
-
-    motorDriver.handleRX();  // nebylo by lepší udělat metodu motorDriver.upade() a schovat tam tyhle tři metody?
-    motorDriver.setERPM(eRPM);
-    motorDriver.requestTmpCurrRPM();
-
-
-    linearAxis.update();
-
-    if (Serial.available())
-    {
-      String cmd = Serial.readStringUntil('\n');
-      handleCommand(cmd);
-    }
+    String cmd = Serial.readStringUntil('\n');
+    handleCommand(cmd);
   }
 }
 
