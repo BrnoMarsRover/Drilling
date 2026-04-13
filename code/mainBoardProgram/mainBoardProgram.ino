@@ -90,6 +90,14 @@ void handleCommand(String cmd) {
       Serial.println("Chyba: pouzij napr. R100");
     }
   }
+  else if (cmd.startsWith("RM")) { // mm/s
+  float value = cmd.substring(2).toFloat();
+  if (value > 0) {
+    linearAxis.setSpeedMMps(value);
+    Serial.print("Rychlost mm/s: ");
+    Serial.println(linearAxis.getSpeedMMps());
+    }
+  }
   else if (cmd == "X") {
     linearAxis.zero();
   }
