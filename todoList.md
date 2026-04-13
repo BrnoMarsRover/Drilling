@@ -24,7 +24,8 @@ Obslužná program co bude simulovat rover potenciálně
 
 
 ## Misc
-Dopisovat do seznamu materiál co chceme mít redundantní
+Dopisovat do seznamu materiál co chceme mít redundantní\
+Koupit víc písku
 
 
 
