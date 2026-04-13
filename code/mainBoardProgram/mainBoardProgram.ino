@@ -24,6 +24,21 @@ LinearAxis linearAxis(
   0x40 // adresa AS5600
 );
 
+/*I2C
+SDA...GPIO21
+SCL...GPIO22
+*/
+
+//---------PERIPHERAL CLASSES
+LimitSwitch limitSwitchTop(15);
+LimitSwitch limitSwitchBottom(0);
+
+CubeMarsV2 motorDriver(Serial2, Serial0, 16, 17);
+
+//---------TIMING
+uint32_t nextLoopMillis = 0;
+uint32_t deltaMillis = 100;
+
 enum menuEnum
 {
   mainMenu,
@@ -84,12 +99,16 @@ void handleCommand(String cmd) {
   else if (cmd == "SG") {
     linearAxis.setLoadPrintEnabled(true);
   }
+  else if (cmd == "NSG") {
+    linearAxis.setLoadPrintEnabled(false);
+  }
   else if (cmd.startsWith("M")) {   //CUBEMARS MOTOR COMMANDS
     int value = cmd.substring(1).toInt();
-      eRPM = value
+      eRPM = value;
   }
-  else if(cmd == "MD")
+  else if(cmd == "Z")
   {
+    Serial.println("Speed: ");
     printMotorData(motorDriver);
   }
 
@@ -98,22 +117,6 @@ void handleCommand(String cmd) {
     Serial.println("Pouzij: U, D, S, R100, +, -, A2000, X, ?");
   }
 }
-
-/*I2C
-SDA...GPIO21
-SCL...GPIO22
-*/
-
-//---------PERIPHERAL CLASSES
-LimitSwitch limitSwitchTop(15);
-LimitSwitch limitSwitchBottom(0);
-
-CubeMarsV2 motorDriver(Serial2, Serial0, 16, 17);
-
-
-//---------TIMING
-uint32_t nextLoopMillis = 0;
-uint32_t deltaMillis = 100;
 
 void setup() {
   Serial.begin(115200);
@@ -126,7 +129,6 @@ void setup() {
     Serial.println("Linear axis FAILED");
   }
 
-  mainMenuPrint();
 }
 
 void loop()
@@ -135,7 +137,7 @@ void loop()
   {
     nextLoopMillis += deltaMillis;
 
-    motorDriver.handleRX();
+    motorDriver.handleRX();  // nebylo by lepší udělat metodu motorDriver.upade() a schovat tam tyhle tři metody?
     motorDriver.setERPM(eRPM);
     motorDriver.requestTmpCurrRPM();
 
