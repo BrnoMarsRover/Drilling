@@ -10,6 +10,7 @@ Upevnění řetězu k vozíku. Možná koupení novýho řetězu z laskakitu?\
 Kabeláž - nakrimpovat a oplést\
 Umístění PCB na vrtáku, přizpůsobení kabelů, umístění měniče\
 Vyřešit spodní uložení závitoivé tyče
+Upevnění TOF a kamery
 
 Upevnění tenzometru na storage
 
