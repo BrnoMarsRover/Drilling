@@ -118,14 +118,18 @@ void handleCommand(String cmd) {
   else if(cmd == "MSR")
   {
     Serial.println(Measure start);
+    Serial.print(adc.measure_weight(), 4);
+    Serial.println("g");
   }
   else if(cmd == "TRE")
   {
     Serial.println(Tare start);
+    adc.tare();
   }
   else if(cmd == "CLB")
   {
     Serial.println(Calibration start);
+    adc.scale_calibrate();
   }
 
   else {

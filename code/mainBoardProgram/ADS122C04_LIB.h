@@ -5,6 +5,12 @@
 #include <stdbool.h>
 #include <Arduino.h>
 
+// ESP pin 24 is nRESET set to HIGH
+/*
+const innt n_reset = 24;
+pinMode(n_reset, OUTPUT);
+digitalWrite(n_reset, HIGH);
+*/
 // Commands
 #define CMD_RESET     0x06
 #define CMD_STARTSYNC 0x08
