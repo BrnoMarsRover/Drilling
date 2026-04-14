@@ -44,6 +44,8 @@ enum menuEnum
 
 enum menuEnum menuState = mainMenu;
 
+ADC122C04 adc;
+
 void printMotorData(CubeMarsV2 motorDriverArg)
 {
   Serial.print("MOS tmp: ");
@@ -140,7 +142,7 @@ void setup() {
   if (!linearAxis.begin(600, 16)) {
     Serial.println("Linear axis FAILED");
   }
-
+  adc.init();
 }
 
 void loop()
