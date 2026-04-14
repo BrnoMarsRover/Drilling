@@ -144,6 +144,22 @@ void LinearAxis::update() {
         }
     }
 
+    if (_heightPrintEnabled) {
+        uint32_t now = millis();
+        if (now - _lastHeightPrintMs >= _heightPrintIntervalMs) {
+            _lastHeightPrintMs = now;
+            printHeight(Serial);
+        }
+    }
+
+    if (_speedPrintEnabled) {
+        uint32_t now = millis();
+        if (now - _lastSpeedPrintMs >= _speedPrintIntervalMs) {
+            _lastSpeedPrintMs = now;
+            printSpeed(Serial);
+        }
+    }
+/*
     if (isMoving()) {
         long angleSteps = getAngleFromSteps();
         long angleEncoder = getAngleFromEncoder();
@@ -153,7 +169,7 @@ void LinearAxis::update() {
             stop();
         }
     }
-
+*/
 }
 
 void LinearAxis::moveUp() {
@@ -228,6 +244,28 @@ void LinearAxis::changeSpeedRelative(int32_t deltaHz) {
     setSpeed((uint32_t)newSpeed);
 }
 
+void LinearAxis::setSpeedMMps(float mmPerSec) {
+    if (mmPerSec <= 0.0f) mmPerSec = 0.1f;
+
+    float stepsPerSec = mmPerSec * ((float)_stepsPerRevolution / _mmPerRevolution);
+
+    setSpeed((uint32_t)stepsPerSec);
+}
+
+float LinearAxis::getSpeedMMps() const {
+    if (_stepsPerRevolution == 0) return 0.0f;
+
+    return ((float)_speedHz * _mmPerRevolution) / (float)_stepsPerRevolution;
+}
+
+void LinearAxis::setSpeedMps(float mPerSec) {
+    setSpeedMMps(mPerSec * 1000.0f);
+}
+
+float LinearAxis::getSpeedMps() const {
+    return getSpeedMMps() / 1000.0f;
+}
+
 bool LinearAxis::isMoving() const {
     return _motionState != Stop;
 }
@@ -295,6 +333,26 @@ void LinearAxis::printLoad(Stream& out) const {
 void LinearAxis::setLoadPrintEnabled(bool enabled) {
     _loadPrintEnabled = enabled;
     _lastLoadPrintMs = millis();
+}
+
+void LinearAxis::printSpeed(Stream& out) const {
+    out.print(F("Rychlost (mm/s): "));
+    out.println(getSpeedMMps());
+}
+
+void LinearAxis::setSpeedPrintEnabled(bool enabled) {
+    _speedPrintEnabled = enabled;
+    _lastSpeedPrintMs = millis();
+}
+
+void LinearAxis::printHeight(Stream& out) const {
+    out.print(F("Vyska (mm): "));
+    out.println(getHeightMM());
+}
+
+void LinearAxis::setHeightPrintEnabled(bool enabled) {
+    _heightPrintEnabled = enabled;
+    _lastHeightPrintMs = millis();
 }
 
 long LinearAxis::getAngleFromSteps() const {

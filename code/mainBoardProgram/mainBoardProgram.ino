@@ -25,6 +25,17 @@ LinearAxis linearAxis(
   0x40 // adresa AS5600
 );
 
+/*I2C
+SDA...GPIO21
+SCL...GPIO22
+*/
+
+//---------PERIPHERAL CLASSES
+LimitSwitch limitSwitchTop(15);
+LimitSwitch limitSwitchBottom(0);
+
+CubeMarsV2 motorDriver(Serial2, Serial0, 16, 17);
+
 enum menuEnum
 {
   mainMenu,
@@ -32,8 +43,6 @@ enum menuEnum
 };
 
 enum menuEnum menuState = mainMenu;
-
-int32_t eRPM = 0;
 
 void printMotorData(CubeMarsV2 motorDriverArg)
 {
@@ -76,6 +85,14 @@ void handleCommand(String cmd) {
       Serial.println("Chyba: pouzij napr. R100");
     }
   }
+  else if (cmd.startsWith("RM")) { // mm/s
+  float value = cmd.substring(2).toFloat();
+  if (value > 0) {
+    linearAxis.setSpeedMMps(value);
+    Serial.print("Rychlost mm/s: ");
+    Serial.println(linearAxis.getSpeedMMps());
+    }
+  }
   else if (cmd == "X") {
     linearAxis.zero();
   }
@@ -85,11 +102,14 @@ void handleCommand(String cmd) {
   else if (cmd == "SG") {
     linearAxis.setLoadPrintEnabled(true);
   }
+  else if (cmd == "NSG") {
+    linearAxis.setLoadPrintEnabled(false);
+  }
   else if (cmd.startsWith("M")) {   //CUBEMARS MOTOR COMMANDS
     int value = cmd.substring(1).toInt();
-      eRPM = value
+      motorDriver.setRPM(value);
   }
-  else if(cmd == "MD")
+  else if(cmd == "Z")
   {
     printMotorData(motorDriver);
   }
@@ -112,57 +132,27 @@ void handleCommand(String cmd) {
   }
 }
 
-/*I2C
-SDA...GPIO21
-SCL...GPIO22
-*/
-
-//---------PERIPHERAL CLASSES
-LimitSwitch limitSwitchTop(15);
-LimitSwitch limitSwitchBottom(0);
-
-CubeMarsV2 motorDriver(Serial2, Serial0, 16, 17);
-
-ADS122C04 adc;
-
-//---------TIMING
-uint32_t nextLoopMillis = 0;
-uint32_t deltaMillis = 100;
-
 void setup() {
   Serial.begin(115200);
   Serial.setTimeout(10);
-
-  delay(1000);
 
   // linear axis
   if (!linearAxis.begin(600, 16)) {
     Serial.println("Linear axis FAILED");
   }
 
-  adc.init();
-
-  mainMenuPrint();
 }
 
 void loop()
 {
-  if(millis() > nextLoopMillis)
+  motorDriver.update();
+
+  linearAxis.update();
+
+  if (Serial.available())
   {
-    nextLoopMillis += deltaMillis;
-
-    motorDriver.handleRX();
-    motorDriver.setERPM(eRPM);
-    motorDriver.requestTmpCurrRPM();
-
-
-    linearAxis.update();
-
-    if (Serial.available())
-    {
-      String cmd = Serial.readStringUntil('\n');
-      handleCommand(cmd);
-    }
+    String cmd = Serial.readStringUntil('\n');
+    handleCommand(cmd);
   }
 }
 

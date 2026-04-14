@@ -1,0 +1,3 @@
+# Redundantní materiál
+
+články řetězu
