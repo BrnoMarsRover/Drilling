@@ -5,6 +5,7 @@
 #include "LimitSwitch.h"
 #include "as5600.h"
 #include "LinearAxis.h"
+#include "ADS122C04_LIB.h"
 
 #define manualControl
 
@@ -92,10 +93,22 @@ void handleCommand(String cmd) {
   {
     printMotorData(motorDriver);
   }
+  else if(cmd == "MSR")
+  {
+    Serial.println(Measure start);
+  }
+  else if(cmd == "TRE")
+  {
+    Serial.println(Tare start);
+  }
+  else if(cmd == "CLB")
+  {
+    Serial.println(Calibration start);
+  }
 
   else {
     Serial.println("Neznamy prikaz.");
-    Serial.println("Pouzij: U, D, S, R100, +, -, A2000, X, ?");
+    Serial.println("Pouzij: U, D, S, R100, +, -, A2000, X, ?, MSR, TRE, CLB");
   }
 }
 
@@ -110,6 +123,7 @@ LimitSwitch limitSwitchBottom(0);
 
 CubeMarsV2 motorDriver(Serial2, Serial0, 16, 17);
 
+ADS122C04 adc;
 
 //---------TIMING
 uint32_t nextLoopMillis = 0;
@@ -125,6 +139,8 @@ void setup() {
   if (!linearAxis.begin(600, 16)) {
     Serial.println("Linear axis FAILED");
   }
+
+  adc.init();
 
   mainMenuPrint();
 }
