@@ -158,17 +158,18 @@ void LinearAxis::update() {
             printSpeed(Serial);
         }
     }
-/*
+
     if (isMoving()) {
         long angleSteps = getAngleFromSteps();
         long angleEncoder = getAngleFromEncoder();
+        Serial.print("anglesteps");Serial.print(angleSteps);
+        Serial.print("angleencoder");Serial.println(angleEncoder);
 
-        if (compareEncoderAndSteps(angleSteps, angleEncoder)) {
+        if (compareEncoderAndSteps(angleSteps, -angleEncoder)) {
             Serial.println(F("VAROVANI: mozna ztrata kroku!"));
             stop();
         }
     }
-*/
 }
 
 void LinearAxis::moveUp() {

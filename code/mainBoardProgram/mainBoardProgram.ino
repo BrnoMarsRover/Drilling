@@ -101,6 +101,12 @@ void handleCommand(String cmd) {
   else if (cmd == "NSG") {
     linearAxis.setLoadPrintEnabled(false);
   }
+  else if (cmd == "H") {
+    linearAxis.setHeightPrintEnabled(true);
+  }
+  else if (cmd == "NH") {
+    linearAxis.setHeightPrintEnabled(false);
+  }
   else if (cmd.startsWith("M")) {   //CUBEMARS MOTOR COMMANDS
     int value = cmd.substring(1).toInt();
       motorDriver.setRPM(value);
@@ -137,7 +143,7 @@ void setup() {
   Serial.setTimeout(10);
 
   // I2C
-  
+
   I2CBus.begin(sdaPin, sclPin, i2cFrequency);
 
   // linear axis
