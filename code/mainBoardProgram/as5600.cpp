@@ -1,11 +1,10 @@
 #include "as5600.h"
 
-AS5600L::AS5600L(uint8_t address, TwoWire &wire)
+AS5600L::AS5600L(TwoWire &wire, uint8_t address)
   : _wire(&wire), _address(address) {
 }
 
-bool AS5600L::begin(int sdaPin, int sclPin, uint32_t frequency) {
-  _wire->begin(sdaPin, sclPin, frequency);
+bool AS5600L::begin() {
   delay(10);
 
   if (!isConnected()) {

@@ -4,9 +4,9 @@
 
 class AS5600L {
 public:
-  explicit AS5600L(uint8_t address = 0x40, TwoWire &wire = Wire);
+  explicit AS5600L(TwoWire& wire, uint8_t address = 0x40);
 
-  bool begin(int sdaPin, int sclPin, uint32_t frequency = 400000);
+  bool begin();
 
   void setAddress(uint8_t address);
   uint8_t getAddress() const;

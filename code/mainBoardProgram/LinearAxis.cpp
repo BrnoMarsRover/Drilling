@@ -11,11 +11,11 @@ LinearAxis::LinearAxis(uint8_t stepPin,
                        uint8_t mosiPin,
                        uint8_t limitTopPin,
                        uint8_t limitBottomPin,
-                       uint8_t sdaPin,
-                       uint8_t sclPin,
+                       TwoWire& wire,
                        uint8_t encoderAddress,
                        float mmPerRevolution,
-                       float rSense)
+                       float rSense
+                       )
     : _stepPin(stepPin),
       _dirPin(dirPin),
       _enPin(enPin),
@@ -25,19 +25,18 @@ LinearAxis::LinearAxis(uint8_t stepPin,
       _mosiPin(mosiPin),
       _limitTopPin(limitTopPin),
       _limitBottomPin(limitBottomPin),
-      _sdaPin(sdaPin),
-      _sclPin(sclPin),
       _encoderAddress(encoderAddress),
       _mmPerRevolution(mmPerRevolution),
-      _rSense(rSense) {
+      _rSense(rSense),
+      _wire(wire) {
 }
 
 bool LinearAxis::begin(uint16_t rmsCurrent, uint16_t microsteps) {
     _limitTop = new LimitSwitch(_limitTopPin);
     _limitBottom = new LimitSwitch(_limitBottomPin);
 
-    _encoder = new AS5600L(_encoderAddress);
-    if (!_encoder->begin(_sdaPin, _sclPin, 100000)) {
+    _encoder = new AS5600L(_wire, _encoderAddress);
+    if (!_encoder->begin()) {
         Serial.println(F("CHYBA: AS5600L nenalezen"));
         _fatalError = true;
     } else {

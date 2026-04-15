@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <HardwareSerial.h>
+#include <Wire.h>
 
 #include "CubeMarsV2.h"
 #include "LimitSwitch.h"
@@ -7,7 +8,11 @@
 #include "LinearAxis.h"
 //#include "ADS122C04_LIB.h"
 
-#define manualControl
+//-------I2C
+constexpr uint8_t sdaPin = 21;
+constexpr uint8_t sclPin = 22;
+constexpr uint32_t i2cFrequency = 100000;
+TwoWire I2CBus(0);
 
 // ===== LINEAR AXIS =====
 LinearAxis linearAxis(
@@ -20,15 +25,10 @@ LinearAxis linearAxis(
   23, // MOSI
   15, // horní koncák
   0,  // dolní koncák
-  21, // SDA encoder
-  22, // SCL encoder
+  I2CBus,  //i2c bus class
   0x40 // adresa AS5600
 );
 
-/*I2C
-SDA...GPIO21
-SCL...GPIO22
-*/
 
 //---------PERIPHERAL CLASSES
 LimitSwitch limitSwitchTop(15);
@@ -36,13 +36,7 @@ LimitSwitch limitSwitchBottom(0);
 
 CubeMarsV2 motorDriver(Serial2, Serial0, 16, 17);
 
-enum menuEnum
-{
-  mainMenu,
-  speedSelection
-};
 
-enum menuEnum menuState = mainMenu;
 
 //ADS122C04 adc;
 
@@ -141,6 +135,10 @@ void handleCommand(String cmd) {
 void setup() {
   Serial.begin(115200);
   Serial.setTimeout(10);
+
+  // I2C
+  
+  I2CBus.begin(sdaPin, sclPin, i2cFrequency);
 
   // linear axis
   if (!linearAxis.begin(600, 16)) {

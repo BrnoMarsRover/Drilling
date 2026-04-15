@@ -24,11 +24,11 @@ public:
                uint8_t mosiPin,
                uint8_t limitTopPin,
                uint8_t limitBottomPin,
-               uint8_t sdaPin,
-               uint8_t sclPin,
+               TwoWire& wire,
                uint8_t encoderAddress = 0x40,
                float mmPerRevolution = 2.0f,
-               float rSense = 0.075f);
+               float rSense = 0.075f
+               );
 
     bool begin(uint16_t rmsCurrent = 600, uint16_t microsteps = 16);
     void update();
@@ -135,6 +135,8 @@ private:
     bool _stepComparePrintEnabled = false;
 
     uint16_t _stepsPerRevolution = 3200;
+
+    TwoWire& _wire;
 
     TMC5160Stepper* _driver = nullptr;
     FastAccelStepper* _stepper = nullptr;
