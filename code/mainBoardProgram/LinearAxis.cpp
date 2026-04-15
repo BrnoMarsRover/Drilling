@@ -37,7 +37,7 @@ bool LinearAxis::begin(uint16_t rmsCurrent, uint16_t microsteps) {
     _limitBottom = new LimitSwitch(_limitBottomPin);
 
     _encoder = new AS5600L(_encoderAddress);
-    if (!_encoder->begin(_sdaPin, _sclPin, 400000)) {
+    if (!_encoder->begin(_sdaPin, _sclPin, 100000)) {
         Serial.println(F("CHYBA: AS5600L nenalezen"));
         _fatalError = true;
     } else {

@@ -5,7 +5,7 @@
 #include "LimitSwitch.h"
 #include "as5600.h"
 #include "LinearAxis.h"
-#include "ADS122C04_LIB.h"
+//#include "ADS122C04_LIB.h"
 
 #define manualControl
 
@@ -44,7 +44,7 @@ enum menuEnum
 
 enum menuEnum menuState = mainMenu;
 
-ADC122C04 adc;
+//ADS122C04 adc;
 
 void printMotorData(CubeMarsV2 motorDriverArg)
 {
@@ -115,23 +115,23 @@ void handleCommand(String cmd) {
   {
     printMotorData(motorDriver);
   }
-  else if(cmd == "MSR")
+  /*else if(cmd == "MSR")
   {
-    Serial.println(Measure start);
+    Serial.println("Measure start");
     Serial.print(adc.measure_weight(), 4);
     Serial.println("g");
   }
   else if(cmd == "TRE")
   {
-    Serial.println(Tare start);
+    Serial.println("Tare start");
     adc.tare();
   }
   else if(cmd == "CLB")
   {
-    Serial.println(Calibration start);
+    Serial.println("Calibration start");
     adc.scale_calibrate();
   }
-
+*/
   else {
     Serial.println("Neznamy prikaz.");
     Serial.println("Pouzij: U, D, S, R100, +, -, A2000, X, ?, MSR, TRE, CLB");
@@ -146,7 +146,7 @@ void setup() {
   if (!linearAxis.begin(600, 16)) {
     Serial.println("Linear axis FAILED");
   }
-  adc.init();
+  //adc.init();
 }
 
 void loop()
