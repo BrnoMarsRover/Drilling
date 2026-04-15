@@ -4790,6 +4790,12 @@
 		(uuid "e96432e7-ceb2-427a-bd40-fe9ea36f5969")
 	)
 	(junction
+		(at 265.43 151.13)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "e9b61446-17ab-45f3-bd94-fffcfcf8d7c5")
+	)
+	(junction
 		(at 210.82 62.23)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -5367,16 +5373,6 @@
 	)
 	(wire
 		(pts
-			(xy 63.5 130.81) (xy 64.77 130.81)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "4e564c6c-1c6e-41aa-8fcd-a0d601f47f8f")
-	)
-	(wire
-		(pts
 			(xy 151.13 132.08) (xy 151.13 133.35)
 		)
 		(stroke
@@ -5664,16 +5660,6 @@
 			(type default)
 		)
 		(uuid "79ce25cd-0a32-4e00-9418-7db957be0f39")
-	)
-	(wire
-		(pts
-			(xy 132.08 118.11) (xy 130.81 118.11)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "7a1e328d-f217-4fae-a6a0-391fea6bc5a0")
 	)
 	(wire
 		(pts
@@ -5984,6 +5970,16 @@
 			(type default)
 		)
 		(uuid "c5931b09-0e78-45ed-ab3c-5f8351687407")
+	)
+	(wire
+		(pts
+			(xy 265.43 151.13) (xy 265.43 153.67)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c6546056-e9c5-4ef7-b502-6ff1dddcf84d")
 	)
 	(wire
 		(pts
@@ -6767,6 +6763,28 @@
 			)
 		)
 	)
+	(global_label "SERVO2_PWM"
+		(shape input)
+		(at 368.3 135.89 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "6531a23b-1983-46e8-bedb-28bf9c90b4ae")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 352.9173 135.89 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
 	(global_label "SCL1"
 		(shape input)
 		(at 316.23 30.48 180)
@@ -7229,6 +7247,28 @@
 			)
 		)
 	)
+	(global_label "SERVO1_PWM"
+		(shape input)
+		(at 368.3 124.46 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "ac88f1fb-d2ec-4124-acaa-8a8285b5faab")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 352.9173 124.46 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+				(hide yes)
+			)
+		)
+	)
 	(global_label "DRVR_STORAGE_DIR"
 		(shape input)
 		(at 132.08 140.97 0)
@@ -7253,7 +7293,7 @@
 	)
 	(global_label "LIMIT_SENSOR_TOP"
 		(shape input)
-		(at 63.5 130.81 180)
+		(at 64.77 138.43 180)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -7263,7 +7303,7 @@
 		)
 		(uuid "b1bbef88-1b33-498e-91f4-8b0fb56fc872")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 42.8558 130.81 0)
+			(at 44.1258 138.43 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7275,44 +7315,22 @@
 	)
 	(global_label "LIMIT_SENSOR_BOTTOM"
 		(shape input)
-		(at 132.08 118.11 0)
+		(at 64.77 135.89 180)
 		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
-			(justify left)
+			(justify right)
 		)
 		(uuid "bd6d588f-3ee0-4d0b-9782-5cd1077f11ab")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 156.4737 118.11 0)
+			(at 40.3763 135.89 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left)
-				(hide yes)
-			)
-		)
-	)
-	(global_label "ADC_DEEP_DRDY"
-		(shape input)
-		(at 132.08 123.19 0)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "bd9adf43-a8e9-4d5c-93d3-e5f47d31ff9e")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 150.3656 123.19 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
+				(justify right)
 				(hide yes)
 			)
 		)
@@ -8254,6 +8272,79 @@
 			(project ""
 				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313"
 					(reference "#PWR024")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:Screw_Terminal_01x03")
+		(at 373.38 138.43 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "331dfebe-3adb-4a7c-9f78-907634b0b031")
+		(property "Reference" "J15"
+			(at 375.92 137.1599 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "SERVO 2"
+			(at 375.92 139.6999 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Connector_JST:JST_XH_B3B-XH-A_1x03_P2.50mm_Vertical"
+			(at 373.38 138.43 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 373.38 138.43 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Generic screw terminal, single row, 01x03, script generated (kicad-library-utils/schlib/autogen/connector/)"
+			(at 373.38 138.43 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "2"
+			(uuid "90e27873-9198-4c85-bdfe-ff0a256293ae")
+		)
+		(pin "1"
+			(uuid "5af898f6-4cc8-4a0c-b0fd-46c707a12bc0")
+		)
+		(pin "3"
+			(uuid "f55a84bf-8545-4ea4-9e21-c9615b060c37")
+		)
+		(instances
+			(project "drill_pcb"
+				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313"
+					(reference "J15")
 					(unit 1)
 				)
 			)
@@ -10622,6 +10713,72 @@
 		)
 	)
 	(symbol
+		(lib_id "power:+12V")
+		(at 368.3 127 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "a0fb1155-93cf-434e-9327-5f31295997fd")
+		(property "Reference" "#PWR040"
+			(at 372.11 127 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "+5V"
+			(at 364.744 127 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 368.3 127 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 368.3 127 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"+12V\""
+			(at 368.3 127 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "b475decd-78ff-47fa-8ece-f7d673f76fee")
+		)
+		(instances
+			(project "drill_pcb"
+				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313"
+					(reference "#PWR040")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Device:C_Polarized")
 		(at 83.82 50.8 0)
 		(unit 1)
@@ -10685,6 +10842,140 @@
 			(project "drill_pcb"
 				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313"
 					(reference "C1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 368.3 129.54 270)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "a3747f81-6cea-4694-aa8e-7569434aee4e")
+		(property "Reference" "#PWR042"
+			(at 361.95 129.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 364.49 129.5399 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" ""
+			(at 368.3 129.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 368.3 129.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 368.3 129.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "b020d43d-5f7e-495f-827c-2f05dc09f0aa")
+		)
+		(instances
+			(project ""
+				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313"
+					(reference "#PWR042")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 368.3 140.97 270)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "a38e70f4-233f-4c52-ac42-7aa8fdbf490d")
+		(property "Reference" "#PWR041"
+			(at 361.95 140.97 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 364.49 140.9699 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" ""
+			(at 368.3 140.97 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 368.3 140.97 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 368.3 140.97 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "c4b8b6ec-5e3f-4c64-bb06-31109fb8ad08")
+		)
+		(instances
+			(project ""
+				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313"
+					(reference "#PWR041")
 					(unit 1)
 				)
 			)
@@ -11110,6 +11401,72 @@
 		)
 	)
 	(symbol
+		(lib_id "power:+12V")
+		(at 368.3 138.43 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "b91769e2-2840-44ef-b311-30a9fa0a09f8")
+		(property "Reference" "#PWR039"
+			(at 372.11 138.43 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "+5V"
+			(at 364.998 138.684 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 368.3 138.43 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 368.3 138.43 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"+12V\""
+			(at 368.3 138.43 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "8b43ab7f-4605-46fd-bbb2-3bf53e97b7dd")
+		)
+		(instances
+			(project "drill_pcb"
+				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313"
+					(reference "#PWR039")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "power:PWR_FLAG")
 		(at 52.07 27.94 0)
 		(unit 1)
@@ -11504,6 +11861,73 @@
 			(project "drill_pcb"
 				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313"
 					(reference "F2")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 265.43 151.13 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "c73d817b-34f3-48a1-9ce9-d0e61c43fac6")
+		(property "Reference" "#PWR038"
+			(at 271.78 151.13 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 269.24 151.1299 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" ""
+			(at 265.43 151.13 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 265.43 151.13 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 265.43 151.13 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "42e1d060-21de-4edd-87bb-62dfae496b34")
+		)
+		(instances
+			(project "drill_pcb"
+				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313"
+					(reference "#PWR038")
 					(unit 1)
 				)
 			)
@@ -12379,6 +12803,79 @@
 			(project "drill_pcb"
 				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313"
 					(reference "#PWR016")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:Screw_Terminal_01x03")
+		(at 373.38 127 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "e242f4a4-e136-4d44-875f-3c923ae1f46a")
+		(property "Reference" "J14"
+			(at 375.92 125.7299 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "SERVO 1"
+			(at 375.92 128.2699 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Connector_JST:JST_XH_B3B-XH-A_1x03_P2.50mm_Vertical"
+			(at 373.38 127 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 373.38 127 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Generic screw terminal, single row, 01x03, script generated (kicad-library-utils/schlib/autogen/connector/)"
+			(at 373.38 127 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "2"
+			(uuid "02d14c1d-b27f-459a-8c79-712321c7330f")
+		)
+		(pin "1"
+			(uuid "7f1091ba-c1aa-4707-8c7c-b7b1056f979c")
+		)
+		(pin "3"
+			(uuid "f8b114b7-c53f-483e-90d5-af9140706598")
+		)
+		(instances
+			(project "drill_pcb"
+				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313"
+					(reference "J14")
 					(unit 1)
 				)
 			)
