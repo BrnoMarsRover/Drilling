@@ -5,7 +5,6 @@ Prodloužení vrtáku\
 Zkrácení profilů\
 Uřezání nové trubky
 
-Upevnění koncáků\
 Upevnění řetězu k vozíku. Možná koupení novýho řetězu z laskakitu?\
 Kabeláž - nakrimpovat a oplést\
 Umístění PCB na vrtáku, přizpůsobení kabelů, umístění měniče\
@@ -17,7 +16,6 @@ Upevnění tenzometru na storage
 ## Nová PCB
 Přidat měření proudu před driver pojezdu\
 přidat výstupy PWN pro serva na surface storage\
-ubrat piny z driveru motoru zásobníku
 
 ## Software
 Sekvence vrtání automaticky, regulace lineárního posuvu v závislosti na vrtání\
