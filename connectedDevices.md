@@ -11,4 +11,4 @@ List of devices connected to the drill's microcontroller:
 |Storage stepper encoder               |I2C                                       |Programmable I2C address 0x37   |3,3 V                  |3,3 V |
 |Storage ADC                           |I2C                                       |3 possible I2C addresses 0x44/0x45   |5 V                |5 V   |
 |Height sensor                         |I2C (possible analog and PWM)             |Programmable I2C address 0x52   |3,3 V                   |3,3 V |
-|Current sensor                        |I2C                                       |Programmable I2C address 0x40|3,3 V                      |3,3 V |
+|Current sensor                        |I2C                                       |Programmable I2C address 0x40|3,3 V                      |24 V |
