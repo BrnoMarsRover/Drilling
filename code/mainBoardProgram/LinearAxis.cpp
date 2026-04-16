@@ -158,7 +158,7 @@ void LinearAxis::update() {
             printSpeed(Serial);
         }
     }
-
+/*
     if (isMoving()) {
         long angleSteps = getAngleFromSteps();
         long angleEncoder = getAngleFromEncoder();
@@ -170,6 +170,7 @@ void LinearAxis::update() {
             stop();
         }
     }
+    */
 }
 
 void LinearAxis::moveUp() {
