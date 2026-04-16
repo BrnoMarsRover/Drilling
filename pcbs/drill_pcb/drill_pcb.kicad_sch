@@ -734,7 +734,7 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "Connector:Screw_Terminal_01x07"
+		(symbol "Connector:Screw_Terminal_01x06"
 			(pin_names
 				(offset 1.016)
 				(hide yes)
@@ -743,14 +743,14 @@
 			(in_bom yes)
 			(on_board yes)
 			(property "Reference" "J"
-				(at 0 10.16 0)
+				(at 0 7.62 0)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
 				)
 			)
-			(property "Value" "Screw_Terminal_01x07"
+			(property "Value" "Screw_Terminal_01x06"
 				(at 0 -10.16 0)
 				(effects
 					(font
@@ -776,7 +776,7 @@
 					(hide yes)
 				)
 			)
-			(property "Description" "Generic screw terminal, single row, 01x07, script generated (kicad-library-utils/schlib/autogen/connector/)"
+			(property "Description" "Generic screw terminal, single row, 01x06, script generated (kicad-library-utils/schlib/autogen/connector/)"
 				(at 0 0 0)
 				(effects
 					(font
@@ -803,9 +803,9 @@
 					(hide yes)
 				)
 			)
-			(symbol "Screw_Terminal_01x07_1_1"
+			(symbol "Screw_Terminal_01x06_1_1"
 				(rectangle
-					(start -1.27 8.89)
+					(start -1.27 6.35)
 					(end 1.27 -8.89)
 					(stroke
 						(width 0.254)
@@ -813,18 +813,6 @@
 					)
 					(fill
 						(type background)
-					)
-				)
-				(polyline
-					(pts
-						(xy -0.5334 7.9502) (xy 0.3302 7.112)
-					)
-					(stroke
-						(width 0.1524)
-						(type default)
-					)
-					(fill
-						(type none)
 					)
 				)
 				(polyline
@@ -890,18 +878,6 @@
 				(polyline
 					(pts
 						(xy -0.5334 -7.2898) (xy 0.3302 -8.128)
-					)
-					(stroke
-						(width 0.1524)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -0.3556 8.128) (xy 0.508 7.2898)
 					)
 					(stroke
 						(width 0.1524)
@@ -984,17 +960,6 @@
 					)
 				)
 				(circle
-					(center 0 7.62)
-					(radius 0.635)
-					(stroke
-						(width 0.1524)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(circle
 					(center 0 5.08)
 					(radius 0.635)
 					(stroke
@@ -1061,7 +1026,7 @@
 					)
 				)
 				(pin passive line
-					(at -5.08 7.62 0)
+					(at -5.08 5.08 0)
 					(length 3.81)
 					(name "Pin_1"
 						(effects
@@ -1079,7 +1044,7 @@
 					)
 				)
 				(pin passive line
-					(at -5.08 5.08 0)
+					(at -5.08 2.54 0)
 					(length 3.81)
 					(name "Pin_2"
 						(effects
@@ -1097,7 +1062,7 @@
 					)
 				)
 				(pin passive line
-					(at -5.08 2.54 0)
+					(at -5.08 0 0)
 					(length 3.81)
 					(name "Pin_3"
 						(effects
@@ -1115,7 +1080,7 @@
 					)
 				)
 				(pin passive line
-					(at -5.08 0 0)
+					(at -5.08 -2.54 0)
 					(length 3.81)
 					(name "Pin_4"
 						(effects
@@ -1133,7 +1098,7 @@
 					)
 				)
 				(pin passive line
-					(at -5.08 -2.54 0)
+					(at -5.08 -5.08 0)
 					(length 3.81)
 					(name "Pin_5"
 						(effects
@@ -1151,7 +1116,7 @@
 					)
 				)
 				(pin passive line
-					(at -5.08 -5.08 0)
+					(at -5.08 -7.62 0)
 					(length 3.81)
 					(name "Pin_6"
 						(effects
@@ -1161,24 +1126,6 @@
 						)
 					)
 					(number "6"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at -5.08 -7.62 0)
-					(length 3.81)
-					(name "Pin_7"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "7"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -4943,7 +4890,7 @@
 	)
 	(wire
 		(pts
-			(xy 316.23 38.1) (xy 320.04 38.1)
+			(xy 316.23 35.56) (xy 320.04 35.56)
 		)
 		(stroke
 			(width 0)
@@ -5143,7 +5090,7 @@
 	)
 	(wire
 		(pts
-			(xy 318.77 40.64) (xy 320.04 40.64)
+			(xy 318.77 38.1) (xy 320.04 38.1)
 		)
 		(stroke
 			(width 0)
@@ -5353,7 +5300,7 @@
 	)
 	(wire
 		(pts
-			(xy 370.84 40.64) (xy 372.11 40.64)
+			(xy 370.84 38.1) (xy 372.11 38.1)
 		)
 		(stroke
 			(width 0)
@@ -5723,16 +5670,6 @@
 	)
 	(wire
 		(pts
-			(xy 316.23 35.56) (xy 320.04 35.56)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "89de1fb5-12b7-4ab2-badb-547f3cc85a16")
-	)
-	(wire
-		(pts
 			(xy 52.07 33.02) (xy 43.18 33.02)
 		)
 		(stroke
@@ -5753,7 +5690,7 @@
 	)
 	(wire
 		(pts
-			(xy 368.3 38.1) (xy 372.11 38.1)
+			(xy 368.3 35.56) (xy 372.11 35.56)
 		)
 		(stroke
 			(width 0)
@@ -5880,16 +5817,6 @@
 			(type default)
 		)
 		(uuid "aa2df5fc-2805-401c-abe9-c1084baa6e43")
-	)
-	(wire
-		(pts
-			(xy 368.3 35.56) (xy 372.11 35.56)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "b1a0c6cc-7f1c-41ba-b74e-ae08f2d0667d")
 	)
 	(wire
 		(pts
@@ -6477,28 +6404,6 @@
 			)
 		)
 	)
-	(global_label "ADC_DEEP_DRDY"
-		(shape input)
-		(at 316.23 35.56 180)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "348a0ffa-0588-468c-90a0-b765351cad43")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 297.9444 35.56 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-				(hide yes)
-			)
-		)
-	)
 	(global_label "VSPI_SCK"
 		(shape input)
 		(at 185.42 66.04 180)
@@ -6523,7 +6428,7 @@
 	)
 	(global_label "ADC_DEEP_RST"
 		(shape input)
-		(at 316.23 38.1 180)
+		(at 316.23 35.56 180)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -6533,7 +6438,7 @@
 		)
 		(uuid "35b02233-fa7d-4ac5-91e3-f7e59e75d412")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 299.3959 38.1 0)
+			(at 299.3959 35.56 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6710,28 +6615,6 @@
 		(uuid "5e1353f0-c06d-4e4f-a46c-e81ba7324d50")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 171.1258 138.43 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-				(hide yes)
-			)
-		)
-	)
-	(global_label "ADC_SURF_DRDY"
-		(shape input)
-		(at 368.3 35.56 180)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "62d3ad09-e02e-40fc-9673-997481050147")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 349.9538 35.56 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7071,9 +6954,9 @@
 			)
 		)
 	)
-	(global_label "ADC_SURF_RST"
+	(global_label "ADC_DEEP_RST"
 		(shape input)
-		(at 368.3 38.1 180)
+		(at 368.3 35.56 180)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -7083,7 +6966,7 @@
 		)
 		(uuid "9ab2a67f-4dee-4923-8d23-ba7bd085f3b9")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 351.4053 38.1 0)
+			(at 351.4659 35.56 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9334,7 +9217,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 370.84 40.64 270)
+		(at 370.84 38.1 270)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -9342,7 +9225,7 @@
 		(dnp no)
 		(uuid "52749a77-5f89-46db-beec-0b2beaa59158")
 		(property "Reference" "#PWR034"
-			(at 364.49 40.64 0)
+			(at 364.49 38.1 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9351,7 +9234,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 365.252 40.64 90)
+			(at 365.252 38.1 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9359,7 +9242,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 370.84 40.64 0)
+			(at 370.84 38.1 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9368,7 +9251,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 370.84 40.64 0)
+			(at 370.84 38.1 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9377,7 +9260,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 370.84 40.64 0)
+			(at 370.84 38.1 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9422,7 +9305,7 @@
 				)
 			)
 		)
-		(property "Footprint" "sd"
+		(property "Footprint" ""
 			(at 202.565 88.9 0)
 			(effects
 				(font
@@ -9615,7 +9498,7 @@
 				)
 			)
 		)
-		(property "Footprint" "ds"
+		(property "Footprint" ""
 			(at 301.752 89.408 0)
 			(effects
 				(font
@@ -11049,6 +10932,88 @@
 		)
 	)
 	(symbol
+		(lib_id "Connector:Screw_Terminal_01x06")
+		(at 325.12 30.48 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "a687988e-0c5f-44da-9e03-0269073b5c2a")
+		(property "Reference" "J16"
+			(at 327.66 30.4799 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "DEEP WEIGHT SENSOR"
+			(at 327.66 33.0199 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Connector_JST:JST_XH_B6B-XH-A_1x06_P2.50mm_Vertical"
+			(at 325.12 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 325.12 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Generic screw terminal, single row, 01x06, script generated (kicad-library-utils/schlib/autogen/connector/)"
+			(at 325.12 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "3"
+			(uuid "919f8726-baa4-4cde-a131-5d7408e12aef")
+		)
+		(pin "6"
+			(uuid "fb90a91c-2807-4e01-aebc-98ddc4d53a96")
+		)
+		(pin "1"
+			(uuid "17e32e81-df7e-43cf-9d88-457e5cdb387b")
+		)
+		(pin "2"
+			(uuid "af5e909e-8c64-49b8-b394-b4ae3e6b4577")
+		)
+		(pin "4"
+			(uuid "4645e445-2d5a-4d4a-a9ba-741a2b94f8d3")
+		)
+		(pin "5"
+			(uuid "3e7eb2f9-db56-443d-a8f7-47c7f8feff27")
+		)
+		(instances
+			(project ""
+				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313"
+					(reference "J16")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Connector:Screw_Terminal_01x02")
 		(at 193.04 24.13 0)
 		(unit 1)
@@ -11250,90 +11215,6 @@
 		)
 	)
 	(symbol
-		(lib_id "Connector:Screw_Terminal_01x07")
-		(at 377.19 33.02 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "b788b576-5d4b-43da-8698-ee4bf2f56ff9")
-		(property "Reference" "J12"
-			(at 379.73 31.7499 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "SURFACE WEIGHT SENSOR"
-			(at 379.73 34.29 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Connector_JST:JST_XH_B7B-XH-A_1x07_P2.50mm_Vertical"
-			(at 377.19 33.02 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 377.19 33.02 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Generic screw terminal, single row, 01x07, script generated (kicad-library-utils/schlib/autogen/connector/)"
-			(at 377.19 33.02 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "5"
-			(uuid "b2b665ef-abd1-4dcf-a241-1340fbe61df1")
-		)
-		(pin "1"
-			(uuid "6b157508-7644-479a-9d51-c38ee4206da2")
-		)
-		(pin "2"
-			(uuid "33d20e8d-485d-49e6-af2e-bb5c7b623e0f")
-		)
-		(pin "3"
-			(uuid "97f4def4-ff60-45c1-b2b0-6eb403f771ef")
-		)
-		(pin "4"
-			(uuid "1abbadd3-a57a-4e0c-8699-50e9d4850760")
-		)
-		(pin "6"
-			(uuid "d120efec-cadf-4366-9a5a-f9b1207020a5")
-		)
-		(pin "7"
-			(uuid "51d55862-2e4a-4bd7-bb13-41e2722238cd")
-		)
-		(instances
-			(project "drill_pcb"
-				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313"
-					(reference "J12")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "power:GND")
 		(at 316.23 125.73 270)
 		(unit 1)
@@ -11526,6 +11407,88 @@
 			(project "drill_pcb"
 				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313"
 					(reference "#FLG01")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:Screw_Terminal_01x06")
+		(at 377.19 30.48 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "bb926f6c-6a1a-4039-984a-49d12a6dd36b")
+		(property "Reference" "J17"
+			(at 379.73 30.4799 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "SURFACE WEIGHT SENSOR"
+			(at 379.73 33.0199 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Connector_JST:JST_XH_B6B-XH-A_1x06_P2.50mm_Vertical"
+			(at 377.19 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 377.19 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Generic screw terminal, single row, 01x06, script generated (kicad-library-utils/schlib/autogen/connector/)"
+			(at 377.19 30.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "3"
+			(uuid "6ecf32fb-89fd-4286-9cb9-0c93181588b4")
+		)
+		(pin "6"
+			(uuid "a06e9661-698e-40ac-aa00-57c52ec461f8")
+		)
+		(pin "1"
+			(uuid "bfbcd970-7776-4e9e-a059-be209533dc5e")
+		)
+		(pin "2"
+			(uuid "0ece2f05-99a3-4637-a297-4138fb775c3b")
+		)
+		(pin "4"
+			(uuid "49efb033-2018-4151-af95-0d01c9f3d25f")
+		)
+		(pin "5"
+			(uuid "f01d87c1-7dba-448a-ab59-a8b4799aa8bd")
+		)
+		(instances
+			(project "drill_pcb"
+				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313"
+					(reference "J17")
 					(unit 1)
 				)
 			)
@@ -12591,90 +12554,6 @@
 		)
 	)
 	(symbol
-		(lib_id "Connector:Screw_Terminal_01x07")
-		(at 325.12 33.02 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "d7eeccc0-84fb-4448-9cbd-e8833bd71ee6")
-		(property "Reference" "J10"
-			(at 327.66 31.7499 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "DEEP WEIGHT SENSOR"
-			(at 327.66 34.29 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Connector_JST:JST_XH_B7B-XH-A_1x07_P2.50mm_Vertical"
-			(at 325.12 33.02 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 325.12 33.02 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Generic screw terminal, single row, 01x07, script generated (kicad-library-utils/schlib/autogen/connector/)"
-			(at 325.12 33.02 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "5"
-			(uuid "094d1086-93f1-44d5-aa08-2bed4760c2fd")
-		)
-		(pin "1"
-			(uuid "664f8ab6-27d0-42b2-9f7c-0120fdab7565")
-		)
-		(pin "2"
-			(uuid "9147c40d-809c-4bbd-8e01-e0ac2b53bb3c")
-		)
-		(pin "3"
-			(uuid "4cc0a767-d58f-442b-99ba-00ce16646b4a")
-		)
-		(pin "4"
-			(uuid "b2ea8b74-2f5e-4eff-adcf-6239f17b742d")
-		)
-		(pin "6"
-			(uuid "3fbe187e-e77b-4312-bbf3-1acc35fc90f2")
-		)
-		(pin "7"
-			(uuid "a73ee556-3220-47c9-9b48-f81aa4c4d2c0")
-		)
-		(instances
-			(project ""
-				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313"
-					(reference "J10")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "power:+24V")
 		(at 210.82 54.61 270)
 		(unit 1)
@@ -13185,7 +13064,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 318.77 40.64 270)
+		(at 318.77 38.1 270)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -13193,7 +13072,7 @@
 		(dnp no)
 		(uuid "fc19f1e0-c070-4b33-8fa4-495dee2c0e07")
 		(property "Reference" "#PWR026"
-			(at 312.42 40.64 0)
+			(at 312.42 38.1 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13202,7 +13081,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 313.182 40.64 90)
+			(at 313.182 38.1 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13210,7 +13089,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 318.77 40.64 0)
+			(at 318.77 38.1 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13219,7 +13098,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 318.77 40.64 0)
+			(at 318.77 38.1 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13228,7 +13107,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 318.77 40.64 0)
+			(at 318.77 38.1 0)
 			(effects
 				(font
 					(size 1.27 1.27)
