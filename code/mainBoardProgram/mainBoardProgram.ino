@@ -124,18 +124,6 @@ CubeMarsV2 motorDriver(Serial2, Serial0, 16, 17);
 
 //ADS122C04 adc;
 
-void printMotorData(CubeMarsV2 motorDriverArg)
-{
-  Serial.print("MOS tmp: ");
-  Serial.println(motorDriverArg.getMOSTmp());
-  Serial.print("Motor tmp: ");
-  Serial.println(motorDriverArg.getMotorTmp());
-  Serial.print("Current: ");
-  Serial.println(motorDriverArg.getCurrent());
-  Serial.print("Speed: ");
-  Serial.println(motorDriverArg.getRPM());
-}
-
 void handleCommand(String cmd) {
   cmd.trim();
   cmd.toUpperCase();
@@ -197,7 +185,7 @@ void handleCommand(String cmd) {
   }
   else if(cmd == "Z")
   {
-    printMotorData(motorDriver);
+    motorDriver.printMotorInfoToDebug();
   }
   /*else if(cmd == "MSR")
   {

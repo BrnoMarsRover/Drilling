@@ -178,3 +178,15 @@ float CubeMarsV2::getMOSTmp()  { return MOSTmp; }
 float CubeMarsV2::getMotorTmp() { return motorTmp; }
 float CubeMarsV2::getCurrent() { return current; }
 float CubeMarsV2::getRPM()     { return RPM; }
+
+void CubeMarsV2::printMotorInfoToDebug()
+{
+  debugSerial.print("MOS tmp: ");
+  debugSerial.println(MOSTmp);
+  debugSerial.print("Motor tmp: ");
+  debugSerial.println(motorTmp);
+  debugSerial.print("Current: ");
+  debugSerial.println(current);
+  debugSerial.print("Speed: ");
+  debugSerial.println(RPM);
+}
