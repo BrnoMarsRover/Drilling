@@ -178,7 +178,7 @@ void LinearAxis::moveUp() {
 
     if (isTopLimitPressed()) {
         Serial.println(F("Horni koncak je sepnuty, nahoru nelze jet."));
-        stopAndZeroPosition();
+        //stopAndZeroPosition(); //možny fix proč je potřeba davat dvakrát DOWN
         return;
     }
 
@@ -190,7 +190,7 @@ void LinearAxis::moveDown() {
 
     if (isBottomLimitPressed()) {
         Serial.println(F("Dolni koncak je sepnuty, dolu nelze jet."));
-        stop();
+        //stop(); //možny fix proč je potřeba davat dvakrát DOWN
         return;
     }
 
