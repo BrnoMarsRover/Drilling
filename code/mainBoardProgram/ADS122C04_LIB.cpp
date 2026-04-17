@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-const int n_reset = 2;
+//const int n_reset = 2;
 
 // ─── Private helpers ──────────────────────────────────────────────────────────
 uint8_t ADS122C04::_read_reg(uint8_t reg) {
@@ -53,24 +53,25 @@ void ADS122C04::powerdown(void) {
 }
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
+
 void ADS122C04::init(void) {
+    pinMode(_resetPin, OUTPUT);
+    digitalWrite(_resetPin, HIGH);
     delay(1);
-    //const int n_reset = 24;
-    pinMode(n_reset, OUTPUT);
-    digitalWrite(n_reset, HIGH);
     reset();
 
     // REG0: MUX=0000 (AIN0+/AIN1-), GAIN=111 (x16), PGA_BYPASS=0  → 0x0E // old 1000 -> 0x08
     // REG1: DR=000 (20SPS), MODE=0, CM=1 (continuous), VREF=00 (ext), TS=0 → 0x08
     // REG2: IDAC=101 (500uA), rest 0 → 0x05
     // REG3: I1MUX=011 (AIN2), I2MUX=100 (AIN3) → 0x70
-    uint8_t cfg[4] = { 0x0E, 0x08, 0x07, 0x70 }; // 500uA { 0x0E, 0x08, 0x05, 0x70 }; 
-
+    uint8_t cfg[4] = { 0x0E, 0x08, 0x07, 0x70 };
     for (int i = 0; i < 4; i++) {
         _write_reg(i, cfg[i]);
     }
     start();
 }
+
+//void ADS122C04::init(void) { begin(); }  // backward compat
 
 // ─── Gain ─────────────────────────────────────────────────────────────────────
 void ADS122C04::set_gain(uint8_t gain) {

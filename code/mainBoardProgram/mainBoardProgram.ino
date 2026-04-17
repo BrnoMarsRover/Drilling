@@ -122,7 +122,11 @@ CubeMarsV2 motorDriver(Serial2, Serial0, 16, 17);
 
 
 
-ADS122C04 adc(I2CBus);
+ADS122C04 adc(
+  I2CBus, //i2c bus class
+  0x44, // address for deep sample weight
+  2 // n_reset pin
+);
 
 void handleCommand(String cmd) {
   cmd.trim();
@@ -187,7 +191,7 @@ void handleCommand(String cmd) {
   {
     motorDriver.printMotorInfoToDebug();
   }
-  else if(cmd == "11")
+  else if(cmd == "WGH")
   {
     Serial.println("Measure start");
     Serial.print(adc.measure_weight(), 4);
@@ -205,13 +209,13 @@ void handleCommand(String cmd) {
   }
   else if(cmd == "ADCTMP")
   {
-    Serial.print("Chip temperature: ");
+    Serial.println("Chip temperature: ");
     Serial.print(adc.read_temperature(), 4);
     Serial.println(" °C");
   }
   else {
     Serial.println("Neznamy prikaz.");
-    Serial.println("Pouzij: U, D, S, R100, +, -, A2000, X, ?, MSR, TRE, CLB, ADCTMP");
+    Serial.println("Pouzij: U, D, S, R100, +, -, A2000, X, ?, WGH, TRE, CLB, ADCTMP");
   }
 }
 

@@ -6,12 +6,6 @@
 #include <Arduino.h>
 #include <Wire.h>
 
-// ESP pin 24 is nRESET set to HIGH
-/*
-const innt n_reset = 24;
-pinMode(n_reset, OUTPUT);
-digitalWrite(n_reset, HIGH);
-*/
 // Commands
 #define CMD_RESET     0x06
 #define CMD_STARTSYNC 0x08
@@ -67,8 +61,9 @@ public:
     // dgnd-dvdd 100 0001 = 0x41
     // dvdd-dgnd 100 0100 = 0x44 deep samples
     // dvdd-dvdd 100 0101 = 0x45 surface samples
-    ADS122C04(TwoWire &wire, uint8_t addr = 0x44)
-        : _wire(&wire), _addr(addr), cal_a(1.0f), cal_b(0.0f), tare_grams(0.0f) {} //_addr(addr), cal_a(1.0f), cal_b(0.0f), tare_val(0) {}
+    ADS122C04(TwoWire &wire, uint8_t addr = 0x44, uint8_t resetPin = 2)
+        : _wire(&wire), _addr(addr), _resetPin(resetPin),
+          cal_a(1.0f), cal_b(0.0f), tare_grams(0.0f) {} //_addr(addr), cal_a(1.0f), cal_b(0.0f), tare_val(0) {}
 
     // ── Low-level control ──────────────────────────────────────────────────
     void    init(void);
@@ -94,6 +89,7 @@ public:
 private:
     TwoWire *_wire;
     uint8_t  _addr;
+    uint8_t  _resetPin;
     volatile float   cal_a;
     volatile float   cal_b;
     //volatile int32_t tare_val;
