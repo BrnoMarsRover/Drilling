@@ -64,9 +64,9 @@ public:
     // Constructor: set default I2C address and calibration values
     // dgnd-dgnd 100 0000 = 0x40
     // dgnd-dvdd 100 0001 = 0x41
-    // dvdd-dgnd 100 0100 = 0x44
-    // dvdd-dvdd 100 0101 = 0x45
-    ADS122C04(uint8_t addr = 0x45)
+    // dvdd-dgnd 100 0100 = 0x44 deep samples
+    // dvdd-dvdd 100 0101 = 0x45 surface samples
+    ADS122C04(uint8_t addr = 0x44)
         : _addr(addr), cal_a(1.0f), cal_b(0.0f), tare_grams(0.0f) {} //_addr(addr), cal_a(1.0f), cal_b(0.0f), tare_val(0) {}
 
     // ── Low-level control ──────────────────────────────────────────────────

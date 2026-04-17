@@ -115,7 +115,7 @@ void handleCommand(String cmd) {
   {
     printMotorData(motorDriver);
   }
-  /*else if(cmd == "MSR")
+  else if(cmd == "MSR")
   {
     Serial.println("Measure start");
     Serial.print(adc.measure_weight(), 4);
@@ -131,7 +131,6 @@ void handleCommand(String cmd) {
     Serial.println("Calibration start");
     adc.scale_calibrate();
   }
-*/
   else {
     Serial.println("Neznamy prikaz.");
     Serial.println("Pouzij: U, D, S, R100, +, -, A2000, X, ?, MSR, TRE, CLB");
@@ -150,7 +149,7 @@ void setup() {
   if (!linearAxis.begin(600, 16)) {
     Serial.println("Linear axis FAILED");
   }
-  //adc.init();
+  adc.init();
 }
 
 void loop()
