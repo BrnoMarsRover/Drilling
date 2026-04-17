@@ -26,6 +26,7 @@ private:
   uint8_t rxBuffer[MAX_PAYLOAD + 2]; // payload + 2 CRC bytes
   uint8_t rxLength = 0;
   uint8_t rxIndex = 0;
+  void handleRX();
 
   void transmitPayload(uint8_t* payload, uint8_t payloadLength);
 
@@ -45,7 +46,7 @@ private:
 public:
   CubeMarsV2(HardwareSerial& serialPort, HardwareSerial& debugSerialPort, uint8_t rxPin, uint8_t txPin);
 
-  void update();
+  void update(); // Call this in loop()
 
   void setERPM(int32_t erpm);
   void setRPM(float rpm);
@@ -58,5 +59,5 @@ public:
   float getCurrent();
   float getRPM();
 
-  void handleRX(); // Call this in loop()
+  void printMotorInfoToDebug();
 };

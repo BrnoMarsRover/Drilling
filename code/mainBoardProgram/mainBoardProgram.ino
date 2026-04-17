@@ -9,10 +9,94 @@
 //#include "ADS122C04_LIB.h"
 
 //-------I2C
+
 constexpr uint8_t sdaPin = 21;
 constexpr uint8_t sclPin = 22;
 constexpr uint32_t i2cFrequency = 100000;
 TwoWire I2CBus(0);
+
+void setupI2CBus()
+{
+  // Print starting message for I2C recovery and setup
+  Serial.println(F("Starting I2C Bus Recovery and Setup..."));
+
+  // Check if I2C bus is free
+  if (isI2CBusFree())
+  {
+    Serial.println(F("I2C bus is already free."));
+  } else
+  {
+    // Bus is stuck, attempt recovery
+    Serial.println(F("I2C bus is stuck, attempting recovery..."));
+    if (i2cRecoverBus())
+    {
+      Serial.println(F("I2C bus recovery successful."));
+    } else
+    {
+      Serial.println(F("I2C bus recovery failed!"));
+    }
+  }
+
+  // Initialize the I2C bus
+  I2CBus.begin(sdaPin, sclPin, i2cFrequency);
+  I2CBus.setTimeOut(50);
+
+  Serial.println(F("I2C Bus Setup Complete."));
+}
+
+bool isI2CBusFree()
+{
+  // Check if the SDA and SCL lines are both high (idle state for I2C)
+  return (digitalRead(sdaPin) == HIGH && digitalRead(sclPin) == HIGH);
+}
+
+bool i2cRecoverBus()
+{
+  pinMode(sdaPin, INPUT_PULLUP);
+  pinMode(sclPin, INPUT_PULLUP);
+
+  if (digitalRead(sdaPin) == HIGH && digitalRead(sclPin) == HIGH)
+  {
+    return true; // Bus is already free
+  }
+
+  Serial.println(F("Attempting I2C bus recovery..."));
+
+  // Try to generate clock pulses on SCL to free the bus
+  pinMode(sclPin, OUTPUT_OPEN_DRAIN);
+  pinMode(sdaPin, INPUT_PULLUP);
+
+  for (int i = 0; i < 20; i++)
+  {  // Try up to 20 clock pulses
+    digitalWrite(sclPin, LOW);
+    delayMicroseconds(10);
+    digitalWrite(sclPin, HIGH);
+    delayMicroseconds(10);
+
+    if (digitalRead(sdaPin) == HIGH)
+    {
+      Serial.println(F("SDA line released. Bus is free."));
+      return true; // SDA line released, bus is free
+    }
+  }
+
+  // Send STOP condition to release the bus
+  pinMode(sdaPin, OUTPUT_OPEN_DRAIN);
+  digitalWrite(sdaPin, LOW);
+  delayMicroseconds(10);
+  digitalWrite(sclPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(sdaPin, HIGH);
+  delayMicroseconds(10);
+
+  pinMode(sdaPin, INPUT_PULLUP);
+  pinMode(sclPin, INPUT_PULLUP);
+
+  bool success = (digitalRead(sdaPin) == HIGH);
+  Serial.println(success ? F("I2C recovery successful.") : F("I2C recovery failed."));
+
+  return success;
+}
 
 // ===== LINEAR AXIS =====
 LinearAxis linearAxis(
@@ -39,18 +123,6 @@ CubeMarsV2 motorDriver(Serial2, Serial0, 16, 17);
 
 
 //ADS122C04 adc;
-
-void printMotorData(CubeMarsV2 motorDriverArg)
-{
-  Serial.print("MOS tmp: ");
-  Serial.println(motorDriverArg.getMOSTmp());
-  Serial.print("Motor tmp: ");
-  Serial.println(motorDriverArg.getMotorTmp());
-  Serial.print("Current: ");
-  Serial.println(motorDriverArg.getCurrent());
-  Serial.print("Speed: ");
-  Serial.println(motorDriverArg.getRPM());
-}
 
 void handleCommand(String cmd) {
   cmd.trim();
@@ -113,7 +185,7 @@ void handleCommand(String cmd) {
   }
   else if(cmd == "Z")
   {
-    printMotorData(motorDriver);
+    motorDriver.printMotorInfoToDebug();
   }
   else if(cmd == "MSR")
   {
@@ -141,9 +213,7 @@ void setup() {
   Serial.begin(115200);
   Serial.setTimeout(10);
 
-  // I2C
-
-  I2CBus.begin(sdaPin, sclPin, i2cFrequency);
+  setupI2CBus();
 
   // linear axis
   if (!linearAxis.begin(600, 16)) {
