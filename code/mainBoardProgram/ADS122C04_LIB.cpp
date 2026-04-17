@@ -32,6 +32,24 @@ void ADS122C04::_isort(int32_t *arr, uint8_t n) {
     }
 }
 
+bool ADS122C04::_verify_regs(const uint8_t *expected, uint8_t n) {
+    for (uint8_t i = 0; i < n; i++) {
+        uint8_t actual = _read_reg(i);
+        if (actual != expected[i]) {
+            Serial.print("[ADC] REG");
+            Serial.print(i);
+            Serial.print(" MISMATCH — expected 0x");
+            Serial.print(expected[i], HEX);
+            Serial.print(" got 0x");
+            Serial.println(actual, HEX);
+            return false;
+        }
+    }
+    return true;
+}
+
+uint32_t ADS122C04::_initializedResetPins = 0;
+
 // ─── Commands ─────────────────────────────────────────────────────────────────
 void ADS122C04::reset(void) {
     _wire->beginTransmission(_addr);
@@ -53,7 +71,7 @@ void ADS122C04::powerdown(void) {
 }
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
-
+/*
 void ADS122C04::init(void) {
     pinMode(_resetPin, OUTPUT);
     digitalWrite(_resetPin, HIGH);
@@ -70,8 +88,13 @@ void ADS122C04::init(void) {
     }
     start();
 }
-
+*/
 //void ADS122C04::init(void) { begin(); }  // backward compat
+
+ADS122C04::~ADS122C04() {
+    powerdown();
+    _wire = nullptr;
+}
 
 // ─── Gain ─────────────────────────────────────────────────────────────────────
 void ADS122C04::set_gain(uint8_t gain) {
@@ -180,7 +203,7 @@ float ADS122C04::read_median(uint8_t n) {
 void ADS122C04::tare(void) {
     float raw = read_median(32);
     tare_grams = cal_a * raw + cal_b;             // store in grams
-    Serial.print(F("[TARE] Tare value stored: "));
+    Serial.print(F("[ADC] Tare value stored: "));
     Serial.print(tare_grams, 4);
     Serial.println(F(" g"));
 }
@@ -195,7 +218,7 @@ void ADS122C04::scale_calibrate(void) {
     while (Serial.available()) Serial.read();
 
     float adc_zero = read_median(32);
-    Serial.print(F("[CAL] ADC at 0 g: "));
+    Serial.print(F("[ADC] at 0 g: "));
     Serial.println(adc_zero, 2);
 
     Serial.println(F("Place exactly 100 g on scale, then press ENTER."));
@@ -204,18 +227,20 @@ void ADS122C04::scale_calibrate(void) {
     while (Serial.available()) Serial.read();
 
     float adc_100 = read_median(32);
-    Serial.print(F("[CAL] ADC at 100 g: "));
+    Serial.print(F("[ADC] at 100 g: "));
     Serial.println(adc_100, 2);
 
     if (fabsf(adc_100 - adc_zero) < 1.0f) {
-        Serial.println(F("[CAL] ERROR: ADC span too small - check wiring. Calibration aborted."));
+        Serial.println(F("[ADC] ERROR: ADC span too small - check wiring. Calibration aborted."));
         return;
     }
 
     cal_a = 100.0f / (adc_100 - adc_zero);
     cal_b = 0.0f - cal_a * adc_zero;
 
-    Serial.println(F("[CAL] Calibration complete."));
+    Serial.print("[ADC] 0x");
+    Serial.print(_addr, HEX);
+    Serial.println(" Calibration complete");
     Serial.print(F("  a (slope)  = ")); Serial.println(cal_a, 8);
     Serial.print(F("  b (offset) = ")); Serial.println(cal_b, 8);
     Serial.println(F("  y = a*x + b  (y in grams, x = raw ADC)"));
