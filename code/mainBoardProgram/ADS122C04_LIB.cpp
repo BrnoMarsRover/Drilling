@@ -1,22 +1,23 @@
 #include "ads122c04_lib.h"
-#include <Wire.h>
 #include <stdlib.h>
 #include <math.h>
 
+const int n_reset = 2;
+
 // ─── Private helpers ──────────────────────────────────────────────────────────
 uint8_t ADS122C04::_read_reg(uint8_t reg) {
-    Wire.beginTransmission(_addr);
-    Wire.write(CMD_RREG(reg));
-    Wire.endTransmission(false);
-    Wire.requestFrom(_addr, (uint8_t)1);
-    return Wire.read();
+    _wire->beginTransmission(_addr);
+    _wire->write(CMD_RREG(reg));
+    _wire->endTransmission(false);
+    _wire->requestFrom(_addr, (uint8_t)1);
+    return _wire->read();
 }
 
 void ADS122C04::_write_reg(uint8_t reg, uint8_t val) {
-    Wire.beginTransmission(_addr);
-    Wire.write(CMD_WREG(reg));
-    Wire.write(val);
-    Wire.endTransmission();
+    _wire->beginTransmission(_addr);
+    _wire->write(CMD_WREG(reg));
+    _wire->write(val);
+    _wire->endTransmission();
 }
 
 void ADS122C04::_isort(int32_t *arr, uint8_t n) {
@@ -33,28 +34,30 @@ void ADS122C04::_isort(int32_t *arr, uint8_t n) {
 
 // ─── Commands ─────────────────────────────────────────────────────────────────
 void ADS122C04::reset(void) {
-    Wire.beginTransmission(_addr);
-    Wire.write(CMD_RESET);
-    Wire.endTransmission();
+    _wire->beginTransmission(_addr);
+    _wire->write(CMD_RESET);
+    _wire->endTransmission();
     delay(1);
 }
 
 void ADS122C04::start(void) {
-    Wire.beginTransmission(_addr);
-    Wire.write(CMD_STARTSYNC);
-    Wire.endTransmission();
+    _wire->beginTransmission(_addr);
+    _wire->write(CMD_STARTSYNC);
+    _wire->endTransmission();
 }
 
 void ADS122C04::powerdown(void) {
-    Wire.beginTransmission(_addr);
-    Wire.write(CMD_POWERDOWN);
-    Wire.endTransmission();
+    _wire->beginTransmission(_addr);
+    _wire->write(CMD_POWERDOWN);
+    _wire->endTransmission();
 }
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
 void ADS122C04::init(void) {
-    //Wire.begin();
     delay(1);
+    //const int n_reset = 24;
+    pinMode(n_reset, OUTPUT);
+    digitalWrite(n_reset, HIGH);
     reset();
 
     // REG0: MUX=0000 (AIN0+/AIN1-), GAIN=111 (x16), PGA_BYPASS=0  → 0x0E // old 1000 -> 0x08
@@ -112,14 +115,14 @@ bool ADS122C04::data_ready(void) {
 
 // ─── Read raw 24-bit result ───────────────────────────────────────────────────
 int32_t ADS122C04::read(void) {
-    Wire.beginTransmission(_addr);
-    Wire.write(CMD_RDATA);
-    Wire.endTransmission(false);
-    Wire.requestFrom(_addr, (uint8_t)3);
+    _wire->beginTransmission(_addr);
+    _wire->write(CMD_RDATA);
+    _wire->endTransmission(false);
+    _wire->requestFrom(_addr, (uint8_t)3);
 
-    uint8_t b2 = Wire.read();
-    uint8_t b1 = Wire.read();
-    uint8_t b0 = Wire.read();
+    uint8_t b2 = _wire->read();
+    uint8_t b1 = _wire->read();
+    uint8_t b0 = _wire->read();
 
     int32_t val = ((int32_t)b2 << 16) | ((int32_t)b1 << 8) | (int32_t)b0;
     if (val & 0x800000) val |= 0xFF000000;
@@ -173,14 +176,6 @@ float ADS122C04::read_median(uint8_t n) {
 }
 
 // ─── Tare ─────────────────────────────────────────────────────────────────────
-/*
-void ADS122C04::tare(void) {
-    tare_val = (int32_t)read_median(32);
-    Serial.print(F("[TARE] Raw tare value stored: "));
-    Serial.println(tare_val);
-}
-*/
-
 void ADS122C04::tare(void) {
     float raw = read_median(32);
     tare_grams = cal_a * raw + cal_b;             // store in grams
@@ -226,14 +221,6 @@ void ADS122C04::scale_calibrate(void) {
 }
 
 // ─── Weight measurement ───────────────────────────────────────────────────────
-/*
-float ADS122C04::measure_weight(void) {
-    float raw    = read_median(8);
-    float tared  = raw - (float)tare_val;
-    float grams  = cal_a * tared + cal_b;
-    return grams;
-}
-*/
 float ADS122C04::measure_weight(void) {
     float raw    = read_median(10); // will be 6 ideally, measure mode 20 sps, i call measure each 500 ms
     float grams  = cal_a * raw + cal_b;           // apply calibration first
@@ -254,13 +241,13 @@ float ADS122C04::read_temperature(void) {
     while (!data_ready() && timeout--) delay(1);
 
     // Read raw 24-bit result
-    Wire.beginTransmission(_addr);
-    Wire.write(CMD_RDATA);
-    Wire.endTransmission(false);
-    Wire.requestFrom(_addr, (uint8_t)3);
-    uint8_t b2 = Wire.read();
-    uint8_t b1 = Wire.read();
-    Wire.read();                        // b0 not used, only 14 MSBs matter
+    _wire->beginTransmission(_addr);
+    _wire->write(CMD_RDATA);
+    _wire->endTransmission(false);
+    _wire->requestFrom(_addr, (uint8_t)3);
+    uint8_t b2 = _wire->read();
+    uint8_t b1 = _wire->read();
+    _wire->read();                        // b0 not used, only 14 MSBs matter
 
     // Restore previous REG1 (clears TS bit)
     _write_reg(REG_DR_MODE, reg1);

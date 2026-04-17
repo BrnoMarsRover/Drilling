@@ -6,7 +6,7 @@
 #include "LimitSwitch.h"
 #include "as5600.h"
 #include "LinearAxis.h"
-//#include "ADS122C04_LIB.h"
+#include "ADS122C04_LIB.h"
 
 //-------I2C
 
@@ -122,7 +122,7 @@ CubeMarsV2 motorDriver(Serial2, Serial0, 16, 17);
 
 
 
-//ADS122C04 adc;
+ADS122C04 adc(I2CBus);
 
 void handleCommand(String cmd) {
   cmd.trim();
@@ -187,7 +187,7 @@ void handleCommand(String cmd) {
   {
     motorDriver.printMotorInfoToDebug();
   }
-  else if(cmd == "MSR")
+  else if(cmd == "11")
   {
     Serial.println("Measure start");
     Serial.print(adc.measure_weight(), 4);
@@ -203,9 +203,15 @@ void handleCommand(String cmd) {
     Serial.println("Calibration start");
     adc.scale_calibrate();
   }
+  else if(cmd == "ADCTMP")
+  {
+    Serial.print("Chip temperature: ");
+    Serial.print(adc.read_temperature(), 4);
+    Serial.println(" °C");
+  }
   else {
     Serial.println("Neznamy prikaz.");
-    Serial.println("Pouzij: U, D, S, R100, +, -, A2000, X, ?, MSR, TRE, CLB");
+    Serial.println("Pouzij: U, D, S, R100, +, -, A2000, X, ?, MSR, TRE, CLB, ADCTMP");
   }
 }
 
