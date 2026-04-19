@@ -1,22 +1,23 @@
 #include "ads122c04_lib.h"
-#include <Wire.h>
 #include <stdlib.h>
 #include <math.h>
 
+//const int n_reset = 2;
+
 // ─── Private helpers ──────────────────────────────────────────────────────────
 uint8_t ADS122C04::_read_reg(uint8_t reg) {
-    Wire.beginTransmission(_addr);
-    Wire.write(CMD_RREG(reg));
-    Wire.endTransmission(false);
-    Wire.requestFrom(_addr, (uint8_t)1);
-    return Wire.read();
+    _wire->beginTransmission(_addr);
+    _wire->write(CMD_RREG(reg));
+    _wire->endTransmission(false);
+    _wire->requestFrom(_addr, (uint8_t)1);
+    return _wire->read();
 }
 
 void ADS122C04::_write_reg(uint8_t reg, uint8_t val) {
-    Wire.beginTransmission(_addr);
-    Wire.write(CMD_WREG(reg));
-    Wire.write(val);
-    Wire.endTransmission();
+    _wire->beginTransmission(_addr);
+    _wire->write(CMD_WREG(reg));
+    _wire->write(val);
+    _wire->endTransmission();
 }
 
 void ADS122C04::_isort(int32_t *arr, uint8_t n) {
@@ -31,29 +32,49 @@ void ADS122C04::_isort(int32_t *arr, uint8_t n) {
     }
 }
 
+bool ADS122C04::_verify_regs(const uint8_t *expected, uint8_t n) {
+    for (uint8_t i = 0; i < n; i++) {
+        uint8_t actual = _read_reg(i);
+        if (actual != expected[i]) {
+            Serial.print("[ADC] REG");
+            Serial.print(i);
+            Serial.print(" MISMATCH — expected 0x");
+            Serial.print(expected[i], HEX);
+            Serial.print(" got 0x");
+            Serial.println(actual, HEX);
+            return false;
+        }
+    }
+    return true;
+}
+
+uint32_t ADS122C04::_initializedResetPins = 0;
+
 // ─── Commands ─────────────────────────────────────────────────────────────────
 void ADS122C04::reset(void) {
-    Wire.beginTransmission(_addr);
-    Wire.write(CMD_RESET);
-    Wire.endTransmission();
+    _wire->beginTransmission(_addr);
+    _wire->write(CMD_RESET);
+    _wire->endTransmission();
     delay(1);
 }
 
 void ADS122C04::start(void) {
-    Wire.beginTransmission(_addr);
-    Wire.write(CMD_STARTSYNC);
-    Wire.endTransmission();
+    _wire->beginTransmission(_addr);
+    _wire->write(CMD_STARTSYNC);
+    _wire->endTransmission();
 }
 
 void ADS122C04::powerdown(void) {
-    Wire.beginTransmission(_addr);
-    Wire.write(CMD_POWERDOWN);
-    Wire.endTransmission();
+    _wire->beginTransmission(_addr);
+    _wire->write(CMD_POWERDOWN);
+    _wire->endTransmission();
 }
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
+/*
 void ADS122C04::init(void) {
-    //Wire.begin();
+    pinMode(_resetPin, OUTPUT);
+    digitalWrite(_resetPin, HIGH);
     delay(1);
     reset();
 
@@ -61,12 +82,18 @@ void ADS122C04::init(void) {
     // REG1: DR=000 (20SPS), MODE=0, CM=1 (continuous), VREF=00 (ext), TS=0 → 0x08
     // REG2: IDAC=101 (500uA), rest 0 → 0x05
     // REG3: I1MUX=011 (AIN2), I2MUX=100 (AIN3) → 0x70
-    uint8_t cfg[4] = { 0x0E, 0x08, 0x07, 0x70 }; // 500uA { 0x0E, 0x08, 0x05, 0x70 }; 
-
+    uint8_t cfg[4] = { 0x0E, 0x08, 0x07, 0x70 };
     for (int i = 0; i < 4; i++) {
         _write_reg(i, cfg[i]);
     }
     start();
+}
+*/
+//void ADS122C04::init(void) { begin(); }  // backward compat
+
+ADS122C04::~ADS122C04() {
+    powerdown();
+    _wire = nullptr;
 }
 
 // ─── Gain ─────────────────────────────────────────────────────────────────────
@@ -112,14 +139,14 @@ bool ADS122C04::data_ready(void) {
 
 // ─── Read raw 24-bit result ───────────────────────────────────────────────────
 int32_t ADS122C04::read(void) {
-    Wire.beginTransmission(_addr);
-    Wire.write(CMD_RDATA);
-    Wire.endTransmission(false);
-    Wire.requestFrom(_addr, (uint8_t)3);
+    _wire->beginTransmission(_addr);
+    _wire->write(CMD_RDATA);
+    _wire->endTransmission(false);
+    _wire->requestFrom(_addr, (uint8_t)3);
 
-    uint8_t b2 = Wire.read();
-    uint8_t b1 = Wire.read();
-    uint8_t b0 = Wire.read();
+    uint8_t b2 = _wire->read();
+    uint8_t b1 = _wire->read();
+    uint8_t b0 = _wire->read();
 
     int32_t val = ((int32_t)b2 << 16) | ((int32_t)b1 << 8) | (int32_t)b0;
     if (val & 0x800000) val |= 0xFF000000;
@@ -173,18 +200,10 @@ float ADS122C04::read_median(uint8_t n) {
 }
 
 // ─── Tare ─────────────────────────────────────────────────────────────────────
-/*
-void ADS122C04::tare(void) {
-    tare_val = (int32_t)read_median(32);
-    Serial.print(F("[TARE] Raw tare value stored: "));
-    Serial.println(tare_val);
-}
-*/
-
 void ADS122C04::tare(void) {
     float raw = read_median(32);
     tare_grams = cal_a * raw + cal_b;             // store in grams
-    Serial.print(F("[TARE] Tare value stored: "));
+    Serial.print(F("[ADC] Tare value stored: "));
     Serial.print(tare_grams, 4);
     Serial.println(F(" g"));
 }
@@ -199,7 +218,7 @@ void ADS122C04::scale_calibrate(void) {
     while (Serial.available()) Serial.read();
 
     float adc_zero = read_median(32);
-    Serial.print(F("[CAL] ADC at 0 g: "));
+    Serial.print(F("[ADC] at 0 g: "));
     Serial.println(adc_zero, 2);
 
     Serial.println(F("Place exactly 100 g on scale, then press ENTER."));
@@ -208,32 +227,26 @@ void ADS122C04::scale_calibrate(void) {
     while (Serial.available()) Serial.read();
 
     float adc_100 = read_median(32);
-    Serial.print(F("[CAL] ADC at 100 g: "));
+    Serial.print(F("[ADC] at 100 g: "));
     Serial.println(adc_100, 2);
 
     if (fabsf(adc_100 - adc_zero) < 1.0f) {
-        Serial.println(F("[CAL] ERROR: ADC span too small - check wiring. Calibration aborted."));
+        Serial.println(F("[ADC] ERROR: ADC span too small - check wiring. Calibration aborted."));
         return;
     }
 
     cal_a = 100.0f / (adc_100 - adc_zero);
     cal_b = 0.0f - cal_a * adc_zero;
 
-    Serial.println(F("[CAL] Calibration complete."));
+    Serial.print("[ADC] 0x");
+    Serial.print(_addr, HEX);
+    Serial.println(" Calibration complete");
     Serial.print(F("  a (slope)  = ")); Serial.println(cal_a, 8);
     Serial.print(F("  b (offset) = ")); Serial.println(cal_b, 8);
     Serial.println(F("  y = a*x + b  (y in grams, x = raw ADC)"));
 }
 
 // ─── Weight measurement ───────────────────────────────────────────────────────
-/*
-float ADS122C04::measure_weight(void) {
-    float raw    = read_median(8);
-    float tared  = raw - (float)tare_val;
-    float grams  = cal_a * tared + cal_b;
-    return grams;
-}
-*/
 float ADS122C04::measure_weight(void) {
     float raw    = read_median(10); // will be 6 ideally, measure mode 20 sps, i call measure each 500 ms
     float grams  = cal_a * raw + cal_b;           // apply calibration first
@@ -254,13 +267,13 @@ float ADS122C04::read_temperature(void) {
     while (!data_ready() && timeout--) delay(1);
 
     // Read raw 24-bit result
-    Wire.beginTransmission(_addr);
-    Wire.write(CMD_RDATA);
-    Wire.endTransmission(false);
-    Wire.requestFrom(_addr, (uint8_t)3);
-    uint8_t b2 = Wire.read();
-    uint8_t b1 = Wire.read();
-    Wire.read();                        // b0 not used, only 14 MSBs matter
+    _wire->beginTransmission(_addr);
+    _wire->write(CMD_RDATA);
+    _wire->endTransmission(false);
+    _wire->requestFrom(_addr, (uint8_t)3);
+    uint8_t b2 = _wire->read();
+    uint8_t b1 = _wire->read();
+    _wire->read();                        // b0 not used, only 14 MSBs matter
 
     // Restore previous REG1 (clears TS bit)
     _write_reg(REG_DR_MODE, reg1);

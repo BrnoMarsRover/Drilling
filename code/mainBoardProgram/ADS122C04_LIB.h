@@ -4,13 +4,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <Arduino.h>
+#include <Wire.h>
 
-// ESP pin 24 is nRESET set to HIGH
-/*
-const innt n_reset = 24;
-pinMode(n_reset, OUTPUT);
-digitalWrite(n_reset, HIGH);
-*/
 // Commands
 #define CMD_RESET     0x06
 #define CMD_STARTSYNC 0x08
@@ -38,10 +33,10 @@ digitalWrite(n_reset, HIGH);
 #define GAIN_16  0x04
 #define GAIN_32  0x05
 #define GAIN_64  0x06
-#define GAIN_128 0x07
+#define GAIN_128 0x07 // used
 
 // Data rate (bits 7:5 of REG1)
-#define DR_20SPS  0x00
+#define DR_20SPS  0x00 // used
 #define DR_45SPS  0x20
 #define DR_90SPS  0x40
 #define DR_175SPS 0x60
@@ -66,8 +61,36 @@ public:
     // dgnd-dvdd 100 0001 = 0x41
     // dvdd-dgnd 100 0100 = 0x44 deep samples
     // dvdd-dvdd 100 0101 = 0x45 surface samples
-    ADS122C04(uint8_t addr = 0x44)
-        : _addr(addr), cal_a(1.0f), cal_b(0.0f), tare_grams(0.0f) {} //_addr(addr), cal_a(1.0f), cal_b(0.0f), tare_val(0) {}
+    ADS122C04(TwoWire &wire, uint8_t addr = 0x44, uint8_t resetPin = 2)
+        : _wire(&wire), _addr(addr), _resetPin(resetPin),
+          cal_a(1.0f), cal_b(0.0f), tare_grams(0.0f) 
+    {
+      if (!(_initializedResetPins & (1UL << _resetPin))) { // checker if pin is alredy initialised
+        pinMode(_resetPin, OUTPUT);
+        digitalWrite(_resetPin, HIGH);
+        _initializedResetPins |= (1UL << _resetPin);
+      } 
+      delay(1);
+      reset();
+      // REG0: MUX=0000 (AIN0+/AIN1-), GAIN=111 (x16), PGA_BYPASS=0  → 0x0E // old 1000 -> 0x08
+      // REG1: DR=000 (20SPS), MODE=0, CM=1 (continuous), VREF=00 (ext), TS=0 → 0x08
+      // REG2: IDAC=101 (500uA), rest 0 → 0x05
+      // REG3: I1MUX=011 (AIN2), I2MUX=100 (AIN3) → 0x70
+      uint8_t cfg[4] = { 0x0E, 0x08, 0x07, 0x70 };
+      for (int i = 0; i < 4; i++) _write_reg(i, cfg[i]);
+      start();
+
+      if (_verify_regs(cfg, 4)) {
+        Serial.print("[ADC] 0x");
+        Serial.print(addr, HEX);
+        Serial.println(" OK");
+      } else {
+        Serial.print("[ADC] 0x");
+        Serial.print(addr, HEX);
+        Serial.println(" INIT FAIL");
+      }
+    }
+    ~ADS122C04();
 
     // ── Low-level control ──────────────────────────────────────────────────
     void    init(void);
@@ -91,15 +114,19 @@ public:
     float   read_temperature(void);
 
 private:
+    TwoWire *_wire;
     uint8_t  _addr;
+    uint8_t  _resetPin;
     volatile float   cal_a;
     volatile float   cal_b;
+    static uint32_t _initializedResetPins;
     //volatile int32_t tare_val;
     volatile float tare_grams;    // was: volatile int32_t tare_val
 
     uint8_t _read_reg(uint8_t reg);
     void    _write_reg(uint8_t reg, uint8_t val);
     void    _isort(int32_t *arr, uint8_t n);
+    bool    _verify_regs(const uint8_t *expected, uint8_t n);
 };
 
 #endif // ADS122C04_LIB_H

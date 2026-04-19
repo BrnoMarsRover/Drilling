@@ -121,8 +121,14 @@ LimitSwitch limitSwitchBottom(0);
 CubeMarsV2 motorDriver(Serial2, Serial0, 16, 17);
 
 
-
-ADS122C04 adc;
+ADS122C04 *adc = nullptr; // declaration of ADC class
+/*
+ADS122C04 adc(
+  I2CBus, //i2c bus class
+  0x44, // address for deep sample weight
+  2 // n_reset pin
+);
+*/
 
 void handleCommand(String cmd) {
   cmd.trim();
@@ -187,25 +193,31 @@ void handleCommand(String cmd) {
   {
     motorDriver.printMotorInfoToDebug();
   }
-  else if(cmd == "MSR")
+  else if(cmd == "WGH")
   {
     Serial.println("Measure start");
-    Serial.print(adc.measure_weight(), 4);
+    Serial.print(adc->measure_weight(), 4);
     Serial.println("g");
   }
   else if(cmd == "TRE")
   {
     Serial.println("Tare start");
-    adc.tare();
+    adc->tare();
   }
   else if(cmd == "CLB")
   {
     Serial.println("Calibration start");
-    adc.scale_calibrate();
+    adc->scale_calibrate();
+  }
+  else if(cmd == "ADCTMP")
+  {
+    Serial.println("Chip temperature: ");
+    Serial.print(adc->read_temperature(), 4);
+    Serial.println(" °C");
   }
   else {
     Serial.println("Neznamy prikaz.");
-    Serial.println("Pouzij: U, D, S, R100, +, -, A2000, X, ?, MSR, TRE, CLB");
+    Serial.println("Pouzij: U, D, S, R100, +, -, A2000, X, ?, WGH, TRE, CLB, ADCTMP");
   }
 }
 
@@ -219,7 +231,13 @@ void setup() {
   if (!linearAxis.begin(600, 16)) {
     Serial.println("Linear axis FAILED");
   }
-  adc.init();
+
+  adc = new ADS122C04(
+    I2CBus, //i2c bus class
+    0x44, // address for deep sample weight
+    2 // n_reset pin
+  );
+  //adc.init();
 }
 
 void loop()
