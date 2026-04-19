@@ -67,6 +67,8 @@ public:
     void printStatus(Stream& out) const;
 
     uint16_t getLoad() const;
+    void updateLoadFilter(uint16_t raw);
+    float getFilteredLoad() const;
     void printLoad(Stream& out) const;
     void setLoadPrintEnabled(bool enabled);
 
@@ -143,6 +145,10 @@ private:
     AS5600L* _encoder = nullptr;
     LimitSwitch* _limitTop = nullptr;
     LimitSwitch* _limitBottom = nullptr;
+
+    uint16_t _loadUnfiltered = 0;
+    float _loadFiltered = 0;
+    float _loadAlpha = 0.1;
 
     static FastAccelStepperEngine _engine;
 };

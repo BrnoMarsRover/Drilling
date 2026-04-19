@@ -135,6 +135,9 @@ void LinearAxis::update() {
         Serial.println(F("Dolni koncak sepnut"));
     }
 
+    _loadUnfiltered = getLoad();
+    updateLoadFilter(_loadUnfiltered);
+
     if (_loadPrintEnabled) {
         uint32_t now = millis();
         if (now - _lastLoadPrintMs >= _loadPrintIntervalMs) {
@@ -158,6 +161,8 @@ void LinearAxis::update() {
             printSpeed(Serial);
         }
     }
+
+
 /*
     if (isMoving()) {
         long angleSteps = getAngleFromSteps();
@@ -326,9 +331,20 @@ uint16_t LinearAxis::getLoad() const {
     return _driver->sg_result();
 }
 
+float LinearAxis::getFilteredLoad() const {
+    return _loadFiltered;
+}
+
+void LinearAxis::updateLoadFilter(uint16_t raw) {
+    _loadUnfiltered = (float)raw;
+    _loadFiltered = _loadAlpha * _loadUnfiltered + (1 - _loadAlpha) * _loadFiltered;
+}
+
 void LinearAxis::printLoad(Stream& out) const {
-    out.print(F("Zatizeni (SG): "));
-    out.println(getLoad());
+    out.print(F("SG raw: "));
+    out.print(_loadUnfiltered);
+    out.print(F(" | SG filt: "));
+    out.println(_loadFiltered);
 }
 
 void LinearAxis::setLoadPrintEnabled(bool enabled) {

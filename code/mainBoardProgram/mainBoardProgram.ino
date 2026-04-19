@@ -6,7 +6,7 @@
 #include "LimitSwitch.h"
 #include "as5600.h"
 #include "LinearAxis.h"
-//#include "ADS122C04_LIB.h"
+#include "ADS122C04_LIB.h"
 
 //-------I2C
 
@@ -122,7 +122,7 @@ CubeMarsV2 motorDriver(Serial2, Serial0, 16, 17);
 
 
 
-//ADS122C04 adc;
+ADS122C04 adc;
 
 void handleCommand(String cmd) {
   cmd.trim();
