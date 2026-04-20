@@ -1,5 +1,9 @@
 pcbs/drill_pcb/drill_pcb-backups
 pcbs/drill_pcb/fp-info-cache
+pcbs/drill_pcb/.history
+
+
 pcbs/adc board/adc board-backups
+
 .vscode
 .DS_Store
