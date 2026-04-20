@@ -63,7 +63,7 @@ public:
     // dvdd-dvdd 100 0101 = 0x45 surface samples
     ADS122C04(TwoWire &wire, uint8_t addr = 0x44, uint8_t resetPin = 2)
         : _wire(&wire), _addr(addr), _resetPin(resetPin),
-          cal_a(1.0f), cal_b(0.0f), tare_grams(0.0f) 
+          cal_a(0.00467235f), cal_b(-6054.52392578f), tare_grams(0.0f) //cal_a(1.0f), cal_b(0.0f), tare_grams(0.0f)
     {
       if (!(_initializedResetPins & (1UL << _resetPin))) { // checker if pin is alredy initialised
         pinMode(_resetPin, OUTPUT);

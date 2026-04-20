@@ -121,14 +121,9 @@ LimitSwitch limitSwitchBottom(0);
 CubeMarsV2 motorDriver(Serial2, Serial0, 16, 17);
 
 
-ADS122C04 *adc = nullptr; // declaration of ADC class
-/*
-ADS122C04 adc(
-  I2CBus, //i2c bus class
-  0x44, // address for deep sample weight
-  2 // n_reset pin
-);
-*/
+ADS122C04 *adc1 = nullptr; // declaration of ADC Deep sample class
+ADS122C04 *adc2 = nullptr; // declaration of ADC Surface sample class
+
 
 void handleCommand(String cmd) {
   cmd.trim();
@@ -193,31 +188,37 @@ void handleCommand(String cmd) {
   {
     motorDriver.printMotorInfoToDebug();
   }
-  else if(cmd == "WGH")
-  {
-    Serial.println("Measure start");
-    Serial.print(adc->measure_weight(), 4);
+  else if (cmd.startsWith("WGH")) {
+    ADS122C04 *target = cmd.endsWith("D") ? adc1 :
+                        cmd.endsWith("S") ? adc2 : nullptr;
+    if (target == nullptr) { return; }
+    float w = target->measure_weight();
+    Serial.print(w, 4);
     Serial.println("g");
+    if (w > 2000.0f) Serial.println("Scale overweight");
   }
-  else if(cmd == "TRE")
-  {
+  else if (cmd.startsWith("TRE")) {
+    ADS122C04 *target = cmd.endsWith("D") ? adc1 : cmd.endsWith("S") ? adc2 : nullptr;
+    if (target == nullptr) { return; }
     Serial.println("Tare start");
-    adc->tare();
+    target->tare();
   }
-  else if(cmd == "CLB")
-  {
+  else if (cmd.startsWith("CLB")) {
+    ADS122C04 *target = cmd.endsWith("D") ? adc1 : cmd.endsWith("S") ? adc2 : nullptr;
+    if (target == nullptr) { return; }
     Serial.println("Calibration start");
-    adc->scale_calibrate();
+    target->scale_calibrate();
   }
-  else if(cmd == "ADCTMP")
-  {
-    Serial.println("Chip temperature: ");
-    Serial.print(adc->read_temperature(), 4);
+  else if (cmd.startsWith("ADCTMP")) {
+    ADS122C04 *target = cmd.endsWith("D") ? adc1 : cmd.endsWith("S") ? adc2 : nullptr;
+    if (target == nullptr) { return; }
+    Serial.print("Chip temperature: ");
+    Serial.print(target->read_temperature(), 4);
     Serial.println(" °C");
   }
   else {
     Serial.println("Neznamy prikaz.");
-    Serial.println("Pouzij: U, D, S, R100, +, -, A2000, X, ?, WGH, TRE, CLB, ADCTMP");
+    Serial.println("Pouzij: U, D, S, R100, +, -, A2000, X, ?, WGH+D/S, TRE+D/S, CLB+D/S, ADCTMP+D/S");
   }
 }
 
@@ -232,12 +233,16 @@ void setup() {
     Serial.println("Linear axis FAILED");
   }
 
-  adc = new ADS122C04(
+  adc1 = new ADS122C04(
     I2CBus, //i2c bus class
     0x44, // address for deep sample weight
     2 // n_reset pin
   );
-  //adc.init();
+  adc2 = new ADS122C04(
+    I2CBus, //i2c bus class
+    0x45, // address for deep sample weight
+    2 // n_reset pin
+  );
 }
 
 void loop()
