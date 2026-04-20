@@ -7,6 +7,7 @@
 #include "as5600.h"
 #include "LinearAxis.h"
 #include "ADS122C04_LIB.h"
+#include "VL53L1X_Sensor.h"
 
 //-------I2C
 
@@ -120,6 +121,7 @@ LimitSwitch limitSwitchBottom(0);
 
 CubeMarsV2 motorDriver(Serial2, Serial0, 16, 17);
 
+VL53L1X_Sensor distanceSensor(I2CBus);
 
 ADS122C04 *adc1 = nullptr; // declaration of ADC Deep sample class
 ADS122C04 *adc2 = nullptr; // declaration of ADC Surface sample class
@@ -167,6 +169,10 @@ void handleCommand(String cmd) {
   }
   else if (cmd == "?") {
     linearAxis.printStatus(Serial);
+  }
+  else if (cmd == "TOF") {
+    Serial.print("Vzdálenost: ");
+    Serial.println(distanceSensor.readSingle());
   }
   else if (cmd == "SG") {
     linearAxis.setLoadPrintEnabled(true);
@@ -232,6 +238,9 @@ void setup() {
   if (!linearAxis.begin(600, 16)) {
     Serial.println("Linear axis FAILED");
   }
+  if (!distanceSensor.begin()) {
+        Serial.println(" TOF FAILED");
+    }
 
   adc1 = new ADS122C04(
     I2CBus, //i2c bus class
