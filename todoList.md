@@ -1,7 +1,6 @@
 # TODO list
 
 ## Hardware
-Prodloužení vrtáku\
 Zkrácení profilů\
 Uřezání nové trubky
 
@@ -14,9 +13,7 @@ Upevnění kamery
 Upevnění tenzometru na storage
 
 ## Nová PCB
-Přidat měření proudu před driver pojezdu\
-přidat výstupy PWM pro serva na surface storage\
-Přidat reset periferií - tranzistor ovládanej GPIO, co jim utne napájení
+přidat výstupy PWM pro serva na surface storage
 
 ## Software
 Sekvence vrtání automaticky, regulace lineárního posuvu v závislosti na vrtání\
