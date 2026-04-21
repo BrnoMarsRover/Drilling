@@ -1,4 +1,4 @@
-\# Součástky k nakoupení
+# Součástky k nakoupení
 
 
 
