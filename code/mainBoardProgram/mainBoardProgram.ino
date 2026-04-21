@@ -111,7 +111,7 @@ LinearAxis linearAxis(
   15, // horní koncák
   0,  // dolní koncák
   I2CBus,  //i2c bus class
-  0x40 // adresa AS5600
+  0x42 // adresa AS5600
 );
 
 

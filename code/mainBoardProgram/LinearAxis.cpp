@@ -336,15 +336,22 @@ float LinearAxis::getFilteredLoad() const {
 }
 
 void LinearAxis::updateLoadFilter(uint16_t raw) {
-    _loadUnfiltered = (float)raw;
+    _loadUnfiltered = raw;
     _loadFiltered = _loadAlpha * _loadUnfiltered + (1 - _loadAlpha) * _loadFiltered;
 }
 
 void LinearAxis::printLoad(Stream& out) const {
+    /*
     out.print(F("SG raw: "));
     out.print(_loadUnfiltered);
     out.print(F(" | SG filt: "));
     out.println(_loadFiltered);
+    */
+    Serial.print(getSpeedHz());
+    Serial.print(',');
+    Serial.print(_loadUnfiltered);
+    Serial.print(',');
+    Serial.println(_loadFiltered, 2);
 }
 
 void LinearAxis::setLoadPrintEnabled(bool enabled) {

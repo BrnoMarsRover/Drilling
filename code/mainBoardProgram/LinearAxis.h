@@ -126,7 +126,7 @@ private:
     bool _speedPrintEnabled = false;
     bool _heightPrintEnabled = false;
 
-    uint32_t _loadPrintIntervalMs = 300;
+    uint32_t _loadPrintIntervalMs = 0;
     uint32_t _speedPrintIntervalMs = 300;
     uint32_t _heightPrintIntervalMs = 300;
     uint32_t _lastLoadPrintMs = 0;
