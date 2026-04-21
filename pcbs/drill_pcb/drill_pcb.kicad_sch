@@ -5866,7 +5866,7 @@
 	)
 	(wire
 		(pts
-			(xy 360.68 60.96) (xy 364.49 60.96)
+			(xy 363.22 60.96) (xy 364.49 60.96)
 		)
 		(stroke
 			(width 0)
@@ -6596,7 +6596,7 @@
 	)
 	(wire
 		(pts
-			(xy 308.61 60.96) (xy 312.42 60.96)
+			(xy 311.15 60.96) (xy 312.42 60.96)
 		)
 		(stroke
 			(width 0)
@@ -7694,30 +7694,6 @@
 		)
 		(uuid "ffe01963-13ed-4678-a172-00bfd7d7c135")
 	)
-	(global_label "RST"
-		(shape input)
-		(at 360.68 60.96 180)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "00024ab5-1514-4e19-93b9-6c7fc8685498")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 354.2477 60.96 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-	)
 	(global_label "DRVR_STORAGE_STEP"
 		(shape input)
 		(at 347.98 142.24 180)
@@ -7787,6 +7763,30 @@
 					(size 1.27 1.27)
 				)
 				(justify left)
+			)
+		)
+	)
+	(global_label "RST"
+		(shape input)
+		(at 308.61 68.58 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "12bd83e6-909f-4d2d-aee9-1df079c0504d")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 302.1777 68.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
 			)
 		)
 	)
@@ -7886,6 +7886,30 @@
 			)
 		)
 	)
+	(global_label "RST"
+		(shape input)
+		(at 360.68 68.58 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "29c7ce9e-04a9-4c02-ac85-31d7db528fc8")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 354.2477 68.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
 	(global_label "TX2"
 		(shape input)
 		(at 255.27 68.58 180)
@@ -7923,30 +7947,6 @@
 		(uuid "35734ab5-a76e-4bbb-b867-5a26799a1a89")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 196.4048 129.54 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-	)
-	(global_label "ADC_DEEP_RST"
-		(shape input)
-		(at 308.61 68.58 180)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "35b02233-fa7d-4ac5-91e3-f7e59e75d412")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 291.7759 68.58 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8582,30 +8582,6 @@
 			)
 		)
 	)
-	(global_label "ADC_DEEP_RST"
-		(shape input)
-		(at 360.68 68.58 180)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "9ab2a67f-4dee-4923-8d23-ba7bd085f3b9")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 343.8459 68.58 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-	)
 	(global_label "DRVR_VERT_DIR"
 		(shape input)
 		(at 208.28 148.59 180)
@@ -8979,30 +8955,6 @@
 		(uuid "d19bc5e3-5f31-400d-82c1-5c9f3d9cecbc")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 195.5581 125.73 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-	)
-	(global_label "RST"
-		(shape input)
-		(at 308.61 60.96 180)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "d33f85ff-0a5b-4f59-b2cc-314d52715048")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 302.1777 60.96 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -11334,6 +11286,83 @@
 			(project "drill_pcb"
 				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313"
 					(reference "C4")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:+3.3V")
+		(at 311.15 60.96 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "4b19a2f1-3bde-4174-b009-715c36a48d93")
+		(property "Reference" "#PWR041"
+			(at 314.96 60.96 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "+3.3V"
+			(at 305.308 60.96 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 311.15 60.96 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 311.15 60.96 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"+3.3V\""
+			(at 311.15 60.96 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "756cba48-0008-4486-b923-747373892bfd")
+		)
+		(instances
+			(project "drill_pcb"
+				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313"
+					(reference "#PWR041")
 					(unit 1)
 				)
 			)
@@ -15629,6 +15658,83 @@
 			(project "drill_pcb"
 				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313"
 					(reference "#PWR016")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:+3.3V")
+		(at 363.22 60.96 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "dfeeb48f-f06c-4d0e-b62f-55cf3bef7722")
+		(property "Reference" "#PWR042"
+			(at 367.03 60.96 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "+3.3V"
+			(at 357.124 60.96 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 363.22 60.96 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 363.22 60.96 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"+3.3V\""
+			(at 363.22 60.96 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "4c8b256e-4d45-49bb-8b34-352cd93df8dc")
+		)
+		(instances
+			(project "drill_pcb"
+				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313"
+					(reference "#PWR042")
 					(unit 1)
 				)
 			)
