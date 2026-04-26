@@ -16,9 +16,11 @@ Drill: 0x03 0x00 (request received, sending position: 0 cm - default position)
 
 |Name and description | Message from rover | Function argument from rover | Response data from drill |
 |-                    |-                   |-                             |-                         |
-| STOP - stops all drill's actions. Retracts the deep sample box. Returns the vertical drive to its uppermost position. Also serves to calibrate the vertical position value. | 1 | None | None |
+| STOP - stops all drill's actions. Restarts the microcontroller. Retracts the deep sample box. Returns the vertical drive to its uppermost position. Also calibrates the vertical position value. | 1 | None | None |
 | DRILL - Extract a deep sample from specified depth | 2 | uint8 - desired drill depth [cm] | None |
 | STATE - Requests the state of the drilling mechanism | 3 | None | uint8_t [code of the current state] |
 | HEIGHT - Requests the height of the vertical drive | 4 | None | uint8 - current distance from the uppermost position (higher number means lower height) [cm] |
 | WEIGHT_DEEP - Requests the weight of the deep sample | 5 | None | float [grams] |
 | WEIGHT_SURF - Requests the weight of the surface sample | 6 | None | float [grams] |
+| SURF_OPEN - opens the surface sample box  | 7 | None | None |
+| SURF_CLOSE - closes the surface sample box  | 8 | None | None |
