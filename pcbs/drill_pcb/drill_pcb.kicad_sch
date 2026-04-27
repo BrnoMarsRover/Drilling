@@ -5403,6 +5403,12 @@
 		(uuid "11467791-68a6-474c-be0a-0aab226911d6")
 	)
 	(junction
+		(at 189.23 43.18)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "11a428d8-4f71-436b-bf64-d94704207166")
+	)
+	(junction
 		(at 347.98 194.31)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -5455,6 +5461,12 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "27831ca9-7a81-4c5b-8d01-8f9a06aae17f")
+	)
+	(junction
+		(at 231.14 116.84)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "2c79a6ad-de5d-4e29-bee6-6e0e099d86d4")
 	)
 	(junction
 		(at 96.52 43.18)
@@ -5541,12 +5553,6 @@
 		(uuid "89db05be-86e8-4ba5-b0c5-096d2564bcb2")
 	)
 	(junction
-		(at 137.16 58.42)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "8a1821f5-65d1-4b5b-8e1e-93179e053fe1")
-	)
-	(junction
 		(at 45.72 43.18)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -5601,7 +5607,7 @@
 		(uuid "c846763b-accc-4a84-a658-3f1075f47bb4")
 	)
 	(junction
-		(at 191.77 43.18)
+		(at 195.58 43.18)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "c98083b0-bc0c-460b-95b8-5e1d6d22f5f1")
@@ -5623,6 +5629,12 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "fb79b6fb-56aa-4f20-a5af-27784cb11b64")
+	)
+	(junction
+		(at 137.16 58.42)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "fbfab447-b732-443a-9c1f-084ed9c5bfaa")
 	)
 	(junction
 		(at 265.43 102.87)
@@ -5716,7 +5728,7 @@
 	)
 	(wire
 		(pts
-			(xy 191.77 43.18) (xy 191.77 46.99)
+			(xy 195.58 43.18) (xy 195.58 46.99)
 		)
 		(stroke
 			(width 0)
@@ -5853,6 +5865,16 @@
 			(type default)
 		)
 		(uuid "0cdea90e-9ae1-4602-9428-cc7624d272bd")
+	)
+	(wire
+		(pts
+			(xy 137.16 58.42) (xy 195.58 58.42)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0e329645-ad5d-4bf9-865d-dae12e973e2c")
 	)
 	(wire
 		(pts
@@ -6756,7 +6778,7 @@
 	)
 	(wire
 		(pts
-			(xy 191.77 38.1) (xy 191.77 43.18)
+			(xy 195.58 38.1) (xy 195.58 43.18)
 		)
 		(stroke
 			(width 0)
@@ -6823,6 +6845,16 @@
 			(type default)
 		)
 		(uuid "80b603be-2a6d-4150-ad14-04eb00320c78")
+	)
+	(wire
+		(pts
+			(xy 189.23 43.18) (xy 195.58 43.18)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "81a74480-bbf9-41f3-ab24-d81b083aa872")
 	)
 	(wire
 		(pts
@@ -6926,17 +6958,7 @@
 	)
 	(wire
 		(pts
-			(xy 137.16 58.42) (xy 191.77 58.42)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "9546a2b1-5f74-490a-af23-bf02ec567862")
-	)
-	(wire
-		(pts
-			(xy 185.42 43.18) (xy 191.77 43.18)
+			(xy 185.42 43.18) (xy 189.23 43.18)
 		)
 		(stroke
 			(width 0)
@@ -7396,7 +7418,7 @@
 	)
 	(wire
 		(pts
-			(xy 191.77 58.42) (xy 191.77 54.61)
+			(xy 195.58 58.42) (xy 195.58 54.61)
 		)
 		(stroke
 			(width 0)
@@ -9621,7 +9643,7 @@
 	)
 	(symbol
 		(lib_id "power:+3.3VP")
-		(at 191.77 38.1 0)
+		(at 195.58 38.1 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -9631,7 +9653,7 @@
 		(dnp no)
 		(uuid "1c77c84d-6314-40d6-aaa5-e28f4f7afae1")
 		(property "Reference" "#PWR09"
-			(at 195.58 39.37 0)
+			(at 199.39 39.37 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9642,7 +9664,7 @@
 			)
 		)
 		(property "Value" "+3.3VP"
-			(at 191.77 33.782 0)
+			(at 195.58 33.782 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -9652,7 +9674,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 191.77 38.1 0)
+			(at 195.58 38.1 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9663,7 +9685,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 191.77 38.1 0)
+			(at 195.58 38.1 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9674,7 +9696,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"+3.3VP\""
-			(at 191.77 38.1 0)
+			(at 195.58 38.1 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9966,6 +9988,83 @@
 			(project "drill_pcb"
 				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313"
 					(reference "#PWR05")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:PWR_FLAG")
+		(at 189.23 43.18 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "22727cbc-f929-48ea-b6ff-3047af86790d")
+		(property "Reference" "#FLG03"
+			(at 189.23 41.275 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "PWR_FLAG"
+			(at 189.23 38.862 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 189.23 43.18 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 189.23 43.18 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Special symbol for telling ERC where power comes from"
+			(at 189.23 43.18 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "735f431c-81bb-418c-8a01-7387aec15ecb")
+		)
+		(instances
+			(project "drill_pcb"
+				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313"
+					(reference "#FLG03")
 					(unit 1)
 				)
 			)
@@ -10384,7 +10483,7 @@
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 191.77 50.8 0)
+		(at 195.58 50.8 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -10395,7 +10494,7 @@
 		(fields_autoplaced yes)
 		(uuid "3a9a9b15-859d-45c9-8fa0-dc01f48f13c4")
 		(property "Reference" "R6"
-			(at 194.31 49.5299 0)
+			(at 198.12 49.5299 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -10406,7 +10505,7 @@
 			)
 		)
 		(property "Value" "100k"
-			(at 194.31 52.0699 0)
+			(at 198.12 52.0699 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -10417,7 +10516,7 @@
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_1206_3216Metric"
-			(at 189.992 50.8 90)
+			(at 193.802 50.8 90)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -10428,7 +10527,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 191.77 50.8 0)
+			(at 195.58 50.8 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -10439,7 +10538,7 @@
 			)
 		)
 		(property "Description" "Resistor"
-			(at 191.77 50.8 0)
+			(at 195.58 50.8 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -12820,6 +12919,83 @@
 			(project "drill_pcb"
 				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313"
 					(reference "C6")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:PWR_FLAG")
+		(at 231.14 116.84 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "86190f77-617d-4d7a-9893-a74043ab862e")
+		(property "Reference" "#FLG04"
+			(at 231.14 114.935 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "PWR_FLAG"
+			(at 231.14 112.522 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 231.14 116.84 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 231.14 116.84 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Special symbol for telling ERC where power comes from"
+			(at 231.14 116.84 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "ca0c041c-7bc5-4a7f-af5e-dec12ef677ba")
+		)
+		(instances
+			(project "drill_pcb"
+				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313"
+					(reference "#FLG04")
 					(unit 1)
 				)
 			)
