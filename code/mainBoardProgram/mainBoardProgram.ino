@@ -222,9 +222,18 @@ void handleCommand(String cmd) {
     Serial.print(target->read_temperature(), 4);
     Serial.println(" °C");
   }
+  else if (cmd.startsWith("ADCRST")) {
+    //ADS122C04 *target = adc1;
+    //if (target == nullptr) { Serial.println("ADC deep sample not assigned"); }
+    adc1->reset();
+    //ADS122C04 *target = adc2;
+    //if (target == nullptr) { Serial.println("ADC surface sample not assigned"); }
+    adc2->reset();
+    Serial.println("ADC's reset complete");
+  }
   else {
     Serial.println("Neznamy prikaz.");
-    Serial.println("Pouzij: U, D, S, R100, +, -, A2000, X, ?, WGH+D/S, TRE+D/S, CLB+D/S, ADCTMP+D/S");
+    Serial.println("Pouzij: U, D, S, R100, +, -, A2000, X, ?, WGH+D/S, TRE+D/S, CLB+D/S, ADCTMP+D/S, ADCRST");
   }
 }
 
@@ -244,13 +253,13 @@ void setup() {
 
   adc1 = new ADS122C04(
     I2CBus, //i2c bus class
-    0x44, // address for deep sample weight
-    2 // n_reset pin
+    0x44 // address for deep sample weight
+    //2 // n_reset pin
   );
   adc2 = new ADS122C04(
     I2CBus, //i2c bus class
-    0x45, // address for deep sample weight
-    2 // n_reset pin
+    0x45 // address for deep sample weight
+    //2 // n_reset pin
   );
 }
 

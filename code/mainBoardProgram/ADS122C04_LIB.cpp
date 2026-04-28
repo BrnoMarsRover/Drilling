@@ -48,7 +48,7 @@ bool ADS122C04::_verify_regs(const uint8_t *expected, uint8_t n) {
     return true;
 }
 
-uint32_t ADS122C04::_initializedResetPins = 0;
+//uint32_t ADS122C04::_initializedResetPins = 0;
 
 // ─── Commands ─────────────────────────────────────────────────────────────────
 void ADS122C04::reset(void) {
