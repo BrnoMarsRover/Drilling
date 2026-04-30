@@ -1,8 +1,7 @@
 # TODO list
 
 ## Hardware
-Zkrácení profilů\
-Uřezání nové trubky
+Zkrácení profilů
 
 Upevnění řetězu k vozíku. Možná koupení novýho řetězu z laskakitu?\
 Kabeláž - nakrimpovat a oplést\
@@ -13,7 +12,7 @@ Upevnění kamery
 Upevnění tenzometru na storage
 
 ## Nová PCB
-přidat výstupy PWM pro serva na surface storage
+
 
 ## Software
 Sekvence vrtání automaticky, regulace lineárního posuvu v závislosti na vrtání\
