@@ -16,6 +16,15 @@ void CubeMarsV2::transmitERPM()
   transmitPayload(payload, 5);
 }
 
+
+void CubeMarsV2::transmitDuty(float duty)
+{
+  uint8_t payload[5] = {0x05, 0, 0, 0, 0};
+  int32_t val = (int32_t)(duty * 100000.0f);
+  int32ToBytes(val, payload + 1);
+  transmitPayload(payload, 5);
+}
+
 void CubeMarsV2::transmitPayload(uint8_t* payload, uint8_t payloadLength)
 {
   uint8_t msgLength = payloadLength + 5; //extended by start, length, 2 bytes for checksum, end
@@ -64,8 +73,15 @@ void CubeMarsV2::int32ToBytes(int32_t input, uint8_t* output)
 
 void CubeMarsV2::handleRX()
 {
+  // Reset parser if it has been stuck mid-packet for too long
+  if (parserState != WAIT_START && (millis() - rxLastByteMillis) > rxTimeoutMillis)
+  {
+    parserState = WAIT_START;
+  }
+
   while (cubeMarsSerial.available())
   {
+    rxLastByteMillis = millis();
     uint8_t b = cubeMarsSerial.read();
 
     switch (parserState)
@@ -107,8 +123,11 @@ void CubeMarsV2::handleRX()
         if (b == 3) // ETX
         {
           uint16_t receivedCRC = (uint16_t)((rxBuffer[rxLength] << 8) | rxBuffer[rxLength + 1]);
-          //if (receivedCRC == crc16(rxBuffer, rxLength))
-          readTmpCurrRPM(); // call interpreter
+          uint16_t computedCRC = crc16(rxBuffer, rxLength);
+          if (receivedCRC == computedCRC)
+          {
+            readTmpCurrRPM(); // call interpreter
+          }
         }
         parserState = WAIT_START;
         break;
@@ -144,7 +163,15 @@ void CubeMarsV2::update()
   if(millis() > commNextMillis)
   {
     commNextMillis += commDeltaMillis;
-    transmitERPM();
+    if(requestedERPM == 0)
+    {
+      transmitDuty(0.0);
+    }
+    else
+    {
+      transmitERPM();
+    }
+
     requestTmpCurrRPM();
   }
 }
