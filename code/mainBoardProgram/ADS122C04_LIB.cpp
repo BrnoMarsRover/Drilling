@@ -4,7 +4,6 @@
 
 //const int n_reset = 2;
 
-// ─── Private helpers ──────────────────────────────────────────────────────────
 uint8_t ADS122C04::_read_reg(uint8_t reg) {
     _wire->beginTransmission(_addr);
     _wire->write(CMD_RREG(reg));
@@ -50,7 +49,6 @@ bool ADS122C04::_verify_regs(const uint8_t *expected, uint8_t n) {
 
 //uint32_t ADS122C04::_initializedResetPins = 0;
 
-// ─── Commands ─────────────────────────────────────────────────────────────────
 void ADS122C04::reset(void) {
     _wire->beginTransmission(_addr);
     _wire->write(CMD_RESET);
@@ -70,7 +68,6 @@ void ADS122C04::powerdown(void) {
     _wire->endTransmission();
 }
 
-// ─── Init ─────────────────────────────────────────────────────────────────────
 /*
 void ADS122C04::init(void) {
     pinMode(_resetPin, OUTPUT);
@@ -96,8 +93,7 @@ ADS122C04::~ADS122C04() {
     _wire = nullptr;
 }
 
-// ─── Gain ─────────────────────────────────────────────────────────────────────
-void ADS122C04::set_gain(uint8_t gain) {
+void ADS122C04::set_gain(uint8_t gain) { // Gain set
     uint8_t reg0 = _read_reg(REG_MUX_GAIN);
     reg0 = (reg0 & 0xF1) | ((gain & 0x07) << 1);
     if (gain > GAIN_4) reg0 &= ~0x01;
@@ -105,24 +101,21 @@ void ADS122C04::set_gain(uint8_t gain) {
     start();
 }
 
-// ─── MUX ──────────────────────────────────────────────────────────────────────
-void ADS122C04::set_mux(uint8_t mux) {
+void ADS122C04::set_mux(uint8_t mux) { // MUX set
     uint8_t reg0 = _read_reg(REG_MUX_GAIN);
     reg0 = (reg0 & 0x0F) | (mux & 0xF0);
     _write_reg(REG_MUX_GAIN, reg0);
     start();
 }
 
-// ─── Data rate ────────────────────────────────────────────────────────────────
-void ADS122C04::set_data_rate(uint8_t dr) {
+void ADS122C04::set_data_rate(uint8_t dr) { // Data rate set
     uint8_t reg1 = _read_reg(REG_DR_MODE);
     reg1 = (reg1 & 0x1F) | (dr & 0xE0);
     _write_reg(REG_DR_MODE, reg1);
     start();
 }
 
-// ─── IDAC ─────────────────────────────────────────────────────────────────────
-void ADS122C04::set_idac(uint8_t i1mux, uint8_t i2mux, uint8_t current) {
+void ADS122C04::set_idac(uint8_t i1mux, uint8_t i2mux, uint8_t current) { // IDAC set
     uint8_t reg2 = _read_reg(REG_DATA_STATUS);
     reg2 = (reg2 & 0xF8) | (current & 0x07);
     _write_reg(REG_DATA_STATUS, reg2);
@@ -132,13 +125,11 @@ void ADS122C04::set_idac(uint8_t i1mux, uint8_t i2mux, uint8_t current) {
     start();
 }
 
-// ─── Data ready ───────────────────────────────────────────────────────────────
-bool ADS122C04::data_ready(void) {
+bool ADS122C04::data_ready(void) { // Data ready
     return (_read_reg(REG_DATA_STATUS) & 0x80) != 0;
 }
 
-// ─── Read raw 24-bit result ───────────────────────────────────────────────────
-int32_t ADS122C04::read(void) {
+int32_t ADS122C04::read(void) { // Read raw 24-bit result
     _wire->beginTransmission(_addr);
     _wire->write(CMD_RDATA);
     _wire->endTransmission(false);
@@ -153,7 +144,6 @@ int32_t ADS122C04::read(void) {
     return val;
 }
 
-// ─── Single-shot blocking measurement ────────────────────────────────────────
 int32_t ADS122C04::measure(void) {
     uint8_t reg1 = _read_reg(REG_DR_MODE);
     _write_reg(REG_DR_MODE, reg1 & ~0x08);
@@ -168,12 +158,10 @@ int32_t ADS122C04::measure(void) {
     return result;
 }
 
-// ─── Address ──────────────────────────────────────────────────────────────────
 void ADS122C04::set_address(uint8_t addr) {
     _addr = addr;
 }
 
-// ─── Median ───────────────────────────────────────────────────────────────────
 float ADS122C04::read_median(uint8_t n) {
     if (n == 0) n = 1;
 
@@ -199,16 +187,14 @@ float ADS122C04::read_median(uint8_t n) {
     return result;
 }
 
-// ─── Tare ─────────────────────────────────────────────────────────────────────
 void ADS122C04::tare(void) {
     float raw = read_median(32);
-    tare_grams = cal_a * raw + cal_b;             // store in grams
+    tare_grams = cal_a * raw + cal_b; // store in grams
     Serial.print(F("[ADC] Tare value stored: "));
     Serial.print(tare_grams, 4);
     Serial.println(F(" g"));
 }
 
-// ─── Scale calibration ────────────────────────────────────────────────────────
 void ADS122C04::scale_calibrate(void) {
     Serial.println(F("=== Scale calibration ==="));
     Serial.println(F("Remove all weight from scale, then press ENTER."));
@@ -246,15 +232,14 @@ void ADS122C04::scale_calibrate(void) {
     Serial.println(F("  y = a*x + b  (y in grams, x = raw ADC)"));
 }
 
-// ─── Weight measurement ───────────────────────────────────────────────────────
-float ADS122C04::measure_weight(void) {
-    float raw    = read_median(10); // will be 6 ideally, measure mode 20 sps, i call measure each 500 ms
+float ADS122C04::measure_weight(void) { // to update to non-blocking fnc
+    float raw    = read_median(10); // about 6 values, measure mode 20 sps, i call measure each 500 ms
     float grams  = cal_a * raw + cal_b;           // apply calibration first
     float tared  = grams - (float)tare_grams;     // subtract tare in grams
     return tared;
 }
 
-float ADS122C04::read_temperature(void) {
+float ADS122C04::read_temperature(void) { // to update to non-blocking fnc
     // Save current REG1 to restore after reading
     uint8_t reg1 = _read_reg(REG_DR_MODE);
 
@@ -273,18 +258,15 @@ float ADS122C04::read_temperature(void) {
     _wire->requestFrom(_addr, (uint8_t)3);
     uint8_t b2 = _wire->read();
     uint8_t b1 = _wire->read();
-    _wire->read();                        // b0 not used, only 14 MSBs matter
+    _wire->read();
 
     // Restore previous REG1 (clears TS bit)
     _write_reg(REG_DR_MODE, reg1);
     start();
 
-    // 14-bit result is left-justified in 24-bit word
-    // b2 and b1 contain bits 23:8, we need bits 23:10
     int16_t raw = ((int16_t)b2 << 6) | (b1 >> 2);
 
-    // raw is 14-bit two's complement
-    // sign extend from bit 13
+    // raw is 14-bit two's complement, sign extend from bit 13
     if (raw & 0x2000) raw |= 0xC000;
 
     // 1 LSB = 0.03125°C

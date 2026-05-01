@@ -95,7 +95,7 @@ public:
     }
     ~ADS122C04();
 
-    // ── Low-level control ──────────────────────────────────────────────────
+    // Low-level control
     void    init(void);
     void    reset(void);
     void    start(void);
@@ -109,7 +109,7 @@ public:
     int32_t measure(void);
     void    set_address(uint8_t addr);
 
-    // ── High-level scale functions ─────────────────────────────────────────
+    // Higher-level scale functions
     float   read_median(uint8_t n);
     void    tare(void);
     void    scale_calibrate(void);
