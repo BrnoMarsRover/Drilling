@@ -5314,6 +5314,17 @@
 		)
 		(uuid "ecaaf61a-9bcc-4703-aab7-9c7aeaf6b980")
 	)
+	(text "Beware of pin 0\nThe device cannot be programmed if it is held HIGH"
+		(exclude_from_sim no)
+		(at 118.11 131.318 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "2de292c0-3c22-445c-854f-98d387df2f52")
+	)
 	(text "Power distribution"
 		(exclude_from_sim no)
 		(at 36.068 73.406 0)
