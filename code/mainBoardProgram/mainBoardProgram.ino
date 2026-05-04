@@ -99,6 +99,8 @@ bool i2cRecoverBus()
   return success;
 }
 
+//---------PERIPHERAL CLASSES
+
 // ===== LINEAR AXIS =====
 LinearAxis linearAxis(
   13, // STEP
@@ -114,8 +116,6 @@ LinearAxis linearAxis(
   0x42 // adresa AS5600
 );
 
-
-//---------PERIPHERAL CLASSES
 LimitSwitch limitSwitchTop(15);
 LimitSwitch limitSwitchBottom(0);
 
@@ -248,8 +248,10 @@ void setup() {
     Serial.println("Linear axis FAILED");
   }
   if (!distanceSensor.begin()) {
-        Serial.println(" TOF FAILED");
-    }
+    Serial.println(" TOF FAILED");
+  }
+
+  motorDriver.begin();
 
   adc1 = new ADS122C04(
     I2CBus, //i2c bus class

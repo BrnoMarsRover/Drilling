@@ -3,15 +3,17 @@
 class CubeMarsV2
 {
 private:
+  uint8_t rxPin;
+  uint8_t txPin;
   HardwareSerial& cubeMarsSerial;
   HardwareSerial& debugSerial;
 
-  float MOSTmp;
-  float motorTmp;
-  float current;
-  float RPM;
+  float MOSTmp = 0;
+  float motorTmp = 0;
+  float current = 0;
+  float RPM = 0;
 
-  int32_t requestedERPM;
+  int32_t requestedERPM = 0;
   void transmitERPM();
   void transmitDuty(float duty);
 
@@ -48,6 +50,8 @@ private:
 
 public:
   CubeMarsV2(HardwareSerial& serialPort, HardwareSerial& debugSerialPort, uint8_t rxPin, uint8_t txPin);
+
+  void begin();
 
   void update(); // Call this in loop()
 

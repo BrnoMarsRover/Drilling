@@ -149,8 +149,12 @@ void CubeMarsV2::readTmpCurrRPM()
 
 // ---------------- PUBLIC ----------------
 
-CubeMarsV2::CubeMarsV2(HardwareSerial& serialPort, HardwareSerial& debugSerialPort, uint8_t rxPin, uint8_t txPin)
-  : cubeMarsSerial(serialPort), debugSerial(debugSerialPort)
+CubeMarsV2::CubeMarsV2(HardwareSerial& serialPort, HardwareSerial& debugSerialPort, uint8_t aRxPin, uint8_t aTxPin)
+  : cubeMarsSerial(serialPort), debugSerial(debugSerialPort), rxPin(aRxPin), txPin(aTxPin)
+{
+}
+
+void CubeMarsV2::begin()
 {
   cubeMarsSerial.begin(921600, SERIAL_8N1, rxPin, txPin);
   commNextMillis = millis();
