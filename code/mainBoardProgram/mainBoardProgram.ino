@@ -271,6 +271,8 @@ void loop()
 
   linearAxis.update();
 
+  //adc1->update(); check if data_ready
+
   if (Serial.available())
   {
     String cmd = Serial.readStringUntil('\n');

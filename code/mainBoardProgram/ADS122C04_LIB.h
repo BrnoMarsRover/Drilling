@@ -99,6 +99,7 @@ public:
     void    init(void);
     void    reset(void);
     void    start(void);
+    void    update(void);
     void    powerdown(void);
     void    set_gain(uint8_t gain);
     void    set_mux(uint8_t mux);
@@ -125,6 +126,19 @@ private:
     //static uint32_t _initializedResetPins;
     //volatile int32_t tare_val;
     volatile float tare_grams;    // was: volatile int32_t tare_val
+
+    enum class ADCState : uint8_t {
+    IDLE,
+    SAMPLING,
+    CALCULATING,
+    READY
+    };
+
+    ADCState _state       = ADCState::IDLE;
+    int32_t  _buf[10]     = {0};
+    uint8_t  _sampleCount = 0;
+    float    _lastWeight  = 0.0f;
+    bool     _resultReady = false;
 
     uint8_t _read_reg(uint8_t reg);
     void    _write_reg(uint8_t reg, uint8_t val);

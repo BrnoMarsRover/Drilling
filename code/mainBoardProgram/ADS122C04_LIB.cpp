@@ -273,5 +273,23 @@ float ADS122C04::read_temperature(void) { // to update to non-blocking fnc
     return (float)raw * 0.03125f;
 }
 
+void ADS122C04::update() {
+    switch (_state) {
+        case ADCState::IDLE:
+            // do nothing
+            break;
+
+        case ADCState::SAMPLING:
+            break;
+
+        case ADCState::CALCULATING:
+            break;
+
+        case ADCState::READY:
+            break;
+    }
+}
+
+
 // -------- High end fncs ---------
 // acquisition in time
