@@ -7,6 +7,8 @@
 #include <Wire.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "freertos/queue.h"
+#include "freertos/semphr.h"
 
 // Commands
 #define CMD_RESET     0x06
@@ -109,28 +111,45 @@ public:
     void    tare(void);
     void    scale_calibrate(void);
     float   measure_weight(void); // to be obsolete
-    float   read_temperature(void);
+    float   read_temperature(void); // to be obsolete
+
+    // FreeRTOS task interface
+    void    task_start(void);
+    void    request_measure(void);
+    void    request_tmp(void);
+    void    set_tare(void);
+    void    set_calibration(void);
+
+    // Rresult getters
+    bool    result_ready(void);
+    float   get_last_weight(void);
+    float   get_last_temp(void);
 
 private:
     TwoWire *_wire;
     uint8_t  _addr;
     volatile float   cal_a;
     volatile float   cal_b;
-    //volatile int32_t tare_val;
-    volatile float tare_grams;    // was: volatile int32_t tare_val
+    volatile float   tare_grams;
 
-    enum class ADCState : uint8_t {
-    IDLE,
-    SAMPLING,
-    CALCULATING,
-    READY
+    // FreeRTOS objects
+    QueueHandle_t _cmdQueue           = nullptr;
+    SemaphoreHandle_t _mutex          = nullptr;
+    TaskHandle_t _task_measure_handle = nullptr;
+
+    // Shared result state _mutex protected
+    float   _lastWeight  = 0.0f;
+    float   _lastTemp    = 0.0f;
+    bool    _resultReady = false;
+
+    enum class adc_cmd : uint8_t {
+    MEASURE,
+    TARE,
+    CALIBRATE,
+    TEMPERATURE
     };
 
-    ADCState _state       = ADCState::IDLE;
-    int32_t  _buf[10]     = {0};
-    uint8_t  _sampleCount = 0;
-    float    _lastWeight  = 0.0f;
-    bool     _resultReady = false;
+    static void _adcTask(void *pvParameters);
 
     uint8_t _read_reg(uint8_t reg);
     void    _write_reg(uint8_t reg, uint8_t val);

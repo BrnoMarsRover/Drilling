@@ -232,7 +232,7 @@ void ADS122C04::scale_calibrate(void) {
     Serial.println(F("  y = a*x + b  (y in grams, x = raw ADC)"));
 }
 
-float ADS122C04::measure_weight(void) { // to update to non-blocking fnc
+float ADS122C04::measure_weight(void) { // to update to non-blocking fnc ; OBSOLETE
     float raw    = read_median(10); // about 6 values, measure mode 20 sps, i call measure each 500 ms
     float grams  = cal_a * raw + cal_b;           // apply calibration first
     float tared  = grams - (float)tare_grams;     // subtract tare in grams
@@ -273,23 +273,100 @@ float ADS122C04::read_temperature(void) { // to update to non-blocking fnc
     return (float)raw * 0.03125f;
 }
 
-void ADS122C04::update() {
-    switch (_state) {
-        case ADCState::IDLE:
-            // do nothing
-            break;
+void ADS122C04::task_start() {
+    _cmdQueue = xQueueCreate(5, sizeof(adc_cmd));  // queue of 5 commands
+    _mutex    = xSemaphoreCreateMutex();
 
-        case ADCState::SAMPLING:
-            break;
+    xTaskCreate(
+        _adcTask,               // fnc to run
+        "ADC_Task",             // system name
+        4096,                   // stack size in bytes
+        this,                   // pvParameters
+        5,                      // priority low
+        &_task_measure_handle,  // handle stored here
+        0                       // core 0
+    );
+}
+void ADS122C04::request_measure() {
+  adc_cmd cmd = adc_cmd::MEASURE;
+  xQueueSend(_cmdQueue, &cmd, 0);
+}
 
-        case ADCState::CALCULATING:
-            break;
+void ADS122C04::request_tmp(){
+  adc_cmd cmd = adc_cmd::TEMPERATURE;
+  xQueueSend(_cmdQueue, &cmd, 0);
+}
 
-        case ADCState::READY:
-            break;
+void ADS122C04::set_tare(){
+  adc_cmd cmd = adc_cmd::TARE;
+  xQueueSend(_cmdQueue, &cmd, 0);
+}
+
+void ADS122C04::set_calibration(){
+  adc_cmd cmd = adc_cmd::CALIBRATE;
+  xQueueSend(_cmdQueue, &cmd, 0);
+}
+
+void ADS122C04::_adcTask(void *pvParameters) {
+    ADS122C04 *self = static_cast<ADS122C04*>(pvParameters);
+    adc_cmd cmd;
+
+    while (true) {
+        if (xQueueReceive(self->_cmdQueue, &cmd, portMAX_DELAY)) {
+            switch (cmd) {
+                case adc_cmd::MEASURE: {
+                    float raw = self->read_median(10);
+                    float w   = self->cal_a * raw + self->cal_b - self->tare_grams;
+                    xSemaphoreTake(self->_mutex, portMAX_DELAY);
+                    self->_lastWeight  = w;
+                    self->_resultReady = true;
+                    xSemaphoreGive(self->_mutex);
+                    UBaseType_t hwm = uxTaskGetStackHighWaterMark(_task_measure_handle); // to erase after testing
+                    Serial.println("remaining words till overflow in _adcTask"); // to erase after testing
+                    Serial.println(hwm); // to erase after testing; with 4096 words i wish for this to be max 1000 words left
+                    break;
+                }
+                case adc_cmd::TARE:
+                    self->tare();
+                    break;
+
+                case adc_cmd::CALIBRATE:
+                    self->scale_calibrate();
+                    break;
+
+                case adc_cmd::TEMPERATURE: {
+                    float t = self->read_temperature();
+                    xSemaphoreTake(self->_mutex, portMAX_DELAY);
+                    self->_lastTemp = t;
+                    xSemaphoreGive(self->_mutex);
+                    break;
+                }
+            }
+        }
     }
 }
 
+bool ADS122C04::result_ready(void) {
+    xSemaphoreTake(_mutex, portMAX_DELAY); // this->_mutex not needed due to the fnc being implicit "self"
+    bool r = _resultReady;
+    xSemaphoreGive(_mutex);
+    return r;
+}
+
+float ADS122C04::get_last_weight(void) {
+    xSemaphoreTake(_mutex, portMAX_DELAY);
+    float w = _lastWeight;
+    _resultReady = false;
+    xSemaphoreGive(_mutex);
+    return w;
+}
+
+float ADS122C04::get_last_temp(void) {
+    xSemaphoreTake(_mutex, portMAX_DELAY);
+    float t = _lastTemp;
+    xSemaphoreGive(_mutex);
+    return t;
+}
 
 // -------- High end fncs ---------
 // acquisition in time
