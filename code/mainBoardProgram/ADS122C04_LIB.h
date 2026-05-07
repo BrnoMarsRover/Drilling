@@ -92,7 +92,7 @@ public:
     ~ADS122C04();
 
     // Low-level control
-    void    init(void);
+    //void    init(void);
     void    reset(void);
     void    start(void);
     void    update(void);
@@ -103,15 +103,15 @@ public:
     void    set_idac(uint8_t i1mux, uint8_t i2mux, uint8_t current);
     bool    data_ready(void);
     int32_t read(void);
-    int32_t measure(void); // obsolete
+    //int32_t measure(void); // obsolete
     void    set_address(uint8_t addr);
 
     // Higher-level scale functions
     float   read_median(uint8_t n);
     void    tare(void);
     void    scale_calibrate(void);
-    float   measure_weight(void); // to be obsolete
-    float   read_temperature(void); // to be obsolete
+    //float   measure_weight(void); // to be obsolete
+    float   read_temperature(void);
 
     // FreeRTOS task interface
     void    task_start(void);
@@ -135,12 +135,12 @@ private:
     // FreeRTOS objects
     QueueHandle_t _cmdQueue           = nullptr;
     SemaphoreHandle_t _mutex          = nullptr;
-    TaskHandle_t _task_measure_handle = nullptr;
+    TaskHandle_t _adc_task_handle = nullptr;
 
     // Shared result state _mutex protected
     float   _lastWeight  = 0.0f;
     float   _lastTemp    = 0.0f;
-    bool    _resultReady = false;
+    bool    _result_ready = false;
 
     enum class adc_cmd : uint8_t {
     MEASURE,

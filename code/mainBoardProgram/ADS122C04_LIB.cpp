@@ -47,8 +47,6 @@ bool ADS122C04::_verify_regs(const uint8_t *expected, uint8_t n) {
     return true;
 }
 
-//uint32_t ADS122C04::_initializedResetPins = 0;
-
 void ADS122C04::reset(void) {
     _wire->beginTransmission(_addr);
     _wire->write(CMD_RESET);
@@ -67,26 +65,6 @@ void ADS122C04::powerdown(void) {
     _wire->write(CMD_POWERDOWN);
     _wire->endTransmission();
 }
-
-/*
-void ADS122C04::init(void) {
-    pinMode(_resetPin, OUTPUT);
-    digitalWrite(_resetPin, HIGH);
-    delay(1);
-    reset();
-
-    // REG0: MUX=0000 (AIN0+/AIN1-), GAIN=111 (x16), PGA_BYPASS=0  → 0x0E // old 1000 -> 0x08
-    // REG1: DR=000 (20SPS), MODE=0, CM=1 (continuous), VREF=00 (ext), TS=0 → 0x08
-    // REG2: IDAC=101 (500uA), rest 0 → 0x05
-    // REG3: I1MUX=011 (AIN2), I2MUX=100 (AIN3) → 0x70
-    uint8_t cfg[4] = { 0x0E, 0x08, 0x07, 0x70 };
-    for (int i = 0; i < 4; i++) {
-        _write_reg(i, cfg[i]);
-    }
-    start();
-}
-*/
-//void ADS122C04::init(void) { begin(); }  // backward compat
 
 ADS122C04::~ADS122C04() {
     powerdown();
@@ -143,7 +121,7 @@ int32_t ADS122C04::read(void) { // Read raw 24-bit result
     if (val & 0x800000) val |= 0xFF000000;
     return val;
 }
-
+/*
 int32_t ADS122C04::measure(void) {
     uint8_t reg1 = _read_reg(REG_DR_MODE);
     _write_reg(REG_DR_MODE, reg1 & ~0x08);
@@ -157,6 +135,7 @@ int32_t ADS122C04::measure(void) {
     if (reg1 & 0x08) start();
     return result;
 }
+*/
 
 void ADS122C04::set_address(uint8_t addr) {
     _addr = addr;
@@ -164,25 +143,20 @@ void ADS122C04::set_address(uint8_t addr) {
 
 float ADS122C04::read_median(uint8_t n) {
     if (n == 0) n = 1;
-
     int32_t *buf = (int32_t *)malloc(n * sizeof(int32_t));
     if (!buf) return (float)read();
-
     for (uint8_t i = 0; i < n; i++) {
         uint16_t timeout = 60;
         while (!data_ready() && timeout--) delay(1);
         buf[i] = read();
     }
-
     _isort(buf, n);
-
     float result;
     if (n % 2 == 1) {
         result = (float)buf[n / 2];
     } else {
         result = ((float)buf[n / 2 - 1] + (float)buf[n / 2]) / 2.0f;
     }
-
     free(buf);
     return result;
 }
@@ -232,12 +206,12 @@ void ADS122C04::scale_calibrate(void) {
     Serial.println(F("  y = a*x + b  (y in grams, x = raw ADC)"));
 }
 
-float ADS122C04::measure_weight(void) { // to update to non-blocking fnc ; OBSOLETE
-    float raw    = read_median(10); // about 6 values, measure mode 20 sps, i call measure each 500 ms
-    float grams  = cal_a * raw + cal_b;           // apply calibration first
-    float tared  = grams - (float)tare_grams;     // subtract tare in grams
-    return tared;
-}
+//float ADS122C04::measure_weight(void) { // to update to non-blocking fnc ; OBSOLETE
+//    float raw    = read_median(10); // about 6 values, measure mode 20 sps, i call measure each 500 ms
+//    float grams  = cal_a * raw + cal_b;           // apply calibration first
+//    float tared  = grams - (float)tare_grams;     // subtract tare in grams
+//    return tared;
+//}
 
 float ADS122C04::read_temperature(void) { // to update to non-blocking fnc
     // Save current REG1 to restore after reading
@@ -277,14 +251,17 @@ void ADS122C04::task_start() {
     _cmdQueue = xQueueCreate(5, sizeof(adc_cmd));  // queue of 5 commands
     _mutex    = xSemaphoreCreateMutex();
 
-    xTaskCreate(
+    char taskName[16];
+    snprintf(taskName, sizeof(taskName), "ADC_0x%02X", _addr); // dynamic "ADC_0x44", "ADC_0x45"
+
+    xTaskCreatePinnedToCore(
         _adcTask,               // fnc to run
-        "ADC_Task",             // system name
+        taskName,               // old "ADC_Task" system name
         4096,                   // stack size in bytes
         this,                   // pvParameters
-        5,                      // priority low
-        &_task_measure_handle,  // handle stored here
-        0                       // core 0
+        1,                      // priority low
+        &_adc_task_handle,      // handle stored here not used now
+        1                       // core 1
     );
 }
 void ADS122C04::request_measure() {
@@ -308,20 +285,20 @@ void ADS122C04::set_calibration(){
 }
 
 void ADS122C04::_adcTask(void *pvParameters) {
-    ADS122C04 *self = static_cast<ADS122C04*>(pvParameters);
+    ADS122C04 *self = static_cast<ADS122C04*>(pvParameters); // redefine void* to ADS122C04* to use self
     adc_cmd cmd;
 
     while (true) {
-        if (xQueueReceive(self->_cmdQueue, &cmd, portMAX_DELAY)) {
+        if (xQueueReceive(self->_cmdQueue, &cmd, portMAX_DELAY)) { // will not go through till right command
             switch (cmd) {
                 case adc_cmd::MEASURE: {
                     float raw = self->read_median(10);
                     float w   = self->cal_a * raw + self->cal_b - self->tare_grams;
                     xSemaphoreTake(self->_mutex, portMAX_DELAY);
                     self->_lastWeight  = w;
-                    self->_resultReady = true;
+                    self->_result_ready = true;
                     xSemaphoreGive(self->_mutex);
-                    UBaseType_t hwm = uxTaskGetStackHighWaterMark(_task_measure_handle); // to erase after testing
+                    UBaseType_t hwm = uxTaskGetStackHighWaterMark(NULL); // NULL refers to this task; to erase after testing
                     Serial.println("remaining words till overflow in _adcTask"); // to erase after testing
                     Serial.println(hwm); // to erase after testing; with 4096 words i wish for this to be max 1000 words left
                     break;
@@ -346,9 +323,9 @@ void ADS122C04::_adcTask(void *pvParameters) {
     }
 }
 
-bool ADS122C04::result_ready(void) {
+bool ADS122C04::result_ready(void) { // get_result_ready to be added
     xSemaphoreTake(_mutex, portMAX_DELAY); // this->_mutex not needed due to the fnc being implicit "self"
-    bool r = _resultReady;
+    bool r = _result_ready;
     xSemaphoreGive(_mutex);
     return r;
 }
@@ -356,7 +333,7 @@ bool ADS122C04::result_ready(void) {
 float ADS122C04::get_last_weight(void) {
     xSemaphoreTake(_mutex, portMAX_DELAY);
     float w = _lastWeight;
-    _resultReady = false;
+    _result_ready = false;
     xSemaphoreGive(_mutex);
     return w;
 }

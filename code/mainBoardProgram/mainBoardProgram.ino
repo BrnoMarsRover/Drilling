@@ -198,28 +198,42 @@ void handleCommand(String cmd) {
     ADS122C04 *target = cmd.endsWith("D") ? adc1 :
                         cmd.endsWith("S") ? adc2 : nullptr;
     if (target == nullptr) { return; }
-    float w = target->measure_weight();
-    Serial.print(w, 4);
-    Serial.println("g");
-    if (w > 2000.0f) Serial.println("Scale overweight");
+    target->request_measure(); // old float w = target->measure_weight();
+    //Serial.print(w, 4);
+    //Serial.println("g");
+    //if (w > 2000.0f) Serial.println("Scale overweight");
+  }
+  else if (cmd.startsWith("GW")) {
+    ADS122C04 *target = cmd.endsWith("D") ? adc1 :
+                        cmd.endsWith("S") ? adc2 : nullptr;
+    if (target == nullptr) { return; }
+    if(target->result_ready() == true){
+      float w = target->get_last_weight();
+      Serial.print(w, 4);
+      Serial.println("g");
+      if (w > 2000.0f) Serial.println("Scale overweight");
+    }
+    else {
+      Serial.println("No weight result ready");
+    }
   }
   else if (cmd.startsWith("TRE")) {
     ADS122C04 *target = cmd.endsWith("D") ? adc1 : cmd.endsWith("S") ? adc2 : nullptr;
     if (target == nullptr) { return; }
     Serial.println("Tare start");
-    target->tare();
+    target->set_tare();
   }
   else if (cmd.startsWith("CLB")) {
     ADS122C04 *target = cmd.endsWith("D") ? adc1 : cmd.endsWith("S") ? adc2 : nullptr;
     if (target == nullptr) { return; }
     Serial.println("Calibration start");
-    target->scale_calibrate();
+    target->set_calibration();
   }
   else if (cmd.startsWith("ADCTMP")) {
     ADS122C04 *target = cmd.endsWith("D") ? adc1 : cmd.endsWith("S") ? adc2 : nullptr;
     if (target == nullptr) { return; }
     Serial.print("Chip temperature: ");
-    Serial.print(target->read_temperature(), 4);
+    Serial.print(target->get_last_temp(), 4);
     Serial.println(" °C");
   }
   else if (cmd.startsWith("ADCRST")) {
@@ -233,7 +247,7 @@ void handleCommand(String cmd) {
   }
   else {
     Serial.println("Neznamy prikaz.");
-    Serial.println("Pouzij: U, D, S, R100, +, -, A2000, X, ?, WGH+D/S, TRE+D/S, CLB+D/S, ADCTMP+D/S, ADCRST");
+    Serial.println("Pouzij: U, D, S, R100, +, -, A2000, X, ?, WGH+D/S, TRE+D/S, CLB+D/S, ADCTMP+D/S, ADCRST, GW+D/S");
   }
 }
 
@@ -263,6 +277,8 @@ void setup() {
     0x45 // address for deep sample weight
     //2 // n_reset pin
   );
+  adc1->task_start(); // may be put at end of constructor, to be tested
+  adc2->task_start();
 }
 
 void loop()
