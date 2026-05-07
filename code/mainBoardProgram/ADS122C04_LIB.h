@@ -5,6 +5,8 @@
 #include <stdbool.h>
 #include <Arduino.h>
 #include <Wire.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 
 // Commands
 #define CMD_RESET     0x06
@@ -63,16 +65,8 @@ public:
     // dvdd-dvdd 100 0101 = 0x45 surface samples
     ADS122C04(TwoWire &wire, uint8_t addr = 0x44)
         : _wire(&wire), _addr(addr),
-          cal_a(0.00467235f), cal_b(-6054.52392578f), tare_grams(0.0f) //cal_a(1.0f), cal_b(0.0f), tare_grams(0.0f) _resetPin(resetPin)
-    { //}
-
-      /*
-      if (!(_initializedResetPins & (1UL << _resetPin))) { // checker if pin is alredy initialised
-        pinMode(_resetPin, OUTPUT);
-        digitalWrite(_resetPin, HIGH);
-        _initializedResetPins |= (1UL << _resetPin);
-      */
-      //} 
+          cal_a(0.00467235f), cal_b(-6054.52392578f), tare_grams(0.0f) // old: cal_a(1.0f), cal_b(0.0f), tare_grams(0.0f) _resetPin(resetPin)
+    {
       delay(1);
       reset(); // should not pull down RST pin
       // REG0: MUX=0000 (AIN0+/AIN1-), GAIN=111 (x16), PGA_BYPASS=0  → 0x0E // old 1000 -> 0x08
@@ -107,23 +101,21 @@ public:
     void    set_idac(uint8_t i1mux, uint8_t i2mux, uint8_t current);
     bool    data_ready(void);
     int32_t read(void);
-    int32_t measure(void);
+    int32_t measure(void); // obsolete
     void    set_address(uint8_t addr);
 
     // Higher-level scale functions
     float   read_median(uint8_t n);
     void    tare(void);
     void    scale_calibrate(void);
-    float   measure_weight(void);
+    float   measure_weight(void); // to be obsolete
     float   read_temperature(void);
 
 private:
     TwoWire *_wire;
     uint8_t  _addr;
-    //uint8_t  _resetPin;
     volatile float   cal_a;
     volatile float   cal_b;
-    //static uint32_t _initializedResetPins;
     //volatile int32_t tare_val;
     volatile float tare_grams;    // was: volatile int32_t tare_val
 
