@@ -264,6 +264,25 @@ void ADS122C04::task_start() {
         1                       // core 1
     );
 }
+
+void ADS122C04::task_start_acqu() {
+    _cmdQueue = xQueueCreate(5, sizeof(adc_cmd));  // queue of 5 commands -> i need just 1?
+    //_mutex    = xSemaphoreCreateMutex();
+
+    char taskName[16];
+    snprintf(taskName, sizeof(taskName), "ADC_0x%02X", _addr); // dynamic "ADC_0x44", "ADC_0x45"
+
+    xTaskCreatePinnedToCore(
+        _adcTask,               // fnc to run
+        taskName,               // old "ADC_Task" system name
+        4096,                   // stack size in bytes
+        this,                   // pvParameters
+        1,                      // priority low
+        NULL,                   // handle stored here not used now
+        1                       // core 1
+    );
+}
+
 void ADS122C04::request_measure() {
   adc_cmd cmd = adc_cmd::MEASURE;
   xQueueSend(_cmdQueue, &cmd, 0);

@@ -119,11 +119,15 @@ public:
     void    request_tmp(void);
     void    set_tare(void);
     void    set_calibration(void);
+    void    task_start_acqu(void); // to be written
+    float   measure_for_time(uint32_t sec, uint32_t sample_num); // to be an array? each X ms will interript set adc_cmd:MEASURE and store value to an array, ms between samples will be calculated from sample num and sec
+
 
     // Rresult getters
     bool    result_ready(void);
     float   get_last_weight(void);
     float   get_last_temp(void);
+    float   get_arr_weight(void); // to be written
 
 private:
     TwoWire *_wire;
@@ -135,7 +139,7 @@ private:
     // FreeRTOS objects
     QueueHandle_t _cmdQueue           = nullptr;
     SemaphoreHandle_t _mutex          = nullptr;
-    TaskHandle_t _adc_task_handle = nullptr;
+    TaskHandle_t _adc_task_handle     = nullptr;
 
     // Shared result state _mutex protected
     float   _lastWeight  = 0.0f;
@@ -159,5 +163,3 @@ private:
 
 #endif // ADS122C04_LIB_H
 // ----- High end functions -----
-
-// float[] measure_for_time(int time (seconds)) each 100 ms will interript call measure_weight and stre value to an array
