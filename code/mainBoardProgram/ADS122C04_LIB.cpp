@@ -169,40 +169,39 @@ void ADS122C04::tare(void) {
   Serial.println(F(" g"));
 }
 
-void ADS122C04::scale_calibrate(void) {
-  Serial.println(F("=== Scale calibration ==="));
-  Serial.println(F("Remove all weight from scale, then press ENTER."));
-
-  while (Serial.available()) Serial.read();
-  while (!Serial.available()) delay(10);
-  while (Serial.available()) Serial.read();
+void ADS122C04::scale_calibrate_0(void) {
+  Serial.println(F("=== Scale calibration A ==="));
+  Serial.println(F("On scale should be weight of 0g"));
 
   float adc_zero = read_median(32);
-  Serial.print(F("[ADC] at 0 g: "));
+  _cal_adc_zero = adc_zero;
+  Serial.print(F("[ADC] at 0g: "));
   Serial.println(adc_zero, 2);
 
-  Serial.println(F("Place exactly 100 g on scale, then press ENTER."));
-  while (Serial.available()) Serial.read();
-  while (!Serial.available()) delay(10);
-  while (Serial.available()) Serial.read();
+  Serial.println(F("Place exactly 100 g on scale, then call CLB100+S/D."));
+}
+
+void ADS122C04::scale_calibrate_100(void) {
+  Serial.println(F("=== Scale calibration B ==="));
+  Serial.println(F("On scale should be weight of 100g"));
 
   float adc_100 = read_median(32);
   Serial.print(F("[ADC] at 100 g: "));
   Serial.println(adc_100, 2);
 
-  if (fabsf(adc_100 - adc_zero) < 1.0f) {
+  if (fabsf(adc_100 - _cal_adc_zero) < 1.0f) {
     Serial.println(F("[ADC] ERROR: ADC span too small - check wiring. Calibration aborted."));
     return;
   }
 
-  cal_a = 100.0f / (adc_100 - adc_zero);
-  cal_b = 0.0f - cal_a * adc_zero;
+  cal_a = 100.0f / (adc_100 - _cal_adc_zero);
+  cal_b = 0.0f - cal_a * _cal_adc_zero;
 
   Serial.print("[ADC] 0x");
   Serial.print(_addr, HEX);
   Serial.println(" Calibration complete");
-  Serial.print(F("  a (slope)  = ")); Serial.println(cal_a, 8);
-  Serial.print(F("  b (offset) = ")); Serial.println(cal_b, 8);
+  Serial.print(F("a = ")); Serial.println(cal_a, 8);
+  Serial.print(F("b = ")); Serial.println(cal_b, 8);
   Serial.println(F("  y = a*x + b  (y in grams, x = raw ADC)"));
 }
 
@@ -264,25 +263,7 @@ void ADS122C04::task_start() {
         1                       // core 1
     );
 }
-/*
-void ADS122C04::task_start_acqu() {
-    _cmdQueue = xQueueCreate(5, sizeof(adc_cmd));  // queue of 5 commands -> i need just 1?
-    //_mutex    = xSemaphoreCreateMutex();
 
-    char taskName[16];
-    snprintf(taskName, sizeof(taskName), "ADC_0x%02X", _addr); // dynamic "ADC_0x44", "ADC_0x45"
-
-    xTaskCreatePinnedToCore(
-        _adc_acq_Task,          // fnc to run
-        taskName,               // old "ADC_Task" system name
-        4096,                   // stack size in bytes
-        this,                   // pvParameters
-        1,                      // priority low
-        NULL,                   // handle stored here not used now
-        1                       // set core 1
-    );
-}
-*/
 void ADS122C04::request_measure() {
   adc_cmd cmd = adc_cmd::MEASURE;
   xQueueSend(_cmdQueue, &cmd, 0);
@@ -332,11 +313,11 @@ void ADS122C04::_adcTask(void *pvParameters) {
                     break;
 
                 case adc_cmd::CALIBRATE0:
-                    self->scale_calibrate(); //0
+                    self->scale_calibrate_0(); //0
                     break;
 
                 case adc_cmd::CALIBRATE100:
-                    self->scale_calibrate(); //100
+                    self->scale_calibrate_100(); //100
                     break;
 
                 case adc_cmd::TEMPERATURE: {
@@ -375,3 +356,23 @@ float ADS122C04::get_last_temp(void) {
 
 // -------- High end fncs ---------
 // acquisition in time
+
+/*
+void ADS122C04::task_start_acqu() {
+    _cmdQueue = xQueueCreate(5, sizeof(adc_cmd));  // queue of 5 commands -> i need just 1?
+    //_mutex    = xSemaphoreCreateMutex();
+
+    char taskName[16];
+    snprintf(taskName, sizeof(taskName), "ADC_0x%02X", _addr); // dynamic "ADC_0x44", "ADC_0x45"
+
+    xTaskCreatePinnedToCore(
+        _adc_acq_Task,          // fnc to run
+        taskName,               // old "ADC_Task" system name
+        4096,                   // stack size in bytes
+        this,                   // pvParameters
+        1,                      // priority low
+        NULL,                   // handle stored here not used now
+        1                       // set core 1
+    );
+}
+*/

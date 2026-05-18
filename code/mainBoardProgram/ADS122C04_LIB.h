@@ -108,7 +108,8 @@ public:
     // Higher-level scale functions
     float   read_median(uint8_t n);
     void    tare(void);
-    void    scale_calibrate(void);
+    void    scale_calibrate_0(void);
+    void    scale_calibrate_100(void);
     //float   measure_weight(void); // to be obsolete
     float   read_temperature(void);
 
