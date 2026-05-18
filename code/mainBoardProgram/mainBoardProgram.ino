@@ -223,11 +223,17 @@ void handleCommand(String cmd) {
     Serial.println("Tare start");
     target->set_tare();
   }
-  else if (cmd.startsWith("CLB")) {
+  else if (cmd.startsWith("CLB0")) {
     ADS122C04 *target = cmd.endsWith("D") ? adc1 : cmd.endsWith("S") ? adc2 : nullptr;
     if (target == nullptr) { return; }
-    Serial.println("Calibration start");
-    target->set_calibration();
+    Serial.println("Calibration start 0g");
+    target->set_calibration_0();
+  }
+  else if (cmd.startsWith("CLB100")) {
+    ADS122C04 *target = cmd.endsWith("D") ? adc1 : cmd.endsWith("S") ? adc2 : nullptr;
+    if (target == nullptr) { return; }
+    Serial.println("Calibration start 100g");
+    target->set_calibration_100();
   }
   else if (cmd.startsWith("ADCTMP")) {
     ADS122C04 *target = cmd.endsWith("D") ? adc1 : cmd.endsWith("S") ? adc2 : nullptr;
@@ -247,7 +253,7 @@ void handleCommand(String cmd) {
   }
   else {
     Serial.println("Neznamy prikaz.");
-    Serial.println("Pouzij: U, D, S, R100, +, -, A2000, X, ?, WGH+D/S, TRE+D/S, CLB+D/S, ADCTMP+D/S, ADCRST, GW+D/S");
+    Serial.println("Pouzij: U, D, S, R100, +, -, A2000, X, ?, WGH+D/S, TRE+D/S, CLB+0/100+D/S, ADCTMP+D/S, ADCRST, GW+D/S");
   }
 }
 

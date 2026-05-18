@@ -264,7 +264,7 @@ void ADS122C04::task_start() {
         1                       // core 1
     );
 }
-
+/*
 void ADS122C04::task_start_acqu() {
     _cmdQueue = xQueueCreate(5, sizeof(adc_cmd));  // queue of 5 commands -> i need just 1?
     //_mutex    = xSemaphoreCreateMutex();
@@ -279,10 +279,10 @@ void ADS122C04::task_start_acqu() {
         this,                   // pvParameters
         1,                      // priority low
         NULL,                   // handle stored here not used now
-        1                       // core 1
+        1                       // set core 1
     );
 }
-
+*/
 void ADS122C04::request_measure() {
   adc_cmd cmd = adc_cmd::MEASURE;
   xQueueSend(_cmdQueue, &cmd, 0);
@@ -298,8 +298,13 @@ void ADS122C04::set_tare(){
   xQueueSend(_cmdQueue, &cmd, 0);
 }
 
-void ADS122C04::set_calibration(){
-  adc_cmd cmd = adc_cmd::CALIBRATE;
+void ADS122C04::set_calibration_0(){
+  adc_cmd cmd = adc_cmd::CALIBRATE0;
+  xQueueSend(_cmdQueue, &cmd, 0);
+}
+
+void ADS122C04::set_calibration_100(){
+  adc_cmd cmd = adc_cmd::CALIBRATE100;
   xQueueSend(_cmdQueue, &cmd, 0);
 }
 
@@ -326,8 +331,12 @@ void ADS122C04::_adcTask(void *pvParameters) {
                     self->tare();
                     break;
 
-                case adc_cmd::CALIBRATE:
-                    self->scale_calibrate();
+                case adc_cmd::CALIBRATE0:
+                    self->scale_calibrate(); //0
+                    break;
+
+                case adc_cmd::CALIBRATE100:
+                    self->scale_calibrate(); //100
                     break;
 
                 case adc_cmd::TEMPERATURE: {

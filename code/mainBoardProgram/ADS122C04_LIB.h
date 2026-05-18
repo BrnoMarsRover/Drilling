@@ -117,7 +117,8 @@ public:
     void    request_measure(void);
     void    request_tmp(void);
     void    set_tare(void);
-    void    set_calibration(void);
+    void    set_calibration_0(void);
+    void    set_calibration_100(void);
     void    task_start_acqu(void); // to be written
     float   measure_for_time(uint32_t sec, uint32_t sample_num); // to be an array? each X ms will interript set adc_cmd:MEASURE and store value to an array, ms between samples will be calculated from sample num and sec
 
@@ -131,6 +132,7 @@ public:
 private:
     TwoWire *_wire;
     uint8_t  _addr;
+    float _cal_adc_zero = 0.0f; // stored between CALIBRATE_0 and CALIBRATE_100
     volatile float   cal_a;
     volatile float   cal_b;
     volatile float   tare_grams;
@@ -148,7 +150,8 @@ private:
     enum class adc_cmd : uint8_t {
     MEASURE,
     TARE,
-    CALIBRATE,
+    CALIBRATE0,
+    CALIBRATE100,
     TEMPERATURE
     };
 
