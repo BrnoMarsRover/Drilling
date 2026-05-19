@@ -275,9 +275,6 @@ void handleSimpleCommand()
                           cmd.endsWith("S") ? adc2 : nullptr;
       if (target == nullptr) { return; }
       target->request_measure(); // old float w = target->measure_weight();
-      //Serial.print(w, 4);
-      //Serial.println("g");
-      //if (w > 2000.0f) Serial.println("Scale overweight");
     }
     else if (cmd.startsWith("GW")) {
       ADS122C04 *target = cmd.endsWith("D") ? adc1 :
@@ -287,34 +284,40 @@ void handleSimpleCommand()
         float w = target->get_last_weight();
         Serial.print(w, 4);
         Serial.println("g");
-        if (w > 2000.0f) Serial.println("Scale overweight");
+        if (w > 2000.0f) Serial.println("[ADC] Scale overweight");
       }
       else {
-        Serial.println("No weight result ready");
+        Serial.println("[ADC] No weight result ready");
       }
     }
     else if (cmd.startsWith("TRE")) {
       ADS122C04 *target = cmd.endsWith("D") ? adc1 : cmd.endsWith("S") ? adc2 : nullptr;
       if (target == nullptr) { return; }
-      Serial.println("Tare start");
+      Serial.println("[ADC] Tare start");
       target->set_tare();
     }
     else if (cmd.startsWith("CLB0")) {
       ADS122C04 *target = cmd.endsWith("D") ? adc1 : cmd.endsWith("S") ? adc2 : nullptr;
       if (target == nullptr) { return; }
-      Serial.println("Calibration start 0g");
+      Serial.println("[ADC] Calibration start 0g");
       target->set_calibration_0();
     }
     else if (cmd.startsWith("CLB100")) {
       ADS122C04 *target = cmd.endsWith("D") ? adc1 : cmd.endsWith("S") ? adc2 : nullptr;
       if (target == nullptr) { return; }
-      Serial.println("Calibration start 100g");
+      Serial.println("[ADC] Calibration start 100g");
       target->set_calibration_100();
     }
     else if (cmd.startsWith("ADCTMP")) {
       ADS122C04 *target = cmd.endsWith("D") ? adc1 : cmd.endsWith("S") ? adc2 : nullptr;
       if (target == nullptr) { return; }
-      Serial.print("Chip temperature: ");
+      Serial.println("[ADC] tmp measured");
+      target->request_tmp();
+    }
+    else if (cmd.startsWith("GT")) {
+      ADS122C04 *target = cmd.endsWith("D") ? adc1 : cmd.endsWith("S") ? adc2 : nullptr;
+      if (target == nullptr) { return; }
+      Serial.print("[ADC] Chip tmp: ");
       Serial.print(target->get_last_temp(), 4);
       Serial.println(" °C");
     }
@@ -325,11 +328,11 @@ void handleSimpleCommand()
       //ADS122C04 *target = adc2;
       //if (target == nullptr) { Serial.println("ADC surface sample not assigned"); }
       adc2->reset();
-      Serial.println("ADC's reset complete");
+      Serial.println("[ADC] resets complete");
     }
     else {
       Serial.println("Neznamy prikaz.");
-      Serial.println("Pouzij: U, D, S, R100, +, -, A2000, X, ?, WGH+D/S, TRE+D/S, CLB+0/100+D/S, ADCTMP+D/S, ADCRST, GW+D/S");
+      Serial.println("Pouzij: U, D, S, R100, +, -, A2000, X, ?, WGH+D/S, TRE+D/S, CLB+0/100+D/S, ADCTMP+D/S, ADCRST, GW+D/S, GT+D/S");
     }
   }
 }
@@ -360,7 +363,9 @@ void setup() {
     0x45 // address for deep sample weight
     //2 // n_reset pin
   );
-  adc1->task_start(); // may be put at end of constructor, to be tested
+  adc1->begin();
+  adc2->begin();
+  adc1->task_start(); // may be put at end begin, to be tested
   adc2->task_start();
 }
 

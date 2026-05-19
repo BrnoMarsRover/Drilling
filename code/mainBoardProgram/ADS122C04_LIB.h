@@ -68,6 +68,7 @@ public:
     ADS122C04(TwoWire &wire, uint8_t addr = 0x44)
         : _wire(&wire), _addr(addr), cal_a(0.00467235f), cal_b(-6054.52392578f), tare_grams(0.0f) // old: cal_a(1.0f), cal_b(0.0f), tare_grams(0.0f) _resetPin(resetPin)
     {
+      /*
       delay(1);
       reset(); // should not pull down RST pin
       // REG0: MUX=0000 (AIN0+/AIN1-), GAIN=111 (x16), PGA_BYPASS=0  → 0x0E // old 1000 -> 0x08
@@ -87,11 +88,13 @@ public:
         Serial.print(addr, HEX);
         Serial.println(" INIT FAIL");
       }
+      */
     }
     ~ADS122C04();
 
     // Low-level control
     //void    init(void);
+    void    begin(void);
     void    reset(void);
     void    start(void);
     void    update(void);
