@@ -20,27 +20,48 @@ The chekcsum algorithm is "Sum complement". See: https://en.wikipedia.org/wiki/C
 The checksum is computed only from the payload.
 
 ## Example 1
-Rover: 0x02 (start) -> 0x01 (length 1) -> 0x01 (message - stop) -> 0x?? (checksum) -> 0x03 (end)\
-Drill: 0x02 (start) -> 0x01 (length 1) -> 0x01 (message - request to stop received, stopping) -> 0xidk (checksum) -> 0x03 (end) 
+Rover: 0x02 (start) -> 0x01 (length 1) -> 0x01 (message - reset) -> 0x?? (checksum) -> 0x03 (end)\
+Drill: 0x02 (start) -> 0x01 (length 1) -> 0x01 (message - request to reset received. Resetting.) -> 0x?? (checksum) -> 0x03 (end) 
 
 ## Example 2
-Rover: ...0x03... (send vertical drive position)\
-Drill: ...0x03 (request received) -> 0x00 (position: 0 cm)...
+Rover: 0x02 (start) -> 0x01 (length 1) -> 0x42 (GET WEIGHT DEEP) -> 0x?? (checksum) -> 0x03 (end)\
+Drill: 0x02 (start) -> 0x01 (length 5) -> 0x42 (Weight request received. Weight follows.) -> 4 bytes-float -> 0x?? (checksum) -> 0x03 (end)
 
-|Name and description | Message from rover | Function argument from rover | Response data from drill |
-|-                    |-                   |-                             |-                         |
-| STOP - Restarts the microcontroller. Retracts the deep sample box. Returns the vertical drive to its uppermost position. Also calibrates the vertical position value. | 1 | None | None |
-| DRILL - Extract a deep sample from specified depth | 2 | uint8 - desired drill depth [cm] | None |
-| STATE - Requests the state of the drilling mechanism | 3 | None | uint8 [code of the current state] |
-| HEIGHT - Requests the current height of the vertical drive | 4 | None | uint8 - current distance from the uppermost position (higher number means lower height) [cm] |
-| WEIGHT DEEP - Requests the weight of the deep sample | 5 | None | float [grams] |
-| WEIGHT SURFACE - Requests the weight of the surface sample | 6 | None | float [grams] |
-| DRILL SPEED - sets the speed of the drill/spiral | 100 | int8 [RPM] | None |
-| VERTICAL SPEED - sets the speed of the vertical drive| 101 | int8 [mm/s] | None |
-| STORAGE POSITION - sets the position of the deep sample storage box | 102 | uint8 [position] | None |
-| WEIGH DEEP - Start weighing the deep sample | 103 | None | None |
-| WEIGH SURFACE - Start weighing the surface sample | 104 | None | None |
-| ROCK OPEN - opens the rock sample box | 252 | None | None |
-| ROCK CLOSE - closes the rock sample box | 253 | None | None |
-| SAND OPEN - opens the sand sample box  | 254 | None | None |
-| SAND CLOSE - closes the sand sample box  | 255 | None | None |
+| Name and description | Message from rover | Function argument from rover | Response data from drill |
+|-                     |-                   |-                             |-                         |
+| RESTART - Restarts the microcontroller. Retracts the deep sample box. Returns the vertical drive to its uppermost position. Also calibrates the vertical position value. | 0x01 | None | None |
+| STATE - Requests the state of the drilling mechanism | 0x02 | None | Response is in table below |
+| DRILL AUTO - Automatically extract a deep sample from specified depth. Blocks manual commands. | 0x03 | Desired drill depth - uint8 [cm] | None |
+| STOP AUTO - Stops the automatic drilling procedure. Unlocks manual commands. | 0x04 | None | None |
+| CALIBRATE HEIGHT - Moves the carriage up, until it hits the top limit switch. Sets height = 0 at that position. | 0x05 | 0 | 0 |
+| DRILL SPEED - sets the speed of the drill/spiral | 0x20 | int16 [RPM] | None |
+| VERTICAL SPEED - sets the speed of the vertical drive| 0x21 | int8 [mm/s] | None |
+| STORAGE POSITION - sets the position of the deep sample storage box | 0x22 | uint8 [position] | None |
+| WEIGH DEEP - Start weighing the deep sample | 0x40 | None | None |
+| WEIGH SURFACE - Start weighing the surface sample | 0x41 | None | None |
+| GET WEIGHT DEEP - Requests the weight of the deep sample | 0x42 | None | float [grams] |
+| GET WEIGHT SURFACE - Requests the weight of the surface sample | 0x43 | None | float [grams] |
+| ROCK OPEN - opens the rock sample box | 0x50 | None | None |
+| ROCK CLOSE - closes the rock sample box | 0x51 | None | None |
+| SAND OPEN - opens the sand sample box  | 0x52 | None | None |
+| SAND CLOSE - closes the sand sample box  | 0x53 | None | None |
+
+STATE response table
+| Variable meaning | Data type | Unit |
+|-                 |-          |-     |
+| Current distance of the carriage from uppermost position | uint8 | cm |
+| Motor speed | int16 | RPM |
+| Motor temperature | uint8 | °C |
+| Tray angle | uint16 | ° |
+| Software state | uint8 | Code of the state - meaning in table below yet again :) |
+
+Software state codes 
+| Code | Meaning |
+|-     |-        |
+| 0x00 | Drill is initializing. |
+| 0x01 | Error. Try restarting. |
+| 0x02 | Device ready. Automatic drilling procedure disabled. |
+| 0xF0 | Automatic procedure active. Drilling down. |
+| 0xF1 | Automatic procedure active. Could not reach the desired depth. |
+| 0xF2 | Automatic procedure active. Desired depth reached. Moving up. |
+| 0xF3 | Automatic procedure active. Storing the sample. |
