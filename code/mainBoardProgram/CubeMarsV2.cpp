@@ -91,16 +91,14 @@ void CubeMarsV2::handleRX()
         break;
 
       case READ_LENGTH:
+        if (b == 0 || b > MAX_PAYLOAD - 1)  // -1 to leave room for checksum byte
+        {
+          parserState = WAIT_START;
+          break;
+        }
         rxLength = b;
         rxIndex = 0;
-        if(rxLength > 0)
-        {
-          parserState = READ_PAYLOAD;
-        }
-        else
-        {
-          parserState = READ_CRC1;
-        }
+        parserState = READ_PAYLOAD;
         break;
 
       case READ_PAYLOAD:

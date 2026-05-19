@@ -132,11 +132,17 @@ ADS122C04 *adc2 = nullptr; // declaration of ADC Surface sample class
 
 
 //------UART COMMUNICATION
-uint8_t rxBuffer[128];
+void interpretReceivedMsg()
+{
+
+}
+
+constexpr uint8_t rxBufferSize = 32;
+uint8_t rxBuffer[rxBufferSize];
 uint8_t rxLength = 0;
 uint8_t rxIndex = 0;
 uint32_t rxLastByteMillis = 0;
-uint32_t rxTimeoutMillis = 100;
+constexpr uint32_t rxTimeoutMillis = 100;
 
 enum ParseState { WAIT_START, READ_LENGTH, READ_PAYLOAD, READ_CKSUM, WAIT_END };
 ParseState parserState = WAIT_START;
@@ -161,16 +167,14 @@ void handleCommand()
         break;
 
       case READ_LENGTH:
+        if (b == 0 || b > rxBufferSize - 1)  // -1 to leave room for checksum byte
+        {
+          parserState = WAIT_START;
+          break;
+        }
         rxLength = b;
         rxIndex = 0;
-        if(rxLength > 0)
-        {
-          parserState = READ_PAYLOAD;
-        }
-        else
-        {
-          parserState = READ_CKSUM;
-        }
+        parserState = READ_PAYLOAD;
         break;
 
       case READ_PAYLOAD:
@@ -187,10 +191,14 @@ void handleCommand()
       case WAIT_END:
         if (b == 3) // ETX
         {
-          //TODO: checksumrxBuffer[rxLength]
-          if (true)
+          uint8_t checksum = 0;
+          for(uint8_t i = 0; i < rxLength + 1; i++)
           {
-            // call interpreter
+            checksum += rxBuffer[i];
+          }
+          if (checksum == 0)
+          {
+            interpretReceivedMsg();
           }
         }
         parserState = WAIT_START;
@@ -198,6 +206,8 @@ void handleCommand()
     }
   }
 }
+
+
 
 void handleSimpleCommand()
 {
