@@ -9,8 +9,12 @@
 #include "ADS122C04_LIB.h"
 #include "VL53L1X_Sensor.h"
 
-//-------I2C
+//Define to command via ASCII messages through ArduinoIDE console.
+//Comment out to utilize command via Python app.
+#define simpleCommand
 
+
+//-------I2C
 constexpr uint8_t sdaPin = 21;
 constexpr uint8_t sclPin = 22;
 constexpr uint32_t i2cFrequency = 100000;
@@ -127,133 +131,206 @@ ADS122C04 *adc1 = nullptr; // declaration of ADC Deep sample class
 ADS122C04 *adc2 = nullptr; // declaration of ADC Surface sample class
 
 
-void handleCommand(String cmd) {
-  cmd.trim();
-  cmd.toUpperCase();
+//------UART COMMUNICATION
+uint8_t rxBuffer[128];
+uint8_t rxLength = 0;
+uint8_t rxIndex = 0;
+uint32_t rxLastByteMillis = 0;
+uint32_t rxTimeoutMillis = 100;
 
-  if (cmd.length() == 0) return;
+enum ParseState { WAIT_START, READ_LENGTH, READ_PAYLOAD, READ_CKSUM, WAIT_END };
+ParseState parserState = WAIT_START;
 
-  if (cmd == "U") {
-    linearAxis.moveUp();
-  }
-  else if (cmd == "D") {
-    linearAxis.moveDown();
-  }
-  else if (cmd == "S") {
-    linearAxis.stop();
-  }
-  else if (cmd == "+") {
-    linearAxis.changeSpeedRelative(100);
-  }
-  else if (cmd == "-") {
-    linearAxis.changeSpeedRelative(-100);
-  }
-  else if (cmd.startsWith("R")) {
-    int value = cmd.substring(1).toInt();
-    if (value > 0) {
-      linearAxis.setSpeed((uint32_t)value);
-    } else {
-      Serial.println("Chyba: pouzij napr. R100");
-    }
-  }
-  else if (cmd.startsWith("RM")) { // mm/s
-  float value = cmd.substring(2).toFloat();
-  if (value > 0) {
-    linearAxis.setSpeedMMps(value);
-    Serial.print("Rychlost mm/s: ");
-    Serial.println(linearAxis.getSpeedMMps());
-    }
-  }
-  else if (cmd == "X") {
-    linearAxis.zero();
-  }
-  else if (cmd == "?") {
-    linearAxis.printStatus(Serial);
-  }
-  else if (cmd == "TOF") {
-    Serial.print("Vzdálenost: ");
-    Serial.println(distanceSensor.readSingle());
-  }
-  else if (cmd == "SG") {
-    linearAxis.setLoadPrintEnabled(true);
-  }
-  else if (cmd == "NSG") {
-    linearAxis.setLoadPrintEnabled(false);
-  }
-  else if (cmd == "H") {
-    linearAxis.setHeightPrintEnabled(true);
-  }
-  else if (cmd == "NH") {
-    linearAxis.setHeightPrintEnabled(false);
-  }
-  else if (cmd.startsWith("M")) {   //CUBEMARS MOTOR COMMANDS
-    int value = cmd.substring(1).toInt();
-      motorDriver.setRPM(value);
-  }
-  else if(cmd == "Z")
+void handleCommand()
+{
+  // Reset parser if it has been stuck mid-packet for too long
+  if (parserState != WAIT_START && (millis() - rxLastByteMillis) > rxTimeoutMillis)
   {
-    motorDriver.printMotorInfoToDebug();
+    parserState = WAIT_START;
   }
-  else if (cmd.startsWith("WGH")) {
-    ADS122C04 *target = cmd.endsWith("D") ? adc1 :
-                        cmd.endsWith("S") ? adc2 : nullptr;
-    if (target == nullptr) { return; }
-    target->request_measure(); // old float w = target->measure_weight();
-    //Serial.print(w, 4);
-    //Serial.println("g");
-    //if (w > 2000.0f) Serial.println("Scale overweight");
+
+  while (Serial.available())
+  {
+    rxLastByteMillis = millis();
+    uint8_t b = Serial.read();
+
+    switch (parserState)
+    {
+      case WAIT_START:
+        if (b == 2) parserState = READ_LENGTH;
+        break;
+
+      case READ_LENGTH:
+        rxLength = b;
+        rxIndex = 0;
+        if(rxLength > 0)
+        {
+          parserState = READ_PAYLOAD;
+        }
+        else
+        {
+          parserState = READ_CKSUM;
+        }
+        break;
+
+      case READ_PAYLOAD:
+        rxBuffer[rxIndex] = b;
+        rxIndex++;
+        if (rxIndex >= rxLength) parserState = READ_CKSUM;
+        break;
+
+      case READ_CKSUM:
+        rxBuffer[rxLength] = b;
+        parserState = WAIT_END;
+        break;
+
+      case WAIT_END:
+        if (b == 3) // ETX
+        {
+          //TODO: checksumrxBuffer[rxLength]
+          if (true)
+          {
+            // call interpreter
+          }
+        }
+        parserState = WAIT_START;
+        break;
+    }
   }
-  else if (cmd.startsWith("GW")) {
-    ADS122C04 *target = cmd.endsWith("D") ? adc1 :
-                        cmd.endsWith("S") ? adc2 : nullptr;
-    if (target == nullptr) { return; }
-    if(target->result_ready() == true){
-      float w = target->get_last_weight();
-      Serial.print(w, 4);
-      Serial.println("g");
-      if (w > 2000.0f) Serial.println("Scale overweight");
+}
+
+void handleSimpleCommand()
+{
+  if (Serial.available())
+  {
+    String cmd = Serial.readStringUntil('\n');
+    cmd.trim();
+    cmd.toUpperCase();
+
+    if (cmd.length() == 0) return;
+
+    if (cmd == "U") {
+      linearAxis.moveUp();
+    }
+    else if (cmd == "D") {
+      linearAxis.moveDown();
+    }
+    else if (cmd == "S") {
+      linearAxis.stop();
+    }
+    else if (cmd == "+") {
+      linearAxis.changeSpeedRelative(100);
+    }
+    else if (cmd == "-") {
+      linearAxis.changeSpeedRelative(-100);
+    }
+    else if (cmd.startsWith("R")) {
+      int value = cmd.substring(1).toInt();
+      if (value > 0) {
+        linearAxis.setSpeed((uint32_t)value);
+      } else {
+        Serial.println("Chyba: pouzij napr. R100");
+      }
+    }
+    else if (cmd.startsWith("RM")) { // mm/s
+    float value = cmd.substring(2).toFloat();
+    if (value > 0) {
+      linearAxis.setSpeedMMps(value);
+      Serial.print("Rychlost mm/s: ");
+      Serial.println(linearAxis.getSpeedMMps());
+      }
+    }
+    else if (cmd == "X") {
+      linearAxis.zero();
+    }
+    else if (cmd == "?") {
+      linearAxis.printStatus(Serial);
+    }
+    else if (cmd == "TOF") {
+      Serial.print("Vzdálenost: ");
+      Serial.println(distanceSensor.readSingle());
+    }
+    else if (cmd == "SG") {
+      linearAxis.setLoadPrintEnabled(true);
+    }
+    else if (cmd == "NSG") {
+      linearAxis.setLoadPrintEnabled(false);
+    }
+    else if (cmd == "H") {
+      linearAxis.setHeightPrintEnabled(true);
+    }
+    else if (cmd == "NH") {
+      linearAxis.setHeightPrintEnabled(false);
+    }
+    else if (cmd.startsWith("M")) {   //CUBEMARS MOTOR COMMANDS
+      int value = cmd.substring(1).toInt();
+        motorDriver.setRPM(value);
+    }
+    else if(cmd == "Z")
+    {
+      motorDriver.printMotorInfoToDebug();
+    }
+    else if (cmd.startsWith("WGH")) {
+      ADS122C04 *target = cmd.endsWith("D") ? adc1 :
+                          cmd.endsWith("S") ? adc2 : nullptr;
+      if (target == nullptr) { return; }
+      target->request_measure(); // old float w = target->measure_weight();
+      //Serial.print(w, 4);
+      //Serial.println("g");
+      //if (w > 2000.0f) Serial.println("Scale overweight");
+    }
+    else if (cmd.startsWith("GW")) {
+      ADS122C04 *target = cmd.endsWith("D") ? adc1 :
+                          cmd.endsWith("S") ? adc2 : nullptr;
+      if (target == nullptr) { return; }
+      if(target->result_ready() == true){
+        float w = target->get_last_weight();
+        Serial.print(w, 4);
+        Serial.println("g");
+        if (w > 2000.0f) Serial.println("Scale overweight");
+      }
+      else {
+        Serial.println("No weight result ready");
+      }
+    }
+    else if (cmd.startsWith("TRE")) {
+      ADS122C04 *target = cmd.endsWith("D") ? adc1 : cmd.endsWith("S") ? adc2 : nullptr;
+      if (target == nullptr) { return; }
+      Serial.println("Tare start");
+      target->set_tare();
+    }
+    else if (cmd.startsWith("CLB0")) {
+      ADS122C04 *target = cmd.endsWith("D") ? adc1 : cmd.endsWith("S") ? adc2 : nullptr;
+      if (target == nullptr) { return; }
+      Serial.println("Calibration start 0g");
+      target->set_calibration_0();
+    }
+    else if (cmd.startsWith("CLB100")) {
+      ADS122C04 *target = cmd.endsWith("D") ? adc1 : cmd.endsWith("S") ? adc2 : nullptr;
+      if (target == nullptr) { return; }
+      Serial.println("Calibration start 100g");
+      target->set_calibration_100();
+    }
+    else if (cmd.startsWith("ADCTMP")) {
+      ADS122C04 *target = cmd.endsWith("D") ? adc1 : cmd.endsWith("S") ? adc2 : nullptr;
+      if (target == nullptr) { return; }
+      Serial.print("Chip temperature: ");
+      Serial.print(target->get_last_temp(), 4);
+      Serial.println(" °C");
+    }
+    else if (cmd.startsWith("ADCRST")) {
+      //ADS122C04 *target = adc1;
+      //if (target == nullptr) { Serial.println("ADC deep sample not assigned"); }
+      adc1->reset();
+      //ADS122C04 *target = adc2;
+      //if (target == nullptr) { Serial.println("ADC surface sample not assigned"); }
+      adc2->reset();
+      Serial.println("ADC's reset complete");
     }
     else {
-      Serial.println("No weight result ready");
+      Serial.println("Neznamy prikaz.");
+      Serial.println("Pouzij: U, D, S, R100, +, -, A2000, X, ?, WGH+D/S, TRE+D/S, CLB+0/100+D/S, ADCTMP+D/S, ADCRST, GW+D/S");
     }
-  }
-  else if (cmd.startsWith("TRE")) {
-    ADS122C04 *target = cmd.endsWith("D") ? adc1 : cmd.endsWith("S") ? adc2 : nullptr;
-    if (target == nullptr) { return; }
-    Serial.println("Tare start");
-    target->set_tare();
-  }
-  else if (cmd.startsWith("CLB0")) {
-    ADS122C04 *target = cmd.endsWith("D") ? adc1 : cmd.endsWith("S") ? adc2 : nullptr;
-    if (target == nullptr) { return; }
-    Serial.println("Calibration start 0g");
-    target->set_calibration_0();
-  }
-  else if (cmd.startsWith("CLB100")) {
-    ADS122C04 *target = cmd.endsWith("D") ? adc1 : cmd.endsWith("S") ? adc2 : nullptr;
-    if (target == nullptr) { return; }
-    Serial.println("Calibration start 100g");
-    target->set_calibration_100();
-  }
-  else if (cmd.startsWith("ADCTMP")) {
-    ADS122C04 *target = cmd.endsWith("D") ? adc1 : cmd.endsWith("S") ? adc2 : nullptr;
-    if (target == nullptr) { return; }
-    Serial.print("Chip temperature: ");
-    Serial.print(target->get_last_temp(), 4);
-    Serial.println(" °C");
-  }
-  else if (cmd.startsWith("ADCRST")) {
-    //ADS122C04 *target = adc1;
-    //if (target == nullptr) { Serial.println("ADC deep sample not assigned"); }
-    adc1->reset();
-    //ADS122C04 *target = adc2;
-    //if (target == nullptr) { Serial.println("ADC surface sample not assigned"); }
-    adc2->reset();
-    Serial.println("ADC's reset complete");
-  }
-  else {
-    Serial.println("Neznamy prikaz.");
-    Serial.println("Pouzij: U, D, S, R100, +, -, A2000, X, ?, WGH+D/S, TRE+D/S, CLB+0/100+D/S, ADCTMP+D/S, ADCRST, GW+D/S");
   }
 }
 
@@ -295,11 +372,11 @@ void loop()
 
   //adc1->update(); check if data_ready
 
-  if (Serial.available())
-  {
-    String cmd = Serial.readStringUntil('\n');
-    handleCommand(cmd);
-  }
+  #ifdef simpleCommand
+  handleSimpleCommand();
+  #else
+  handleCommand();
+  #endif
 }
 
 
