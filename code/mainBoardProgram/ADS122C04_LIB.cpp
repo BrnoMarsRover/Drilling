@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-//const int n_reset = 2;
+const int n_reset = 2;
 
 uint8_t ADS122C04::_read_reg(uint8_t reg) {
   _wire->beginTransmission(_addr);
@@ -51,7 +51,6 @@ void ADS122C04::reset(void) {
   _wire->beginTransmission(_addr);
   _wire->write(CMD_RESET);
   _wire->endTransmission();
-  //delay(1); // obsolete
 }
 
 void ADS122C04::start(void) {
@@ -64,6 +63,31 @@ void ADS122C04::powerdown(void) {
   _wire->beginTransmission(_addr);
   _wire->write(CMD_POWERDOWN);
   _wire->endTransmission();
+}
+
+void ADS122C04::begin(void) {
+  pinMode(2,OUTPUT);    // TO ERASE ON BOARD V2
+  digitalWrite(2, HIGH);    // TO ERASE ON BOARD V2
+
+  delay(1);
+  reset(); // should not pull down RST pin
+  // REG0: MUX=0000 (AIN0+/AIN1-), GAIN=111 (x16), PGA_BYPASS=0  → 0x0E // old 1000 -> 0x08
+  // REG1: DR=000 (20SPS), MODE=0, CM=1 (continuous), VREF=00 (ext), TS=0 → 0x08
+  // REG2: IDAC=111 (1500uA), rest 0 → 0x07
+  // REG3: I1MUX=011 (AIN2), I2MUX=100 (AIN3) → 0x70
+  uint8_t cfg[4] = { 0x0E, 0x08, 0x07, 0x70 };
+  for (int i = 0; i < 4; i++) _write_reg(i, cfg[i]);
+  start();
+
+  if (_verify_regs(cfg, 4)) {
+    Serial.print("[ADC] 0x");
+    Serial.print(_addr, HEX);
+    Serial.println(" OK");
+  } else {
+    Serial.print("[ADC] 0x");
+    Serial.print(_addr, HEX);
+    Serial.println(" INIT FAIL");
+  }
 }
 
 ADS122C04::~ADS122C04() {
@@ -170,20 +194,20 @@ void ADS122C04::tare(void) {
 }
 
 void ADS122C04::scale_calibrate_0(void) {
-  Serial.println(F("=== Scale calibration A ==="));
-  Serial.println(F("On scale should be weight of 0g"));
+  Serial.println(F("[ADC] Scale calibration 1/2. "));
+  Serial.print(F("On scale should be weight of 0g"));
 
   float adc_zero = read_median(32);
   _cal_adc_zero = adc_zero;
   Serial.print(F("[ADC] at 0g: "));
   Serial.println(adc_zero, 2);
 
-  Serial.println(F("Place exactly 100 g on scale, then call CLB100+S/D."));
+  Serial.println(F("[ADC] Place exactly 100g on scale, then call CLB100+S/D."));
 }
 
 void ADS122C04::scale_calibrate_100(void) {
-  Serial.println(F("=== Scale calibration B ==="));
-  Serial.println(F("On scale should be weight of 100g"));
+  Serial.println(F("[ADC] Scale calibration 2/2. "));
+  Serial.print(F("On scale should be weight of 100g"));
 
   float adc_100 = read_median(32);
   Serial.print(F("[ADC] at 100 g: "));
@@ -256,7 +280,7 @@ void ADS122C04::task_start() {
     xTaskCreatePinnedToCore(
         _adcTask,               // fnc to run
         taskName,               // old "ADC_Task" system name
-        4096,                   // stack size in bytes
+        2048,                   // stack size in bytes 4096
         this,                   // pvParameters
         1,                      // priority low
         &_adc_task_handle,      // handle stored here not used now
@@ -304,8 +328,8 @@ void ADS122C04::_adcTask(void *pvParameters) {
                     self->_result_ready = true;
                     xSemaphoreGive(self->_mutex);
                     UBaseType_t hwm = uxTaskGetStackHighWaterMark(NULL); // NULL refers to this task; to erase after testing
-                    Serial.println("remaining words till overflow in _adcTask"); // to erase after testing
-                    Serial.println(hwm); // to erase after testing; with 4096 words i wish for this to be max 1000 words left
+                    //Serial.print("[_adcTask] remaining words till overflow: "); // to erase after testing
+                    //Serial.println(hwm); // to erase after testing; with 4096 words i wish for this to be max 1000 words left
                     break;
                 }
                 case adc_cmd::TARE:
