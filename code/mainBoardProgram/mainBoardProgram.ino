@@ -131,6 +131,7 @@ VL53L1X_Sensor distanceSensor(I2CBus);
 ADS122C04 *adc1 = nullptr; // declaration of ADC Deep sample class
 ADS122C04 *adc2 = nullptr; // declaration of ADC Surface sample class
 
+DrillState drillState = STATE_INITIALIZING;
 
 //------UART COMMUNICATION
 #ifdef SIMPLE_COMMAND
@@ -275,12 +276,17 @@ void handleSimpleCommand()
 #else
 RoverComm roverComm(Serial);
 
-void respondToMsg(RoverMessage msg)
+void respondToMsg(const RoverMessage& msg)
 {
   switch(msg.getCommandCode();)
   {
     case CMD_RESTART:
+    {
+      roverComm.sendAck(CMD_RESTART);
+      ESP.restart()
       break;
+    }
+
     case CMD_STATE:
     {
       float maxTmp = motorDriver.getMotorTmp();
@@ -288,27 +294,71 @@ void respondToMsg(RoverMessage msg)
       {
         maxTmp = motorDriver.getMOSTmp();
       }
-      roverComm.sendState((int8_t)linearAxis.getHeightCM(), (int16_t)motorDriver.getRPM(), (uint8_t)maxTmp, 0, STATE_READY );
+      roverComm.sendState((int8_t)linearAxis.getHeightCM(), (int16_t)motorDriver.getRPM(), (uint8_t)maxTmp, 0, drillState );
       break;
     }
+
     case CMD_DRILL_AUTO:
+    {
+      if(drillState == STATE_READY)
+      {
+        drillState = STATE_AUTO_DRILLING_DOWN;
+        roverComm.sendAck(CMD_DRILL_AUTO);
+      }
+      else
+      {
+        roverComm.sendNack()
+      }
       break;
+    }
+
     case CMD_STOP_AUTO:
+    {
+      if(drillState == STATE_AUTO_DRILLING_DOWN || drillState == STATE_AUTO_CANT_REACH || drillState == STATE_AUTO_MOVING_UP || drillState == STATE_AUTO_STORING)
+      {
+        drillState = STATE_READY;
+        roverComm.sendAck(CMD_STOP_AUTO);
+      }
+      else
+      {
+        roverComm.sendNack()
+      }
       break;
+    }
+
     case CMD_CALIBRATE_HEIGHT:
+    {
       break;
+    }
+
     case CMD_DRILL_SPEED:
     {
-      motorDriver.setRPM(msg.getInt16Arg());
-      roverComm.sendAck(CMD_DRILL_SPEED);
+      if(drillState == STATE_READY)
+      {
+        motorDriver.setRPM(msg.getInt16Arg());
+        roverComm.sendAck(CMD_DRILL_SPEED);
+      }
+      else
+      {
+        roverComm.sendNack();
+      }
       break;
     }
+
     case CMD_VERTICAL_SPEED:
     {
-      linearAxis.setSpeed((int32_t)msg.getInt8Arg()*100);
-      roverComm.sendAck(CMD_VERTICAL_SPEED);
+      if(drillState == STATE_READY)
+      {
+        linearAxis.setSpeedMMps(((float)msg.getInt8Arg())*0.1);
+        roverComm.sendAck(CMD_VERTICAL_SPEED);
+      }
+      else
+      {
+        roverComm.sendNack();
+      }
       break;
     }
+
     case CMD_STORAGE_POSITION:
       break;
     case CMD_WEIGH_DEEP:
@@ -333,7 +383,11 @@ void respondToMsg(RoverMessage msg)
 #endif
 
 void setup() {
+  #ifdef SIMPLE_COMMAND
   Serial.begin(115200);
+  #else
+  Serial.begin(38400);
+  #endif
   Serial.setTimeout(10);
 
   setupI2CBus();
@@ -362,6 +416,8 @@ void setup() {
   adc2->begin();
   adc1->task_start(); // may be put at end begin, to be tested
   adc2->task_start();
+
+  drillState = STATE_READY;
 }
 
 void loop()
