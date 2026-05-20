@@ -292,9 +292,9 @@ class App(tk.Tk):
 
     def _set_vertical_speed(self):
         try:
-            mm_s = int(self.vert_speed_var.get())
-            if not (-128 <= mm_s <= 127):
-                self._log("Vertical speed must be between -128 and 127.")
+            mm_s = float(self.vert_speed_var.get())
+            if not (-12.0 <= mm_s <= 12.0):
+                self._log("Vertical speed must be between -12.0 and 12.0 mm/s.")
                 return
             self._send(protocol.cmd_vertical_speed(mm_s), f"VERTICAL SPEED {mm_s} mm/s")
         except ValueError:

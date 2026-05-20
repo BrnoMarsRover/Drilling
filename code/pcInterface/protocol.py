@@ -91,9 +91,9 @@ def cmd_drill_speed(rpm: int):
     # rpm is int16, big-endian
     return build_command(CMD_DRILL_SPEED, struct.pack(">h", rpm))
 
-def cmd_vertical_speed(mm_per_s: int):
-    # mm/s is int8; positive = down, negative = up
-    return build_command(CMD_VERTICAL_SPEED, struct.pack("b", mm_per_s))
+def cmd_vertical_speed(mm_per_s: float):
+    raw = int(round(mm_per_s * 10))
+    return build_command(CMD_VERTICAL_SPEED, struct.pack("b", raw))
 
 def cmd_storage_position(position: int):
     return build_command(CMD_STORAGE_POSITION, struct.pack("B", position))
