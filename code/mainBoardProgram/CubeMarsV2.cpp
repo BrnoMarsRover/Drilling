@@ -7,6 +7,82 @@
 #define RQMASK_OUTCURRENT 0x04
 #define RQMASK_RPM 0x80
 
+
+// ---------------- PUBLIC ----------------
+
+CubeMarsV2::CubeMarsV2(HardwareSerial& serialPort, HardwareSerial& debugSerialPort, uint8_t aRxPin, uint8_t aTxPin)
+  : cubeMarsSerial(serialPort), debugSerial(debugSerialPort), rxPin(aRxPin), txPin(aTxPin)
+{
+}
+
+void CubeMarsV2::begin()
+{
+  cubeMarsSerial.begin(921600, SERIAL_8N1, rxPin, txPin);
+  commNextMillis = millis();
+}
+
+void CubeMarsV2::update()
+{
+  handleRX();
+
+  if(millis() > commNextMillis)
+  {
+    commNextMillis += commDeltaMillis;
+    if(requestedERPM == 0)
+    {
+      transmitDuty(0.0);
+    }
+    else
+    {
+      transmitERPM();
+    }
+
+    requestTmpCurrRPM();
+  }
+}
+
+void CubeMarsV2::setERPM(int32_t erpm)
+{
+  requestedERPM = erpm;
+  transmitERPM();
+}
+
+void CubeMarsV2::setRPM(float rpm)
+{
+  setERPM((int32_t)(rpm * poleCount * gearboxRatio));
+}
+
+void CubeMarsV2::requestAllData()
+{
+  uint8_t payload[1] = {4};
+  transmitPayload(payload, 1);
+}
+
+void CubeMarsV2::requestTmpCurrRPM()
+{
+  uint8_t payload[5] = {50, 0,0,0,0};
+  int32_t mask = RQMASK_MOSTMP | RQMASK_MOTORTMP | RQMASK_OUTCURRENT | RQMASK_RPM;
+  int32ToBytes(mask, payload + 1);
+  transmitPayload(payload, 5);
+}
+
+float CubeMarsV2::getMOSTmp()  { return MOSTmp; }
+float CubeMarsV2::getMotorTmp() { return motorTmp; }
+float CubeMarsV2::getCurrent() { return current; }
+float CubeMarsV2::getRPM()     { return RPM; }
+
+void CubeMarsV2::printMotorInfoToDebug()
+{
+  debugSerial.print("MOS tmp: ");
+  debugSerial.println(MOSTmp);
+  debugSerial.print("Motor tmp: ");
+  debugSerial.println(motorTmp);
+  debugSerial.print("Current: ");
+  debugSerial.println(current);
+  debugSerial.print("Speed: ");
+  debugSerial.println(RPM);
+}
+
 // ---------------- PRIVATE ----------------
 
 void CubeMarsV2::transmitERPM()
@@ -143,79 +219,4 @@ void CubeMarsV2::readTmpCurrRPM()
   motorTmp = 0.1 * bytesToInt16(rxBuffer + begin + 2);
   current = 0.01 * bytesToInt32(rxBuffer + begin + 4);
   RPM = (1.0 / (poleCount * gearboxRatio)) * bytesToInt32(rxBuffer + begin + 8);
-}
-
-// ---------------- PUBLIC ----------------
-
-CubeMarsV2::CubeMarsV2(HardwareSerial& serialPort, HardwareSerial& debugSerialPort, uint8_t aRxPin, uint8_t aTxPin)
-  : cubeMarsSerial(serialPort), debugSerial(debugSerialPort), rxPin(aRxPin), txPin(aTxPin)
-{
-}
-
-void CubeMarsV2::begin()
-{
-  cubeMarsSerial.begin(921600, SERIAL_8N1, rxPin, txPin);
-  commNextMillis = millis();
-}
-
-void CubeMarsV2::update()
-{
-  handleRX();
-
-  if(millis() > commNextMillis)
-  {
-    commNextMillis += commDeltaMillis;
-    if(requestedERPM == 0)
-    {
-      transmitDuty(0.0);
-    }
-    else
-    {
-      transmitERPM();
-    }
-
-    requestTmpCurrRPM();
-  }
-}
-
-void CubeMarsV2::setERPM(int32_t erpm)
-{
-  requestedERPM = erpm;
-  transmitERPM();
-}
-
-void CubeMarsV2::setRPM(float rpm)
-{
-  setERPM((int32_t)(rpm * poleCount * gearboxRatio));
-}
-
-void CubeMarsV2::requestAllData()
-{
-  uint8_t payload[1] = {4};
-  transmitPayload(payload, 1);
-}
-
-void CubeMarsV2::requestTmpCurrRPM()
-{
-  uint8_t payload[5] = {50, 0,0,0,0};
-  int32_t mask = RQMASK_MOSTMP | RQMASK_MOTORTMP | RQMASK_OUTCURRENT | RQMASK_RPM;
-  int32ToBytes(mask, payload + 1);
-  transmitPayload(payload, 5);
-}
-
-float CubeMarsV2::getMOSTmp()  { return MOSTmp; }
-float CubeMarsV2::getMotorTmp() { return motorTmp; }
-float CubeMarsV2::getCurrent() { return current; }
-float CubeMarsV2::getRPM()     { return RPM; }
-
-void CubeMarsV2::printMotorInfoToDebug()
-{
-  debugSerial.print("MOS tmp: ");
-  debugSerial.println(MOSTmp);
-  debugSerial.print("Motor tmp: ");
-  debugSerial.println(motorTmp);
-  debugSerial.print("Current: ");
-  debugSerial.println(current);
-  debugSerial.print("Speed: ");
-  debugSerial.println(RPM);
 }

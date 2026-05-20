@@ -2,6 +2,26 @@
 
 class CubeMarsV2
 {
+public:
+  CubeMarsV2(HardwareSerial& serialPort, HardwareSerial& debugSerialPort, uint8_t rxPin, uint8_t txPin);
+
+  void begin();
+
+  void update(); // Call this in loop()
+
+  void setERPM(int32_t erpm);
+  void setRPM(float rpm);
+
+  void requestAllData();
+  void requestTmpCurrRPM();
+
+  float getMOSTmp();
+  float getMotorTmp();
+  float getCurrent();
+  float getRPM();
+
+  void printMotorInfoToDebug();
+
 private:
   uint8_t rxPin;
   uint8_t txPin;
@@ -47,24 +67,4 @@ private:
   static constexpr uint32_t commDeltaMillis = 500;
   uint32_t rxLastByteMillis = 0;
   static constexpr uint32_t rxTimeoutMillis = 50;
-
-public:
-  CubeMarsV2(HardwareSerial& serialPort, HardwareSerial& debugSerialPort, uint8_t rxPin, uint8_t txPin);
-
-  void begin();
-
-  void update(); // Call this in loop()
-
-  void setERPM(int32_t erpm);
-  void setRPM(float rpm);
-
-  void requestAllData();
-  void requestTmpCurrRPM();
-
-  float getMOSTmp();
-  float getMotorTmp();
-  float getCurrent();
-  float getRPM();
-
-  void printMotorInfoToDebug();
 };

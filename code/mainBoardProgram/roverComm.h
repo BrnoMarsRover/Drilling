@@ -5,7 +5,7 @@
 //  Message queue depth — increase if commands are arriving faster    //
 //  than main() can process them                                       //
 // ------------------------------------------------------------------ //
-#define PROTOCOL_QUEUE_DEPTH 8
+#define PROTOCOL_QUEUE_DEPTH 4
 
 // ------------------------------------------------------------------ //
 //  Command codes                                                      //
@@ -60,8 +60,8 @@ struct DrillMessage
 class RoverComm
 {
 public:
-    // Call once in setup()
-    void begin(HardwareSerial& serial);
+    // Constructor. The serial needs to be initialized in setup, independent of the class.
+    RoverComm(HardwareSerial& serial);
 
     // Call every loop() — runs the parser and feeds the rx queue
     void handle();
@@ -85,17 +85,16 @@ public:
     void sendFloat(DrillCommand cmd, float value);
 
     // Send the full STATE response
-    void sendState(uint8_t heightCm, int16_t rpm, uint8_t tempC,
-                   uint16_t trayAngle, DrillState swState);
+    void sendState(uint8_t heightCm, int16_t rpm, uint8_t tempC, uint16_t trayAngle, DrillState swState);
 
 private:
-    HardwareSerial* _serial;
+    HardwareSerial& _serial;
 
     // ---- Parser state -------------------------------------------- //
     enum ParseState { WAIT_START, READ_LENGTH, READ_PAYLOAD, READ_CKSUM, WAIT_END };
     ParseState _parserState = WAIT_START;
 
-    uint8_t  _rxBuffer[128];
+    uint8_t  _rxBuffer[32];
     uint8_t  _rxLength  = 0;
     uint8_t  _rxIndex   = 0;
     uint32_t _rxLastByteMillis = 0;

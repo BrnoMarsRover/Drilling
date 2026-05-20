@@ -8,10 +8,11 @@
 #include "LinearAxis.h"
 #include "ADS122C04_LIB.h"
 #include "VL53L1X_Sensor.h"
+#include "RoverComm.h"
 
 //Define to command via ASCII messages through ArduinoIDE console.
 //Comment out to utilize command via Python app.
-#define simpleCommand
+#define SIMPLE_COMMAND
 
 
 //-------I2C
@@ -132,82 +133,7 @@ ADS122C04 *adc2 = nullptr; // declaration of ADC Surface sample class
 
 
 //------UART COMMUNICATION
-void interpretReceivedMsg()
-{
-
-}
-
-constexpr uint8_t rxBufferSize = 32;
-uint8_t rxBuffer[rxBufferSize];
-uint8_t rxLength = 0;
-uint8_t rxIndex = 0;
-uint32_t rxLastByteMillis = 0;
-constexpr uint32_t rxTimeoutMillis = 100;
-
-enum ParseState { WAIT_START, READ_LENGTH, READ_PAYLOAD, READ_CKSUM, WAIT_END };
-ParseState parserState = WAIT_START;
-
-void handleCommand()
-{
-  // Reset parser if it has been stuck mid-packet for too long
-  if (parserState != WAIT_START && (millis() - rxLastByteMillis) > rxTimeoutMillis)
-  {
-    parserState = WAIT_START;
-  }
-
-  while (Serial.available())
-  {
-    rxLastByteMillis = millis();
-    uint8_t b = Serial.read();
-
-    switch (parserState)
-    {
-      case WAIT_START:
-        if (b == 2) parserState = READ_LENGTH;
-        break;
-
-      case READ_LENGTH:
-        if (b == 0 || b > rxBufferSize - 1)  // -1 to leave room for checksum byte
-        {
-          parserState = WAIT_START;
-          break;
-        }
-        rxLength = b;
-        rxIndex = 0;
-        parserState = READ_PAYLOAD;
-        break;
-
-      case READ_PAYLOAD:
-        rxBuffer[rxIndex] = b;
-        rxIndex++;
-        if (rxIndex >= rxLength) parserState = READ_CKSUM;
-        break;
-
-      case READ_CKSUM:
-        rxBuffer[rxLength] = b;
-        parserState = WAIT_END;
-        break;
-
-      case WAIT_END:
-        if (b == 3) // ETX
-        {
-          uint8_t checksum = 0;
-          for(uint8_t i = 0; i < rxLength + 1; i++)
-          {
-            checksum += rxBuffer[i];
-          }
-          if (checksum == 0)
-          {
-            interpretReceivedMsg();
-          }
-        }
-        parserState = WAIT_START;
-        break;
-    }
-  }
-}
-
-
+#ifdef SIMPLE_COMMAND
 
 void handleSimpleCommand()
 {
@@ -346,6 +272,26 @@ void handleSimpleCommand()
     }
   }
 }
+#else
+RoverComm roverComm(Serial);
+
+void respondToMsg(struct DrillMessage msg)
+{
+  switch(msg.code)
+  {
+    case CMD_RESTART:
+      break;
+    case CMD_STATE:
+      float maxTmp = motorDriver.getMotorTmp();
+      if(motorDriver.getMOSTmp() > maxTmp)
+        maxTmp = getMOSTmp();
+
+      roverComm.sendState(10, (int16_t)motorDriver.getRPM(), (uint8_t)maxTmp, 0, STATE_READY );
+      break;
+  }
+}
+
+#endif
 
 void setup() {
   Serial.begin(115200);
@@ -387,10 +333,14 @@ void loop()
 
   //adc1->update(); check if data_ready
 
-  #ifdef simpleCommand
+  #ifdef SIMPLE_COMMAND
   handleSimpleCommand();
   #else
-  handleCommand();
+  roverComm.handle();
+  if(roverComm.messageAvailable())
+  {
+    respondToMsg(roverComm.popMessage());
+  }
   #endif
 }
 

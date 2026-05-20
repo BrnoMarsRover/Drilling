@@ -7,9 +7,8 @@
 //  Public                                                             //
 // ------------------------------------------------------------------ //
 
-void RoverComm::begin(HardwareSerial& serial)
+RoverComm::RoverComm(HardwareSerial& serial) : _serial(serial)
 {
-    _serial = &serial;
 }
 
 void RoverComm::handle()
@@ -20,10 +19,10 @@ void RoverComm::handle()
         _parserState = WAIT_START;
     }
 
-    while (_serial->available())
+    while (_serial.available())
     {
         _rxLastByteMillis = millis();
-        uint8_t b = _serial->read();
+        uint8_t b = _serial.read();
 
         switch (_parserState)
         {
@@ -117,8 +116,7 @@ void RoverComm::sendFloat(DrillCommand cmd, float value)
     _sendRaw(payload, 5);
 }
 
-void RoverComm::sendState(uint8_t heightCm, int16_t rpm, uint8_t tempC,
-                               uint16_t trayAngle, DrillState swState)
+void RoverComm::sendState(uint8_t heightCm, int16_t rpm, uint8_t tempC, uint16_t trayAngle, DrillState swState)
 {
     uint8_t payload[8];
     payload[0] = (uint8_t)CMD_STATE;
@@ -176,9 +174,9 @@ uint8_t RoverComm::_checksum(uint8_t* data, uint8_t length) const
 void RoverComm::_sendRaw(uint8_t* payload, uint8_t length)
 {
     uint8_t cs = _checksum(payload, length);
-    _serial->write(STX);
-    _serial->write(length);
-    _serial->write(payload, length);
-    _serial->write(cs);
-    _serial->write(ETX);
+    _serial.write(STX);
+    _serial.write(length);
+    _serial.write(payload, length);
+    _serial.write(cs);
+    _serial.write(ETX);
 }
