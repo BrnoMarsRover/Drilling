@@ -1,15 +1,3 @@
-pcbs/drill_pcb/drill_pcb-backups
-pcbs/drill_pcb/fp-info-cache
-pcbs/drill_pcb/.history/
-
-pcbs/drill_pcb_v1_legacy/drill_pcb-backups
-pcbs/drill_pcb_v1_legacy/fp-info-cache
-pcbs/drill_pcb_v1_legacy/.history
-
-pcbs/drill_pcb_v2/drill_pcb-backups
-pcbs/drill_pcb_v2/fp-info-cache
-pcbs/drill_pcb_v2/.history/
-
 pcbs/adc board/adc board-backups
 pcbs/adc board/fp-info-cache
 pcbs/adc board/.history
@@ -18,3 +6,5 @@ pcbs/*/*.lck
 
 .vscode
 .DS_Store
+
+**/__pycache__/
