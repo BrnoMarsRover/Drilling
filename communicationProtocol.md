@@ -35,7 +35,7 @@ Drill: 0x02 (start) -> 0x01 (length 5) -> 0x42 (Weight request received. Weight 
 | STOP AUTO - Stops the automatic drilling procedure. Unlocks manual commands. | 0x04 | None | None |
 | CALIBRATE HEIGHT - Moves the carriage up, until it hits the top limit switch. Sets height = 0 at that position. | 0x05 | 0 | 0 |
 | DRILL SPEED - sets the speed of the drill/spiral | 0x20 | int16 [RPM] | None |
-| VERTICAL SPEED - sets the speed of the vertical drive| 0x21 | int8 [mm/s] | None |
+| VERTICAL SPEED - sets the speed of the vertical drive| 0x21 | int8 [0,1 mm/s]<br>e.g.&nbsp;100 = 10mm/s | None |
 | STORAGE POSITION - sets the position of the deep sample storage box | 0x22 | uint8 [position] | None |
 | WEIGH DEEP - Start weighing the deep sample | 0x40 | None | None |
 | WEIGH SURFACE - Start weighing the surface sample | 0x41 | None | None |
