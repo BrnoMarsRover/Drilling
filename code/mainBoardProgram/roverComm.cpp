@@ -63,7 +63,8 @@ void RoverComm::handle()
                     }
                     if (sum == 0)
                     {
-                        _interpretMessage();
+                        RoverMessage msg(_rxBuffer, _rxLength);
+                        _pushMessage(msg);
                     }
                 }
                 _parserState = WAIT_START;
@@ -77,9 +78,9 @@ bool RoverComm::messageAvailable() const
     return _queueCount > 0;
 }
 
-DrillMessage RoverComm::popMessage()
+RoverMessage RoverComm::popMessage()
 {
-    DrillMessage msg = _queue[_queueTail];
+    RoverMessage msg = _queue[_queueTail];
     _queueTail = (_queueTail + 1) % PROTOCOL_QUEUE_DEPTH;
     _queueCount--;
     return msg;
@@ -89,7 +90,7 @@ DrillMessage RoverComm::popMessage()
 //  Transmit helpers                                                   //
 // ------------------------------------------------------------------ //
 
-void RoverComm::sendAck(DrillCommand cmd)
+void RoverComm::sendAck(RoverCommand cmd)
 {
     uint8_t payload[1] = { (uint8_t)cmd };
     _sendRaw(payload, 1);
@@ -101,7 +102,7 @@ void RoverComm::sendNack()
     _sendRaw(payload, 1);
 }
 
-void RoverComm::sendFloat(DrillCommand cmd, float value)
+void RoverComm::sendFloat(RoverCommand cmd, float value)
 {
     uint8_t payload[5];
     payload[0] = (uint8_t)cmd;
@@ -116,7 +117,7 @@ void RoverComm::sendFloat(DrillCommand cmd, float value)
     _sendRaw(payload, 5);
 }
 
-void RoverComm::sendState(uint8_t heightCm, int16_t rpm, uint8_t tempC, uint16_t trayAngle, DrillState swState)
+void RoverComm::sendState(int8_t heightCm, int16_t rpm, uint8_t tempC, uint16_t trayAngle, DrillState swState)
 {
     uint8_t payload[8];
     payload[0] = (uint8_t)CMD_STATE;
@@ -135,22 +136,8 @@ void RoverComm::sendState(uint8_t heightCm, int16_t rpm, uint8_t tempC, uint16_t
 //  Private                                                            //
 // ------------------------------------------------------------------ //
 
-void RoverComm::_interpretMessage()
-{
-    // First payload byte is always the command code
-    DrillMessage msg;
-    msg.code          = (DrillCommand)_rxBuffer[0];
-    msg.payloadLength = _rxLength - 1;           // argument bytes after the code
 
-    for (uint8_t i = 0; i < msg.payloadLength; i++)
-    {
-        msg.payload[i] = _rxBuffer[i + 1];
-    }
-
-    _pushMessage(msg);
-}
-
-void RoverComm::_pushMessage(DrillMessage& msg)
+void RoverComm::_pushMessage(RoverMessage& msg)
 {
     if (_queueCount >= PROTOCOL_QUEUE_DEPTH)
     {

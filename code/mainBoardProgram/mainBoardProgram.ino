@@ -275,18 +275,57 @@ void handleSimpleCommand()
 #else
 RoverComm roverComm(Serial);
 
-void respondToMsg(struct DrillMessage msg)
+void respondToMsg(RoverMessage msg)
 {
-  switch(msg.code)
+  switch(msg.getCommandCode();)
   {
     case CMD_RESTART:
       break;
     case CMD_STATE:
+    {
       float maxTmp = motorDriver.getMotorTmp();
       if(motorDriver.getMOSTmp() > maxTmp)
-        maxTmp = getMOSTmp();
-
-      roverComm.sendState(10, (int16_t)motorDriver.getRPM(), (uint8_t)maxTmp, 0, STATE_READY );
+      {
+        maxTmp = motorDriver.getMOSTmp();
+      }
+      roverComm.sendState((int8_t)linearAxis.getHeightCM(), (int16_t)motorDriver.getRPM(), (uint8_t)maxTmp, 0, STATE_READY );
+      break;
+    }
+    case CMD_DRILL_AUTO:
+      break;
+    case CMD_STOP_AUTO:
+      break;
+    case CMD_CALIBRATE_HEIGHT:
+      break;
+    case CMD_DRILL_SPEED:
+    {
+      motorDriver.setRPM(msg.getInt16Arg());
+      roverComm.sendAck(CMD_DRILL_SPEED);
+      break;
+    }
+    case CMD_VERTICAL_SPEED:
+    {
+      linearAxis.setSpeed((int32_t)msg.getInt8Arg()*100);
+      roverComm.sendAck(CMD_VERTICAL_SPEED);
+      break;
+    }
+    case CMD_STORAGE_POSITION:
+      break;
+    case CMD_WEIGH_DEEP:
+      break;
+    case CMD_WEIGH_SURFACE:
+      break;
+    case CMD_GET_WEIGHT_DEEP:
+      break;
+    case CMD_GET_WEIGHT_SURFACE:
+      break;
+    case CMD_ROCK_OPEN:
+      break;
+    case CMD_ROCK_CLOSE:
+      break;
+    case CMD_SAND_OPEN:
+      break;
+    case CMD_SAND_CLOSE:
       break;
   }
 }

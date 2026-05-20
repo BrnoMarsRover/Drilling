@@ -10,7 +10,7 @@
 // ------------------------------------------------------------------ //
 //  Command codes                                                      //
 // ------------------------------------------------------------------ //
-enum DrillCommand : uint8_t
+enum RoverCommand : uint8_t
 {
     CMD_RESTART           = 0x01,
     CMD_STATE             = 0x02,
@@ -47,11 +47,29 @@ enum DrillState : uint8_t
 // ------------------------------------------------------------------ //
 //  Received message — populated by the parser, pulled by main()      //
 // ------------------------------------------------------------------ //
-struct DrillMessage
+class RoverMessage
 {
-    DrillCommand code;
-    uint8_t      payload[16];   // raw argument bytes, big-endian
-    uint8_t      payloadLength; // number of argument bytes (0 if none)
+public:
+    RoverMessage(uint8_t* buffer, uint8_t length)
+    {
+        code = (RoverCommand)buffer[0];
+        argLength = length - 1;           // argument bytes after the code
+        for (uint8_t i = 0; i < argLength; i++)
+        {
+            argArray[i] = buffer[i + 1];
+        }
+    }
+    RoverMessage() : code((RoverCommand)0), argLength(0) {}
+
+    RoverCommand getCommandCode()   {return code;}
+    uint8_t getUint8Arg()   {return argArray[0];}
+    int8_t getInt8Arg()   {return argArray[0];}
+    uint16_t getUint16Arg()     {return ((uint16_t)argArray[0] << 8) | (uint16_t)argArray[1];}
+    int16_t getInt16Arg()     {return ((int16_t)argArray[0] << 8) | (int16_t)argArray[1];}
+private:
+    enum RoverCommand code;
+    uint8_t argArray[4];   // raw argument bytes, big-endian
+    uint8_t argLength; // number of argument bytes (0 if none)
 };
 
 // ------------------------------------------------------------------ //
@@ -71,21 +89,21 @@ public:
 
     // Remove and return the oldest message from the queue.
     // Check messageAvailable() before calling.
-    DrillMessage popMessage();
+    RoverMessage popMessage();
 
     // ---- Transmit helpers ---------------------------------------- //
 
     // Send a response with no data (e.g. simple ACK of a command)
-    void sendAck(DrillCommand cmd);
+    void sendAck(RoverCommand cmd);
 
     // Send a NACK (drill cannot perform the requested command)
     void sendNack();
 
     // Send a float value after the command code (e.g. weight response)
-    void sendFloat(DrillCommand cmd, float value);
+    void sendFloat(RoverCommand cmd, float value);
 
     // Send the full STATE response
-    void sendState(uint8_t heightCm, int16_t rpm, uint8_t tempC, uint16_t trayAngle, DrillState swState);
+    void sendState(int8_t heightCm, int16_t rpm, uint8_t tempC, uint16_t trayAngle, DrillState swState);
 
 private:
     HardwareSerial& _serial;
@@ -101,15 +119,14 @@ private:
     uint32_t _rxTimeoutMillis  = 100;
 
     // ---- Receive queue ------------------------------------------- //
-    DrillMessage _queue[PROTOCOL_QUEUE_DEPTH];
+    RoverMessage _queue[PROTOCOL_QUEUE_DEPTH];
     uint8_t _queueHead = 0;  // next slot to write
     uint8_t _queueTail = 0;  // next slot to read
     uint8_t _queueCount = 0;
 
-    void _pushMessage(DrillMessage& msg);
+    void _pushMessage(RoverMessage& msg);
 
     // ---- Internal helpers ---------------------------------------- //
-    void     _interpretMessage();
     uint8_t  _checksum(uint8_t* data, uint8_t length) const;
     void     _sendRaw(uint8_t* payload, uint8_t length);
 };
