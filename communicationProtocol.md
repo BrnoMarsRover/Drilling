@@ -49,7 +49,7 @@ Drill: 0x02 (start) -> 0x01 (length 5) -> 0x42 (Weight request received. Weight 
 STATE response table
 | Variable meaning | Data type | Unit |
 |-                 |-          |-     |
-| Current distance of the carriage from uppermost position | uint8 | cm |
+| Current distance of the carriage from uppermost position | int8 | cm |
 | Motor speed | int16 | RPM |
 | Motor temperature | uint8 | °C |
 | Tray angle | uint16 | ° |
