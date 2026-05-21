@@ -103,7 +103,7 @@ public:
     void sendFloat(RoverCommand cmd, float value);
 
     // Send the full STATE response
-    void sendState(int8_t heightCm, int16_t rpm, uint8_t tempC, uint16_t trayAngle, DrillState swState);
+    void sendState(int16_t heightMm, int16_t rpm, uint8_t tempC, uint16_t trayAngle, DrillState swState);
 
 private:
     HardwareSerial& _serial;
