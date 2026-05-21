@@ -17,3 +17,16 @@ Currently working on an overhauled design.
 - **Ondrej Stafa**  
   Responsible for DC motor control.
 
+## ESP software structure
+```mermaid
+graph TD;
+    Main-->RoverComm;
+    Main-->MasterHardwareController;
+    MasterHardwareController-->SampleHolder;
+    MasterHardwareController-->DrillController;
+    DrillController-->VerticalDrive;
+    DrillController-->SpiralMotor;
+```
+
+## Communication protocol
+[Here](communicationProtocol.md)
