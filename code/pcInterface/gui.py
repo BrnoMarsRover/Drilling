@@ -94,7 +94,7 @@ class App(tk.Tk):
         frame.grid(row=1, column=0, padx=8, pady=6, sticky="nsew")
 
         labels = [
-            ("Height",       "height_var",     "cm"),
+            ("Height",       "height_var",     "mm"),
             ("Motor speed",  "rpm_var",        "RPM"),
             ("Motor temp",   "temp_var",       "°C"),
             ("Tray angle",   "tray_var",       "°"),
@@ -248,7 +248,7 @@ class App(tk.Tk):
 
         if code == protocol.CMD_STATE and "state" in msg:
             s = msg["state"]
-            self.height_var.set(str(s["height_cm"]))
+            self.height_var.set(str(s["height_mm"]))
             self.rpm_var.set(str(s["rpm"]))
             self.temp_var.set(str(s["temp_c"]))
             self.tray_var.set(str(s["tray_angle"]))

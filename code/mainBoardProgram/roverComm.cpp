@@ -117,19 +117,20 @@ void RoverComm::sendFloat(RoverCommand cmd, float value)
     _sendRaw(payload, 5);
 }
 
-void RoverComm::sendState(int8_t heightCm, int16_t rpm, uint8_t tempC, uint16_t trayAngle, DrillState swState)
+void RoverComm::sendState(int16_t heightMm, int16_t rpm, uint8_t tempC, uint16_t trayAngle, DrillState swState)
 {
-    uint8_t payload[8];
+    uint8_t payload[9];
     payload[0] = (uint8_t)CMD_STATE;
-    payload[1] = heightCm;
-    payload[2] = (uint8_t)(rpm >> 8);       // int16 big-endian
-    payload[3] = (uint8_t)(rpm & 0xFF);
-    payload[4] = tempC;
-    payload[5] = (uint8_t)(trayAngle >> 8); // uint16 big-endian
-    payload[6] = (uint8_t)(trayAngle & 0xFF);
-    payload[7] = (uint8_t)swState;
+    payload[1] = (uint8_t)(heightMm >> 8);
+    payload[2] = (uint8_t)(heightMm & 0xFF);
+    payload[3] = (uint8_t)(rpm >> 8);       // int16 big-endian
+    payload[4] = (uint8_t)(rpm & 0xFF);
+    payload[5] = tempC;
+    payload[6] = (uint8_t)(trayAngle >> 8); // uint16 big-endian
+    payload[7] = (uint8_t)(trayAngle & 0xFF);
+    payload[8] = (uint8_t)swState;
 
-    _sendRaw(payload, 8);
+    _sendRaw(payload, 9);
 }
 
 // ------------------------------------------------------------------ //

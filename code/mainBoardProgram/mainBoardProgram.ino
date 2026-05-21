@@ -12,7 +12,7 @@
 
 //Define to command via ASCII messages through ArduinoIDE console.
 //Comment out to utilize command via Python app.
-#define SIMPLE_COMMAND
+//#define SIMPLE_COMMAND
 
 
 //-------I2C
@@ -278,12 +278,12 @@ RoverComm roverComm(Serial);
 
 void respondToMsg(const RoverMessage& msg)
 {
-  switch(msg.getCommandCode();)
+  switch(msg.getCommandCode())
   {
     case CMD_RESTART:
     {
       roverComm.sendAck(CMD_RESTART);
-      ESP.restart()
+      ESP.restart();
       break;
     }
 
@@ -294,7 +294,7 @@ void respondToMsg(const RoverMessage& msg)
       {
         maxTmp = motorDriver.getMOSTmp();
       }
-      roverComm.sendState((int8_t)linearAxis.getHeightCM(), (int16_t)motorDriver.getRPM(), (uint8_t)maxTmp, 0, drillState );
+      roverComm.sendState((int16_t)linearAxis.getHeightMM(), (int16_t)motorDriver.getRPM(), (uint8_t)maxTmp, 0, drillState );
       break;
     }
 
@@ -307,7 +307,7 @@ void respondToMsg(const RoverMessage& msg)
       }
       else
       {
-        roverComm.sendNack()
+        roverComm.sendNack();
       }
       break;
     }
@@ -321,7 +321,7 @@ void respondToMsg(const RoverMessage& msg)
       }
       else
       {
-        roverComm.sendNack()
+        roverComm.sendNack();
       }
       break;
     }

@@ -160,9 +160,9 @@ def parse_response(data: bytes):
 
     if code == CMD_STATE and len(payload) >= 7:
         # uint8 height, int16 rpm, uint8 temp, uint16 tray_angle, uint8 sw_state
-        height, rpm, temp, tray_angle, sw_state = struct.unpack_from(">bhBHB", payload, 1)
+        height, rpm, temp, tray_angle, sw_state = struct.unpack_from(">hhBHB", payload, 1)
         result["state"] = {
-            "height_cm":   height,
+            "height_mm":   height,
             "rpm":         rpm,
             "temp_c":      temp,
             "tray_angle":  tray_angle,

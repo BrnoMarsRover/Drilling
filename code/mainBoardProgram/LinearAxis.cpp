@@ -251,9 +251,22 @@ void LinearAxis::changeSpeedRelative(int32_t deltaHz) {
 }
 
 void LinearAxis::setSpeedMMps(float mmPerSec) {
-    if (mmPerSec <= 0.0f) mmPerSec = 0.1f;
+    //if (mmPerSec <= 0.0f) mmPerSec = 0.1f;
 
-    float stepsPerSec = mmPerSec * ((float)_stepsPerRevolution / _mmPerRevolution);
+    if(mmPerSec < 0)
+    {
+        moveUp();
+    }
+    else if (mmPerSec > 0)
+    {
+        moveDown();
+    }
+    else if (mmPerSec == 0)
+    {
+        stop();
+    }
+
+    float stepsPerSec = abs(mmPerSec) * ((float)_stepsPerRevolution / _mmPerRevolution);
 
     setSpeed((uint32_t)stepsPerSec);
 }

@@ -61,11 +61,11 @@ public:
     }
     RoverMessage() : code((RoverCommand)0), argLength(0) {}
 
-    RoverCommand getCommandCode()   {return code;}
-    uint8_t getUint8Arg()   {return argArray[0];}
-    int8_t getInt8Arg()   {return argArray[0];}
-    uint16_t getUint16Arg()     {return ((uint16_t)argArray[0] << 8) | (uint16_t)argArray[1];}
-    int16_t getInt16Arg()     {return ((int16_t)argArray[0] << 8) | (int16_t)argArray[1];}
+    RoverCommand getCommandCode() const {return code;}
+    uint8_t getUint8Arg() const {return argArray[0];}
+    int8_t getInt8Arg() const  {return argArray[0];}
+    uint16_t getUint16Arg() const    {return ((uint16_t)argArray[0] << 8) | (uint16_t)argArray[1];}
+    int16_t getInt16Arg() const    {return ((int16_t)argArray[0] << 8) | (int16_t)argArray[1];}
 private:
     enum RoverCommand code;
     uint8_t argArray[4];   // raw argument bytes, big-endian
