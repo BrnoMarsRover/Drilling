@@ -22,10 +22,11 @@ Currently working on an overhauled design.
 graph TD;
     Main-->RoverComm;
     Main-->MasterHardwareController;
-    MasterHardwareController-->SampleHolder;
     MasterHardwareController-->DrillController;
+    MasterHardwareController-->SampleHolder;
     DrillController-->VerticalDrive;
     DrillController-->SpiralMotor;
+  	DrillController-->HeightSensor;
 ```
 
 ## Communication protocol
