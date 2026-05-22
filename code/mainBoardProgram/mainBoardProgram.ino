@@ -2,13 +2,8 @@
 #include <HardwareSerial.h>
 #include <Wire.h>
 
-#include "CubeMarsV2.h"
-#include "LimitSwitch.h"
-#include "as5600.h"
-#include "LinearAxis.h"
-#include "ADS122C04_LIB.h"
-#include "VL53L1X_Sensor.h"
-#include "RoverComm.h"
+#include "src/RoverComm/RoverComm.h"
+#include "src/HardwareController/HardwareController.h"
 
 //Define to command via ASCII messages through ArduinoIDE console.
 //Comment out to utilize command via Python app.
@@ -105,28 +100,8 @@ bool i2cRecoverBus()
 }
 
 //---------PERIPHERAL CLASSES
+HardwareController hardwareController(I2CBus, Serial0);
 
-// ===== LINEAR AXIS =====
-LinearAxis linearAxis(
-  13, // STEP
-  12, // DIR
-  14, // EN
-  5,  // CS (TMC5160)
-  18, // SCK
-  19, // MISO
-  23, // MOSI
-  15, // horní koncák
-  0,  // dolní koncák
-  I2CBus,  //i2c bus class
-  0x42 // adresa AS5600
-);
-
-LimitSwitch limitSwitchTop(15);
-LimitSwitch limitSwitchBottom(0);
-
-CubeMarsV2 motorDriver(Serial2, Serial0, 16, 17);
-
-VL53L1X_Sensor distanceSensor(I2CBus);
 
 ADS122C04 *adc1 = nullptr; // declaration of ADC Deep sample class
 ADS122C04 *adc2 = nullptr; // declaration of ADC Surface sample class
@@ -289,12 +264,8 @@ void respondToMsg(const RoverMessage& msg)
 
     case CMD_STATE:
     {
-      float maxTmp = motorDriver.getMotorTmp();
-      if(motorDriver.getMOSTmp() > maxTmp)
-      {
-        maxTmp = motorDriver.getMOSTmp();
-      }
-      roverComm.sendState((int16_t)linearAxis.getHeightMM(), (int16_t)motorDriver.getRPM(), (uint8_t)maxTmp, 0, drillState );
+
+      roverComm.sendState((int16_t)hardwareController.getCarriageHeightMM(), (int16_t)hardwareController.getSpiralRPM(), (uint8_t)hardwareController.getSpiralMotorTmp(), 0, drillState );
       break;
     }
 
@@ -333,29 +304,19 @@ void respondToMsg(const RoverMessage& msg)
 
     case CMD_DRILL_SPEED:
     {
-      if(drillState == STATE_READY)
-      {
-        motorDriver.setRPM(msg.getInt16Arg());
+      if(hardwareController.setSpiralRPM(msg.getInt16Arg()))
         roverComm.sendAck(CMD_DRILL_SPEED);
-      }
       else
-      {
         roverComm.sendNack();
-      }
       break;
     }
 
     case CMD_VERTICAL_SPEED:
     {
-      if(drillState == STATE_READY)
-      {
-        linearAxis.setSpeedMMps(((float)msg.getInt8Arg())*0.1);
+      if(hardwareController.setCarriageSpeedMMps(((float)msg.getInt8Arg())*0.1))
         roverComm.sendAck(CMD_VERTICAL_SPEED);
-      }
       else
-      {
         roverComm.sendNack();
-      }
       break;
     }
 
@@ -392,15 +353,9 @@ void setup() {
 
   setupI2CBus();
 
-  // linear axis
-  if (!linearAxis.begin(600, 16)) {
-    Serial.println("Linear axis FAILED");
-  }
-  if (!distanceSensor.begin()) {
-    Serial.println(" TOF FAILED");
-  }
+  hardwareController.begin();
 
-  motorDriver.begin();
+
 
   adc1 = new ADS122C04(
     I2CBus, //i2c bus class
@@ -422,9 +377,7 @@ void setup() {
 
 void loop()
 {
-  motorDriver.update();
-
-  linearAxis.update();
+  hardwareController.update();
 
   //adc1->update(); check if data_ready
 
