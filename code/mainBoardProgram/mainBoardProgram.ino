@@ -102,10 +102,6 @@ bool i2cRecoverBus()
 //---------PERIPHERAL CLASSES
 HardwareController hardwareController(I2CBus, Serial0);
 
-
-ADS122C04 *adc1 = nullptr; // declaration of ADC Deep sample class
-ADS122C04 *adc2 = nullptr; // declaration of ADC Surface sample class
-
 DrillState drillState = STATE_INITIALIZING;
 
 //------UART COMMUNICATION
@@ -355,31 +351,12 @@ void setup() {
 
   hardwareController.begin();
 
-
-
-  adc1 = new ADS122C04(
-    I2CBus, //i2c bus class
-    0x44 // address for deep sample weight
-    //2 // n_reset pin
-  );
-  adc2 = new ADS122C04(
-    I2CBus, //i2c bus class
-    0x45 // address for deep sample weight
-    //2 // n_reset pin
-  );
-  adc1->begin();
-  adc2->begin();
-  adc1->task_start(); // may be put at end begin, to be tested
-  adc2->task_start();
-
   drillState = STATE_READY;
 }
 
 void loop()
 {
   hardwareController.update();
-
-  //adc1->update(); check if data_ready
 
   #ifdef SIMPLE_COMMAND
   handleSimpleCommand();

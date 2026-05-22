@@ -128,7 +128,7 @@ public:
 
 
     // Rresult getters
-    bool    result_ready(void);
+    bool    get_result_ready(void);
     float   get_last_weight(void);
     float   get_last_temp(void);
     float   get_arr_weight(void); // to be written
