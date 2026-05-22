@@ -24,7 +24,7 @@ graph TD;
     Main-->MasterHardwareController;
     MasterHardwareController-->DrillController;
     MasterHardwareController-->SampleHolder;
-    DrillController-->VerticalDrive;
+    DrillController-->LinearAxis;
     DrillController-->SpiralMotor;
   	DrillController-->HeightSensor;
 ```
