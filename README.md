@@ -21,9 +21,9 @@ Currently working on an overhauled design.
 ```mermaid
 graph TD;
     Main-->RoverComm;
-    Main-->MasterHardwareController;
-    MasterHardwareController-->DrillController;
-    MasterHardwareController-->SampleHolder;
+    Main-->HardwareController;
+    HardwareController-->DrillController;
+    HardwareController-->SampleHolder;
     DrillController-->LinearAxis;
     DrillController-->SpiralMotor;
   	DrillController-->HeightSensor;
