@@ -5,7 +5,7 @@
 #include <HardwareSerial.h>
 #include <TMCStepper.h>
 #include <FastAccelStepper.h>
-#include "as5600.h"
+#include "../../shared/as5600.h"
 
 // ---------------------------------------------------------------
 //  StepperPositioner

@@ -5,7 +5,7 @@
 #include <TMCStepper.h>
 #include <FastAccelStepper.h>
 
-#include "AS5600.h"
+#include "../../../shared/as5600.h"
 #include "LimitSwitch.h"
 
 class LinearAxis {
