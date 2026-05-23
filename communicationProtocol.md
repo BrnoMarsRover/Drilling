@@ -50,9 +50,10 @@ STATE response table
 | Variable meaning | Data type | Unit |
 |-                 |-          |-     |
 | Current distance of the carriage from uppermost position | int16 | mm |
-| Motor speed | int16 | RPM |
-| Motor temperature | uint8 | °C |
-| Tray angle | uint16 | ° |
+| Vertical drive stepper current | uint8 | 0,01 A (100 = 1 A)
+| Spiral motor speed | int16 | RPM |
+| Spiral motor temperature | uint8 | °C |
+| Deep sample storage angle | uint16 | ° |
 | Software state | uint8 | Code of the state - meaning in table below yet again :) |
 
 Software state codes 
