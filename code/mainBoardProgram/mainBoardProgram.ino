@@ -123,7 +123,14 @@ void respondToMsg(const RoverMessage& msg)
 
     case CMD_STATE:
     {
-      roverComm.sendState((int16_t)deepSampler.getCarriageHeightMM(), (int16_t)deepSampler.getSpiralRPM(), (uint8_t)deepSampler.getSpiralMotorTmp(), 0, drillState );
+      
+      roverComm.sendState(
+        deepSampler.getCarriageHeightMM(),
+        0.0,  //vertical drive stepper current
+        (int16_t)deepSampler.getSpiralRPM(),
+        (uint8_t)deepSampler.getSpiralMotorTmp(),
+        0.0,  //deep sample storage angle
+        drillState );
       break;
     }
 
@@ -157,6 +164,28 @@ void respondToMsg(const RoverMessage& msg)
 
     case CMD_CALIBRATE_HEIGHT:
     {
+      break;
+    }
+
+    case CMD_START_DEVICE_CHECK:
+    {
+      roverComm.sendAck(CMD_START_DEVICE_CHECK);
+      break;
+    }
+
+    case CMD_GET_DEVICE_STATUS:
+    {
+      roverComm.sendDeviceStatus(
+        false, //vertStepper
+        false, //vertEncoder
+        false, //vertCurrentSensor
+        false, //spiralMotor
+        false, //heightSensor
+        false, //deepSampleStepper
+        false, //deepSampleEncoder
+        false, //deepSampleADC
+        false //surfaceSampleADC
+      );
       break;
     }
 

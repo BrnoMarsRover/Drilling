@@ -26,22 +26,30 @@ void DeepSampler::update()
   _drillController.update();
 }
 
+// Integrated carriage/spiral motor control
+
+// Low level carriage/vertical drive control
 bool DeepSampler::setCarriageSpeedMMps(float MMps)
 {
   return _drillController.setCarriageSpeedMMps(MMps);
 }
 
+float DeepSampler::getCarriageHeightMM() { return _drillController.getCarriageHeightMM(); }
+
+// Low level spiral motor control
 bool DeepSampler::setSpiralRPM(float rpm)
 {
   return _drillController.setSpiralRPM(rpm);
 }
+
+float DeepSampler::getSpiralRPM() { return _drillController.getSpiralRPM(); }
+float DeepSampler::getSpiralMotorTmp() { return _drillController.getSpiralMotorTmp(); }
+
+//Storage control
 void DeepSampler::setTareDeep() {_deepSampleHolder.setTare(); }
 void DeepSampler::setCalibration0Deep() {_deepSampleHolder.setCalibration0(); }
 void DeepSampler::setCalibration100Deep() {_deepSampleHolder.setCalibration100(); }
 
-float DeepSampler::getCarriageHeightMM() { return _drillController.getCarriageHeightMM(); }
-float DeepSampler::getSpiralRPM() { return _drillController.getSpiralRPM(); }
-float DeepSampler::getSpiralMotorTmp() { return _drillController.getSpiralMotorTmp(); }
 bool DeepSampler::getResultReadyDeep() { return _deepSampleHolder.getResultReady(); }
 float DeepSampler::getLastWeightDeep() { return _deepSampleHolder.getLastWeight(); }
 float DeepSampler::getLastTempDeep() { return _deepSampleHolder.getLastTemp(); }

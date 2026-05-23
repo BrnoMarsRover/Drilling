@@ -18,9 +18,15 @@ CubeMarsV2::CubeMarsV2(HardwareSerial& serialPort, HardwareSerial& debugSerialPo
 bool CubeMarsV2::begin()
 {
   cubeMarsSerial.begin(921600, SERIAL_8N1, rxPin, txPin);
+  checkConnection();
   commNextMillis = millis();
 
   return true;
+}
+
+void CubeMarsV2::checkConnection()
+{
+
 }
 
 void CubeMarsV2::update()
