@@ -21,12 +21,23 @@ Currently working on an overhauled design.
 ```mermaid
 graph TD;
     Main-->RoverComm;
-    Main-->HardwareController;
-    HardwareController-->DrillController;
-    HardwareController-->SampleHolder;
-    DrillController-->LinearAxis;
-    DrillController-->SpiralMotor;
-  	DrillController-->HeightSensor;
+    Main-->DeepSampler;
+      DeepSampler-->DrillController;
+        DrillController-->LinearAxis;
+          LinearAxis-->Stepper1;
+          LinearAxis-->Encoder1;
+          LinearAxis-->LimitSwitch;
+          LinearAxis-->CurrentSensor;
+        DrillController-->SpiralMotor;
+      	DrillController-->HeightSensor;
+      DeepSampler-->DeepSampleHolder;
+        DeepSampleHolder-->ADC1
+        DeepSampleHolder-->StoragePositioner
+          StoragePositioner-->Stepper2;
+          StoragePositioner-->Encoder2;
+  Main-->SurfaceSampleHolder;
+    SurfaceSampleHolder-->ADC2
+    SurfaceSampleHolder-->Servo;
 ```
 
 ## Communication protocol
