@@ -4,6 +4,7 @@
 
 #include "src/RoverComm/RoverComm.h"
 #include "src/DeepSampler/DeepSampler.h"
+#include "src/SurfaceSampleHolder/SurfaceSampleHolder.h"
 
 
 //-------I2C
@@ -99,7 +100,7 @@ DrillState drillState = STATE_INITIALIZING;
 
 //---------PERIPHERAL CLASSES
 DeepSampler deepSampler(I2CBus, Serial0);
-// SurfaceSampleHolder _surfaceSampleHolder; // to be done later
+SurfaceSampleHolder surfaceSampleHolder(I2CBus, Serial0);
 
 //------UART COMMUNICATION
 //Define ADVANCE_COMMAND to utilize command via Python app.
@@ -107,7 +108,7 @@ DeepSampler deepSampler(I2CBus, Serial0);
 #define ADVANCED_COMMAND
 
 #ifdef ADVANCED_COMMAND
-RoverComm roverComm(Serial);
+RoverComm roverComm(Serial0);
 
 void respondToMsg(const RoverMessage& msg)
 {
