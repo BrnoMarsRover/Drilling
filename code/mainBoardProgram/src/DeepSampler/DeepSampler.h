@@ -4,24 +4,31 @@
 #include <Wire.h>
 
 #include "DrillController/DrillController.h"
-#include "DeepSample/DeepSample.h"
+#include "DeepSampleHolder/DeepSampleHolder.h"
 
-class HardwareController
+class DeepSampler
 {
 public:
-  HardwareController(TwoWire& wire, HardwareSerial& debugSerial);  //will be deleted later. Wire and debugSerial will be initialized in begin.
+  DeepSampler(TwoWire& wire, HardwareSerial& debugSerial);
   bool begin();
   void update();
 
+  // Integrated carriage/spiral motor control
+
+  // Low level carriage/vertical drive control
   bool setCarriageSpeedMMps(float MMps);
+  float getCarriageHeightMM();
+
+  // Low level spiral motor control
   bool setSpiralRPM(float rpm);
+  float getSpiralRPM();
+  float getSpiralMotorTmp();
+
+  //Storage control
   void setTareDeep();
   void setCalibration0Deep();
   void setCalibration100Deep();
 
-  float getCarriageHeightMM();
-  float getSpiralRPM();
-  float getSpiralMotorTmp();
   bool getResultReadyDeep();
   float getLastWeightDeep();
   float getLastTempDeep();
@@ -33,7 +40,7 @@ private:
   TwoWire& _wire;
   HardwareSerial& _debugSerial;
   DrillController _drillController;
-  DeepSample _deepSample;
-  // SurfaceSample _surfaceSample; // to be done later
-  // Sample holder or something like that will belong here later.
+  DeepSampleHolder _deepSampleHolder;
+
+
 };

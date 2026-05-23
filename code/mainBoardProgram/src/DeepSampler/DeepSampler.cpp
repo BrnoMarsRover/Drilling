@@ -1,0 +1,54 @@
+ #include "DeepSampler.h"
+
+// ------------------------------------------------------------------ //
+//  Public                                                            //
+// ------------------------------------------------------------------ //
+
+DeepSampler::DeepSampler(TwoWire& wire, HardwareSerial& debugSerial):
+  _wire(wire),
+  _debugSerial(debugSerial),
+  _drillController(wire, debugSerial),
+  _deepSampleHolder(wire)
+{
+  
+}
+
+bool DeepSampler::begin()
+{
+  if(_drillController.begin() && _deepSampleHolder.begin())
+    return true;
+  else
+    return false;  
+}
+
+void DeepSampler::update()
+{
+  _drillController.update();
+}
+
+bool DeepSampler::setCarriageSpeedMMps(float MMps)
+{
+  return _drillController.setCarriageSpeedMMps(MMps);
+}
+
+bool DeepSampler::setSpiralRPM(float rpm)
+{
+  return _drillController.setSpiralRPM(rpm);
+}
+void DeepSampler::setTareDeep() {_deepSampleHolder.setTare(); }
+void DeepSampler::setCalibration0Deep() {_deepSampleHolder.setCalibration0(); }
+void DeepSampler::setCalibration100Deep() {_deepSampleHolder.setCalibration100(); }
+
+float DeepSampler::getCarriageHeightMM() { return _drillController.getCarriageHeightMM(); }
+float DeepSampler::getSpiralRPM() { return _drillController.getSpiralRPM(); }
+float DeepSampler::getSpiralMotorTmp() { return _drillController.getSpiralMotorTmp(); }
+bool DeepSampler::getResultReadyDeep() { return _deepSampleHolder.getResultReady(); }
+float DeepSampler::getLastWeightDeep() { return _deepSampleHolder.getLastWeight(); }
+float DeepSampler::getLastTempDeep() { return _deepSampleHolder.getLastTemp(); }
+
+void DeepSampler::requestMeasureDeep() { return _deepSampleHolder.requestMeasure(); }
+void DeepSampler::requestTempDeep() { return _deepSampleHolder.requestTemp(); }
+
+// ------------------------------------------------------------------ //
+//  Private                                                           //
+// ------------------------------------------------------------------ //

@@ -4,11 +4,12 @@
 #include <Wire.h>
 
 #include "../../shared/ADS122C04_LIB.h" //ADS122C04_LIB/
+#include "StepperPositioner.h"
 
-class DeepSample
+class DeepSampleHolder
 {
 public:
-  DeepSample(TwoWire& wire);
+  DeepSampleHolder(TwoWire& wire);
   bool begin();
 
   void requestMeasure();
@@ -27,5 +28,5 @@ private:
   TwoWire& _wire;
 
   ADS122C04 _adcDeep;
-  //ADS122C04 _adcSurface;
+  //StepperPositioner _stepperPositioner;
 };

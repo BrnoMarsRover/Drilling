@@ -3,11 +3,7 @@
 #include <Wire.h>
 
 #include "src/RoverComm/RoverComm.h"
-#include "src/HardwareController/HardwareController.h"
-
-//Define to command via ASCII messages through ArduinoIDE console.
-//Comment out to utilize command via Python app.
-//#define SIMPLE_COMMAND
+#include "src/DeepSampler/DeepSampler.h"
 
 
 //-------I2C
@@ -97,15 +93,112 @@ bool i2cRecoverBus()
   Serial.println(success ? F("I2C recovery successful.") : F("I2C recovery failed."));
 
   return success;
-}
-
-//---------PERIPHERAL CLASSES
-HardwareController hardwareController(I2CBus, Serial0);
+};
 
 DrillState drillState = STATE_INITIALIZING;
 
+//---------PERIPHERAL CLASSES
+DeepSampler deepSampler(I2CBus, Serial0);
+// SurfaceSampleHolder _surfaceSampleHolder; // to be done later
+
 //------UART COMMUNICATION
-#ifdef SIMPLE_COMMAND
+//Define ADVANCE_COMMAND to utilize command via Python app.
+//Comment out to command via ASCII messages through ArduinoIDE console.
+#define ADVANCED_COMMAND
+
+#ifdef ADVANCED_COMMAND
+RoverComm roverComm(Serial);
+
+void respondToMsg(const RoverMessage& msg)
+{
+  switch(msg.getCommandCode())
+  {
+    case CMD_RESTART:
+    {
+      roverComm.sendAck(CMD_RESTART);
+      ESP.restart();
+      break;
+    }
+
+    case CMD_STATE:
+    {
+      roverComm.sendState((int16_t)deepSampler.getCarriageHeightMM(), (int16_t)deepSampler.getSpiralRPM(), (uint8_t)deepSampler.getSpiralMotorTmp(), 0, drillState );
+      break;
+    }
+
+    case CMD_DRILL_AUTO:
+    {
+      if(drillState == STATE_READY)
+      {
+        drillState = STATE_AUTO_DRILLING_DOWN;
+        roverComm.sendAck(CMD_DRILL_AUTO);
+      }
+      else
+      {
+        roverComm.sendNack();
+      }
+      break;
+    }
+
+    case CMD_STOP_AUTO:
+    {
+      if(drillState == STATE_AUTO_DRILLING_DOWN || drillState == STATE_AUTO_CANT_REACH || drillState == STATE_AUTO_MOVING_UP || drillState == STATE_AUTO_STORING)
+      {
+        drillState = STATE_READY;
+        roverComm.sendAck(CMD_STOP_AUTO);
+      }
+      else
+      {
+        roverComm.sendNack();
+      }
+      break;
+    }
+
+    case CMD_CALIBRATE_HEIGHT:
+    {
+      break;
+    }
+
+    case CMD_DRILL_SPEED:
+    {
+      if(deepSampler.setSpiralRPM(msg.getInt16Arg()))
+        roverComm.sendAck(CMD_DRILL_SPEED);
+      else
+        roverComm.sendNack();
+      break;
+    }
+
+    case CMD_VERTICAL_SPEED:
+    {
+      if(deepSampler.setCarriageSpeedMMps(((float)msg.getInt8Arg())*0.1))
+        roverComm.sendAck(CMD_VERTICAL_SPEED);
+      else
+        roverComm.sendNack();
+      break;
+    }
+
+    case CMD_STORAGE_POSITION:
+      break;
+    case CMD_WEIGH_DEEP:
+      break;
+    case CMD_WEIGH_SURFACE:
+      break;
+    case CMD_GET_WEIGHT_DEEP:
+      break;
+    case CMD_GET_WEIGHT_SURFACE:
+      break;
+    case CMD_ROCK_OPEN:
+      break;
+    case CMD_ROCK_CLOSE:
+      break;
+    case CMD_SAND_OPEN:
+      break;
+    case CMD_SAND_CLOSE:
+      break;
+  }
+}
+
+#else
 
 void handleSimpleCommand()
 {
@@ -116,7 +209,7 @@ void handleSimpleCommand()
     cmd.toUpperCase();
 
     if (cmd.length() == 0) return;
-
+    /*
     if (cmd == "U") {
       linearAxis.moveUp();
     }
@@ -140,14 +233,16 @@ void handleSimpleCommand()
         Serial.println("Chyba: pouzij napr. R100");
       }
     }
+    */
     else if (cmd.startsWith("RM")) { // mm/s
-    float value = cmd.substring(2).toFloat();
-    if (value > 0) {
-      linearAxis.setSpeedMMps(value);
-      Serial.print("Rychlost mm/s: ");
-      Serial.println(linearAxis.getSpeedMMps());
-      }
+      float value = cmd.substring(2).toFloat();
+      if (value > 0) {
+        deepSampler.setCarriageSpeedMMps(value);
+        Serial.print("Rychlost mm/s: ");
+        //Serial.println(linearAxis.getSpeedMMps());
+        }
     }
+    /*
     else if (cmd == "X") {
       linearAxis.zero();
     }
@@ -170,10 +265,12 @@ void handleSimpleCommand()
     else if (cmd == "NH") {
       linearAxis.setHeightPrintEnabled(false);
     }
+    */
     else if (cmd.startsWith("M")) {   //CUBEMARS MOTOR COMMANDS
-      int value = cmd.substring(1).toInt();
-        motorDriver.setRPM(value);
+      int value = cmd.substring(1).toFloat();
+      deepSampler.setSpiralRPM(value);
     }
+    /*
     else if(cmd == "Z")
     {
       motorDriver.printMotorInfoToDebug();
@@ -238,134 +335,42 @@ void handleSimpleCommand()
       adc2->reset();
       Serial.println("[ADC] resets complete");
     }
+    */
     else {
       Serial.println("Neznamy prikaz.");
       Serial.println("Pouzij: U, D, S, R100, +, -, A2000, X, ?, WGH+D/S, TRE+D/S, CLB+0/100+D/S, ADCTMP+D/S, ADCRST, GW+D/S, GT+D/S");
     }
   }
 }
-#else
-RoverComm roverComm(Serial);
-
-void respondToMsg(const RoverMessage& msg)
-{
-  switch(msg.getCommandCode())
-  {
-    case CMD_RESTART:
-    {
-      roverComm.sendAck(CMD_RESTART);
-      ESP.restart();
-      break;
-    }
-
-    case CMD_STATE:
-    {
-
-      roverComm.sendState((int16_t)hardwareController.getCarriageHeightMM(), (int16_t)hardwareController.getSpiralRPM(), (uint8_t)hardwareController.getSpiralMotorTmp(), 0, drillState );
-      break;
-    }
-
-    case CMD_DRILL_AUTO:
-    {
-      if(drillState == STATE_READY)
-      {
-        drillState = STATE_AUTO_DRILLING_DOWN;
-        roverComm.sendAck(CMD_DRILL_AUTO);
-      }
-      else
-      {
-        roverComm.sendNack();
-      }
-      break;
-    }
-
-    case CMD_STOP_AUTO:
-    {
-      if(drillState == STATE_AUTO_DRILLING_DOWN || drillState == STATE_AUTO_CANT_REACH || drillState == STATE_AUTO_MOVING_UP || drillState == STATE_AUTO_STORING)
-      {
-        drillState = STATE_READY;
-        roverComm.sendAck(CMD_STOP_AUTO);
-      }
-      else
-      {
-        roverComm.sendNack();
-      }
-      break;
-    }
-
-    case CMD_CALIBRATE_HEIGHT:
-    {
-      break;
-    }
-
-    case CMD_DRILL_SPEED:
-    {
-      if(hardwareController.setSpiralRPM(msg.getInt16Arg()))
-        roverComm.sendAck(CMD_DRILL_SPEED);
-      else
-        roverComm.sendNack();
-      break;
-    }
-
-    case CMD_VERTICAL_SPEED:
-    {
-      if(hardwareController.setCarriageSpeedMMps(((float)msg.getInt8Arg())*0.1))
-        roverComm.sendAck(CMD_VERTICAL_SPEED);
-      else
-        roverComm.sendNack();
-      break;
-    }
-
-    case CMD_STORAGE_POSITION:
-      break;
-    case CMD_WEIGH_DEEP:
-      break;
-    case CMD_WEIGH_SURFACE:
-      break;
-    case CMD_GET_WEIGHT_DEEP:
-      break;
-    case CMD_GET_WEIGHT_SURFACE:
-      break;
-    case CMD_ROCK_OPEN:
-      break;
-    case CMD_ROCK_CLOSE:
-      break;
-    case CMD_SAND_OPEN:
-      break;
-    case CMD_SAND_CLOSE:
-      break;
-  }
-}
-
 #endif
 
 void setup() {
-  #ifdef SIMPLE_COMMAND
-  Serial.begin(115200);
-  #else
+  #ifdef ADVANCED_COMMAND
   Serial.begin(38400);
-  #endif
+  #else
+  Serial.begin(115200);
   Serial.setTimeout(10);
+  #endif
 
   setupI2CBus();
 
-  hardwareController.begin();
+  deepSampler.begin();
 
   drillState = STATE_READY;
 }
 
 void loop()
 {
-  hardwareController.update();
+  deepSampler.update();
 
-  #ifdef SIMPLE_COMMAND
-  handleSimpleCommand();
-  #else
+  #ifdef ADVANCED_COMMAND
   roverComm.handle();
   if(roverComm.messageAvailable())
   {
     respondToMsg(roverComm.popMessage());
   }
+  #else
+  handleSimpleCommand();
   #endif
 }
 

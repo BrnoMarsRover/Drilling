@@ -1,10 +1,10 @@
-#include "DeepSample.h"
+#include "DeepSampleHolder.h"
 
 // ------------------------------------------------------------------ //
 //  Public                                                            //
 // ------------------------------------------------------------------ //
 
-DeepSample::DeepSample(TwoWire& wire) :
+DeepSampleHolder::DeepSampleHolder(TwoWire& wire) :
   _wire(wire),
   _adcDeep(
     wire,
@@ -17,7 +17,7 @@ DeepSample::DeepSample(TwoWire& wire) :
 {
 }
 
-bool DeepSample::begin()
+bool DeepSampleHolder::begin()
 {
   bool beginOK = true;
 
@@ -27,47 +27,47 @@ bool DeepSample::begin()
   return beginOK;
 }
 
-void DeepSample::requestMeasure()
+void DeepSampleHolder::requestMeasure()
 {
   _adcDeep.request_measure();
 }
 
-bool DeepSample::getResultReady()
+bool DeepSampleHolder::getResultReady()
 {
   return _adcDeep.get_result_ready();
 }
 
-float DeepSample::getLastWeight()
+float DeepSampleHolder::getLastWeight()
 {
   return _adcDeep.get_last_weight();
 }
 
-void DeepSample::requestTemp()
+void DeepSampleHolder::requestTemp()
 {
   _adcDeep.request_tmp();
 }
 
-float DeepSample::getLastTemp()
+float DeepSampleHolder::getLastTemp()
 {
   return _adcDeep.get_last_temp();
 }
 
-void DeepSample::setTare()
+void DeepSampleHolder::setTare()
 {
   _adcDeep.set_tare();
 }
 
-void DeepSample::setCalibration0()
+void DeepSampleHolder::setCalibration0()
 {
   _adcDeep.set_calibration_0();
 }
 
-void DeepSample::setCalibration100()
+void DeepSampleHolder::setCalibration100()
 {
   _adcDeep.set_calibration_100();
 }
 
-void DeepSample::reset()
+void DeepSampleHolder::reset()
 {
   _adcDeep.reset();
 }
