@@ -31,6 +31,7 @@ class SerialWorker:
         self._thread = None
         self._stop_event = threading.Event()
         self._connected = False
+        self._debug_buffer = ""
 
     def connect(self, port: str) -> bool:
         """
@@ -101,18 +102,29 @@ class SerialWorker:
         """
         Scan the buffer for complete messages (STX...ETX), parse them,
         and put results in rx_queue. Return the remaining unprocessed bytes.
+        Bytes outside of a framed message are treated as debug text and
+        forwarded to the log.
         """
-        while True:
-            # Find the start byte
-            try:
-                start = buffer.index(protocol.STX)
-            except ValueError:
-                # No STX found — discard everything
-                return bytearray()
+        while len(buffer) > 0:
+            b = buffer[0]
 
-            # Discard any garbage before STX
-            if start > 0:
-                buffer = buffer[start:]
+            if b != protocol.STX:
+                # Outside a frame — collect as debug text
+                char = chr(b)
+                if char == '\n':
+                    # Newline flushes the debug buffer
+                    if self._debug_buffer:
+                        self.rx_queue.put({"debug": self._debug_buffer})
+                        self._debug_buffer = ""
+                else:
+                    self._debug_buffer += char
+                buffer = buffer[1:]
+                continue
+
+            # b == STX — flush any pending debug text before parsing the frame
+            if self._debug_buffer:
+                self.rx_queue.put({"debug": self._debug_buffer})
+                self._debug_buffer = ""
 
             # We need at least 5 bytes for a minimal message
             if len(buffer) < 5:
@@ -133,7 +145,6 @@ class SerialWorker:
             if parsed is not None:
                 self.rx_queue.put(parsed)
             else:
-                # Bad checksum or malformed — report it
                 self.rx_queue.put({"error": "Malformed or corrupt message received"})
 
         return buffer

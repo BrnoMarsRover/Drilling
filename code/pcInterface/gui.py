@@ -94,7 +94,7 @@ class App(tk.Tk):
         frame.grid(row=1, column=0, padx=8, pady=6, sticky="nsew")
 
         labels = [
-            ("Height",       "height_var",     "mm"),
+            ("Height",       "height_var",     "cm"),
             ("Motor speed",  "rpm_var",        "RPM"),
             ("Motor temp",   "temp_var",       "°C"),
             ("Tray angle",   "tray_var",       "°"),
@@ -236,6 +236,10 @@ class App(tk.Tk):
         self.after(STATE_POLL_INTERVAL_MS, self._poll_state)
 
     def _handle_message(self, msg: dict):
+        if "debug" in msg:
+            self._log(f"[ESP] {msg['debug']}")
+            return
+
         if "error" in msg:
             self._log(f"ERROR: {msg['error']}")
             return
@@ -248,7 +252,7 @@ class App(tk.Tk):
 
         if code == protocol.CMD_STATE and "state" in msg:
             s = msg["state"]
-            self.height_var.set(str(s["height_mm"]))
+            self.height_var.set(str(s["height_cm"]))
             self.rpm_var.set(str(s["rpm"]))
             self.temp_var.set(str(s["temp_c"]))
             self.tray_var.set(str(s["tray_angle"]))
@@ -292,9 +296,9 @@ class App(tk.Tk):
 
     def _set_vertical_speed(self):
         try:
-            mm_s = float(self.vert_speed_var.get())
-            if not (-12.0 <= mm_s <= 12.0):
-                self._log("Vertical speed must be between -12.0 and 12.0 mm/s.")
+            mm_s = int(self.vert_speed_var.get())
+            if not (-128 <= mm_s <= 127):
+                self._log("Vertical speed must be between -128 and 127.")
                 return
             self._send(protocol.cmd_vertical_speed(mm_s), f"VERTICAL SPEED {mm_s} mm/s")
         except ValueError:
