@@ -33,7 +33,8 @@ Drill: 0x02 (start) -> 0x01 (length 5) -> 0x42 (Weight request received. Weight 
 | STATE - Requests the state of the drilling mechanism | 0x02 | None | Response is in table below |
 | DRILL AUTO - Automatically extract a deep sample from specified depth. Blocks manual commands. | 0x03 | Desired drill depth - uint8 [cm] | None |
 | STOP AUTO - Stops the automatic drilling procedure. Unlocks manual commands. | 0x04 | None | None |
-| CALIBRATE HEIGHT - Moves the carriage up, until it hits the top limit switch. Sets height = 0 at that position. | 0x05 | 0 | 0 |
+| CALIBRATE HEIGHT - Moves the carriage up, until it hits the top limit switch. Sets height = 0 at that position. | 0x05 | None | None |
+| CHECK DEVICES - Checks whether peripheral devices are connected and responding. | 0x06 | None | uint16 (String of bits. Each bit corresponds to one peripheral device. 1 = OK, 0 = not OK. Order of devices in table below) | 
 | DRILL SPEED - sets the speed of the drill/spiral | 0x20 | int16 [RPM] | None |
 | VERTICAL SPEED - sets the speed of the vertical drive| 0x21 | int8 [0,1 mm/s]<br>e.g.&nbsp;100 = 10mm/s | None |
 | STORAGE POSITION - sets the position of the deep sample storage box | 0x22 | uint8 [position] | None |
@@ -50,9 +51,10 @@ STATE response table
 | Variable meaning | Data type | Unit |
 |-                 |-          |-     |
 | Current distance of the carriage from uppermost position | int16 | mm |
-| Motor speed | int16 | RPM |
-| Motor temperature | uint8 | °C |
-| Tray angle | uint16 | ° |
+| Vertical drive stepper current | uint8 | 0,01 A (100 = 1 A)
+| Spiral motor speed | int16 | RPM |
+| Spiral motor temperature | uint8 | °C |
+| Deep sample storage angle | uint16 | ° |
 | Software state | uint8 | Code of the state - meaning in table below yet again :) |
 
 Software state codes 
@@ -65,3 +67,16 @@ Software state codes
 | 0xF1 | Automatic procedure active. Could not reach the desired depth. |
 | 0xF2 | Automatic procedure active. Desired depth reached. Moving up. |
 | 0xF3 | Automatic procedure active. Storing the sample. |
+
+CHECK DEVICES response order
+|Device |
+| - |
+| Vertical drive stepper driver |
+| Vertical drive encoder |
+| Vertical drive current sensor |
+| Spiral motor |
+| Height sensor |
+| Deep sample storage stepper driver |
+| Deep sample storage encoder |
+| Deep sample ADC |
+| Surface sample ADC |

@@ -7,8 +7,9 @@ List of devices connected to the drill's microcontroller:
 |Vertical drive stepper driver (5160)  |SPI                                       |                            |3,3 V                      |24 V  |
 |Vertical drive stepper encoder        |I2C                                       |Programmable I2C address 0x42    |3,3 V                  |3,3 V |
 |Vertical drive limit sensor 2x        |+V/GND to GPIO pin                        |                            |3,3 V                      |3,3 V |
-|Storage stepper driver (2209)         |Single Wire UART                         |                            |3,3 V                      |24 V  |
-|Storage stepper encoder               |I2C                                       |Programmable I2C address 0x41   |3,3 V                  |3,3 V |
-|Storage ADC                           |I2C                                       |Programmable I2C addresses 0x44,0x45   |5 V                |5 V   |
+|Deep storage stepper driver (2209)         |Single Wire UART                         |                            |3,3 V                      |24 V  |
+|Deep storage stepper encoder               |I2C                                       |Programmable I2C address 0x41   |3,3 V                  |3,3 V |
+|Deep storage ADC + surface storage ADC     |I2C                                  |Programmable I2C addresses 0x44,0x45   |3,3 V           |3,3 V power, 5 V analog reference |
+|Surface storage servo 2x              | PWM                                      |                             |                           | 5 V   |   
 |Height sensor                         |I2C (possible analog and PWM)             |Programmable I2C address 0x52   |3,3 V                   |3,3 V |
 |Current sensor                        |I2C                                       |Programmable I2C address 0x40|3,3 V                      |24 V |
