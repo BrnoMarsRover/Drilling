@@ -305,6 +305,7 @@ void ADS122C04::task_start() {
 }
 
 void ADS122C04::request_measure() {
+  _result_ready = false;  // prevents repetitive readings and states that new value is to be written
   adc_cmd cmd = adc_cmd::MEASURE;
   xQueueSend(_cmdQueue, &cmd, 0);
 }
@@ -384,7 +385,6 @@ std::pair<float,float> ADS122C04::get_last_weight(void) {
     xSemaphoreTake(_mutex, portMAX_DELAY);
     float w = _lastWeight;
     float wr = _lastWeightRaw;
-    _result_ready = false; // this prevents repetitive readings but also states that new value is written -> desired?
     xSemaphoreGive(_mutex);
     return {w,wr};
 }
