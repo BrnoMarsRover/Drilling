@@ -381,12 +381,11 @@ bool ADS122C04::get_result_ready(void) { // get_result_ready to be added
     return r;
 }
 
-std::pair<float,float> ADS122C04::get_last_weight(void) {
+WeightResult ADS122C04::get_last_weight(void) {
     xSemaphoreTake(_mutex, portMAX_DELAY);
-    float w = _lastWeight;
-    float wr = _lastWeightRaw;
+    WeightResult result = {_lastWeight, _lastWeightRaw};
     xSemaphoreGive(_mutex);
-    return {w,wr};
+    return result;
 }
 
 float ADS122C04::get_last_temp(void) {

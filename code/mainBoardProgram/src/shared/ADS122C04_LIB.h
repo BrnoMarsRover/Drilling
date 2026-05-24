@@ -58,6 +58,11 @@
 #define IDAC_1000UA 0x06
 #define IDAC_1500UA 0x07
 
+struct WeightResult
+{
+  float grams;
+  uint32_t raw;
+};
 
 class ADS122C04 {
 public:
@@ -128,7 +133,7 @@ public:
 
     // Rresult getters
     bool    get_result_ready(void);
-    std::pair<float,float>   get_last_weight(void);
+    WeightResult get_last_weight(void);
     float   get_last_temp(void);
     float   get_arr_weight(void); // to be written
 

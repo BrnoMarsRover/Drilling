@@ -208,23 +208,34 @@ void respondToMsg(const RoverMessage& msg)
     }
 
     case CMD_STORAGE_POSITION:
+    {
       break;
+    }
+    
     case CMD_WEIGH_DEEP:
+    {
       if(deepSampler.requestMeasureDeep())
         roverComm.sendAck(CMD_WEIGH_DEEP);
       else
         roverComm.sendNack();
       break;
+    }
+
     case CMD_WEIGH_SURFACE:
+    {
       break; // TBD
+    }
+
     case CMD_GET_WEIGHT_DEEP:
+    {
       if(deepSampler.getResultReadyDeep() == true){
-        float grams = deepSampler.getLastWeightDeep().first;
-        float raw = deepSampler.getLastWeightDeep().second;
-        roverComm.sendFloat(CMD_GET_WEIGHT_DEEP, grams);
-      }else
+        roverComm.sendWeight(CMD_GET_WEIGHT_DEEP, deepSampler.getLastWeight());
+      }
+      else
         roverComm.sendNack();
       break; // TBD
+    }
+
     case CMD_GET_WEIGHT_SURFACE:
       break; // TBD
     //case CMD_SET_CALIB0_DEEP:
@@ -239,14 +250,47 @@ void respondToMsg(const RoverMessage& msg)
     //  else
     //    roverComm.sendNack();
     //  break;
+
+
+    case CMD_CALIBRATE_0_DEEP:
+    {
+      break;
+    }
+
+    case CMD_CALIBRATE_X_DEEP:
+    {
+      break;
+    }
+    
+    case CMD_CALIBRATE_0_SURFACE:
+    {
+      break;
+    }
+    
+    case CMD_CALIBRATE_X_SURFACE:
+    {
+      break;
+    }
+    
     case CMD_ROCK_OPEN:
+    {
       break;
+    }
+
     case CMD_ROCK_CLOSE:
+    {
       break;
+    }
+
     case CMD_SAND_OPEN:
+    {
       break;
+    }
+    
     case CMD_SAND_CLOSE:
+    {
       break;
+    }
   }
 }
 

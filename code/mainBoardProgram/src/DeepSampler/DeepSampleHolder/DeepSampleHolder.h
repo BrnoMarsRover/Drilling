@@ -16,7 +16,7 @@ public:
   bool requestTemp();
 
   bool getResultReady();
-  std::pair<float,float> getLastWeight();
+  WeightResult getLastWeight();
   float getLastTemp();
 
   bool setTare();

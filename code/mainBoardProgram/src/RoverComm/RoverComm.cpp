@@ -121,14 +121,20 @@ void RoverComm::sendState(float heightMm, float stepperCurrent, float rpm, float
 {
     uint8_t payload[10];
     payload[0] = (uint8_t)CMD_STATE;
+
     payload[1] = (uint8_t)((int16_t)heightMm >> 8);
     payload[2] = (uint8_t)((int16_t)heightMm & 0x00FF);
+
     payload[3] = (uint8_t)stepperCurrent;
+
     payload[4] = (uint8_t)((int16_t)rpm >> 8);       // int16 big-endian
     payload[5] = (uint8_t)((int16_t)rpm & 0x00FF);
+
     payload[6] = tempC;
+
     payload[7] = (uint8_t)((int16_t)trayAngle >> 8); // uint16 big-endian
     payload[8] = (uint8_t)((int16_t)trayAngle & 0x00FF);
+
     payload[9] = (uint8_t)swState;
 
     _sendRaw(payload, 10);
@@ -152,6 +158,25 @@ void RoverComm::sendDeviceStatus(bool vertStepper, bool vertEncoder, bool vertCu
     payload[1] = (uint8_t)(status >> 8);
     payload[2] = (uint8_t)(status & 0x00FF);
     _sendRaw(payload, 3);
+}
+
+void RoverComm::sendWeight(RoverCommand cmd, WeightResult result)
+{
+    uint8_t payload[9];
+    payload[0] = (uint8_t)cmd;
+
+    // Copy float as big-endian bytes
+    uint8_t* f = (uint8_t*)&result.grams;
+    payload[1] = f[3];
+    payload[2] = f[2];
+    payload[3] = f[1];
+    payload[4] = f[0];
+
+    payload[5] = (uint8_t)((result.raw >> 24) & 0x000000FF);
+    payload[6] = (uint8_t)((result.raw >> 16) & 0x000000FF);
+    payload[7] = (uint8_t)((result.raw >>  8) & 0x000000FF);
+    payload[8] = (uint8_t)((result.raw      ) & 0x000000FF);
+    _sendRaw(payload, 9);
 }
 
 // ------------------------------------------------------------------ //

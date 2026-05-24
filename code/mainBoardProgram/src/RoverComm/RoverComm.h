@@ -1,6 +1,8 @@
 #pragma once
 #include <Arduino.h>
 
+#include "../shared/ADS122C04_LIB.h"
+
 // ------------------------------------------------------------------ //
 //  Message queue depth — increase if commands are arriving faster    //
 //  than main() can process them                                       //
@@ -26,6 +28,10 @@ enum RoverCommand : uint8_t
     CMD_WEIGH_SURFACE     = 0x41,
     CMD_GET_WEIGHT_DEEP   = 0x42,
     CMD_GET_WEIGHT_SURFACE= 0x43,
+    CMD_CALIBRATE_0_DEEP  = 0x44,
+    CMD_CALIBRATE_X_DEEP  = 0x45,
+    CMD_CALIBRATE_0_SURFACE = 0x46,
+    CMD_CALIBRATE_X_SURFACE = 0x47,
     CMD_ROCK_OPEN         = 0x50,
     CMD_ROCK_CLOSE        = 0x51,
     CMD_SAND_OPEN         = 0x52,
@@ -109,6 +115,7 @@ public:
 
     void sendDeviceStatus(bool vertStepper, bool vertEncoder, bool vertCurrentSensor, bool spiralMotor, bool heightSensor, bool deepSampleStepper, bool deepSampleEncoder, bool deepSampleADC, bool surfaceSampleADC);
 
+    void sendWeight(RoverCommand cmd, WeightResult result);
 private:
     HardwareSerial& _serial;
 
