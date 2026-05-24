@@ -27,9 +27,10 @@ bool DeepSampleHolder::begin()
   return beginOK;
 }
 
-void DeepSampleHolder::requestMeasure()
+bool DeepSampleHolder::requestMeasure()
 {
   _adcDeep.request_measure();
+  return 1;
 }
 
 bool DeepSampleHolder::getResultReady()
@@ -42,9 +43,10 @@ float DeepSampleHolder::getLastWeight()
   return _adcDeep.get_last_weight();
 }
 
-void DeepSampleHolder::requestTemp()
+bool DeepSampleHolder::requestTemp()
 {
   _adcDeep.request_tmp();
+  return 1;
 }
 
 float DeepSampleHolder::getLastTemp()
@@ -52,19 +54,22 @@ float DeepSampleHolder::getLastTemp()
   return _adcDeep.get_last_temp();
 }
 
-void DeepSampleHolder::setTare()
+bool DeepSampleHolder::setTare()
 {
   _adcDeep.set_tare();
+  return true;
 }
 
-void DeepSampleHolder::setCalibration0()
+bool DeepSampleHolder::setCalibration0()
 {
   _adcDeep.set_calibration_0();
+  return true;
 }
 
-void DeepSampleHolder::setCalibration100()
+bool DeepSampleHolder::setCalibration100()
 {
   _adcDeep.set_calibration_100();
+  return true;
 }
 
 void DeepSampleHolder::reset()

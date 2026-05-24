@@ -12,16 +12,16 @@ public:
   DeepSampleHolder(TwoWire& wire);
   bool begin();
 
-  void requestMeasure();
-  void requestTemp();
+  bool requestMeasure();
+  bool requestTemp();
 
   bool getResultReady();
   float getLastWeight();
   float getLastTemp();
 
-  void setTare();
-  void setCalibration0();
-  void setCalibration100();
+  bool setTare();
+  bool setCalibration0();
+  bool setCalibration100();
   void reset();
 
 private:

@@ -210,13 +210,29 @@ void respondToMsg(const RoverMessage& msg)
     case CMD_STORAGE_POSITION:
       break;
     case CMD_WEIGH_DEEP:
+      if(deepSampler.requestMeasureDeep())
+        roverComm.sendAck(CMD_WEIGH_DEEP);
+      else
+        roverComm.sendNack();
       break;
     case CMD_WEIGH_SURFACE:
-      break;
+      break; // TBD
     case CMD_GET_WEIGHT_DEEP:
-      break;
+      break; // TBD
     case CMD_GET_WEIGHT_SURFACE:
-      break;
+      break; // TBD
+    //case CMD_SET_CALIB0_DEEP:
+    //  if(deepSampler.setCalibration0Deep())
+    //    roverComm.sendAck(CMD_SET_CALIB0_DEEP);
+    //  else
+    //    roverComm.sendNack();
+    //  break;
+    //case CMD_SET_CALIB100_DEEP:
+    //  if(deepSampler.setCalibration100Deep())
+    //    roverComm.sendAck(CMD_SET_CALIB100_DEEP);
+    //  else
+    //    roverComm.sendNack();
+    //  break;
     case CMD_ROCK_OPEN:
       break;
     case CMD_ROCK_CLOSE:

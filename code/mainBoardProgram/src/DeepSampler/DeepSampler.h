@@ -25,22 +25,23 @@ public:
   float getSpiralMotorTmp();
 
   //Storage control
-  void setTareDeep();
-  void setCalibration0Deep();
-  void setCalibration100Deep();
+  bool setTareDeep();
+  bool setCalibration0Deep();
+  bool setCalibration100Deep();
 
   bool getResultReadyDeep();
   float getLastWeightDeep();
   float getLastTempDeep();
 
-  void requestMeasureDeep();
-  void requestTempDeep();
+  bool requestMeasureDeep();
+  bool requestTempDeep();
 
   // Connection checks
   bool verticalEncoderConnected();
   bool verticalStepperConnected();
   bool spiralMotorConnected();
   bool heightSensorConneted();
+  bool weightSensorConnected(); // to be finished
 
 private:
   TwoWire& _wire;

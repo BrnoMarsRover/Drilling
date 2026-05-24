@@ -46,16 +46,16 @@ float DeepSampler::getSpiralRPM() { return _drillController.getSpiralRPM(); }
 float DeepSampler::getSpiralMotorTmp() { return _drillController.getSpiralMotorTmp(); }
 
 //Storage control
-void DeepSampler::setTareDeep() {_deepSampleHolder.setTare(); }
-void DeepSampler::setCalibration0Deep() {_deepSampleHolder.setCalibration0(); }
-void DeepSampler::setCalibration100Deep() {_deepSampleHolder.setCalibration100(); }
+bool DeepSampler::setTareDeep() {_deepSampleHolder.setTare(); }
+bool DeepSampler::setCalibration0Deep() {_deepSampleHolder.setCalibration0(); }
+bool DeepSampler::setCalibration100Deep() {_deepSampleHolder.setCalibration100(); }
 
 bool DeepSampler::getResultReadyDeep() { return _deepSampleHolder.getResultReady(); }
 float DeepSampler::getLastWeightDeep() { return _deepSampleHolder.getLastWeight(); }
 float DeepSampler::getLastTempDeep() { return _deepSampleHolder.getLastTemp(); }
 
-void DeepSampler::requestMeasureDeep() { return _deepSampleHolder.requestMeasure(); }
-void DeepSampler::requestTempDeep() { return _deepSampleHolder.requestTemp(); }
+bool DeepSampler::requestMeasureDeep() { return _deepSampleHolder.requestMeasure(); }
+bool DeepSampler::requestTempDeep() { return _deepSampleHolder.requestTemp(); }
 
 // Connection checks
 bool DeepSampler::verticalEncoderConnected() {return _drillController.encoderConnected();}
