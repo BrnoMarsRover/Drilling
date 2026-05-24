@@ -41,8 +41,12 @@ Drill: 0x02 (start) -> 0x01 (length 5) -> 0x42 (Weight request received. Weight 
 | STORAGE POSITION - sets the position of the deep sample storage box | 0x22 | uint8 [position] | None |
 | WEIGH DEEP - Start weighing the deep sample | 0x40 | None | None |
 | WEIGH SURFACE - Start weighing the surface sample | 0x41 | None | None |
-| GET WEIGHT DEEP - Requests the result of WEIGH DEEP | 0x42 | None | float [grams] |
-| GET WEIGHT SURFACE - Requests the result of WEIGH SURFACE | 0x43 | None | float [grams] |
+| GET WEIGHT DEEP - Requests the result of WEIGH DEEP | 0x42 | None | float [grams], uint32 [raw ADC value] |
+| GET WEIGHT SURFACE - Requests the result of WEIGH SURFACE | 0x43 | None | float [grams], uint32 [raw ADC value] |
+| CALIBRATE 0 DEEP - Starts the calibration procedure and locks other weighing functions. Calibrates the ADC value for empty storage. Needs to be followed by CALIBRATE X DEEP | 0x44 | None | None |
+| CALIBRATE X DEEP - Calibrates the ADC value for X grams in storage. Finishes calibration and saves data to nonvolatile flash memory. Unlocks weighing functions. | 0x45 | Weight of the object put into storage -  float [grams] | None |
+| CALIBRATE 0 SURFACE - Same as above, but for surface sample. | 0x46 | None | None |
+| CALIBRATE X SURFACE - Same as above, but for surface sample. | 0x45 | Weight of the object put into storage -  float [grams] | None |
 | ROCK OPEN - opens the rock sample box | 0x50 | None | None |
 | ROCK CLOSE - closes the rock sample box | 0x51 | None | None |
 | SAND OPEN - opens the sand sample box  | 0x52 | None | None |
