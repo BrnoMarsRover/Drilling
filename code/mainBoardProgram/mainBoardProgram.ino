@@ -218,6 +218,11 @@ void respondToMsg(const RoverMessage& msg)
     case CMD_WEIGH_SURFACE:
       break; // TBD
     case CMD_GET_WEIGHT_DEEP:
+      if(deepSampler.getResultReadyDeep() == true)
+        roverComm.sendFloat(CMD_GET_WEIGHT_DEEP, deepSampler.getLastWeightDeep().first); // .second is raw value
+      else
+        // vypsat hlášku přes Serial že hmotnost není připravena?
+        roverComm.sendNack();
       break; // TBD
     case CMD_GET_WEIGHT_SURFACE:
       break; // TBD

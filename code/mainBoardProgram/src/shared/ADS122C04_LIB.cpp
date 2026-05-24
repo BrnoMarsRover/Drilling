@@ -384,7 +384,7 @@ std::pair<float,float> ADS122C04::get_last_weight(void) {
     xSemaphoreTake(_mutex, portMAX_DELAY);
     float w = _lastWeight;
     float wr = _lastWeightRaw;
-    //_result_ready = false; // this prevents repetitive readings -> probably not desired
+    _result_ready = false; // this prevents repetitive readings but also states that new value is written -> desired?
     xSemaphoreGive(_mutex);
     return {w,wr};
 }
