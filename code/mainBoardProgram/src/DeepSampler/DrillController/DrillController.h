@@ -15,12 +15,20 @@ public:
   bool begin();
   void update();
 
+  // Linear Axis
   bool setCarriageSpeedMMps(float MMps);
-  bool setSpiralRPM(float rpm);
-
   float getCarriageHeightMM();
+
+  // Spiral motor
+  bool setSpiralRPM(float rpm);
   float getSpiralRPM();
   float getSpiralMotorTmp();
+
+  // Connection checks
+  bool encoderConnected();
+  bool stepperConnected();
+  bool spiralMotorConnected();
+  bool heightSensorConnected();
 
 private:
   TwoWire& _wire;
@@ -28,5 +36,5 @@ private:
 
   LinearAxis _linearAxis;
   CubeMarsV2 _motorDriver;
-  VL53L1X_Sensor _distanceSensor;
+  VL53L1X_Sensor _heightSensor;
 };

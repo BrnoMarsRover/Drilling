@@ -7,6 +7,7 @@ public:
 
   bool begin();
   void checkConnection();
+  bool isConnected();
 
   void update(); // Call this in loop()
 
@@ -41,6 +42,7 @@ private:
   HardwareSerial& debugSerial;
 
   bool _isConnected = false;
+  bool _waitingForResponse = false;
 
   // Parser state machine
   enum ParseState { WAIT_START, READ_LENGTH, READ_PAYLOAD, READ_CRC1, READ_CRC2, WAIT_END };
@@ -71,6 +73,10 @@ private:
   // TIMING
   uint32_t commNextMillis;
   static constexpr uint32_t commDeltaMillis = 500;
+
+  uint32_t lastRequestMillis = 0;
+  static constexpr uint32_t commErrorThresholdMillis = 300;
+
   uint32_t rxLastByteMillis = 0;
   static constexpr uint32_t rxTimeoutMillis = 50;
 };

@@ -26,8 +26,10 @@ bool CubeMarsV2::begin()
 
 void CubeMarsV2::checkConnection()
 {
-
+  requestTmpCurrRPM();
 }
+
+bool CubeMarsV2::isConnected() {return _isConnected;}
 
 void CubeMarsV2::update()
 {
@@ -46,6 +48,14 @@ void CubeMarsV2::update()
     }
 
     requestTmpCurrRPM();
+  }
+
+  if(_waitingForResponse && _isConnected)
+  {
+    if(millis() > lastRequestMillis + commErrorThresholdMillis)
+    {
+      _isConnected = false;
+    }
   }
 }
 
@@ -72,6 +82,8 @@ void CubeMarsV2::requestTmpCurrRPM()
   int32_t mask = RQMASK_MOSTMP | RQMASK_MOTORTMP | RQMASK_OUTCURRENT | RQMASK_RPM;
   int32ToBytes(mask, payload + 1);
   transmitPayload(payload, 5);
+  _waitingForResponse = true;
+  lastRequestMillis = millis();
 }
 
 float CubeMarsV2::getMOSTmp()  { return MOSTmp; }
@@ -99,7 +111,6 @@ void CubeMarsV2::transmitERPM()
   int32ToBytes(requestedERPM, payload + 1);
   transmitPayload(payload, 5);
 }
-
 
 void CubeMarsV2::transmitDuty(float duty)
 {
@@ -208,6 +219,9 @@ void CubeMarsV2::handleRX()
           uint16_t computedCRC = crc16(rxBuffer, rxLength);
           if (receivedCRC == computedCRC)
           {
+            _waitingForResponse = false;
+            _isConnected = true;
+
             readTmpCurrRPM(); // call interpreter
           }
         }

@@ -22,7 +22,7 @@ DrillController::DrillController(TwoWire& wire, HardwareSerial& debugSerial):
     0x42 // adresa AS5600
   ),
   _motorDriver(Serial2, debugSerial, 16, 17),
-  _distanceSensor(wire)
+  _heightSensor(wire)
 {
 }
 
@@ -33,7 +33,7 @@ bool DrillController::begin()
     _debugSerial.println("Linear axis FAILED");
     beginOK = false;
   }
-  if (!_distanceSensor.begin()) {
+  if (!_heightSensor.begin()) {
     _debugSerial.println("TOF FAILED");
     beginOK = false;
   }
@@ -58,15 +58,15 @@ bool DrillController::setCarriageSpeedMMps(float MMps)
   return true;
 }
 
+float DrillController::getCarriageHeightMM()
+{
+  return _linearAxis.getHeightMM();
+}
+
 bool DrillController::setSpiralRPM(float rpm)
 {
   _motorDriver.setRPM(rpm);
   return true;
-}
-
-float DrillController::getCarriageHeightMM()
-{
-  return _linearAxis.getHeightMM();
 }
 
 float DrillController::getSpiralRPM()
@@ -85,6 +85,11 @@ float DrillController::getSpiralMotorTmp()
     return _motorDriver.getMotorTmp();
   }
 }
+
+bool DrillController::encoderConnected() {return false;}
+bool DrillController::stepperConnected() {return false;}
+bool DrillController::spiralMotorConnected() {return _motorDriver.isConnected(); }
+bool DrillController::heightSensorConnected() {return _heightSensor.isConnected(); }
 
 // ------------------------------------------------------------------ //
 //  Private                                                           //

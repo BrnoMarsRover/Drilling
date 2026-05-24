@@ -36,6 +36,12 @@ public:
   void requestMeasureDeep();
   void requestTempDeep();
 
+  // Connection checks
+  bool verticalEncoderConnected();
+  bool verticalStepperConnected();
+  bool spiralMotorConnected();
+  bool heightSensorConneted();
+
 private:
   TwoWire& _wire;
   HardwareSerial& _debugSerial;

@@ -176,11 +176,11 @@ void respondToMsg(const RoverMessage& msg)
     case CMD_GET_DEVICE_STATUS:
     {
       roverComm.sendDeviceStatus(
-        false, //vertStepper
-        false, //vertEncoder
+        deepSampler.verticalStepperConnected(), //vertStepper
+        deepSampler.verticalEncoderConnected(), //vertEncoder
         false, //vertCurrentSensor
-        false, //spiralMotor
-        false, //heightSensor
+        deepSampler.spiralMotorConnected(), //spiralMotor
+        deepSampler.heightSensorConneted(), //heightSensor
         false, //deepSampleStepper
         false, //deepSampleEncoder
         false, //deepSampleADC

@@ -57,6 +57,12 @@ float DeepSampler::getLastTempDeep() { return _deepSampleHolder.getLastTemp(); }
 void DeepSampler::requestMeasureDeep() { return _deepSampleHolder.requestMeasure(); }
 void DeepSampler::requestTempDeep() { return _deepSampleHolder.requestTemp(); }
 
+// Connection checks
+bool DeepSampler::verticalEncoderConnected() {return _drillController.encoderConnected();}
+bool DeepSampler::verticalStepperConnected() {return _drillController.stepperConnected();}
+bool DeepSampler::spiralMotorConnected() {return _drillController.spiralMotorConnected();}
+bool DeepSampler::heightSensorConneted() {return _drillController.heightSensorConnected();}
+
 // ------------------------------------------------------------------ //
 //  Private                                                           //
 // ------------------------------------------------------------------ //
