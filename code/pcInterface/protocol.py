@@ -35,6 +35,10 @@ CMD_WEIGH_DEEP         = 0x40
 CMD_WEIGH_SURFACE      = 0x41
 CMD_GET_WEIGHT_DEEP    = 0x42
 CMD_GET_WEIGHT_SURFACE = 0x43
+CMD_CALIBRATE_0_DEEP   = 0x44
+CMD_CALIBRATE_X_DEEP   = 0x45
+CMD_CALIBRATE_0_SURFACE= 0x46
+CMD_CALIBRATE_X_SURFACE= 0x47
 CMD_ROCK_OPEN          = 0x50
 CMD_ROCK_CLOSE         = 0x51
 CMD_SAND_OPEN          = 0x52
@@ -130,6 +134,18 @@ def cmd_get_weight_deep():
 def cmd_get_weight_surface():
     return build_command(CMD_GET_WEIGHT_SURFACE)
 
+def cmd_calibrate_0_deep():
+    return build_command(CMD_CALIBRATE_0_DEEP)
+
+def cmd_calibrate_x_deep(weight_g: float):
+    return build_command(CMD_CALIBRATE_X_DEEP, struct.pack(">f", weight_g))
+
+def cmd_calibrate_0_surface():
+    return build_command(CMD_CALIBRATE_0_SURFACE)
+
+def cmd_calibrate_x_surface(weight_g: float):
+    return build_command(CMD_CALIBRATE_X_SURFACE, struct.pack(">f", weight_g))
+
 def cmd_rock_open():
     return build_command(CMD_ROCK_OPEN)
 
@@ -155,6 +171,7 @@ def parse_response(data: bytes):
       'nack'          : bool — True if the drill refused the command
       'state'         : dict — present if code == CMD_STATE
       'weight'        : float — present if code == CMD_GET_WEIGHT_DEEP/SURFACE
+      'adc_raw'       : int   — raw ADC value, present alongside 'weight'
       'device_status' : list of dicts — present if code == CMD_GET_DEVICE_STATUS
     """
     # Minimum valid message: STX + len + code + checksum + ETX = 5 bytes
@@ -192,9 +209,10 @@ def parse_response(data: bytes):
             "sw_state_str": STATE_CODES.get(sw_state, f"Unknown (0x{sw_state:02X})"),
         }
 
-    elif code in (CMD_GET_WEIGHT_DEEP, CMD_GET_WEIGHT_SURFACE) and len(payload) >= 5:
-        weight = struct.unpack_from(">f", payload, 1)[0]
-        result["weight"] = weight
+    elif code in (CMD_GET_WEIGHT_DEEP, CMD_GET_WEIGHT_SURFACE) and len(payload) >= 9:
+        weight, adc_raw = struct.unpack_from(">fI", payload, 1)
+        result["weight"]  = weight
+        result["adc_raw"] = adc_raw
 
     elif code == CMD_GET_DEVICE_STATUS and len(payload) >= 3:
         status_bits = struct.unpack_from(">H", payload, 1)[0]

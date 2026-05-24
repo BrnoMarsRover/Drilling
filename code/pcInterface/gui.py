@@ -195,6 +195,26 @@ class App(tk.Tk):
             ttk.Button(frame, text=label, command=cmd).grid(
                 row=i, column=0, sticky="ew", padx=6, pady=2)
 
+        # Calibration section
+        ttk.Separator(frame, orient="horizontal").grid(
+            row=len(buttons), column=0, columnspan=3, sticky="ew", pady=6)
+        ttk.Label(frame, text="Calibration weight (g):").grid(
+            row=len(buttons)+1, column=0, sticky="w", padx=6, pady=2)
+        self.calib_weight_var = tk.StringVar(value="100.0")
+        ttk.Entry(frame, textvariable=self.calib_weight_var, width=8).grid(
+            row=len(buttons)+1, column=1, padx=4)
+
+        calib_buttons = [
+            ("Cal 0g — deep",    self._calibrate_0_deep),
+            ("Cal Xg — deep",    self._calibrate_x_deep),
+            ("Cal 0g — surface", self._calibrate_0_surface),
+            ("Cal Xg — surface", self._calibrate_x_surface),
+        ]
+        offset = len(buttons) + 2
+        for i, (label, cmd) in enumerate(calib_buttons):
+            ttk.Button(frame, text=label, command=cmd).grid(
+                row=offset+i, column=0, columnspan=2, sticky="ew", padx=6, pady=2)
+
     # ------------------------------------------------------------------ #
     #  Device status panel                                                 #
     # ------------------------------------------------------------------ #
@@ -291,11 +311,11 @@ class App(tk.Tk):
 
         elif code == protocol.CMD_GET_WEIGHT_DEEP and "weight" in msg:
             self.weight_deep_var.set(f"{msg['weight']:.2f}")
-            self._log(f"Deep sample weight: {msg['weight']:.2f} g")
+            self._log(f"Deep sample weight: {msg['weight']:.2f} g  (raw ADC: {msg['adc_raw']})")
 
         elif code == protocol.CMD_GET_WEIGHT_SURFACE and "weight" in msg:
             self.weight_surface_var.set(f"{msg['weight']:.2f}")
-            self._log(f"Surface sample weight: {msg['weight']:.2f} g")
+            self._log(f"Surface sample weight: {msg['weight']:.2f} g  (raw ADC: {msg['adc_raw']})")
 
         elif code == protocol.CMD_GET_DEVICE_STATUS and "device_status" in msg:
             self._update_device_indicators(msg["device_status"])
@@ -380,6 +400,26 @@ class App(tk.Tk):
 
     def _get_weight_surface(self):
         self._send(protocol.cmd_get_weight_surface(), "GET WEIGHT SURFACE")
+
+    def _calibrate_0_deep(self):
+        self._send(protocol.cmd_calibrate_0_deep(), "CALIBRATE 0 DEEP")
+
+    def _calibrate_x_deep(self):
+        try:
+            weight = float(self.calib_weight_var.get())
+            self._send(protocol.cmd_calibrate_x_deep(weight), f"CALIBRATE X DEEP ({weight} g)")
+        except ValueError:
+            self._log("Invalid calibration weight.")
+
+    def _calibrate_0_surface(self):
+        self._send(protocol.cmd_calibrate_0_surface(), "CALIBRATE 0 SURFACE")
+
+    def _calibrate_x_surface(self):
+        try:
+            weight = float(self.calib_weight_var.get())
+            self._send(protocol.cmd_calibrate_x_surface(weight), f"CALIBRATE X SURFACE ({weight} g)")
+        except ValueError:
+            self._log("Invalid calibration weight.")
 
     def _rock_open(self):
         self._send(protocol.cmd_rock_open(), "ROCK OPEN")
