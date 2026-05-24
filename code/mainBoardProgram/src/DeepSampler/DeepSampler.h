@@ -29,7 +29,7 @@ public:
   bool setCalibration100Deep();
 
   bool getResultReadyDeep();
-  float getLastWeightDeep();
+  std::pair<float,float> getLastWeightDeep();
   float getLastTempDeep();
 
   bool requestMeasureDeep();

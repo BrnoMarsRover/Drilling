@@ -1,6 +1,7 @@
 #include "ads122c04_lib.h"
 #include <stdlib.h>
 #include <math.h>
+#include <utility>
 #include <Preferences.h>
 
 const int n_reset = 2;
@@ -207,7 +208,7 @@ void ADS122C04::scale_calibrate_0(void) {
   Serial.println(F("[ADC] Scale calibration 1/2. "));
   Serial.print(F("On scale should be weight of 0g"));
 
-  float adc_zero = read_median(32);
+  float adc_zero = read_median(8);
   _cal_adc_zero = adc_zero;
   Serial.print(F("[ADC] at 0g: "));
   Serial.println(adc_zero, 2);
@@ -219,7 +220,7 @@ void ADS122C04::scale_calibrate_100(void) {
   Serial.println(F("[ADC] Scale calibration 2/2. "));
   Serial.print(F("On scale should be weight of 100g"));
 
-  float adc_100 = read_median(32);
+  float adc_100 = read_median(8);
   Serial.print(F("[ADC] at 100 g: "));
   Serial.println(adc_100, 2);
 
@@ -340,6 +341,7 @@ void ADS122C04::_adcTask(void *pvParameters) {
                     float w   = self->cal_a * raw + self->cal_b - self->tare_grams;
                     xSemaphoreTake(self->_mutex, portMAX_DELAY);
                     self->_lastWeight  = w;
+                    self->_lastWeightRaw = raw;
                     self->_result_ready = true;
                     xSemaphoreGive(self->_mutex);
                     UBaseType_t hwm = uxTaskGetStackHighWaterMark(NULL); // NULL refers to this task; to erase after testing
@@ -378,12 +380,13 @@ bool ADS122C04::get_result_ready(void) { // get_result_ready to be added
     return r;
 }
 
-float ADS122C04::get_last_weight(void) {
+std::pair<float,float> ADS122C04::get_last_weight(void) {
     xSemaphoreTake(_mutex, portMAX_DELAY);
     float w = _lastWeight;
-    _result_ready = false;
+    float wr = _lastWeightRaw;
+    //_result_ready = false; // this prevents repetitive readings -> probably not desired
     xSemaphoreGive(_mutex);
-    return w;
+    return {w,wr};
 }
 
 float ADS122C04::get_last_temp(void) {

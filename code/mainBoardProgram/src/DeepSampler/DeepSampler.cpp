@@ -50,7 +50,7 @@ bool DeepSampler::setCalibration0Deep() {_deepSampleHolder.setCalibration0(); }
 bool DeepSampler::setCalibration100Deep() {_deepSampleHolder.setCalibration100(); }
 
 bool DeepSampler::getResultReadyDeep() { return _deepSampleHolder.getResultReady(); }
-float DeepSampler::getLastWeightDeep() { return _deepSampleHolder.getLastWeight(); }
+std::pair<float,float> DeepSampler::getLastWeightDeep() { return _deepSampleHolder.getLastWeight(); }
 float DeepSampler::getLastTempDeep() { return _deepSampleHolder.getLastTemp(); }
 
 bool DeepSampler::requestMeasureDeep() { return _deepSampleHolder.requestMeasure(); }

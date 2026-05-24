@@ -38,7 +38,7 @@ bool DeepSampleHolder::getResultReady()
   return _adcDeep.get_result_ready();
 }
 
-float DeepSampleHolder::getLastWeight()
+std::pair<float,float> DeepSampleHolder::getLastWeight()
 {
   return _adcDeep.get_last_weight();
 }

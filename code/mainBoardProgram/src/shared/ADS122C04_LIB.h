@@ -128,7 +128,7 @@ public:
 
     // Rresult getters
     bool    get_result_ready(void);
-    float   get_last_weight(void);
+    std::pair<float,float>   get_last_weight(void);
     float   get_last_temp(void);
     float   get_arr_weight(void); // to be written
 
@@ -146,9 +146,10 @@ private:
     TaskHandle_t _adc_task_handle     = nullptr;
 
     // Shared result state _mutex protected
-    float   _lastWeight  = 0.0f;
-    float   _lastTemp    = 0.0f;
-    bool    _result_ready = false;
+    float   _lastWeight     = 0.0f;
+    float   _lastWeightRaw  = 0.0f;
+    float   _lastTemp       = 0.0f;
+    bool    _result_ready   = false;
 
     enum class adc_cmd : uint8_t {
     MEASURE,
