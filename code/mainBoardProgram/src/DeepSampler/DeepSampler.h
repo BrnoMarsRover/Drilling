@@ -25,7 +25,6 @@ public:
   float getSpiralMotorTmp();
 
   //Storage control
-  bool setTareDeep();
   bool setCalibration0Deep();
   bool setCalibration100Deep();
 

@@ -46,7 +46,6 @@ float DeepSampler::getSpiralRPM() { return _drillController.getSpiralRPM(); }
 float DeepSampler::getSpiralMotorTmp() { return _drillController.getSpiralMotorTmp(); }
 
 //Storage control
-bool DeepSampler::setTareDeep() {_deepSampleHolder.setTare(); }
 bool DeepSampler::setCalibration0Deep() {_deepSampleHolder.setCalibration0(); }
 bool DeepSampler::setCalibration100Deep() {_deepSampleHolder.setCalibration100(); }
 

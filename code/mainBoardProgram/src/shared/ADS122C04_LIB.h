@@ -58,6 +58,7 @@
 #define IDAC_1000UA 0x06
 #define IDAC_1500UA 0x07
 
+
 class ADS122C04 {
 public:
     // Constructor: set default I2C address and calibration values
@@ -105,7 +106,6 @@ public:
     void    set_idac(uint8_t i1mux, uint8_t i2mux, uint8_t current);
     bool    data_ready(void);
     int32_t read(void);
-    //int32_t measure(void); // obsolete
     void    set_address(uint8_t addr);
 
     // Higher-level scale functions
@@ -113,7 +113,6 @@ public:
     void    tare(void);
     void    scale_calibrate_0(void);
     void    scale_calibrate_100(void);
-    //float   measure_weight(void); // to be obsolete
     float   read_temperature(void);
 
     // FreeRTOS task interface

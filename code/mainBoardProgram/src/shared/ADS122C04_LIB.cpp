@@ -1,8 +1,11 @@
 #include "ads122c04_lib.h"
 #include <stdlib.h>
 #include <math.h>
+#include <Preferences.h>
 
 const int n_reset = 2;
+
+Preferences prefs;
 
 uint8_t ADS122C04::_read_reg(uint8_t reg) {
   _wire->beginTransmission(_addr);
@@ -88,6 +91,13 @@ void ADS122C04::begin(void) {
     Serial.print(_addr, HEX);
     Serial.println(" INIT FAIL");
   }
+
+  prefs.begin("calibrate", true);
+  if(prefs.getFloat("a", 0.0) != 0.0 && prefs.getFloat("b", 0.0) != 0.0){
+    cal_a = prefs.getFloat("a", 0.0);
+    cal_b = prefs.getFloat("b", 0.0);
+  }
+  prefs.end();
 }
 
 ADS122C04::~ADS122C04() {
@@ -220,6 +230,11 @@ void ADS122C04::scale_calibrate_100(void) {
 
   cal_a = 100.0f / (adc_100 - _cal_adc_zero);
   cal_b = 0.0f - cal_a * _cal_adc_zero;
+
+  prefs.begin("calibration", false);
+  prefs.putFloat("a", cal_a);
+  prefs.putFloat("b", cal_b);
+  prefs.end();
 
   Serial.print("[ADC] 0x");
   Serial.print(_addr, HEX);
