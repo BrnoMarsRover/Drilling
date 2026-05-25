@@ -94,7 +94,7 @@ bool i2cRecoverBus()
   Serial.println(success ? F("I2C recovery successful.") : F("I2C recovery failed."));
 
   return success;
-};
+}
 
 DrillState drillState = STATE_INITIALIZING;
 

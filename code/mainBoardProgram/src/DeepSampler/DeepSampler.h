@@ -13,7 +13,7 @@ public:
   bool begin();
   void update();
 
-  // Integrated carriage/spiral motor control
+  // High level control/autonomy
 
   // Low level carriage/vertical drive control
   bool setCarriageSpeedMMps(float MMps);

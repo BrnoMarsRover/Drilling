@@ -54,8 +54,13 @@ void DrillController::update()
 
 bool DrillController::setCarriageSpeedMMps(float MMps)
 {
-  _linearAxis.setSpeedMMps(MMps);
-  return true;
+  if (_drillingMode == MANUAL)
+  {
+    _linearAxis.setSpeedMMps(MMps);
+    return true;
+  }
+  else
+    return false;
 }
 
 float DrillController::getCarriageHeightMM()
@@ -65,8 +70,13 @@ float DrillController::getCarriageHeightMM()
 
 bool DrillController::setSpiralRPM(float rpm)
 {
-  _motorDriver.setRPM(rpm);
-  return true;
+  if (_drillingMode == MANUAL)
+  {
+    _motorDriver.setRPM(rpm);
+    return true;
+  }
+  else
+    return false;
 }
 
 float DrillController::getSpiralRPM()

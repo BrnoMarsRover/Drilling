@@ -8,6 +8,12 @@
 #include "CubeMarsV2.h"
 #include "LinearAxis/LinearAxis.h"
 
+enum DrillingMode
+{
+  MANUAL,
+  AUTOMATIC
+};
+
 class DrillController
 {
 public:
@@ -30,6 +36,11 @@ public:
   bool spiralMotorConnected();
   bool heightSensorConnected();
 
+  // Integrated drill control
+  float getHeightMM();
+  bool setManualControl();
+  bool setAutomaticControl(float targetSpeedMMps, float spiralSpeedMultiplier);
+
 private:
   TwoWire& _wire;
   HardwareSerial& _debugSerial;
@@ -37,4 +48,8 @@ private:
   LinearAxis _linearAxis;
   CubeMarsV2 _motorDriver;
   VL53L1X_Sensor _heightSensor;
+
+  DrillingMode _drillingMode = MANUAL;
+  constexpr float spiralMMPerRevolution = 80.0;
+  float _autoTargetSpiralSpeed = 0;
 };
