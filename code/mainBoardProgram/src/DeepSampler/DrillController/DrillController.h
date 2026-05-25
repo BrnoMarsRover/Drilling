@@ -8,10 +8,20 @@
 #include "CubeMarsV2.h"
 #include "LinearAxis/LinearAxis.h"
 
-enum DrillingMode
+enum ControlMode
 {
   MANUAL,
   AUTOMATIC
+};
+
+enum AutoState
+{
+  WAITING_FOR_HEIGHT,
+  MOVING_DOWN,
+  DRILLING,
+  MOVING_UP,
+  DONE,
+  ERROR
 };
 
 class DrillController
@@ -23,23 +33,29 @@ public:
 
   // Linear Axis
   bool setCarriageSpeedMMps(float MMps);
-  float getCarriageHeightMM();
+  float getCarriageDepthMM();
 
   // Spiral motor
   bool setSpiralRPM(float rpm);
   float getSpiralRPM();
   float getSpiralMotorTmp();
 
+  // Integrated drill control
+  float getDistFromSurfaceMM();
+  bool setManualControl();
+  bool autoDrillToDepth(float rateOfPenetrationMMpRev, float targetRPM, float targetDepthMM);
+  //multiplier 1 -> spiral is "screwed" into the material
+  //higher multiplier -> motor needs more power, but can get into harder materials
+  //use multiplier about 10x
+
+  ControlMode getControlMode();
+  AutoState getAutoState();
+
   // Connection checks
   bool encoderConnected();
   bool stepperConnected();
   bool spiralMotorConnected();
   bool heightSensorConnected();
-
-  // Integrated drill control
-  float getHeightMM();
-  bool setManualControl();
-  bool setAutomaticControl(float targetSpeedMMps, float spiralSpeedMultiplier);
 
 private:
   TwoWire& _wire;
@@ -49,7 +65,19 @@ private:
   CubeMarsV2 _motorDriver;
   VL53L1X_Sensor _heightSensor;
 
-  DrillingMode _drillingMode = MANUAL;
-  constexpr float spiralMMPerRevolution = 80.0;
-  float _autoTargetSpiralSpeed = 0;
+  ControlMode _controlMode = MANUAL;
+  AutoState _autoState = DONE;
+
+  float _rateOfPenetrationMMpRev = 0;
+  float _targetSpiralRPS = 0;
+  float _targetDepthMM = 0;
+
+  static constexpr float linAxisZeroToSensorMM = 77.5;
+  static constexpr float carriageTopToSpiralTipMM = 72.0;
+  float spiralDepthBelowGroundMM()
+  {
+    return _linearAxis.getDepthMM() + carriageTopToSpiralTipMM - linAxisZeroToSensorMM - _heightSensor.getDistanceMM();
+  }
+
+  static constexpr float spiralLead = 80.0; //millimeters per revolution of the spiral. Currently Unused.
 };

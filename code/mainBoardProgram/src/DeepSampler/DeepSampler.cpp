@@ -27,6 +27,9 @@ void DeepSampler::update()
 }
 
 // Integrated carriage/spiral motor control
+float DeepSampler::getDistFromSurfaceMM() {return _drillController.getDistFromSurfaceMM(); }
+bool DeepSampler::drillSetManualControl() {return _drillController.setManualControl(); }
+bool DeepSampler::autoDrillToDepth(float rateOfPenetrationMMpRev, float targetRPM, float targetDepthMM) {return _drillController.autoDrillToDepth(rateOfPenetrationMMpRev, targetRPM, targetDepthMM); }
 
 // Low level carriage/vertical drive control
 bool DeepSampler::setCarriageSpeedMMps(float MMps)
@@ -34,7 +37,7 @@ bool DeepSampler::setCarriageSpeedMMps(float MMps)
   return _drillController.setCarriageSpeedMMps(MMps);
 }
 
-float DeepSampler::getCarriageHeightMM() { return _drillController.getCarriageHeightMM(); }
+float DeepSampler::getCarriageDepthMM() { return _drillController.getCarriageDepthMM(); }
 
 // Low level spiral motor control
 bool DeepSampler::setSpiralRPM(float rpm)
@@ -60,8 +63,8 @@ bool DeepSampler::requestTemp() { return _deepSampleHolder.requestTemp(); }
 bool DeepSampler::verticalEncoderConnected() {return _drillController.encoderConnected();}
 bool DeepSampler::verticalStepperConnected() {return _drillController.stepperConnected();}
 bool DeepSampler::spiralMotorConnected() {return _drillController.spiralMotorConnected();}
-bool DeepSampler::heightSensorConneted() {return _drillController.heightSensorConnected();}
-bool DeepSampler::getAdcConnecred() {return _deepSampleHolder.getAdcConnected();}
+bool DeepSampler::heightSensorConnected() {return _drillController.heightSensorConnected();}
+bool DeepSampler::getAdcConnected() {return _deepSampleHolder.getAdcConnected();}
 
 // ------------------------------------------------------------------ //
 //  Private                                                           //

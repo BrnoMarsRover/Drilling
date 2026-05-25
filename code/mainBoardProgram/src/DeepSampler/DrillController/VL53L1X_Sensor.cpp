@@ -1,7 +1,17 @@
 #include "VL53L1X_Sensor.h"
 
 VL53L1X_Sensor::VL53L1X_Sensor(TwoWire &wire, uint8_t address)
-    : _wire(&wire), _address(address), _lastDistance(0), _initialized(false) {
+    : _wire(&wire),
+      _address(address),
+      _lastDistance(0),
+      _initialized(false),
+      _measuring(false),
+      _dataReady(false),
+      _sampleCount(0),
+      _sampleSum(0),
+      _averagedDistance(0.0f),
+      _samplePending(false)
+{
 }
 
 bool VL53L1X_Sensor::begin() {
@@ -45,21 +55,15 @@ void VL53L1X_Sensor::stopContinuous() {
     _sensor.stopContinuous();
 }
 
-float VL53L1X_Sensor::readSingle() {
-    for(uint8_t i = 0; i < 10; i++){
-        _lastDistance = _sensor.readSingle();
-        _averageDistance += _lastDistance;
-    }
-    _averageDistance = _averageDistance/10;
-
+uint16_t VL53L1X_Sensor::readSingle() {
+    _lastDistance = _sensor.readSingle() - 15; // -15 offset
     return _lastDistance;
 }
 
 uint16_t VL53L1X_Sensor::readContinuous() {
-    _lastDistance = _sensor.read();
+    _lastDistance = _sensor.read()- 15 ; // -15 offset
     return _lastDistance;
 }
-
 
 float VL53L1X_Sensor::getDistanceCM() {
     return _lastDistance / 10.0f;
@@ -71,4 +75,53 @@ float VL53L1X_Sensor::getDistanceM() {
 
 bool VL53L1X_Sensor::isWithinRange(uint16_t min_mm, uint16_t max_mm) {
     return (_lastDistance >= min_mm && _lastDistance <= max_mm);
+}
+
+bool VL53L1X_Sensor::startMeasure() {
+    if (!_initialized) {
+        return false;
+    }
+
+    // Resetujeme stav
+    _dataReady    = false;
+    _measuring    = true;
+    _sampleCount  = 0;
+    _sampleSum    = 0;
+    _samplePending = false;
+
+    // Spustíme kontinuální měření senzoru (pokud ještě neběží).
+    // Perioda 50 ms odpovídá timing budget 50 000 µs nastaveném v begin().
+    _sensor.startContinuous(50);
+
+    return true;
+}
+
+bool VL53L1X_Sensor::dataReady() {
+    return _dataReady;
+}
+
+float VL53L1X_Sensor::getDistanceMM() {
+    return _averagedDistance;
+}
+
+void VL53L1X_Sensor::update() {
+    if (!_initialized || !_measuring || _dataReady) return;
+
+    // Má senzor připravený výsledek? Pokud ne, vrátíme se a zkusíme příště
+    if (!_sensor.dataReady()) return;
+
+    // Přečteme bez blokování
+    uint16_t sample = _sensor.read(false);
+
+    if (sample > 0 && sample < 65535) {
+        _sampleSum += sample;
+        _sampleCount++;
+    }
+
+    if (_sampleCount >= AVERAGE_SAMPLES) {
+        _averagedDistance = static_cast<float>(_sampleSum) / _sampleCount - 15; // -15 offset
+        _dataReady = true;
+        _measuring = false;
+        _sensor.stopContinuous();
+    }
 }

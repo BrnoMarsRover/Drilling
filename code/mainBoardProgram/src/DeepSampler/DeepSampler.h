@@ -14,10 +14,13 @@ public:
   void update();
 
   // High level control/autonomy
+  float getDistFromSurfaceMM();
+  bool drillSetManualControl();
+  bool autoDrillToDepth(float rateOfPenetrationMMpRev, float targetRPM, float targetDepthMM);
 
   // Low level carriage/vertical drive control
   bool setCarriageSpeedMMps(float MMps);
-  float getCarriageHeightMM();
+  float getCarriageDepthMM();
 
   // Low level spiral motor control
   bool setSpiralRPM(float rpm);
@@ -39,8 +42,8 @@ public:
   bool verticalEncoderConnected();
   bool verticalStepperConnected();
   bool spiralMotorConnected();
-  bool heightSensorConneted();
-  bool getAdcConnecred(); // to be finished
+  bool heightSensorConnected();
+  bool getAdcConnected(); // to be finished
 
 private:
   TwoWire& _wire;

@@ -50,11 +50,76 @@ void DrillController::update()
 {
   _linearAxis.update();
   _motorDriver.update();
+  _heightSensor.update();
+
+  if(_controlMode == AUTOMATIC)
+  {
+    switch(_autoState)
+    {
+      case WAITING_FOR_HEIGHT:
+      {
+        if(_heightSensor.dataReady())
+        {
+          if(spiralDepthBelowGroundMM() > -20.0)
+          {
+            _motorDriver.setRPM(_targetSpiralRPS*60);
+            _autoState = DRILLING;
+          }
+          else
+          {
+            _autoState = MOVING_DOWN;
+            _linearAxis.setSpeedMMps(10);
+          }
+        }
+
+        break;
+      }
+
+      case MOVING_DOWN:
+      {
+        if(spiralDepthBelowGroundMM() > -20.0)
+          _motorDriver.setRPM(_targetSpiralRPS*60);
+          _autoState = DRILLING;
+        break;
+      }
+
+      case DRILLING:
+      {
+        if(spiralDepthBelowGroundMM() > _targetDepthMM)
+        {
+          _linearAxis.setSpeedMMps(-10);
+          _motorDriver.setRPM(0);
+          _autoState = MOVING_UP;
+        }
+        _linearAxis.setSpeedMMps((_motorDriver.getRPM()/60)*_rateOfPenetrationMMpRev);
+        break;
+      }
+
+      case MOVING_UP:
+      {
+        if(_linearAxis.getDepthMM() == 0.0)
+        {
+          _autoState = DONE;
+        }
+        break;
+      }
+      
+      case DONE:
+      {
+        break;
+      }
+      
+      case ERROR:
+      {
+        break;
+      }
+    }
+  }
 }
 
 bool DrillController::setCarriageSpeedMMps(float MMps)
 {
-  if (_drillingMode == MANUAL)
+  if (_controlMode == MANUAL)
   {
     _linearAxis.setSpeedMMps(MMps);
     return true;
@@ -63,14 +128,14 @@ bool DrillController::setCarriageSpeedMMps(float MMps)
     return false;
 }
 
-float DrillController::getCarriageHeightMM()
+float DrillController::getCarriageDepthMM()
 {
-  return _linearAxis.getHeightMM();
+  return _linearAxis.getDepthMM();
 }
 
 bool DrillController::setSpiralRPM(float rpm)
 {
-  if (_drillingMode == MANUAL)
+  if (_controlMode == MANUAL)
   {
     _motorDriver.setRPM(rpm);
     return true;
@@ -96,6 +161,42 @@ float DrillController::getSpiralMotorTmp()
   }
 }
 
+// Integrated drill control
+float DrillController::getDistFromSurfaceMM()
+{
+  _heightSensor.getDistanceMM();
+}
+
+bool DrillController::setManualControl()
+{
+  setSpiralRPM(0);
+  setCarriageSpeedMMps(0);
+  _controlMode = MANUAL;
+  return true;
+}
+
+bool DrillController::autoDrillToDepth(float rateOfPenetrationMMpRev, float targetRPM, float targetDepthMM)
+{
+  if (_controlMode == MANUAL)
+  {
+    _controlMode = AUTOMATIC;
+
+    _rateOfPenetrationMMpRev = rateOfPenetrationMMpRev;
+    _targetSpiralRPS = targetRPM/60.0;
+    _targetDepthMM = targetDepthMM + 15;
+
+    _heightSensor.startMeasure();
+    _autoState = WAITING_FOR_HEIGHT;
+    return true;
+  }
+  else
+    return false;
+}
+
+ControlMode DrillController::getControlMode() {return _controlMode;}
+AutoState DrillController::getAutoState() {return _autoState;}
+
+// Connection checks
 bool DrillController::encoderConnected() {return false;}
 bool DrillController::stepperConnected() {return false;}
 bool DrillController::spiralMotorConnected() {return _motorDriver.isConnected(); }

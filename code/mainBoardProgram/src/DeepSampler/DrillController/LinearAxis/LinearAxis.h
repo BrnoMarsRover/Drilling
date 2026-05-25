@@ -54,11 +54,11 @@ public:
     bool isBottomLimitPressed() const;
 
     int32_t getStepperPosition() const;
-    float getHeightMM() const;
-    float getHeightCM() const;
-    float getHeightM() const;
-    void printHeight(Stream& out) const;
-    void setHeightPrintEnabled(bool enabled);
+    float getDepthMM() const;
+    float getDepthCM() const;
+    float getDepthM() const;
+    void printDepth(Stream& out) const;
+    void setDepthPrintEnabled(bool enabled);
 
     uint32_t getSpeedHz() const;
     uint32_t getAccelerationHz() const;

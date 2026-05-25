@@ -123,9 +123,8 @@ void respondToMsg(const RoverMessage& msg)
 
     case CMD_STATE:
     {
-      
       roverComm.sendState(
-        deepSampler.getCarriageHeightMM(),
+        deepSampler.getCarriageDepthMM(),
         0.0,  //vertical drive stepper current
         (int16_t)deepSampler.getSpiralRPM(),
         (uint8_t)deepSampler.getSpiralMotorTmp(),
@@ -138,8 +137,10 @@ void respondToMsg(const RoverMessage& msg)
     {
       if(drillState == STATE_READY)
       {
-        drillState = STATE_AUTO_DRILLING_DOWN;
-        roverComm.sendAck(CMD_DRILL_AUTO);
+        if(deepSampler.autoDrillToDepth(2, 60, 10*((float)msg.getUint8Arg()) ) )
+          roverComm.sendAck(CMD_DRILL_AUTO);
+        else
+          roverComm.sendNack();
       }
       else
       {
@@ -150,9 +151,8 @@ void respondToMsg(const RoverMessage& msg)
 
     case CMD_STOP_AUTO:
     {
-      if(drillState == STATE_AUTO_DRILLING_DOWN || drillState == STATE_AUTO_CANT_REACH || drillState == STATE_AUTO_MOVING_UP || drillState == STATE_AUTO_STORING)
+      if(deepSampler.drillSetManualControl())
       {
-        drillState = STATE_READY;
         roverComm.sendAck(CMD_STOP_AUTO);
       }
       else
@@ -180,10 +180,10 @@ void respondToMsg(const RoverMessage& msg)
         deepSampler.verticalEncoderConnected(), //vertEncoder
         false, //vertCurrentSensor
         deepSampler.spiralMotorConnected(), //spiralMotor
-        deepSampler.heightSensorConneted(), //heightSensor
+        deepSampler.heightSensorConnected(), //heightSensor
         false, //deepSampleStepper
         false, //deepSampleEncoder
-        deepSampler.getAdcConnecred(), //deepSampleADC
+        deepSampler.getAdcConnected(), //deepSampleADC
         surfaceSampleHolder.getAdcConnected() //surfaceSampleADC
       );
       break;
@@ -368,10 +368,10 @@ void handleSimpleCommand()
       linearAxis.setLoadPrintEnabled(false);
     }
     else if (cmd == "H") {
-      linearAxis.setHeightPrintEnabled(true);
+      linearAxis.setDepthPrintEnabled(true);
     }
     else if (cmd == "NH") {
-      linearAxis.setHeightPrintEnabled(false);
+      linearAxis.setDepthPrintEnabled(false);
     }
     */
     else if (cmd.startsWith("M")) {   //CUBEMARS MOTOR COMMANDS

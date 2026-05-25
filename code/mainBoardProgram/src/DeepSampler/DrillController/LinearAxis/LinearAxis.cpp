@@ -150,7 +150,7 @@ void LinearAxis::update() {
         uint32_t now = millis();
         if (now - _lastHeightPrintMs >= _heightPrintIntervalMs) {
             _lastHeightPrintMs = now;
-            printHeight(Serial);
+            printDepth(Serial);
         }
     }
 
@@ -314,17 +314,17 @@ int32_t LinearAxis::getStepperPosition() const {
     return _stepper->getCurrentPosition();
 }
 
-float LinearAxis::getHeightMM() const {
+float LinearAxis::getDepthMM() const {
     if (_encoder == nullptr) return 0.0f;
     return _encoder->getLinearDistanceMM(_mmPerRevolution);
 }
 
-float LinearAxis::getHeightCM() const {
-    return getHeightMM() / 10.0f;
+float LinearAxis::getDepthCM() const {
+    return getDepthMM() / 10.0f;
 }
 
-float LinearAxis::getHeightM() const {
-    return getHeightMM() / 1000.0f;
+float LinearAxis::getDepthM() const {
+    return getDepthMM() / 1000.0f;
 }
 
 uint32_t LinearAxis::getSpeedHz() const {
@@ -382,12 +382,12 @@ void LinearAxis::setSpeedPrintEnabled(bool enabled) {
     _lastSpeedPrintMs = millis();
 }
 
-void LinearAxis::printHeight(Stream& out) const {
+void LinearAxis::printDepth(Stream& out) const {
     out.print(F("Vyska (mm): "));
-    out.println(getHeightMM());
+    out.println(getDepthMM());
 }
 
-void LinearAxis::setHeightPrintEnabled(bool enabled) {
+void LinearAxis::setDepthPrintEnabled(bool enabled) {
     _heightPrintEnabled = enabled;
     _lastHeightPrintMs = millis();
 }
@@ -438,7 +438,7 @@ void LinearAxis::printStatus(Stream& out) const {
     out.println(getStepperPosition());
 
     out.print(F("Vyska [mm]: "));
-    out.println(getHeightMM(), 3);
+    out.println(getDepthMM(), 3);
 
     out.print(F("Horni koncak: "));
     out.println(isTopLimitPressed() ? F("SEPNUT") : F("ROZEPNUT"));
