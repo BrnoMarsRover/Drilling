@@ -223,7 +223,11 @@ void respondToMsg(const RoverMessage& msg)
 
     case CMD_WEIGH_SURFACE:
     {
-      break; // TBD
+      if(surfaceSampleHolder.requestMeasure())
+        roverComm.sendAck(CMD_WEIGH_SURFACE);
+      else
+        roverComm.sendNack();
+      break;
     }
 
     case CMD_GET_WEIGHT_DEEP:

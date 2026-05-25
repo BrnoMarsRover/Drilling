@@ -4,6 +4,8 @@
 #include <HardwareSerial.h>
 #include <Wire.h>
 
+#include "../shared/ADS122C04_LIB.h"
+
 class SurfaceSampleHolder
 {
 public:
@@ -20,9 +22,25 @@ public:
   void weighSand();
   float getSandWeight();
 
+  // ADC
+  bool begin();
+
+  bool requestMeasure();
+  bool requestTemp();
+
+  bool getResultReady();
+  WeightResult getLastWeight();
+  float getLastTemp();
+  bool getAdcConnected();
+
+  bool setTare();
+  bool setCalibration0();
+  bool setCalibrationX(float);
+  void reset();
+
 private:
   TwoWire& _wire;
   HardwareSerial& _debugSerial;
-  //adc
+  ADS122C04 _adcSurface;
   //servo
 };

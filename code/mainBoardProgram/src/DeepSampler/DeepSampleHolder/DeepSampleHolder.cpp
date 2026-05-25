@@ -9,11 +9,7 @@ DeepSampleHolder::DeepSampleHolder(TwoWire& wire) :
   _adcDeep(
     wire,
     0x44  // address for deep sample weight
-  )/*, // will be added later
-  _adcSurface(
-    wire,
-    0x45  // address for surface sample weight
-  )*/
+  )
 {
 }
 
