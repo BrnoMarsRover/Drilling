@@ -136,6 +136,7 @@ public:
     WeightResult get_last_weight(void);
     float   get_last_temp(void);
     float   get_arr_weight(void); // to be written
+    bool    get_adc_connected();
 
 private:
     TwoWire *_wire;

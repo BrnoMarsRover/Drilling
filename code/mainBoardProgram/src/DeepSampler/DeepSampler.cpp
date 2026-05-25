@@ -61,6 +61,7 @@ bool DeepSampler::verticalEncoderConnected() {return _drillController.encoderCon
 bool DeepSampler::verticalStepperConnected() {return _drillController.stepperConnected();}
 bool DeepSampler::spiralMotorConnected() {return _drillController.spiralMotorConnected();}
 bool DeepSampler::heightSensorConneted() {return _drillController.heightSensorConnected();}
+bool DeepSampler::adcConnecred() {return _deepSampleHolder.getAdcConnected();}
 
 // ------------------------------------------------------------------ //
 //  Private                                                           //

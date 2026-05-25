@@ -54,6 +54,11 @@ float DeepSampleHolder::getLastTemp()
   return _adcDeep.get_last_temp();
 }
 
+bool DeepSampleHolder::getAdcConnected()
+{
+  return _adcDeep.get_adc_connected();
+}
+
 bool DeepSampleHolder::setTare()
 {
   _adcDeep.set_tare();

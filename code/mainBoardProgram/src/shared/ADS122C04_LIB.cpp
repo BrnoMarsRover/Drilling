@@ -336,7 +336,7 @@ void ADS122C04::_adcTask(void *pvParameters) {
                     float w   = self->cal_a * raw + self->cal_b - self->tare_grams;
                     xSemaphoreTake(self->_mutex, portMAX_DELAY);
                     self->_lastWeight  = w;
-                    self->_lastWeightRaw = raw;
+                    self->_lastWeightRaw = (uint32_t)raw;
                     self->_result_ready = true;
                     xSemaphoreGive(self->_mutex);
                     UBaseType_t hwm = uxTaskGetStackHighWaterMark(NULL); // NULL refers to this task; to erase after testing
@@ -387,6 +387,11 @@ float ADS122C04::get_last_temp(void) {
     float t = _lastTemp;
     xSemaphoreGive(_mutex);
     return t;
+}
+
+bool ADS122C04::get_adc_connected(void) {
+    uint8_t reg = 0x0E;
+    return _verify_regs(&reg, 1);
 }
 
 // -------- High end fncs ---------

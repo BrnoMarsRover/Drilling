@@ -18,6 +18,7 @@ public:
   bool getResultReady();
   WeightResult getLastWeight();
   float getLastTemp();
+  bool getAdcConnected();
 
   bool setTare();
   bool setCalibration0();

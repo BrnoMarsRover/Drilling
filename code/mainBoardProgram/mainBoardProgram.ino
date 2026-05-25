@@ -183,7 +183,7 @@ void respondToMsg(const RoverMessage& msg)
         deepSampler.heightSensorConneted(), //heightSensor
         false, //deepSampleStepper
         false, //deepSampleEncoder
-        false, //deepSampleADC
+        deepSampler.adcConnecred(), //deepSampleADC
         false //surfaceSampleADC
       );
       break;
@@ -238,7 +238,7 @@ void respondToMsg(const RoverMessage& msg)
 
     case CMD_GET_WEIGHT_SURFACE:
       break; // TBD
-      
+
     case CMD_CALIBRATE_0_DEEP:
     {
       if(deepSampler.setCalibration0Deep())
