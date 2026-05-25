@@ -25,15 +25,15 @@ public:
   float getSpiralMotorTmp();
 
   //Storage control
-  bool setCalibration0Deep();
-  bool setCalibrationXDeep(float weightX = 100);
+  bool setCalibration0();
+  bool setCalibrationX(float weightX = 100);
 
-  bool getResultReadyDeep();
+  bool getResultReady();
   WeightResult getLastWeight();
-  float getLastTempDeep();
+  float getLastTemp();
 
-  bool requestMeasureDeep();
-  bool requestTempDeep();
+  bool requestMeasure();
+  bool requestTemp();
 
   // Connection checks
   bool verticalEncoderConnected();

@@ -214,7 +214,7 @@ void respondToMsg(const RoverMessage& msg)
     
     case CMD_WEIGH_DEEP:
     {
-      if(deepSampler.requestMeasureDeep())
+      if(deepSampler.requestMeasure())
         roverComm.sendAck(CMD_WEIGH_DEEP);
       else
         roverComm.sendNack();
@@ -232,7 +232,7 @@ void respondToMsg(const RoverMessage& msg)
 
     case CMD_GET_WEIGHT_DEEP:
     {
-      if(deepSampler.getResultReadyDeep()){
+      if(deepSampler.getResultReady()){
         roverComm.sendWeight(CMD_GET_WEIGHT_DEEP, deepSampler.getLastWeight());
       }
       else
@@ -250,7 +250,7 @@ void respondToMsg(const RoverMessage& msg)
 
     case CMD_CALIBRATE_0_DEEP:
     {
-      if(deepSampler.setCalibration0Deep())
+      if(deepSampler.setCalibration0())
         roverComm.sendAck(CMD_CALIBRATE_0_DEEP);
       else
         roverComm.sendNack();
@@ -259,7 +259,7 @@ void respondToMsg(const RoverMessage& msg)
 
     case CMD_CALIBRATE_X_DEEP:
     {
-      if(deepSampler.setCalibrationXDeep((float)msg.getInt16Arg()))
+      if(deepSampler.setCalibrationX((float)msg.getInt16Arg()))
         roverComm.sendAck(CMD_CALIBRATE_X_DEEP);
       else
         roverComm.sendNack();
