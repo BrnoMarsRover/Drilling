@@ -2,7 +2,7 @@
 
 LimitSwitch::LimitSwitch(uint8_t pinNumber) {
   switchPin = pinNumber;
-  pinMode(switchPin, INPUT_PULLUP);
+  pinMode(switchPin, INPUT);
 
   currentState = (digitalRead(switchPin) == LOW);
   lastState = currentState;

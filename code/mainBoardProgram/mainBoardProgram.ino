@@ -473,6 +473,7 @@ void activeDelayReset()
 
 void setup()
 {
+  pinMode(resetPin, OUTPUT);
   activeDelayReset();
   #ifdef ADVANCED_COMMAND
   Serial.begin(38400);
