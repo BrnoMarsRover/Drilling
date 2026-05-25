@@ -1,6 +1,8 @@
 #include <Arduino.h>
 #include <HardwareSerial.h>
+
 #include "CubeMarsV2.h"
+#include "../../shared/serializer.h"
 
 #define RQMASK_MOSTMP 0x01
 #define RQMASK_MOTORTMP 0x02
@@ -80,7 +82,7 @@ void CubeMarsV2::requestTmpCurrRPM()
 {
   uint8_t payload[5] = {50, 0,0,0,0};
   int32_t mask = RQMASK_MOSTMP | RQMASK_MOTORTMP | RQMASK_OUTCURRENT | RQMASK_RPM;
-  int32ToBytes(mask, payload + 1);
+  ser::int32ToBytes(mask, payload + 1);
   transmitPayload(payload, 5);
   _waitingForResponse = true;
   lastRequestMillis = millis();
@@ -108,7 +110,7 @@ void CubeMarsV2::printMotorInfoToDebug()
 void CubeMarsV2::transmitERPM()
 {
   uint8_t payload[5] = {8, 0,0,0,0};
-  int32ToBytes(requestedERPM, payload + 1);
+  ser::int32ToBytes(requestedERPM, payload + 1);
   transmitPayload(payload, 5);
 }
 
@@ -116,7 +118,7 @@ void CubeMarsV2::transmitDuty(float duty)
 {
   uint8_t payload[5] = {0x05, 0, 0, 0, 0};
   int32_t val = (int32_t)(duty * 100000.0f);
-  int32ToBytes(val, payload + 1);
+  ser::int32ToBytes(val, payload + 1);
   transmitPayload(payload, 5);
 }
 
@@ -146,25 +148,6 @@ uint16_t CubeMarsV2::crc16(uint8_t* buffer, uint8_t bufferLength)
     cksum = crc16_tab[((cksum >> 8) ^ buffer[i]) & 0xFF] ^ (cksum << 8);
   return cksum;
 }
-
-int32_t CubeMarsV2::bytesToInt32(uint8_t* buffer)
-{
-  return ((int32_t)buffer[0] << 24) | ((int32_t)buffer[1] << 16) | ((int32_t)buffer[2] << 8) | buffer[3];
-}
-
-int16_t CubeMarsV2::bytesToInt16(uint8_t* buffer)
-{
-  return ((int16_t)buffer[0] << 8) | buffer[1];
-}
-
-void CubeMarsV2::int32ToBytes(int32_t input, uint8_t* output)
-{
-  output[0] = (input >> 24) & 0xFF;
-  output[1] = (input >> 16) & 0xFF;
-  output[2] = (input >> 8) & 0xFF;
-  output[3] = input & 0xFF;
-}
-
 
 void CubeMarsV2::handleRX()
 {
@@ -237,8 +220,8 @@ void CubeMarsV2::readTmpCurrRPM()
 
   uint8_t begin = 5;
 
-  MOSTmp = 0.1 * bytesToInt16(rxBuffer + begin);
-  motorTmp = 0.1 * bytesToInt16(rxBuffer + begin + 2);
-  current = 0.01 * bytesToInt32(rxBuffer + begin + 4);
-  RPM = (1.0 / (poleCount * gearboxRatio)) * bytesToInt32(rxBuffer + begin + 8);
+  MOSTmp = 0.1 * ser::bytesToInt16(rxBuffer + begin);
+  motorTmp = 0.1 * ser::bytesToInt16(rxBuffer + begin + 2);
+  current = 0.01 * ser::bytesToInt32(rxBuffer + begin + 4);
+  RPM = (1.0 / (poleCount * gearboxRatio)) * ser::bytesToInt32(rxBuffer + begin + 8);
 }

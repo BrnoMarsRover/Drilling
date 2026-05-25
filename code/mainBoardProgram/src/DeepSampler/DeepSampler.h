@@ -14,12 +14,14 @@ public:
   void update();
 
   // High level control/autonomy
+  bool startDistFromSurfaceMeasure();
   float getDistFromSurfaceMM();
   bool drillSetManualControl();
   bool autoDrillToDepth(float rateOfPenetrationMMpRev, float targetRPM, float targetDepthMM);
 
   // Low level carriage/vertical drive control
   bool setCarriageSpeedMMps(float MMps);
+  float getCarriageSpeedMMps() const;
   float getCarriageDepthMM();
 
   // Low level spiral motor control

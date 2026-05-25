@@ -2,6 +2,7 @@
 #include <Arduino.h>
 
 #include "../shared/ADS122C04_LIB.h"
+#include "../shared/serializer.h"
 
 // ------------------------------------------------------------------ //
 //  Message queue depth — increase if commands are arriving faster    //
@@ -24,6 +25,8 @@ enum RoverCommand : uint8_t
     CMD_DRILL_SPEED       = 0x20,
     CMD_VERTICAL_SPEED    = 0x21,
     CMD_STORAGE_POSITION  = 0x22,
+    CMD_MEASURE_HEIGHT    = 0x23,
+    CMD_GET_HEIGHT        =	0x24,
     CMD_WEIGH_DEEP        = 0x40,
     CMD_WEIGH_SURFACE     = 0x41,
     CMD_GET_WEIGHT_DEEP   = 0x42,
@@ -107,11 +110,13 @@ public:
     // Send a NACK (drill cannot perform the requested command)
     void sendNack();
 
+    void sendUint16(RoverCommand cmd, uint16_t value);
+
     // Send a float value after the command code (e.g. weight response)
     void sendFloat(RoverCommand cmd, float value);
 
     // Send the full STATE response
-    void sendState(float heightMm, float stepperCurrent, float rpm, float tempC, float trayAngle, DrillState swState);
+    void sendState(float heightMm, float vertDriveSpeedMMps, float stepperCurrent, float rpm, float tempC, float trayAngle, DrillState swState);
 
     void sendDeviceStatus(bool vertStepper, bool vertEncoder, bool vertCurrentSensor, bool spiralMotor, bool heightSensor, bool deepSampleStepper, bool deepSampleEncoder, bool deepSampleADC, bool surfaceSampleADC);
 

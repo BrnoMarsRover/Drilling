@@ -128,6 +128,8 @@ bool DrillController::setCarriageSpeedMMps(float MMps)
     return false;
 }
 
+float DrillController::getCarriageSpeedMMps() const { return _linearAxis.getSpeedMMps(); }
+
 float DrillController::getCarriageDepthMM()
 {
   return _linearAxis.getDepthMM();
@@ -162,9 +164,14 @@ float DrillController::getSpiralMotorTmp()
 }
 
 // Integrated drill control
+bool DrillController::startDistFromSurfaceMeasure()
+{
+  return _heightSensor.startMeasure();
+}
+
 float DrillController::getDistFromSurfaceMM()
 {
-  _heightSensor.getDistanceMM();
+  return _heightSensor.getDistanceMM();
 }
 
 bool DrillController::setManualControl()

@@ -27,6 +27,7 @@ void DeepSampler::update()
 }
 
 // Integrated carriage/spiral motor control
+bool DeepSampler::startDistFromSurfaceMeasure() {return _drillController.startDistFromSurfaceMeasure(); }
 float DeepSampler::getDistFromSurfaceMM() {return _drillController.getDistFromSurfaceMM(); }
 bool DeepSampler::drillSetManualControl() {return _drillController.setManualControl(); }
 bool DeepSampler::autoDrillToDepth(float rateOfPenetrationMMpRev, float targetRPM, float targetDepthMM) {return _drillController.autoDrillToDepth(rateOfPenetrationMMpRev, targetRPM, targetDepthMM); }
@@ -37,6 +38,7 @@ bool DeepSampler::setCarriageSpeedMMps(float MMps)
   return _drillController.setCarriageSpeedMMps(MMps);
 }
 
+float DeepSampler::getCarriageSpeedMMps() const { return _drillController.getCarriageSpeedMMps(); }
 float DeepSampler::getCarriageDepthMM() { return _drillController.getCarriageDepthMM(); }
 
 // Low level spiral motor control

@@ -33,6 +33,7 @@ public:
 
   // Linear Axis
   bool setCarriageSpeedMMps(float MMps);
+  float getCarriageSpeedMMps() const;
   float getCarriageDepthMM();
 
   // Spiral motor
@@ -41,6 +42,7 @@ public:
   float getSpiralMotorTmp();
 
   // Integrated drill control
+  bool startDistFromSurfaceMeasure();
   float getDistFromSurfaceMM();
   bool setManualControl();
   bool autoDrillToDepth(float rateOfPenetrationMMpRev, float targetRPM, float targetDepthMM);

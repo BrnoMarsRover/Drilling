@@ -102,42 +102,42 @@ void RoverComm::sendNack()
     _sendRaw(payload, 1);
 }
 
+void RoverComm::sendUint16(RoverCommand cmd, uint16_t value)
+{
+    uint8_t payload[3];
+    payload[0] = (uint8_t)cmd;
+    ser::uint16ToBytes(value, payload + 1);
+    _sendRaw(payload, 3);
+}
+
 void RoverComm::sendFloat(RoverCommand cmd, float value)
 {
     uint8_t payload[5];
     payload[0] = (uint8_t)cmd;
-
-    // Copy float as big-endian bytes
-    uint8_t* f = (uint8_t*)&value;
-    payload[1] = f[3];
-    payload[2] = f[2];
-    payload[3] = f[1];
-    payload[4] = f[0];
-
+    ser::floatToBytes(value, payload + 1);
     _sendRaw(payload, 5);
 }
 
-void RoverComm::sendState(float heightMm, float stepperCurrent, float rpm, float tempC, float trayAngle, DrillState swState)
+void RoverComm::sendState(float heightMm, float vertDriveSpeedMMps, float stepperCurrent, float rpm, float tempC, float trayAngle, DrillState swState)
 {
-    uint8_t payload[10];
+    uint8_t payload[11];
     payload[0] = (uint8_t)CMD_STATE;
 
-    payload[1] = (uint8_t)((int16_t)heightMm >> 8);
-    payload[2] = (uint8_t)((int16_t)heightMm & 0x00FF);
+    ser::int16ToBytes((int16_t)heightMm, payload + 1);
 
-    payload[3] = (uint8_t)stepperCurrent;
+    payload[3] = (int8_t)(vertDriveSpeedMMps*10);
 
-    payload[4] = (uint8_t)((int16_t)rpm >> 8);       // int16 big-endian
-    payload[5] = (uint8_t)((int16_t)rpm & 0x00FF);
+    payload[4] = (uint8_t)stepperCurrent;
 
-    payload[6] = tempC;
+    ser::int16ToBytes((int16_t)rpm, payload + 5);
 
-    payload[7] = (uint8_t)((int16_t)trayAngle >> 8); // uint16 big-endian
-    payload[8] = (uint8_t)((int16_t)trayAngle & 0x00FF);
+    payload[7] = (uint8_t)tempC;
 
-    payload[9] = (uint8_t)swState;
+    ser::uint16ToBytes((uint16_t)trayAngle, payload + 8);
 
-    _sendRaw(payload, 10);
+    payload[10] = (uint8_t)swState;
+
+    _sendRaw(payload, 11);
 }
 
 void RoverComm::sendDeviceStatus(bool vertStepper, bool vertEncoder, bool vertCurrentSensor, bool spiralMotor, bool heightSensor, bool deepSampleStepper, bool deepSampleEncoder, bool deepSampleADC, bool surfaceSampleADC)
@@ -155,8 +155,7 @@ void RoverComm::sendDeviceStatus(bool vertStepper, bool vertEncoder, bool vertCu
 
     uint8_t payload[3];
     payload[0] = (uint8_t)CMD_GET_DEVICE_STATUS;
-    payload[1] = (uint8_t)(status >> 8);
-    payload[2] = (uint8_t)(status & 0x00FF);
+    ser::uint16ToBytes(status, payload + 1);
     _sendRaw(payload, 3);
 }
 
@@ -166,16 +165,8 @@ void RoverComm::sendWeight(RoverCommand cmd, WeightResult result)
     payload[0] = (uint8_t)cmd;
 
     // Copy float as big-endian bytes
-    uint8_t* f = (uint8_t*)&result.grams;
-    payload[1] = f[3];
-    payload[2] = f[2];
-    payload[3] = f[1];
-    payload[4] = f[0];
-
-    payload[5] = (uint8_t)((result.raw >> 24) & 0x000000FF);
-    payload[6] = (uint8_t)((result.raw >> 16) & 0x000000FF);
-    payload[7] = (uint8_t)((result.raw >>  8) & 0x000000FF);
-    payload[8] = (uint8_t)((result.raw      ) & 0x000000FF);
+    ser::floatToBytes(result.grams, payload + 1);
+    ser::uint32ToBytes(result.raw, payload + 5);
     _sendRaw(payload, 9);
 }
 

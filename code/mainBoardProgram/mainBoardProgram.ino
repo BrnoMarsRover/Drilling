@@ -125,6 +125,7 @@ void respondToMsg(const RoverMessage& msg)
     {
       roverComm.sendState(
         deepSampler.getCarriageDepthMM(),
+        deepSampler.getCarriageSpeedMMps(),
         0.0,  //vertical drive stepper current
         (int16_t)deepSampler.getSpiralRPM(),
         (uint8_t)deepSampler.getSpiralMotorTmp(),
@@ -209,6 +210,21 @@ void respondToMsg(const RoverMessage& msg)
 
     case CMD_STORAGE_POSITION:
     {
+      break;
+    }
+
+    case CMD_MEASURE_HEIGHT:
+    {
+      if(deepSampler.startDistFromSurfaceMeasure())
+        roverComm.sendAck(CMD_MEASURE_HEIGHT);
+      else
+        roverComm.sendNack();
+      break;
+    }
+
+    case CMD_GET_HEIGHT:
+    {
+      roverComm.sendUint16(CMD_GET_HEIGHT, deepSampler.getDistFromSurfaceMM());
       break;
     }
     
