@@ -218,10 +218,10 @@ void ADS122C04::scale_calibrate_0(void) {
 
 void ADS122C04::scale_calibrate_100(void) {
   Serial.println(F("[ADC] Scale calibration 2/2. "));
-  Serial.print(F("On scale should be weight of 100g"));
+  Serial.print(F("On scale should be weight of Xg"));
 
   float adc_100 = read_median(8);
-  Serial.print(F("[ADC] at 100 g: "));
+  Serial.print(F("[ADC] at Xg: "));
   Serial.println(adc_100, 2);
 
   if (fabsf(adc_100 - _cal_adc_zero) < 1.0f) {
@@ -229,7 +229,7 @@ void ADS122C04::scale_calibrate_100(void) {
     return;
   }
 
-  cal_a = 100.0f / (adc_100 - _cal_adc_zero);
+  cal_a = _cal_weight / (adc_100 - _cal_adc_zero); // OLD 100.0f / (adc_100 - _cal_adc_zero)
   cal_b = 0.0f - cal_a * _cal_adc_zero;
 
   prefs.begin("calibration", false);
@@ -244,13 +244,6 @@ void ADS122C04::scale_calibrate_100(void) {
   Serial.print(F("b = ")); Serial.println(cal_b, 8);
   Serial.println(F("  y = a*x + b  (y in grams, x = raw ADC)"));
 }
-
-//float ADS122C04::measure_weight(void) { // to update to non-blocking fnc ; OBSOLETE
-//    float raw    = read_median(10); // about 6 values, measure mode 20 sps, i call measure each 500 ms
-//    float grams  = cal_a * raw + cal_b;           // apply calibration first
-//    float tared  = grams - (float)tare_grams;     // subtract tare in grams
-//    return tared;
-//}
 
 float ADS122C04::read_temperature(void) { // to update to non-blocking fnc
   // Save current REG1 to restore after reading
@@ -325,7 +318,8 @@ void ADS122C04::set_calibration_0(){
   xQueueSend(_cmdQueue, &cmd, 0);
 }
 
-void ADS122C04::set_calibration_100(){
+void ADS122C04::set_calibration_100(float weightX){
+  _cal_weight = weightX;
   adc_cmd cmd = adc_cmd::CALIBRATE100;
   xQueueSend(_cmdQueue, &cmd, 0);
 }
@@ -355,11 +349,11 @@ void ADS122C04::_adcTask(void *pvParameters) {
                     break;
 
                 case adc_cmd::CALIBRATE0:
-                    self->scale_calibrate_0(); //0
+                    self->scale_calibrate_0();
                     break;
 
                 case adc_cmd::CALIBRATE100:
-                    self->scale_calibrate_100(); //100
+                    self->scale_calibrate_100();
                     break;
 
                 case adc_cmd::TEMPERATURE: {

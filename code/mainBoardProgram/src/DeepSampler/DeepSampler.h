@@ -26,7 +26,7 @@ public:
 
   //Storage control
   bool setCalibration0Deep();
-  bool setCalibration100Deep();
+  bool setCalibrationXDeep(float weightX = 100);
 
   bool getResultReadyDeep();
   WeightResult getLastWeight();

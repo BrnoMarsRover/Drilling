@@ -21,7 +21,7 @@ public:
 
   bool setTare();
   bool setCalibration0();
-  bool setCalibration100();
+  bool setCalibrationX(float);
   void reset();
 
 private:

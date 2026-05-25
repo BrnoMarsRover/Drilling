@@ -66,9 +66,9 @@ bool DeepSampleHolder::setCalibration0()
   return true;
 }
 
-bool DeepSampleHolder::setCalibration100()
+bool DeepSampleHolder::setCalibrationX(float weightX)
 {
-  _adcDeep.set_calibration_100();
+  _adcDeep.set_calibration_100(weightX);
   return true;
 }
 

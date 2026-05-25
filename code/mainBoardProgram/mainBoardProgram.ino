@@ -228,7 +228,7 @@ void respondToMsg(const RoverMessage& msg)
 
     case CMD_GET_WEIGHT_DEEP:
     {
-      if(deepSampler.getResultReadyDeep() == true){
+      if(deepSampler.getResultReadyDeep()){
         roverComm.sendWeight(CMD_GET_WEIGHT_DEEP, deepSampler.getLastWeight());
       }
       else
@@ -238,27 +238,22 @@ void respondToMsg(const RoverMessage& msg)
 
     case CMD_GET_WEIGHT_SURFACE:
       break; // TBD
-    //case CMD_SET_CALIB0_DEEP:
-    //  if(deepSampler.setCalibration0Deep())
-    //    roverComm.sendAck(CMD_SET_CALIB0_DEEP);
-    //  else
-    //    roverComm.sendNack();
-    //  break;
-    //case CMD_SET_CALIB100_DEEP:
-    //  if(deepSampler.setCalibration100Deep())
-    //    roverComm.sendAck(CMD_SET_CALIB100_DEEP);
-    //  else
-    //    roverComm.sendNack();
-    //  break;
-
-
+      
     case CMD_CALIBRATE_0_DEEP:
     {
+      if(deepSampler.setCalibration0Deep())
+        roverComm.sendAck(CMD_CALIBRATE_0_DEEP);
+      else
+        roverComm.sendNack();
       break;
     }
 
     case CMD_CALIBRATE_X_DEEP:
     {
+      if(deepSampler.setCalibrationXDeep((float)msg.getInt16Arg()))
+        roverComm.sendAck(CMD_CALIBRATE_X_DEEP);
+      else
+        roverComm.sendNack();
       break;
     }
     
