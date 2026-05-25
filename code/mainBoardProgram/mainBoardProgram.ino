@@ -452,7 +452,28 @@ void handleSimpleCommand()
 }
 #endif
 
-void setup() {
+// 3,3 V MOSFET switch - RESET pin
+constexpr uint8_t resetPin = 2;
+void startPeripheralReset()
+{
+  digitalWrite(resetPin, HIGH);
+}
+void endPeripheralReset()
+{
+  digitalWrite(resetPin, LOW);
+}
+void activeDelayReset()
+{
+  startPeripheralReset();
+  delay(100);
+  endPeripheralReset();
+  delay(100);
+}
+
+
+void setup()
+{
+  activeDelayReset();
   #ifdef ADVANCED_COMMAND
   Serial.begin(38400);
   #else

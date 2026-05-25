@@ -1,8 +1,8 @@
 pcbs/adc board/adc board-backups
-pcbs/adc board/fp-info-cache
 pcbs/adc board/.history
 
-pcbs/*/*.lck
+pcbs/**/*.lck
+pcbs/**/fp-info-cache
 
 .vscode
 .DS_Store
