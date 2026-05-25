@@ -70,8 +70,8 @@ void ADS122C04::powerdown(void) {
 }
 
 void ADS122C04::begin(void) {
-  pinMode(2,OUTPUT);    // TO ERASE ON BOARD V2
-  digitalWrite(2, HIGH);    // TO ERASE ON BOARD V2
+  //pinMode(2,OUTPUT);    // !! ---- FOR BOARD V1 ONLY ---- !!
+  //digitalWrite(2, HIGH);    // !! ---- FOR BOARD V1 ONLY ---- !!
 
   delay(1);
   reset(); // should not pull down RST pin
