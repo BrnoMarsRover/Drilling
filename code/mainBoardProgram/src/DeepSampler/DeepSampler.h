@@ -40,7 +40,7 @@ public:
   bool verticalStepperConnected();
   bool spiralMotorConnected();
   bool heightSensorConneted();
-  bool adcConnecred(); // to be finished
+  bool getAdcConnecred(); // to be finished
 
 private:
   TwoWire& _wire;

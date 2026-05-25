@@ -183,8 +183,8 @@ void respondToMsg(const RoverMessage& msg)
         deepSampler.heightSensorConneted(), //heightSensor
         false, //deepSampleStepper
         false, //deepSampleEncoder
-        deepSampler.adcConnecred(), //deepSampleADC
-        false //surfaceSampleADC
+        deepSampler.getAdcConnecred(), //deepSampleADC
+        surfaceSampleHolder.getAdcConnected() //surfaceSampleADC
       );
       break;
     }
