@@ -237,11 +237,16 @@ void respondToMsg(const RoverMessage& msg)
       }
       else
         roverComm.sendNack();
-      break; // TBD
+      break;
     }
 
     case CMD_GET_WEIGHT_SURFACE:
-      break; // TBD
+      if(surfaceSampleHolder.getResultReady()){
+        roverComm.sendWeight(CMD_GET_WEIGHT_SURFACE, surfaceSampleHolder.getLastWeight());
+      }
+      else
+        roverComm.sendNack();
+      break;
 
     case CMD_CALIBRATE_0_DEEP:
     {
@@ -263,11 +268,19 @@ void respondToMsg(const RoverMessage& msg)
     
     case CMD_CALIBRATE_0_SURFACE:
     {
+      if(surfaceSampleHolder.setCalibration0())
+        roverComm.sendAck(CMD_CALIBRATE_0_SURFACE);
+      else
+        roverComm.sendNack();
       break;
     }
     
     case CMD_CALIBRATE_X_SURFACE:
     {
+      if(surfaceSampleHolder.setCalibrationX((float)msg.getInt16Arg()))
+        roverComm.sendAck(CMD_CALIBRATE_X_SURFACE);
+      else
+        roverComm.sendNack();
       break;
     }
     
