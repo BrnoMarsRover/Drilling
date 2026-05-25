@@ -4,6 +4,12 @@ gui.py
 Tkinter GUI for the drilling HMI.
 All serial communication goes through the SerialWorker — the GUI never
 touches the serial port directly.
+
+Layout (4 columns):
+  Col 0: Drill status + Manual controls
+  Col 1: Auto drilling + Sample handling
+  Col 2: Device status
+  Col 3: Log (full height, no bottom row needed)
 """
 
 import tkinter as tk
@@ -11,11 +17,7 @@ from tkinter import ttk, messagebox
 import serial.tools.list_ports
 import protocol
 
-
-# How often the GUI polls the rx_queue for new data (milliseconds)
-POLL_INTERVAL_MS = 100
-
-# How often the STATE command is sent automatically (milliseconds)
+POLL_INTERVAL_MS       = 100
 STATE_POLL_INTERVAL_MS = 500
 
 
@@ -34,7 +36,6 @@ class App(tk.Tk):
         self._build_device_status_panel()
         self._build_log()
 
-        # Start polling loops
         self._poll_rx()
         self._poll_state()
 
@@ -44,21 +45,17 @@ class App(tk.Tk):
 
     def _build_connection_bar(self):
         frame = ttk.LabelFrame(self, text="Connection")
-        frame.grid(row=0, column=0, columnspan=3, padx=8, pady=6, sticky="ew")
+        frame.grid(row=0, column=0, columnspan=4, padx=8, pady=6, sticky="ew")
 
         ttk.Label(frame, text="COM port:").grid(row=0, column=0, padx=4, pady=4)
-
         self.port_var = tk.StringVar()
         self.port_combo = ttk.Combobox(frame, textvariable=self.port_var, width=12, state="readonly")
         self.port_combo.grid(row=0, column=1, padx=4, pady=4)
-
         ttk.Button(frame, text="Refresh", command=self._refresh_ports).grid(row=0, column=2, padx=4)
         self.connect_btn = ttk.Button(frame, text="Connect", command=self._toggle_connection)
         self.connect_btn.grid(row=0, column=3, padx=4)
-
         self.conn_status = ttk.Label(frame, text="Disconnected", foreground="red")
         self.conn_status.grid(row=0, column=4, padx=8)
-
         self._refresh_ports()
 
     def _refresh_ports(self):
@@ -87,7 +84,7 @@ class App(tk.Tk):
                 self._log(f"Failed to connect on {port}.")
 
     # ------------------------------------------------------------------ #
-    #  Status panel (STATE response)                                       #
+    #  Status panel (STATE response)  — column 0                          #
     # ------------------------------------------------------------------ #
 
     def _build_status_panel(self):
@@ -96,6 +93,7 @@ class App(tk.Tk):
 
         labels = [
             ("Height",           "height_var",     "mm"),
+            ("Vertical speed",   "vert_speed_var", "mm/s"),
             ("Stepper current",  "current_var",    "A"),
             ("Motor speed",      "rpm_var",        "RPM"),
             ("Motor temp",       "temp_var",       "°C"),
@@ -107,57 +105,78 @@ class App(tk.Tk):
             ttk.Label(frame, text=label + ":").grid(row=i, column=0, sticky="w", padx=6, pady=2)
             var = tk.StringVar(value="—")
             setattr(self, attr, var)
-            ttk.Label(frame, textvariable=var, width=24, anchor="w").grid(row=i, column=1, padx=4)
+            ttk.Label(frame, textvariable=var, width=22, anchor="w").grid(row=i, column=1, padx=4)
             if unit:
                 ttk.Label(frame, text=unit).grid(row=i, column=2, sticky="w")
 
-        # Weight display (updated by GET WEIGHT commands)
-        ttk.Separator(frame, orient="horizontal").grid(row=6, column=0, columnspan=3, sticky="ew", pady=4)
-        ttk.Label(frame, text="Weight (deep):").grid(row=7, column=0, sticky="w", padx=6, pady=2)
-        self.weight_deep_var = tk.StringVar(value="—")
-        ttk.Label(frame, textvariable=self.weight_deep_var, width=24, anchor="w").grid(row=7, column=1)
-        ttk.Label(frame, text="g").grid(row=7, column=2, sticky="w")
+        ttk.Separator(frame, orient="horizontal").grid(
+            row=len(labels), column=0, columnspan=3, sticky="ew", pady=4)
 
-        ttk.Label(frame, text="Weight (surface):").grid(row=8, column=0, sticky="w", padx=6, pady=2)
+        # Height sensor measurement
+        ttk.Label(frame, text="Height (sensor):").grid(
+            row=len(labels)+1, column=0, sticky="w", padx=6, pady=2)
+        self.height_sensor_var = tk.StringVar(value="—")
+        ttk.Label(frame, textvariable=self.height_sensor_var, width=22, anchor="w").grid(
+            row=len(labels)+1, column=1, padx=4)
+        ttk.Label(frame, text="mm").grid(row=len(labels)+1, column=2, sticky="w")
+
+        btn_row = len(labels) + 2
+        ttk.Button(frame, text="Measure height", command=self._measure_height).grid(
+            row=btn_row, column=0, columnspan=3, sticky="ew", padx=6, pady=2)
+        ttk.Button(frame, text="Get height", command=self._get_height).grid(
+            row=btn_row+1, column=0, columnspan=3, sticky="ew", padx=6, pady=2)
+
+        ttk.Separator(frame, orient="horizontal").grid(
+            row=btn_row+2, column=0, columnspan=3, sticky="ew", pady=4)
+
+        # Weight displays
+        ttk.Label(frame, text="Weight (deep):").grid(
+            row=btn_row+3, column=0, sticky="w", padx=6, pady=2)
+        self.weight_deep_var = tk.StringVar(value="—")
+        ttk.Label(frame, textvariable=self.weight_deep_var, width=22, anchor="w").grid(
+            row=btn_row+3, column=1, padx=4)
+        ttk.Label(frame, text="g").grid(row=btn_row+3, column=2, sticky="w")
+
+        ttk.Label(frame, text="Weight (surface):").grid(
+            row=btn_row+4, column=0, sticky="w", padx=6, pady=2)
         self.weight_surface_var = tk.StringVar(value="—")
-        ttk.Label(frame, textvariable=self.weight_surface_var, width=24, anchor="w").grid(row=8, column=1)
-        ttk.Label(frame, text="g").grid(row=8, column=2, sticky="w")
+        ttk.Label(frame, textvariable=self.weight_surface_var, width=22, anchor="w").grid(
+            row=btn_row+4, column=1, padx=4)
+        ttk.Label(frame, text="g").grid(row=btn_row+4, column=2, sticky="w")
 
     # ------------------------------------------------------------------ #
-    #  Manual controls                                                     #
+    #  Manual controls — column 0                                          #
     # ------------------------------------------------------------------ #
 
     def _build_manual_controls(self):
         frame = ttk.LabelFrame(self, text="Manual controls")
         frame.grid(row=2, column=0, padx=8, pady=6, sticky="nsew")
 
-        # Drill speed
         ttk.Label(frame, text="Drill speed (RPM):").grid(row=0, column=0, sticky="w", padx=6, pady=3)
         self.drill_speed_var = tk.StringVar(value="0")
         ttk.Entry(frame, textvariable=self.drill_speed_var, width=8).grid(row=0, column=1, padx=4)
         ttk.Button(frame, text="Set", command=self._set_drill_speed).grid(row=0, column=2, padx=4)
 
-        # Vertical speed
         ttk.Label(frame, text="Vertical speed (mm/s):").grid(row=1, column=0, sticky="w", padx=6, pady=3)
         self.vert_speed_var = tk.StringVar(value="0")
         ttk.Entry(frame, textvariable=self.vert_speed_var, width=8).grid(row=1, column=1, padx=4)
         ttk.Button(frame, text="Set", command=self._set_vertical_speed).grid(row=1, column=2, padx=4)
 
-        # Storage position
         ttk.Label(frame, text="Storage position:").grid(row=2, column=0, sticky="w", padx=6, pady=3)
         self.storage_pos_var = tk.StringVar(value="0")
         ttk.Entry(frame, textvariable=self.storage_pos_var, width=8).grid(row=2, column=1, padx=4)
         ttk.Button(frame, text="Set", command=self._set_storage_position).grid(row=2, column=2, padx=4)
 
-        ttk.Separator(frame, orient="horizontal").grid(row=3, column=0, columnspan=3, sticky="ew", pady=6)
+        ttk.Separator(frame, orient="horizontal").grid(
+            row=3, column=0, columnspan=3, sticky="ew", pady=6)
 
         ttk.Button(frame, text="Calibrate height", command=self._calibrate_height).grid(
             row=4, column=0, columnspan=3, sticky="ew", padx=6, pady=2)
-        ttk.Button(frame, text="RESTART", command=self._restart,
-                   style="Danger.TButton").grid(row=5, column=0, columnspan=3, sticky="ew", padx=6, pady=2)
+        ttk.Button(frame, text="RESTART", command=self._restart).grid(
+            row=5, column=0, columnspan=3, sticky="ew", padx=6, pady=2)
 
     # ------------------------------------------------------------------ #
-    #  Automatic drilling controls                                         #
+    #  Automatic drilling — column 1                                       #
     # ------------------------------------------------------------------ #
 
     def _build_auto_controls(self):
@@ -174,7 +193,7 @@ class App(tk.Tk):
             row=2, column=0, columnspan=2, sticky="ew", padx=6, pady=2)
 
     # ------------------------------------------------------------------ #
-    #  Sample controls                                                     #
+    #  Sample handling — column 1                                          #
     # ------------------------------------------------------------------ #
 
     def _build_sample_controls(self):
@@ -193,11 +212,11 @@ class App(tk.Tk):
         ]
         for i, (label, cmd) in enumerate(buttons):
             ttk.Button(frame, text=label, command=cmd).grid(
-                row=i, column=0, sticky="ew", padx=6, pady=2)
+                row=i, column=0, columnspan=2, sticky="ew", padx=6, pady=2)
 
-        # Calibration section
         ttk.Separator(frame, orient="horizontal").grid(
-            row=len(buttons), column=0, columnspan=3, sticky="ew", pady=6)
+            row=len(buttons), column=0, columnspan=2, sticky="ew", pady=6)
+
         ttk.Label(frame, text="Calibration weight (g):").grid(
             row=len(buttons)+1, column=0, sticky="w", padx=6, pady=2)
         self.calib_weight_var = tk.StringVar(value="100.0")
@@ -216,7 +235,7 @@ class App(tk.Tk):
                 row=offset+i, column=0, columnspan=2, sticky="ew", padx=6, pady=2)
 
     # ------------------------------------------------------------------ #
-    #  Device status panel                                                 #
+    #  Device status — column 2                                            #
     # ------------------------------------------------------------------ #
 
     def _build_device_status_panel(self):
@@ -228,14 +247,14 @@ class App(tk.Tk):
         ttk.Button(frame, text="Get device status", command=self._get_device_status).grid(
             row=1, column=0, columnspan=2, sticky="ew", padx=6, pady=2)
 
-        ttk.Separator(frame, orient="horizontal").grid(row=2, column=0, columnspan=2, sticky="ew", pady=6)
+        ttk.Separator(frame, orient="horizontal").grid(
+            row=2, column=0, columnspan=2, sticky="ew", pady=6)
 
-        # One indicator row per device — indicators start as grey (unknown)
         self._device_indicators = []
         for i, name in enumerate(protocol.DEVICE_NAMES):
             indicator = tk.Label(frame, text="●", foreground="grey", font=("TkDefaultFont", 12))
-            indicator.grid(row=3 + i, column=0, padx=(6, 2), pady=1)
-            ttk.Label(frame, text=name, anchor="w").grid(row=3 + i, column=1, sticky="w", padx=(0, 6))
+            indicator.grid(row=3+i, column=0, padx=(6, 2), pady=1)
+            ttk.Label(frame, text=name, anchor="w").grid(row=3+i, column=1, sticky="w", padx=(0, 6))
             self._device_indicators.append(indicator)
 
     def _update_device_indicators(self, devices: list):
@@ -244,19 +263,20 @@ class App(tk.Tk):
             self._device_indicators[i].config(foreground=color)
 
     # ------------------------------------------------------------------ #
-    #  Log                                                                 #
+    #  Log — column 3, full height                                         #
     # ------------------------------------------------------------------ #
 
     def _build_log(self):
         frame = ttk.LabelFrame(self, text="Log")
-        frame.grid(row=3, column=0, columnspan=3, padx=8, pady=6, sticky="ew")
+        frame.grid(row=1, column=3, rowspan=2, padx=8, pady=6, sticky="nsew")
 
-        self.log_text = tk.Text(frame, height=6, state="disabled", wrap="word",
-                                font=("Courier New", 9))
-        self.log_text.grid(row=0, column=0, sticky="ew", padx=4, pady=4)
+        self.log_text = tk.Text(frame, height=30, width=50, state="disabled",
+                                wrap="word", font=("Courier New", 9))
+        self.log_text.grid(row=0, column=0, sticky="nsew", padx=4, pady=4)
         scrollbar = ttk.Scrollbar(frame, command=self.log_text.yview)
         scrollbar.grid(row=0, column=1, sticky="ns")
         self.log_text.config(yscrollcommand=scrollbar.set)
+        frame.rowconfigure(0, weight=1)
         frame.columnconfigure(0, weight=1)
 
     def _log(self, message: str):
@@ -270,7 +290,6 @@ class App(tk.Tk):
     # ------------------------------------------------------------------ #
 
     def _poll_rx(self):
-        """Drain the rx_queue and update the GUI. Called every POLL_INTERVAL_MS."""
         while not self.worker.rx_queue.empty():
             try:
                 msg = self.worker.rx_queue.get_nowait()
@@ -280,7 +299,6 @@ class App(tk.Tk):
         self.after(POLL_INTERVAL_MS, self._poll_rx)
 
     def _poll_state(self):
-        """Send the STATE command automatically. Called every STATE_POLL_INTERVAL_MS."""
         if self.worker.is_connected():
             self.worker.send(protocol.cmd_state())
         self.after(STATE_POLL_INTERVAL_MS, self._poll_state)
@@ -303,11 +321,16 @@ class App(tk.Tk):
         if code == protocol.CMD_STATE and "state" in msg:
             s = msg["state"]
             self.height_var.set(str(s["height_mm"]))
+            self.vert_speed_var.set(f"{s['vert_speed']:.1f}")
             self.current_var.set(f"{s['current_a']:.2f}")
             self.rpm_var.set(str(s["rpm"]))
             self.temp_var.set(str(s["temp_c"]))
             self.tray_var.set(str(s["tray_angle"]))
             self.sw_state_var.set(s["sw_state_str"])
+
+        elif code == protocol.CMD_GET_HEIGHT and "height_mm" in msg:
+            self.height_sensor_var.set(str(msg["height_mm"]))
+            self._log(f"Height sensor: {msg['height_mm']} mm")
 
         elif code == protocol.CMD_GET_WEIGHT_DEEP and "weight" in msg:
             self.weight_deep_var.set(f"{msg['weight']:.2f}")
@@ -345,6 +368,12 @@ class App(tk.Tk):
 
     def _calibrate_height(self):
         self._send(protocol.cmd_calibrate_height(), "CALIBRATE HEIGHT")
+
+    def _measure_height(self):
+        self._send(protocol.cmd_measure_height(), "MEASURE HEIGHT")
+
+    def _get_height(self):
+        self._send(protocol.cmd_get_height(), "GET HEIGHT")
 
     def _start_dev_check(self):
         self._send(protocol.cmd_start_dev_check(), "START DEVICE CHECK")

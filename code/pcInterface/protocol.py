@@ -9,9 +9,10 @@ Message format:
 Checksum: sum complement of payload bytes (0x100 - (sum(payload) & 0xFF)) & 0xFF
 
 Two-step commands (trigger then poll):
-  WEIGH_DEEP       -> GET_WEIGHT_DEEP
-  WEIGH_SURFACE    -> GET_WEIGHT_SURFACE
-  START_DEV_CHECK  -> GET_DEVICE_STATUS
+  WEIGH_DEEP        -> GET_WEIGHT_DEEP
+  WEIGH_SURFACE     -> GET_WEIGHT_SURFACE
+  START_DEV_CHECK   -> GET_DEVICE_STATUS
+  MEASURE_HEIGHT    -> GET_HEIGHT
 """
 
 import struct
@@ -31,6 +32,8 @@ CMD_GET_DEVICE_STATUS  = 0x07
 CMD_DRILL_SPEED        = 0x20
 CMD_VERTICAL_SPEED     = 0x21
 CMD_STORAGE_POSITION   = 0x22
+CMD_MEASURE_HEIGHT     = 0x23
+CMD_GET_HEIGHT         = 0x24
 CMD_WEIGH_DEEP         = 0x40
 CMD_WEIGH_SURFACE      = 0x41
 CMD_GET_WEIGHT_DEEP    = 0x42
@@ -95,7 +98,6 @@ def cmd_state():
     return build_command(CMD_STATE)
 
 def cmd_drill_auto(depth_cm: int):
-    # depth is uint8
     return build_command(CMD_DRILL_AUTO, struct.pack("B", depth_cm))
 
 def cmd_stop_auto():
@@ -111,7 +113,6 @@ def cmd_get_device_status():
     return build_command(CMD_GET_DEVICE_STATUS)
 
 def cmd_drill_speed(rpm: int):
-    # rpm is int16, big-endian
     return build_command(CMD_DRILL_SPEED, struct.pack(">h", rpm))
 
 def cmd_vertical_speed(mm_per_s: float):
@@ -121,6 +122,12 @@ def cmd_vertical_speed(mm_per_s: float):
 
 def cmd_storage_position(position: int):
     return build_command(CMD_STORAGE_POSITION, struct.pack("B", position))
+
+def cmd_measure_height():
+    return build_command(CMD_MEASURE_HEIGHT)
+
+def cmd_get_height():
+    return build_command(CMD_GET_HEIGHT)
 
 def cmd_weigh_deep():
     return build_command(CMD_WEIGH_DEEP)
@@ -167,14 +174,14 @@ def parse_response(data: bytes):
     Returns a dict with parsed fields, or None if the message is invalid.
 
     Possible keys in the returned dict:
-      'code'          : int  — the echoed command code (or 0 for NACK)
-      'nack'          : bool — True if the drill refused the command
-      'state'         : dict — present if code == CMD_STATE
+      'code'          : int   — the echoed command code (or 0 for NACK)
+      'nack'          : bool  — True if the drill refused the command
+      'state'         : dict  — present if code == CMD_STATE
       'weight'        : float — present if code == CMD_GET_WEIGHT_DEEP/SURFACE
       'adc_raw'       : int   — raw ADC value, present alongside 'weight'
-      'device_status' : list of dicts — present if code == CMD_GET_DEVICE_STATUS
+      'height_mm'     : int   — present if code == CMD_GET_HEIGHT
+      'device_status' : list  — present if code == CMD_GET_DEVICE_STATUS
     """
-    # Minimum valid message: STX + len + code + checksum + ETX = 5 bytes
     if len(data) < 5:
         return None
     if data[0] != STX or data[-1] != ETX:
@@ -196,11 +203,14 @@ def parse_response(data: bytes):
 
     result = {"code": code, "nack": False}
 
-    if code == CMD_STATE and len(payload) >= 9:
-        # int16 height_mm, uint8 stepper_current, int16 rpm, uint8 temp, uint16 tray_angle, uint8 sw_state
-        height, current, rpm, temp, tray_angle, sw_state = struct.unpack_from(">hBhBHB", payload, 1)
+    if code == CMD_STATE and len(payload) >= 10:
+        # int16 height_mm, int8 vert_speed, uint8 stepper_current,
+        # int16 rpm, uint8 temp, uint16 tray_angle, uint8 sw_state
+        height, vert_speed, current, rpm, temp, tray_angle, sw_state = \
+            struct.unpack_from(">hbBhBHB", payload, 1)
         result["state"] = {
             "height_mm":    height,
+            "vert_speed":   vert_speed / 10.0,
             "current_a":    current / 100.0,
             "rpm":          rpm,
             "temp_c":       temp,
@@ -213,6 +223,9 @@ def parse_response(data: bytes):
         weight, adc_raw = struct.unpack_from(">fI", payload, 1)
         result["weight"]  = weight
         result["adc_raw"] = adc_raw
+
+    elif code == CMD_GET_HEIGHT and len(payload) >= 3:
+        result["height_mm"] = struct.unpack_from(">H", payload, 1)[0]
 
     elif code == CMD_GET_DEVICE_STATUS and len(payload) >= 3:
         status_bits = struct.unpack_from(">H", payload, 1)[0]
