@@ -230,8 +230,7 @@ void StepperPositioner::_doMoveToAngle(int angleDeg) {
 
     // Před pohybem vždy zapnout motor bez ohledu na hold mód
     digitalWrite(_enPin, LOW);
-    _stepper->setAutoEnable(true);
-    delay(5);   // čas pro nabití cívek
+    //_stepper->setAutoEnable(true);
     _stepper->move(stepsToMove);
 }
 
@@ -242,6 +241,7 @@ void StepperPositioner::stop() {
     if (_stepper) _stepper->forceStop();
     _moving = false;
     Serial.println(F("[MAG] Zastaveno."));
+    _applyHoldState(); 
 }
 
 void StepperPositioner::setZeroOffset(int32_t offsetCounts) {
@@ -369,10 +369,11 @@ void StepperPositioner::setHoldMode(bool hold) {
 
 void StepperPositioner::_applyHoldState() {
     if (_driver == nullptr || _stepper == nullptr) return;
+    _stepper->setAutoEnable(false);
 
     if (_holdMode) {
         // Plný hold proud – motor drží polohu, nelze otočit rukou
-        _driver->ihold(15);          // 0..31, max hold proud
+        _driver->ihold(20);          // 0..31, max hold proud
         _stepper->setAutoEnable(false);
         digitalWrite(_enPin, LOW);   // EN active-low = motor zapnutý
     } else {
@@ -396,18 +397,13 @@ void StepperPositioner::handleStall() {
         _moving     = false;
         _fatalError = true;
         Serial.println(F("[MAG] !!! MOTOR ZABLOKOVAN !!! Pouzij unlock()."));
+        _applyHoldState(); 
         return;
     }
 
     Serial.print(F("[MAG] Pokus o uvolneni (retry "));
     Serial.print(_retryCount);
     Serial.println(F(")..."));
-
-    delay(200);
-    // Krátký pohyb zpět
-    _stepper->move(-STALL_RELEASE_STEPS);
-    while (_stepper->isRunning()) delay(1);
-    delay(200);
 
     // Znovu cílový úhel (bez resetování retry)
     _doMoveToAngle(_targetAngle);

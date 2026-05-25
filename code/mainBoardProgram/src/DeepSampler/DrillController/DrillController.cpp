@@ -16,8 +16,8 @@ DrillController::DrillController(TwoWire& wire, HardwareSerial& debugSerial):
     18, // SCK
     19, // MISO
     23, // MOSI
-    15, // horní koncák
-    0,  // dolní koncák
+    35, // horní koncák
+    34,  // dolní koncák
     wire,  //i2c bus class
     0x42 // adresa AS5600
   ),
