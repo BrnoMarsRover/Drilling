@@ -37,12 +37,14 @@ Drill: 0x02 (start) -> 0x01 (length 5) -> 0x42 (Weight request received. Weight 
 | START DEVICE CHECK - Checks whether peripheral devices are connected and responding. | 0x06 | None | None |
 | GET DEVICE STATUS - Requests the result of the START DEVICE CHECK | 0x07 | None | uint16 (String of bits. Each bit corresponds to one peripheral device. 1 = OK, 0 = not OK. Order of devices in table below) |
 | DRILL SPEED - sets the speed of the drill/spiral | 0x20 | int16 [RPM] | None |
-| VERTICAL SPEED - sets the speed of the vertical drive| 0x21 | int8 [0,1 mm/s]<br>e.g.&nbsp;100 = 10mm/s | None |
+| VERTICAL SPEED - sets the speed of the vertical drive | 0x21 | int8 [0,1 mm/s]<br>e.g.&nbsp;100 = 10mm/s | None |
 | STORAGE POSITION - sets the position of the deep sample storage box | 0x22 | uint8 [position] | None |
-| WEIGH DEEP - Start weighing the deep sample | 0x40 | None | None |
-| WEIGH SURFACE - Start weighing the surface sample | 0x41 | None | None |
-| GET WEIGHT DEEP - Requests the result of WEIGH DEEP | 0x42 | None | float [grams], uint32 [raw ADC value] |
-| GET WEIGHT SURFACE - Requests the result of WEIGH SURFACE | 0x43 | None | float [grams], uint32 [raw ADC value] |
+| MEASURE HEIGHT - requests height measurement. | 0x23 | None | None |
+| GET HEIGHT - requests the value of the last height measurement. | 0x24 | None | uint16 [mm] |
+| WEIGH DEEP - Start weighing the deep sample. | 0x40 | None | None |
+| WEIGH SURFACE - Start weighing the surface sample. | 0x41 | None | None |
+| GET WEIGHT DEEP - Requests the result of WEIGH DEEP. | 0x42 | None | float [grams], uint32 [raw ADC value] |
+| GET WEIGHT SURFACE - Requests the result of WEIGH SURFACE. | 0x43 | None | float [grams], uint32 [raw ADC value] |
 | CALIBRATE 0 DEEP - Starts the calibration procedure. Calibrates the ADC value for empty storage. Needs to be followed by CALIBRATE X DEEP for successful calibration. | 0x44 | None | None |
 | CALIBRATE X DEEP - Calibrates the ADC value for X grams in storage. Finishes calibration and saves data to nonvolatile flash memory. | 0x45 | Weight of the object put into storage -  float [grams] | None |
 | CALIBRATE 0 SURFACE - Same as above, but for surface sample. | 0x46 | None | None |
@@ -56,7 +58,8 @@ STATE response table
 | Variable meaning | Data type | Unit |
 |-                 |-          |-     |
 | Current distance of the carriage from uppermost position | int16 | mm |
-| Vertical drive stepper current | uint8 | 0,01 A (100 = 1 A)
+| Vertical drive speed | int8 | 0,1 mm/s (10 = 1 mm/s) |
+| Vertical drive stepper current | uint8 | 0,01 A (100 = 1 A) |
 | Spiral motor speed | int16 | RPM |
 | Spiral motor temperature | uint8 | °C |
 | Deep sample storage angle | uint16 | ° |
