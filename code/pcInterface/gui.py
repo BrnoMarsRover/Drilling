@@ -95,13 +95,13 @@ class App(tk.Tk):
         frame.grid(row=1, column=0, padx=8, pady=6, sticky="nsew")
 
         labels = [
-            ("Height",           "height_var",     "mm"),
-            ("Vertical speed",   "vert_speed_var", "mm/s"),
-            ("Stepper current",  "current_var",    "A"),
-            ("Motor speed",      "rpm_var",        "RPM"),
-            ("Motor temp",       "temp_var",       "°C"),
-            ("Tray angle",       "tray_var",       "°"),
-            ("State",            "sw_state_var",   ""),
+            ("Carriage depth",         "carriage_depth_var",  "mm"),
+            ("Vertical speed (actual)","vert_speed_actual_var","mm/s"),
+            ("Stepper current",        "current_var",         "A"),
+            ("Motor speed",            "rpm_var",             "RPM"),
+            ("Motor temp",             "temp_var",            "°C"),
+            ("Tray angle",             "tray_var",            "°"),
+            ("State",                  "sw_state_var",        ""),
         ]
 
         for i, (label, attr, unit) in enumerate(labels):
@@ -144,8 +144,8 @@ class App(tk.Tk):
         ttk.Button(frame, text="Set", command=self._set_drill_speed).grid(row=0, column=2, padx=4)
 
         ttk.Label(frame, text="Vertical speed (mm/s):").grid(row=1, column=0, sticky="w", padx=6, pady=3)
-        self.vert_speed_var = tk.StringVar(value="0")
-        ttk.Entry(frame, textvariable=self.vert_speed_var, width=8).grid(row=1, column=1, padx=4)
+        self.vert_speed_request_var = tk.StringVar(value="0")
+        ttk.Entry(frame, textvariable=self.vert_speed_request_var, width=8).grid(row=1, column=1, padx=4)
         ttk.Button(frame, text="Set", command=self._set_vertical_speed).grid(row=1, column=2, padx=4)
 
         ttk.Label(frame, text="Storage position:").grid(row=2, column=0, sticky="w", padx=6, pady=3)
@@ -156,7 +156,7 @@ class App(tk.Tk):
         ttk.Separator(frame, orient="horizontal").grid(
             row=3, column=0, columnspan=3, sticky="ew", pady=6)
 
-        ttk.Button(frame, text="Calibrate height", command=self._calibrate_height).grid(
+        ttk.Button(frame, text="Calibrate carriage depth", command=self._calibrate_height).grid(
             row=4, column=0, columnspan=3, sticky="ew", padx=6, pady=2)
         ttk.Button(frame, text="RESTART", command=self._restart).grid(
             row=5, column=0, columnspan=3, sticky="ew", padx=6, pady=2)
@@ -181,16 +181,17 @@ class App(tk.Tk):
         ttk.Separator(frame, orient="horizontal").grid(
             row=3, column=0, columnspan=2, sticky="ew", pady=6)
 
-        ttk.Label(frame, text="Height (sensor):").grid(
+        ttk.Label(frame, text="Height above ground:").grid(
             row=4, column=0, sticky="w", padx=6, pady=2)
-        self.height_sensor_var = tk.StringVar(value="—")
-        ttk.Label(frame, textvariable=self.height_sensor_var, width=16, anchor="w").grid(
+        self.height_above_ground_var = tk.StringVar(value="—")
+        ttk.Label(frame, textvariable=self.height_above_ground_var, width=10, anchor="w").grid(
             row=4, column=1, padx=4)
+        ttk.Label(frame, text="mm").grid(row=4, column=2, sticky="w")
 
-        ttk.Button(frame, text="Measure height", command=self._measure_height).grid(
-            row=5, column=0, columnspan=2, sticky="ew", padx=6, pady=2)
-        ttk.Button(frame, text="Get height", command=self._get_height).grid(
-            row=6, column=0, columnspan=2, sticky="ew", padx=6, pady=2)
+        ttk.Button(frame, text="Measure height above ground", command=self._measure_height).grid(
+            row=5, column=0, columnspan=3, sticky="ew", padx=6, pady=2)
+        ttk.Button(frame, text="Get height above ground", command=self._get_height).grid(
+            row=6, column=0, columnspan=3, sticky="ew", padx=6, pady=2)
 
     # ------------------------------------------------------------------ #
     #  Sample handling — column 1                                          #
@@ -326,8 +327,8 @@ class App(tk.Tk):
 
         if code == protocol.CMD_STATE and "state" in msg:
             s = msg["state"]
-            self.height_var.set(str(s["height_mm"]))
-            self.vert_speed_var.set(f"{s['vert_speed']:.1f}")
+            self.carriage_depth_var.set(str(s["height_mm"]))
+            self.vert_speed_actual_var.set(f"{s['vert_speed']:.1f}")
             self.current_var.set(f"{s['current_a']:.2f}")
             self.rpm_var.set(str(s["rpm"]))
             self.temp_var.set(str(s["temp_c"]))
@@ -335,8 +336,8 @@ class App(tk.Tk):
             self.sw_state_var.set(s["sw_state_str"])
 
         elif code == protocol.CMD_GET_HEIGHT and "height_mm" in msg:
-            self.height_sensor_var.set(str(msg["height_mm"]))
-            self._log(f"Height sensor: {msg['height_mm']} mm")
+            self.height_above_ground_var.set(str(msg["height_mm"]))
+            self._log(f"Height above ground: {msg['height_mm']} mm")
 
         elif code == protocol.CMD_GET_WEIGHT_DEEP and "weight" in msg:
             self.weight_deep_var.set(f"{msg['weight']:.2f}")
@@ -396,7 +397,7 @@ class App(tk.Tk):
 
     def _set_vertical_speed(self):
         try:
-            mm_s = float(self.vert_speed_var.get())
+            mm_s = float(self.vert_speed_request_var.get())
             if not (-12.8 <= mm_s <= 12.7):
                 self._log("Vertical speed must be between -12.8 and 12.7 mm/s.")
                 return
