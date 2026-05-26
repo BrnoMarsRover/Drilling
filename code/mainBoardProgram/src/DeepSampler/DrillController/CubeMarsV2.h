@@ -66,7 +66,7 @@ private:
   uint16_t crc16(uint8_t* buffer, uint8_t bufferLength);
 
   // TIMING
-  uint32_t commNextMillis;
+  uint32_t commNextMillis = 0;
   static constexpr uint32_t commDeltaMillis = 500;
 
   uint32_t lastRequestMillis = 0;

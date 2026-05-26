@@ -3,6 +3,7 @@
 #include <Arduino.h>
 #include <HardwareSerial.h>
 #include <Wire.h>
+#include <FastAccelStepper.h>
 
 #include "VL53L1X_Sensor.h"
 #include "CubeMarsV2.h"
@@ -27,7 +28,7 @@ enum AutoState
 class DrillController
 {
 public:
-  DrillController(TwoWire& wire, HardwareSerial& debugSerial);
+  DrillController(TwoWire& wire, HardwareSerial& debugSerial, FastAccelStepperEngine& stepperEngine);
   bool begin();
   void update();
 
@@ -60,6 +61,8 @@ public:
   bool heightSensorConnected();
 
 private:
+  FastAccelStepperEngine& _stepperEngine;
+
   TwoWire& _wire;
   HardwareSerial& _debugSerial;
 

@@ -2,6 +2,7 @@
 #include <Arduino.h>
 #include <HardwareSerial.h>
 #include <Wire.h>
+#include <FastAccelStepper.h>
 
 #include "DrillController/DrillController.h"
 #include "DeepSampleHolder/DeepSampleHolder.h"
@@ -55,6 +56,9 @@ public:
 private:
   TwoWire& _wire;
   HardwareSerial& _debugSerial;
+
+  FastAccelStepperEngine _stepperEngine;
+  
   DrillController _drillController;
   DeepSampleHolder _deepSampleHolder;
 

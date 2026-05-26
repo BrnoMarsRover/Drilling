@@ -4,13 +4,14 @@
 //  Public                                                            //
 // ------------------------------------------------------------------ //
 
-DeepSampleHolder::DeepSampleHolder(TwoWire& wire) :
+DeepSampleHolder::DeepSampleHolder(TwoWire& wire, FastAccelStepperEngine& stepperEngine) :
   _wire(wire),
+  _stepperEngine(stepperEngine),
   _adcDeep(
     wire,
     0x44  // address for deep sample weight
   ),
-  _stepperPositioner(STEP_PIN, DIR_PIN, EN_PIN, RX_PIN, TX_PIN, wire)
+  _stepperPositioner(STEP_PIN, DIR_PIN, EN_PIN, RX_PIN, TX_PIN, wire, stepperEngine)
 
 {
 }

@@ -4,9 +4,10 @@
 //  Public                                                            //
 // ------------------------------------------------------------------ //
 
-DrillController::DrillController(TwoWire& wire, HardwareSerial& debugSerial):
+DrillController::DrillController(TwoWire& wire, HardwareSerial& debugSerial,  FastAccelStepperEngine& stepperEngine):
   _wire(wire),
   _debugSerial(debugSerial),
+   _stepperEngine(stepperEngine),
   // ===== LINEAR AXIS =====
   _linearAxis(
     13, // STEP
@@ -19,6 +20,7 @@ DrillController::DrillController(TwoWire& wire, HardwareSerial& debugSerial):
     35, // horní koncák
     34,  // dolní koncák
     wire,  //i2c bus class
+    stepperEngine,
     0x42 // adresa AS5600
   ),
   _motorDriver(Serial2, debugSerial, 16, 17),

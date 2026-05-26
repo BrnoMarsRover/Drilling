@@ -1,7 +1,5 @@
 #include "LinearAxis.h"
 
-FastAccelStepperEngine LinearAxis::_engine = FastAccelStepperEngine();
-
 LinearAxis::LinearAxis(uint8_t stepPin,
                        uint8_t dirPin,
                        uint8_t enPin,
@@ -12,6 +10,7 @@ LinearAxis::LinearAxis(uint8_t stepPin,
                        uint8_t limitTopPin,
                        uint8_t limitBottomPin,
                        TwoWire& wire,
+                       FastAccelStepperEngine& stepperEngine,
                        uint8_t encoderAddress,
                        float mmPerRevolution,
                        float rSense
@@ -28,7 +27,9 @@ LinearAxis::LinearAxis(uint8_t stepPin,
       _encoderAddress(encoderAddress),
       _mmPerRevolution(mmPerRevolution),
       _rSense(rSense),
-      _wire(wire) {
+      _wire(wire),
+      _stepperEngine(stepperEngine)
+{
 }
 
 bool LinearAxis::begin(uint16_t rmsCurrent, uint16_t microsteps) {
@@ -54,7 +55,6 @@ bool LinearAxis::begin(uint16_t rmsCurrent, uint16_t microsteps) {
 
     setupDriver();
 
-    _engine.init();
     setupStepper();
 
     if (_stepper == nullptr) {
@@ -89,8 +89,8 @@ void LinearAxis::setupDriver() {
 }
 
 void LinearAxis::setupStepper() {
-    _stepper = _engine.stepperConnectToPin(_stepPin);
-
+    _stepper = _stepperEngine.stepperConnectToPin(_stepPin);
+    
     if (_stepper == nullptr) {
         Serial.println(F("CHYBA: stepperConnectToPin() selhalo"));
         return;

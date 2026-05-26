@@ -26,6 +26,7 @@ public:
                        uint8_t rxPin,
                        uint8_t txPin,
                        TwoWire& wire,
+                       FastAccelStepperEngine& stepperEngine,
                        uint8_t uartPort = 2,
                        uint8_t numSlots = 6);
 
@@ -91,12 +92,13 @@ private:
     uint8_t _numSlots;
 
     // Periferie
-    HardwareSerial*      _serialDriver = nullptr;
+    HardwareSerial*      _serialDriver = &Serial1;
     TMC2209Stepper*      _driver       = nullptr;
     FastAccelStepper*    _stepper      = nullptr;
     AS5600L*             _encoder      = nullptr;
     TwoWire&        _wire;
-    static FastAccelStepperEngine _engine;
+
+    FastAccelStepperEngine& _stepperEngine;
 
     // Stav
     bool     _initialized = false;

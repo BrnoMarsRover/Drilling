@@ -13,25 +13,27 @@ constexpr uint8_t sclPin = 22;
 constexpr uint32_t i2cFrequency = 100000;
 TwoWire I2CBus(0);
 
+HardwareSerial& roverSerial = Serial0;
+
 void setupI2CBus()
 {
   // Print starting message for I2C recovery and setup
-  Serial.println(F("Starting I2C Bus Recovery and Setup..."));
+  roverSerial.println(F("Starting I2C Bus Recovery and Setup..."));
 
   // Check if I2C bus is free
   if (isI2CBusFree())
   {
-    Serial.println(F("I2C bus is already free."));
+    roverSerial.println(F("I2C bus is already free."));
   } else
   {
     // Bus is stuck, attempt recovery
-    Serial.println(F("I2C bus is stuck, attempting recovery..."));
+    roverSerial.println(F("I2C bus is stuck, attempting recovery..."));
     if (i2cRecoverBus())
     {
-      Serial.println(F("I2C bus recovery successful."));
+      roverSerial.println(F("I2C bus recovery successful."));
     } else
     {
-      Serial.println(F("I2C bus recovery failed!"));
+      roverSerial.println(F("I2C bus recovery failed!"));
     }
   }
 
@@ -39,7 +41,7 @@ void setupI2CBus()
   I2CBus.begin(sdaPin, sclPin, i2cFrequency);
   I2CBus.setTimeOut(50);
 
-  Serial.println(F("I2C Bus Setup Complete."));
+  roverSerial.println(F("I2C Bus Setup Complete."));
 }
 
 bool isI2CBusFree()
@@ -58,7 +60,7 @@ bool i2cRecoverBus()
     return true; // Bus is already free
   }
 
-  Serial.println(F("Attempting I2C bus recovery..."));
+  roverSerial.println(F("Attempting I2C bus recovery..."));
 
   // Try to generate clock pulses on SCL to free the bus
   pinMode(sclPin, OUTPUT_OPEN_DRAIN);
@@ -73,7 +75,7 @@ bool i2cRecoverBus()
 
     if (digitalRead(sdaPin) == HIGH)
     {
-      Serial.println(F("SDA line released. Bus is free."));
+      roverSerial.println(F("SDA line released. Bus is free."));
       return true; // SDA line released, bus is free
     }
   }
@@ -91,7 +93,7 @@ bool i2cRecoverBus()
   pinMode(sclPin, INPUT_PULLUP);
 
   bool success = (digitalRead(sdaPin) == HIGH);
-  Serial.println(success ? F("I2C recovery successful.") : F("I2C recovery failed."));
+  roverSerial.println(success ? F("I2C recovery successful.") : F("I2C recovery failed."));
 
   return success;
 }
@@ -99,8 +101,8 @@ bool i2cRecoverBus()
 DrillState drillState = STATE_INITIALIZING;
 
 //---------PERIPHERAL CLASSES
-DeepSampler deepSampler(I2CBus, Serial0);
-SurfaceSampleHolder surfaceSampleHolder(I2CBus, Serial0);
+DeepSampler deepSampler(I2CBus, roverSerial);
+SurfaceSampleHolder surfaceSampleHolder(I2CBus, roverSerial);
 
 //------UART COMMUNICATION
 //Define ADVANCE_COMMAND to utilize command via Python app.
@@ -108,7 +110,7 @@ SurfaceSampleHolder surfaceSampleHolder(I2CBus, Serial0);
 #define ADVANCED_COMMAND
 
 #ifdef ADVANCED_COMMAND
-RoverComm roverComm(Serial0);
+RoverComm roverComm(roverSerial);
 
 void respondToMsg(const RoverMessage& msg)
 {
@@ -334,9 +336,9 @@ void respondToMsg(const RoverMessage& msg)
 
 void handleSimpleCommand()
 {
-  if (Serial.available())
+  if (roverSerial.available())
   {
-    String cmd = Serial.readStringUntil('\n');
+    String cmd = roverSerial.readStringUntil('\n');
     cmd.trim();
     cmd.toUpperCase();
 
@@ -362,7 +364,7 @@ void handleSimpleCommand()
       if (value > 0) {
         linearAxis.setSpeed((uint32_t)value);
       } else {
-        Serial.println("Chyba: pouzij napr. R100");
+        roverSerial.println("Chyba: pouzij napr. R100");
       }
     }
     */
@@ -370,8 +372,8 @@ void handleSimpleCommand()
       float value = cmd.substring(2).toFloat();
       if (value > 0) {
         deepSampler.setCarriageSpeedMMps(value);
-        Serial.print("Rychlost mm/s: ");
-        //Serial.println(linearAxis.getSpeedMMps());
+        roverSerial.print("Rychlost mm/s: ");
+        //roverSerial.println(linearAxis.getSpeedMMps());
         }
     }
     /*
@@ -379,11 +381,11 @@ void handleSimpleCommand()
       linearAxis.zero();
     }
     else if (cmd == "?") {
-      linearAxis.printStatus(Serial);
+      linearAxis.printStatus(roverSerial);
     }
     else if (cmd == "TOF") {
-      Serial.print("Vzdálenost: ");
-      Serial.println(distanceSensor.readSingle());
+      roverSerial.print("Vzdálenost: ");
+      roverSerial.println(distanceSensor.readSingle());
     }
     else if (cmd == "SG") {
       linearAxis.setLoadPrintEnabled(true);
@@ -419,58 +421,58 @@ void handleSimpleCommand()
       if (target == nullptr) { return; }
       if(target->result_ready() == true){
         float w = target->get_last_weight();
-        Serial.print(w, 4);
-        Serial.println("g");
-        if (w > 2000.0f) Serial.println("[ADC] Scale overweight");
+        roverSerial.print(w, 4);
+        roverSerial.println("g");
+        if (w > 2000.0f) roverSerial.println("[ADC] Scale overweight");
       }
       else {
-        Serial.println("[ADC] No weight result ready");
+        roverSerial.println("[ADC] No weight result ready");
       }
     }
     else if (cmd.startsWith("TRE")) {
       ADS122C04 *target = cmd.endsWith("D") ? adc1 : cmd.endsWith("S") ? adc2 : nullptr;
       if (target == nullptr) { return; }
-      Serial.println("[ADC] Tare start");
+      roverSerial.println("[ADC] Tare start");
       target->set_tare();
     }
     else if (cmd.startsWith("CLB0")) {
       ADS122C04 *target = cmd.endsWith("D") ? adc1 : cmd.endsWith("S") ? adc2 : nullptr;
       if (target == nullptr) { return; }
-      Serial.println("[ADC] Calibration start 0g");
+      roverSerial.println("[ADC] Calibration start 0g");
       target->set_calibration_0();
     }
     else if (cmd.startsWith("CLB100")) {
       ADS122C04 *target = cmd.endsWith("D") ? adc1 : cmd.endsWith("S") ? adc2 : nullptr;
       if (target == nullptr) { return; }
-      Serial.println("[ADC] Calibration start 100g");
+      roverSerial.println("[ADC] Calibration start 100g");
       target->set_calibration_100();
     }
     else if (cmd.startsWith("ADCTMP")) {
       ADS122C04 *target = cmd.endsWith("D") ? adc1 : cmd.endsWith("S") ? adc2 : nullptr;
       if (target == nullptr) { return; }
-      Serial.println("[ADC] tmp measured");
+      roverSerial.println("[ADC] tmp measured");
       target->request_tmp();
     }
     else if (cmd.startsWith("GT")) {
       ADS122C04 *target = cmd.endsWith("D") ? adc1 : cmd.endsWith("S") ? adc2 : nullptr;
       if (target == nullptr) { return; }
-      Serial.print("[ADC] Chip tmp: ");
-      Serial.print(target->get_last_temp(), 4);
-      Serial.println(" °C");
+      roverSerial.print("[ADC] Chip tmp: ");
+      roverSerial.print(target->get_last_temp(), 4);
+      roverSerial.println(" °C");
     }
     else if (cmd.startsWith("ADCRST")) {
       //ADS122C04 *target = adc1;
-      //if (target == nullptr) { Serial.println("ADC deep sample not assigned"); }
+      //if (target == nullptr) { roverSerial.println("ADC deep sample not assigned"); }
       adc1->reset();
       //ADS122C04 *target = adc2;
-      //if (target == nullptr) { Serial.println("ADC surface sample not assigned"); }
+      //if (target == nullptr) { roverSerial.println("ADC surface sample not assigned"); }
       adc2->reset();
-      Serial.println("[ADC] resets complete");
+      roverSerial.println("[ADC] resets complete");
     }
     */
     else {
-      Serial.println("Neznamy prikaz.");
-      Serial.println("Pouzij: U, D, S, R100, +, -, A2000, X, ?, WGH+D/S, TRE+D/S, CLB+0/100+D/S, ADCTMP+D/S, ADCRST, GW+D/S, GT+D/S");
+      roverSerial.println("Neznamy prikaz.");
+      roverSerial.println("Pouzij: U, D, S, R100, +, -, A2000, X, ?, WGH+D/S, TRE+D/S, CLB+0/100+D/S, ADCTMP+D/S, ADCRST, GW+D/S, GT+D/S");
     }
   }
 }
@@ -500,10 +502,10 @@ void setup()
   pinMode(resetPin, OUTPUT);
   activeDelayReset();
   #ifdef ADVANCED_COMMAND
-  Serial.begin(38400);
+  roverSerial.begin(38400);
   #else
-  Serial.begin(115200);
-  Serial.setTimeout(10);
+  roverSerial.begin(115200);
+  roverSerial.setTimeout(10);
   #endif
 
   setupI2CBus();

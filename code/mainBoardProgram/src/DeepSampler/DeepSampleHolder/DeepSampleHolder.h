@@ -2,6 +2,7 @@
 
 #include <Arduino.h>
 #include <Wire.h>
+#include <FastAccelStepper.h>
 
 #include "../../shared/ADS122C04_LIB.h" //ADS122C04_LIB/
 #include "StepperPositioner.h"
@@ -9,7 +10,7 @@
 class DeepSampleHolder
 {
 public:
-  DeepSampleHolder(TwoWire& wire);
+  DeepSampleHolder(TwoWire& wire, FastAccelStepperEngine& stepperEngine);
   bool begin();
 
   void update();
@@ -39,13 +40,15 @@ private:
   TwoWire& _wire;
 
   ADS122C04 _adcDeep;
-  StepperPositioner _stepperPositioner;
+  FastAccelStepperEngine& _stepperEngine;
 
   // Piny pro StepperPositioner
   static constexpr uint8_t STEP_PIN  = 26;
   static constexpr uint8_t DIR_PIN   = 25;
   static constexpr uint8_t EN_PIN    = 27;
-  static constexpr uint8_t RX_PIN    = 16;
-  static constexpr uint8_t TX_PIN    = 17;
+  static constexpr uint8_t RX_PIN    = 32;
+  static constexpr uint8_t TX_PIN    = 33;
+
+  StepperPositioner _stepperPositioner;
 
 };

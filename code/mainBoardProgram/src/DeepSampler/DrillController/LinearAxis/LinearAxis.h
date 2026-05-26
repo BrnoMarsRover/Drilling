@@ -25,6 +25,7 @@ public:
                uint8_t limitTopPin,
                uint8_t limitBottomPin,
                TwoWire& wire,
+               FastAccelStepperEngine& stepperEngine,
                uint8_t encoderAddress = 0x40,
                float mmPerRevolution = 2.0f,
                float rSense = 0.075f
@@ -150,5 +151,5 @@ private:
     float _loadFiltered = 0;
     float _loadAlpha = 0.1;
 
-    static FastAccelStepperEngine _engine;
+    FastAccelStepperEngine& _stepperEngine;
 };

@@ -7,14 +7,17 @@
 DeepSampler::DeepSampler(TwoWire& wire, HardwareSerial& debugSerial):
   _wire(wire),
   _debugSerial(debugSerial),
-  _drillController(wire, debugSerial),
-  _deepSampleHolder(wire)
+  _stepperEngine(),
+  _drillController(wire, debugSerial, _stepperEngine),
+  _deepSampleHolder(wire, _stepperEngine)
 {
   
 }
 
 bool DeepSampler::begin()
 {
+  _stepperEngine.init();
+
   if(_drillController.begin() && _deepSampleHolder.begin())
     return true;
   else

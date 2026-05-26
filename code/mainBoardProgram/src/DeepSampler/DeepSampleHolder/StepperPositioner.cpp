@@ -1,8 +1,5 @@
 #include "StepperPositioner.h"
 
-// Statický engine sdílený přes všechny instance
-FastAccelStepperEngine StepperPositioner::_engine = FastAccelStepperEngine();
-
 // ---------------------------------------------------------------
 //  Konstruktor
 // ---------------------------------------------------------------
@@ -12,6 +9,7 @@ StepperPositioner::StepperPositioner(uint8_t stepPin,
                                        uint8_t rxPin,
                                        uint8_t txPin,
                                        TwoWire& wire,
+                                       FastAccelStepperEngine& stepperEngine,
                                        uint8_t uartPort,
                                        uint8_t numSlots)
     : _stepPin(stepPin),
@@ -20,6 +18,7 @@ StepperPositioner::StepperPositioner(uint8_t stepPin,
       _rxPin(rxPin),
       _txPin(txPin),
       _wire(wire),
+      _stepperEngine(stepperEngine),
       _uartPort(uartPort),
       _numSlots(numSlots)
 {}
@@ -29,7 +28,6 @@ StepperPositioner::StepperPositioner(uint8_t stepPin,
 // ---------------------------------------------------------------
 bool StepperPositioner::begin(uint16_t rmsCurrent, uint16_t microsteps) {
     // --- TMC2209 UART ---
-    _serialDriver = new HardwareSerial(_uartPort == 1 ? 1 : 2);
     _serialDriver->begin(115200, SERIAL_8N1, _rxPin, _txPin);
 
     _driver = new TMC2209Stepper(_serialDriver, 0.11f, 0b00);
@@ -48,14 +46,14 @@ bool StepperPositioner::begin(uint16_t rmsCurrent, uint16_t microsteps) {
 
     _encoder = new AS5600L(_wire, 0x41);   // 0x36 = výchozí adresa AS5600L
 
-    delay(20);
+    //delay(20);
     if (!_encoder->begin()) {
         _fatalError = true;
         Serial.println(F("[MAG] CHYBA: AS5600L nenalezen na I2C."));
         return false;
     }
 
-    delay(20);
+    //delay(20);
     if (!_encoder->magnetDetected()) {
         Serial.println(F("[MAG] VAROVANI: Slaby nebo zadny magnet!"));
     }
@@ -63,8 +61,7 @@ bool StepperPositioner::begin(uint16_t rmsCurrent, uint16_t microsteps) {
     _encoder->setDirection(true);
 
     // --- FastAccelStepper ---
-    _engine.init();
-    _stepper = _engine.stepperConnectToPin(_stepPin);
+    _stepper = _stepperEngine.stepperConnectToPin(_stepPin);
     if (_stepper == nullptr) {
         _fatalError = true;
         Serial.println(F("[MAG] CHYBA: Nelze inicializovat stepper."));
@@ -77,7 +74,7 @@ bool StepperPositioner::begin(uint16_t rmsCurrent, uint16_t microsteps) {
     _stepper->setSpeedInHz(3000);
     _stepper->setAcceleration(1500);
 
-    delay(200);
+    //delay(200);
     setZeroOffsetDegrees(290); // konstanta podle natočení magentu vůči senzoru -> zaručí úhel nula na uprostřed pod roverem
     //setZero();
 
