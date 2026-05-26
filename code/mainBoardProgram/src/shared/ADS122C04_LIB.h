@@ -154,7 +154,7 @@ private:
 
     // Shared result state _mutex protected
     float   _lastWeight     = 0.0f;
-    float   _lastWeightRaw  = 0.0f;
+    uint32_t _lastWeightRaw = 0;
     float   _lastTemp       = 0.0f;
     bool    _result_ready   = false;
 
