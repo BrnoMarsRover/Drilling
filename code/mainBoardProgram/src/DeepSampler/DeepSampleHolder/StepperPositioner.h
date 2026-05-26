@@ -25,8 +25,7 @@ public:
                        uint8_t enPin,
                        uint8_t rxPin,
                        uint8_t txPin,
-                       uint8_t sdaPin  = 21,
-                       uint8_t sclPin  = 22,
+                       TwoWire& wire,
                        uint8_t uartPort = 2,
                        uint8_t numSlots = 6);
 
@@ -96,7 +95,7 @@ private:
     TMC2209Stepper*      _driver       = nullptr;
     FastAccelStepper*    _stepper      = nullptr;
     AS5600L*             _encoder      = nullptr;
-    TwoWire*             _wire         = nullptr;
+    TwoWire&        _wire;
     static FastAccelStepperEngine _engine;
 
     // Stav

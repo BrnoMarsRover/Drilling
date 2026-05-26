@@ -163,7 +163,7 @@ void LinearAxis::update() {
     }
 
 
-/*
+
     if (isMoving()) {
         long angleSteps = getAngleFromSteps();
         long angleEncoder = getAngleFromEncoder();
@@ -175,7 +175,7 @@ void LinearAxis::update() {
             stop();
         }
     }
-    */
+    
 }
 
 void LinearAxis::moveUp() {

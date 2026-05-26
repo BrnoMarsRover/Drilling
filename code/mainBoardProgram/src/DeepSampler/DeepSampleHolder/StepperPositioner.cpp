@@ -11,8 +11,7 @@ StepperPositioner::StepperPositioner(uint8_t stepPin,
                                        uint8_t enPin,
                                        uint8_t rxPin,
                                        uint8_t txPin,
-                                       uint8_t sdaPin,
-                                       uint8_t sclPin,
+                                       TwoWire& wire,
                                        uint8_t uartPort,
                                        uint8_t numSlots)
     : _stepPin(stepPin),
@@ -20,8 +19,7 @@ StepperPositioner::StepperPositioner(uint8_t stepPin,
       _enPin(enPin),
       _rxPin(rxPin),
       _txPin(txPin),
-      _sdaPin(sdaPin),
-      _sclPin(sclPin),
+      _wire(wire),
       _uartPort(uartPort),
       _numSlots(numSlots)
 {}
@@ -48,10 +46,7 @@ bool StepperPositioner::begin(uint16_t rmsCurrent, uint16_t microsteps) {
     _rmsCurrent = rmsCurrent;
     _stepsPerRevolution = (microsteps == 0) ? 200 : (200U * microsteps);
 
-    // --- AS5600L I2C ---
-    _wire = new TwoWire(0);
-    _wire->begin(_sdaPin, _sclPin, 400000);
-    _encoder = new AS5600L(*_wire, 0x41);   // 0x36 = výchozí adresa AS5600L
+    _encoder = new AS5600L(_wire, 0x41);   // 0x36 = výchozí adresa AS5600L
 
     delay(20);
     if (!_encoder->begin()) {

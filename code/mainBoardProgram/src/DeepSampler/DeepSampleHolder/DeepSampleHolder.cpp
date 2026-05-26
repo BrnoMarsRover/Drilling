@@ -9,7 +9,9 @@ DeepSampleHolder::DeepSampleHolder(TwoWire& wire) :
   _adcDeep(
     wire,
     0x44  // address for deep sample weight
-  )
+  ),
+  _stepperPositioner(STEP_PIN, DIR_PIN, EN_PIN, RX_PIN, TX_PIN, wire)
+
 {
 }
 
@@ -19,8 +21,29 @@ bool DeepSampleHolder::begin()
 
   _adcDeep.begin();
   _adcDeep.task_start();
+  _stepperPositioner.begin(1000, 16);  // rmsCurrent, microsteps
 
   return beginOK;
+}
+
+void DeepSampleHolder::storageMoveToAngle(int angleDeg) {
+  _stepperPositioner.moveToAngle(angleDeg);
+}
+
+void DeepSampleHolder::storageMoveToSlot(uint8_t slot) {
+  _stepperPositioner.moveToSlot(slot);
+}
+
+void DeepSampleHolder::storageUnlock() {
+  _stepperPositioner.unlock();
+}
+
+void DeepSampleHolder::storageSetHoldMode(bool hold) {
+  _stepperPositioner.setHoldMode(hold);
+}
+
+int DeepSampleHolder::storageGetCurrentAngle() const {
+  return _stepperPositioner.getCurrentAngle();
 }
 
 bool DeepSampleHolder::requestMeasure()
