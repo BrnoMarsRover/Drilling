@@ -163,10 +163,10 @@ void respondToMsg(const RoverMessage& msg)
       break;
     }
 
-    case CMD_CALIBRATE_HEIGHT:
+    case CMD_CALIBRATE_CARRIAGE_DEPTH:
     {
       if(deepSampler.setCarriageSpeedMMps(-10.0))
-        roverComm.sendAck(CMD_CALIBRATE_HEIGHT);
+        roverComm.sendAck(CMD_CALIBRATE_CARRIAGE_DEPTH);
       else
         roverComm.sendNack();
       break;
@@ -217,18 +217,18 @@ void respondToMsg(const RoverMessage& msg)
       break;
     }
 
-    case CMD_MEASURE_HEIGHT:
+    case CMD_MEASURE_HEIGHT_ABOVE_GROUND:
     {
       if(deepSampler.startDistFromSurfaceMeasure())
-        roverComm.sendAck(CMD_MEASURE_HEIGHT);
+        roverComm.sendAck(CMD_MEASURE_HEIGHT_ABOVE_GROUND);
       else
         roverComm.sendNack();
       break;
     }
 
-    case CMD_GET_HEIGHT:
+    case CMD_GET_HEIGHT_ABOVE_GROUND:
     {
-      roverComm.sendUint16(CMD_GET_HEIGHT, deepSampler.getDistFromSurfaceMM());
+      roverComm.sendUint16(CMD_GET_HEIGHT_ABOVE_GROUND, deepSampler.getDistFromSurfaceMM());
       break;
     }
     

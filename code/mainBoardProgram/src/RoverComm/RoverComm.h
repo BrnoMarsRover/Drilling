@@ -19,14 +19,14 @@ enum RoverCommand : uint8_t
     CMD_STATE             = 0x02,
     CMD_DRILL_AUTO        = 0x03,
     CMD_STOP_AUTO         = 0x04,
-    CMD_CALIBRATE_HEIGHT  = 0x05,
+    CMD_CALIBRATE_CARRIAGE_DEPTH  = 0x05,
     CMD_START_DEVICE_CHECK = 0x06,
     CMD_GET_DEVICE_STATUS = 0x07,
     CMD_DRILL_SPEED       = 0x20,
     CMD_VERTICAL_SPEED    = 0x21,
     CMD_STORAGE_POSITION  = 0x22,
-    CMD_MEASURE_HEIGHT    = 0x23,
-    CMD_GET_HEIGHT        =	0x24,
+    CMD_MEASURE_HEIGHT_ABOVE_GROUND    = 0x23,
+    CMD_GET_HEIGHT_ABOVE_GROUND        = 0x24,
     CMD_WEIGH_DEEP        = 0x40,
     CMD_WEIGH_SURFACE     = 0x41,
     CMD_GET_WEIGHT_DEEP   = 0x42,
@@ -116,7 +116,7 @@ public:
     void sendFloat(RoverCommand cmd, float value);
 
     // Send the full STATE response
-    void sendState(float heightMm, float vertDriveSpeedMMps, float stepperCurrent, float rpm, float tempC, float trayAngle, DrillState swState);
+    void sendState(float carriageDepthMM, float carriageSpeedMMps, float stepperCurrent, float rpm, float tempC, float trayAngle, DrillState swState);
 
     void sendDeviceStatus(bool vertStepper, bool vertEncoder, bool vertCurrentSensor, bool spiralMotor, bool heightSensor, bool deepSampleStepper, bool deepSampleEncoder, bool deepSampleADC, bool surfaceSampleADC);
 
