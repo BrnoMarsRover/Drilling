@@ -31,6 +31,7 @@ public:
   void storageSetHoldMode(bool hold);
   bool storageIsHoldMode() const { return _stepperPositioner.isHoldMode(); }
   int  storageGetCurrentAngle()  const;
+  bool storageIsMoving() const {return _stepperPositioner.isMoving(); }
 
 private:
   TwoWire& _wire;

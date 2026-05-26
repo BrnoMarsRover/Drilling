@@ -207,6 +207,7 @@ void LinearAxis::stop() {
 
     if (_stepper != nullptr) {
         _stepper->forceStop();
+        _stepper->setSpeedInHz(0);
     }
 
     Serial.println(F("Motor zastaven"));
@@ -485,6 +486,7 @@ void LinearAxis::stopAndZeroPosition() {
     if (_stepper != nullptr) {
         _stepper->forceStop();
         _stepper->setCurrentPosition(0);
+        _stepper->setSpeedInHz(0);
     }
 
     if (_encoder != nullptr) {
