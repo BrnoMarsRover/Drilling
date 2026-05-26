@@ -215,9 +215,7 @@ void respondToMsg(const RoverMessage& msg)
     case CMD_STORAGE_POSITION:
     {
       if(deepSampler.storageMoveToSlot(msg.getUint8Arg()))
-      {
-        roverComm.sendAck(CMD_STORAGE_POSITION)
-      }
+        roverComm.sendAck(CMD_STORAGE_POSITION);
       else
         roverComm.sendNack();
       break;
