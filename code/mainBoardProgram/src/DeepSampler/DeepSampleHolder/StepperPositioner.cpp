@@ -116,15 +116,15 @@ void StepperPositioner::update() {
     if (now - _lastCheckMs < STALL_CHECK_MS) return;
     _lastCheckMs = now;
 
-    int realPos = getCurrentAngle();
+    uint16_t realPos = getCurrentAngle();
 
     // Vypočítaná očekávaná poloha z kroků
     long deltaSteps   = _stepper->getCurrentPosition() - _moveStartSteps;
-    int  expectedPos  = normalizeAngle(
+    uint16_t  expectedPos  = normalizeAngle(
         _moveStartAngle + (int)((deltaSteps * 360L) / _stepsPerRevolution)
     );
 
-    int err = shortestAngleDiff(expectedPos, realPos);
+    int16_t err = shortestAngleDiff(expectedPos, realPos);
 
     // --- Průběžný debug výpis ---
     Serial.print(F("[DBG] motor="));
@@ -159,14 +159,14 @@ void StepperPositioner::update() {
 // ---------------------------------------------------------------
 //  moveToSlot()
 // ---------------------------------------------------------------
-void StepperPositioner::moveToSlot(uint8_t slot) {
+bool StepperPositioner::moveToSlot(uint8_t slot) {
     if (slot < 1 || slot > NUM_POSITIONS) {
         Serial.print(F("[MAG] Neplatny slot: "));
         Serial.println(slot);
-        return;
+        return false;
     }
 
-    int angle = POSITIONS[slot - 1];
+    uint16_t angle = POSITIONS[slot - 1];
 
     Serial.print(F("[MAG] Slot "));
     Serial.print(slot);
@@ -175,18 +175,20 @@ void StepperPositioner::moveToSlot(uint8_t slot) {
     Serial.println(F("°"));
 
     _retryCount = 0;
-    moveToAngle(angle);
+    return moveToAngle(angle);
 }
 
 // ---------------------------------------------------------------
 //  moveToAngle()
 // ---------------------------------------------------------------
-void StepperPositioner::moveToAngle(int angleDeg) {
+bool StepperPositioner::moveToAngle(int16_t angleDeg) {
+    if (_fatalError) {return false;}
     _retryCount = 0;
     _doMoveToAngle(angleDeg);
+    return true;
 }
 
-void StepperPositioner::_doMoveToAngle(int angleDeg) {
+void StepperPositioner::_doMoveToAngle(int16_t angleDeg) {
     if (_fatalError) {
         Serial.println(F("[MAG] CHYBA: System zablokovan. Pouzij unlock()."));
         return;
@@ -197,8 +199,8 @@ void StepperPositioner::_doMoveToAngle(int angleDeg) {
     }
 
     _targetAngle = normalizeAngle(angleDeg);
-    int currentEnc = getCurrentAngle();
-    int diff       = shortestAngleDiff(currentEnc, _targetAngle);
+    uint16_t currentEnc = getCurrentAngle();
+    int16_t diff  = shortestAngleDiff(currentEnc, _targetAngle);
 
     if (abs(diff) <= 1) {
         Serial.println(F("[MAG] Cil uz dosazen."));
@@ -281,7 +283,7 @@ void StepperPositioner::unlock() {
 // ---------------------------------------------------------------
 //  getCurrentAngle()
 // ---------------------------------------------------------------
-int StepperPositioner::getCurrentAngle() const {
+int16_t StepperPositioner::getCurrentAngle() const {
     if (_encoder == nullptr) return 0;
     // getTotalAngleDegrees() vraci kumulativni uhel (muze byt >360 nebo zaporny)
     // pro porovnani slotu chceme 0-359
@@ -293,14 +295,14 @@ int StepperPositioner::getCurrentAngle() const {
 //  getCurrentSlot() – nejbližší slot
 // ---------------------------------------------------------------
 uint8_t StepperPositioner::getCurrentSlot() const {
-    int angle = getCurrentAngle();
+    uint16_t angle = getCurrentAngle();
 
     uint8_t nearestSlot = 1;
-    int minError = 360;
+    uint16_t minError = 360;
 
     for (uint8_t i = 0; i < NUM_POSITIONS; i++) {
 
-        int err = shortestAngleDiff(angle, POSITIONS[i]);
+        int16_t err = shortestAngleDiff(angle, POSITIONS[i]);
 
         if (abs(err) < minError) {
             minError = abs(err);
@@ -407,15 +409,18 @@ void StepperPositioner::handleStall() {
 // ---------------------------------------------------------------
 //  Pomocné funkce
 // ---------------------------------------------------------------
-int StepperPositioner::normalizeAngle(int a) {
+uint16_t StepperPositioner::normalizeAngle(int16_t a) {
     a %= 360;
     if (a < 0) a += 360;
     return a;
 }
 
-int StepperPositioner::shortestAngleDiff(int from, int to) {
-    int diff = normalizeAngle(to) - normalizeAngle(from);
-    if (diff >  180) diff -= 360;
+int16_t StepperPositioner::shortestAngleDiff(int16_t from, int16_t to)
+{
+    int16_t diff = (int16_t)normalizeAngle(to) - (int16_t)normalizeAngle(from);
+
+    if (diff > 180) diff -= 360;
     if (diff <= -180) diff += 360;
+
     return diff;
 }

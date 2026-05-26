@@ -38,10 +38,10 @@ public:
     void update();
 
     // Otočit na slot 1..numSlots
-    void moveToSlot(uint8_t slot);
+    bool moveToSlot(uint8_t slot);
 
     // Přímé zadání úhlu 0..359°
-    void moveToAngle(int angleDeg);
+    bool moveToAngle(int16_t angleDeg);
 
     // Nastavit nulový bod na aktuální polohu enkodéru
     void setZero();
@@ -63,8 +63,8 @@ public:
     bool    isMoving()      const { return _moving; }
     bool    hasFatalError() const { return _fatalError; }
     bool    isInitialized() const { return _initialized; }
-    int     getCurrentAngle()  const;
-    int     getTargetAngle()   const { return _targetAngle; }
+    int16_t     getCurrentAngle()  const;
+    uint16_t     getTargetAngle()   const { return _targetAngle; }
     uint8_t getCurrentSlot()   const;   // nejbližší slot k aktuální pozici
     uint8_t getNumSlots()      const { return _numSlots; }
     int32_t getZeroOffset() const;
@@ -76,12 +76,12 @@ public:
 
 private:
     // interní pohyb (bez resetu retry)
-    void _doMoveToAngle(int angleDeg);
+    void _doMoveToAngle(int16_t angleDeg);
     void _applyHoldState();
 
     void handleStall();
-    static int  normalizeAngle(int a);
-    static int  shortestAngleDiff(int from, int to);
+    static uint16_t  normalizeAngle(int16_t a);
+    static int16_t  shortestAngleDiff(int16_t from, int16_t to);
 
     // Piny
     uint8_t _stepPin, _dirPin, _enPin;
@@ -105,9 +105,9 @@ private:
     bool     _holdMode    = true;   // true=drzi, false=volny
     uint16_t _rmsCurrent  = 600;
 
-    int      _targetAngle    = 0;
-    int      _lastAngle      = 0;
-    int      _retryCount     = 0;
+    uint16_t _targetAngle    = 0;
+    uint16_t _lastAngle      = 0;
+    uint16_t _retryCount     = 0;
     uint32_t _lastCheckMs    = 0;
 
     uint16_t _stepsPerRevolution = 3200;
