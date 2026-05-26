@@ -55,8 +55,8 @@ float DeepSampler::getSpiralRPM() { return _drillController.getSpiralRPM(); }
 float DeepSampler::getSpiralMotorTmp() { return _drillController.getSpiralMotorTmp(); }
 
 //Storage control
-bool DeepSampler::setCalibration0() {_deepSampleHolder.setCalibration0(); }
-bool DeepSampler::setCalibrationX(float weightX) {_deepSampleHolder.setCalibrationX(weightX); }
+bool DeepSampler::setCalibration0() { return _deepSampleHolder.setCalibration0(); }
+bool DeepSampler::setCalibrationX(float weightX) { return _deepSampleHolder.setCalibrationX(weightX); }
 
 bool DeepSampler::getResultReady() { return _deepSampleHolder.getResultReady(); }
 WeightResult DeepSampler::getLastWeight() { return _deepSampleHolder.getLastWeight(); }

@@ -67,7 +67,7 @@ private:
 
   // TIMING
   uint32_t commNextMillis = 0;
-  static constexpr uint32_t commDeltaMillis = 500;
+  static constexpr uint32_t commDeltaMillis = 400;
 
   uint32_t lastRequestMillis = 0;
   static constexpr uint32_t commErrorThresholdMillis = 300;

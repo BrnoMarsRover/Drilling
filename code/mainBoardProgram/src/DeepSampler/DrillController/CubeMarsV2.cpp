@@ -37,9 +37,8 @@ void CubeMarsV2::update()
 {
   handleRX();
 
-  if(millis() > commNextMillis)
+  if(millis() >= commNextMillis)
   {
-    commNextMillis += commDeltaMillis;
     if(requestedERPM == 0)
     {
       transmitDuty(0.0);
@@ -50,6 +49,11 @@ void CubeMarsV2::update()
     }
 
     requestTmpCurrRPM();
+
+    while(millis() >= commNextMillis)
+    {
+      commNextMillis += commDeltaMillis;
+    }
   }
 
   if(_waitingForResponse && _isConnected)
