@@ -5,11 +5,13 @@ Tkinter GUI for the drilling HMI.
 All serial communication goes through the SerialWorker — the GUI never
 touches the serial port directly.
 
-Layout (4 columns):
+Layout (4 columns, 2 content rows):
   Col 0: Drill status + Manual controls
-  Col 1: Auto drilling + Sample handling
-  Col 2: Device status
-  Col 3: Log (full height, no bottom row needed)
+  Col 1 row 1: Auto drilling + Height measurement
+  Col 1 row 2: Sample handling
+  Col 2 row 1: Device status
+  Col 2 row 2: Calibration
+  Col 3 rows 1-2: Log
 """
 
 import tkinter as tk
@@ -34,6 +36,7 @@ class App(tk.Tk):
         self._build_auto_controls()
         self._build_sample_controls()
         self._build_device_status_panel()
+        self._build_calibration_panel()
         self._build_log()
 
         self._poll_rx()
@@ -112,37 +115,20 @@ class App(tk.Tk):
         ttk.Separator(frame, orient="horizontal").grid(
             row=len(labels), column=0, columnspan=3, sticky="ew", pady=4)
 
-        # Height sensor measurement
-        ttk.Label(frame, text="Height (sensor):").grid(
-            row=len(labels)+1, column=0, sticky="w", padx=6, pady=2)
-        self.height_sensor_var = tk.StringVar(value="—")
-        ttk.Label(frame, textvariable=self.height_sensor_var, width=22, anchor="w").grid(
-            row=len(labels)+1, column=1, padx=4)
-        ttk.Label(frame, text="mm").grid(row=len(labels)+1, column=2, sticky="w")
-
-        btn_row = len(labels) + 2
-        ttk.Button(frame, text="Measure height", command=self._measure_height).grid(
-            row=btn_row, column=0, columnspan=3, sticky="ew", padx=6, pady=2)
-        ttk.Button(frame, text="Get height", command=self._get_height).grid(
-            row=btn_row+1, column=0, columnspan=3, sticky="ew", padx=6, pady=2)
-
-        ttk.Separator(frame, orient="horizontal").grid(
-            row=btn_row+2, column=0, columnspan=3, sticky="ew", pady=4)
-
         # Weight displays
         ttk.Label(frame, text="Weight (deep):").grid(
-            row=btn_row+3, column=0, sticky="w", padx=6, pady=2)
+            row=len(labels)+1, column=0, sticky="w", padx=6, pady=2)
         self.weight_deep_var = tk.StringVar(value="—")
         ttk.Label(frame, textvariable=self.weight_deep_var, width=22, anchor="w").grid(
-            row=btn_row+3, column=1, padx=4)
-        ttk.Label(frame, text="g").grid(row=btn_row+3, column=2, sticky="w")
+            row=len(labels)+1, column=1, padx=4)
+        ttk.Label(frame, text="g").grid(row=len(labels)+1, column=2, sticky="w")
 
         ttk.Label(frame, text="Weight (surface):").grid(
-            row=btn_row+4, column=0, sticky="w", padx=6, pady=2)
+            row=len(labels)+2, column=0, sticky="w", padx=6, pady=2)
         self.weight_surface_var = tk.StringVar(value="—")
         ttk.Label(frame, textvariable=self.weight_surface_var, width=22, anchor="w").grid(
-            row=btn_row+4, column=1, padx=4)
-        ttk.Label(frame, text="g").grid(row=btn_row+4, column=2, sticky="w")
+            row=len(labels)+2, column=1, padx=4)
+        ttk.Label(frame, text="g").grid(row=len(labels)+2, column=2, sticky="w")
 
     # ------------------------------------------------------------------ #
     #  Manual controls — column 0                                          #
@@ -192,6 +178,20 @@ class App(tk.Tk):
         ttk.Button(frame, text="Stop auto drill", command=self._stop_auto).grid(
             row=2, column=0, columnspan=2, sticky="ew", padx=6, pady=2)
 
+        ttk.Separator(frame, orient="horizontal").grid(
+            row=3, column=0, columnspan=2, sticky="ew", pady=6)
+
+        ttk.Label(frame, text="Height (sensor):").grid(
+            row=4, column=0, sticky="w", padx=6, pady=2)
+        self.height_sensor_var = tk.StringVar(value="—")
+        ttk.Label(frame, textvariable=self.height_sensor_var, width=16, anchor="w").grid(
+            row=4, column=1, padx=4)
+
+        ttk.Button(frame, text="Measure height", command=self._measure_height).grid(
+            row=5, column=0, columnspan=2, sticky="ew", padx=6, pady=2)
+        ttk.Button(frame, text="Get height", command=self._get_height).grid(
+            row=6, column=0, columnspan=2, sticky="ew", padx=6, pady=2)
+
     # ------------------------------------------------------------------ #
     #  Sample handling — column 1                                          #
     # ------------------------------------------------------------------ #
@@ -214,33 +214,15 @@ class App(tk.Tk):
             ttk.Button(frame, text=label, command=cmd).grid(
                 row=i, column=0, columnspan=2, sticky="ew", padx=6, pady=2)
 
-        ttk.Separator(frame, orient="horizontal").grid(
-            row=len(buttons), column=0, columnspan=2, sticky="ew", pady=6)
 
-        ttk.Label(frame, text="Calibration weight (g):").grid(
-            row=len(buttons)+1, column=0, sticky="w", padx=6, pady=2)
-        self.calib_weight_var = tk.StringVar(value="100.0")
-        ttk.Entry(frame, textvariable=self.calib_weight_var, width=8).grid(
-            row=len(buttons)+1, column=1, padx=4)
-
-        calib_buttons = [
-            ("Cal 0g — deep",    self._calibrate_0_deep),
-            ("Cal Xg — deep",    self._calibrate_x_deep),
-            ("Cal 0g — surface", self._calibrate_0_surface),
-            ("Cal Xg — surface", self._calibrate_x_surface),
-        ]
-        offset = len(buttons) + 2
-        for i, (label, cmd) in enumerate(calib_buttons):
-            ttk.Button(frame, text=label, command=cmd).grid(
-                row=offset+i, column=0, columnspan=2, sticky="ew", padx=6, pady=2)
 
     # ------------------------------------------------------------------ #
-    #  Device status — column 2                                            #
+    #  Device status — column 2, row 1                                     #
     # ------------------------------------------------------------------ #
 
     def _build_device_status_panel(self):
         frame = ttk.LabelFrame(self, text="Device status")
-        frame.grid(row=1, column=2, rowspan=2, padx=8, pady=6, sticky="nsew")
+        frame.grid(row=1, column=2, padx=8, pady=6, sticky="nsew")
 
         ttk.Button(frame, text="Check devices", command=self._start_dev_check).grid(
             row=0, column=0, columnspan=2, sticky="ew", padx=6, pady=4)
@@ -263,7 +245,31 @@ class App(tk.Tk):
             self._device_indicators[i].config(foreground=color)
 
     # ------------------------------------------------------------------ #
-    #  Log — column 3, full height                                         #
+    #  Calibration — column 3, row 2                                       #
+    # ------------------------------------------------------------------ #
+
+    def _build_calibration_panel(self):
+        frame = ttk.LabelFrame(self, text="Calibration")
+        frame.grid(row=2, column=2, padx=8, pady=6, sticky="new")
+
+        ttk.Label(frame, text="Calibration weight (g):").grid(
+            row=0, column=0, sticky="w", padx=6, pady=2)
+        self.calib_weight_var = tk.StringVar(value="100.0")
+        ttk.Entry(frame, textvariable=self.calib_weight_var, width=8).grid(
+            row=0, column=1, padx=4)
+
+        calib_buttons = [
+            ("Cal 0g — deep",    self._calibrate_0_deep),
+            ("Cal Xg — deep",    self._calibrate_x_deep),
+            ("Cal 0g — surface", self._calibrate_0_surface),
+            ("Cal Xg — surface", self._calibrate_x_surface),
+        ]
+        for i, (label, cmd) in enumerate(calib_buttons):
+            ttk.Button(frame, text=label, command=cmd).grid(
+                row=i+1, column=0, columnspan=2, sticky="ew", padx=6, pady=2)
+
+    # ------------------------------------------------------------------ #
+    #  Log — column 3, row 1                                               #
     # ------------------------------------------------------------------ #
 
     def _build_log(self):

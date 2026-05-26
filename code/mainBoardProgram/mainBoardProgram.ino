@@ -165,6 +165,10 @@ void respondToMsg(const RoverMessage& msg)
 
     case CMD_CALIBRATE_HEIGHT:
     {
+      if(deepSampler.setCarriageSpeedMMps(-10.0))
+        roverComm.sendAck(CMD_CALIBRATE_HEIGHT);
+      else
+        roverComm.sendNack();
       break;
     }
 
