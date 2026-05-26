@@ -33,14 +33,14 @@ Drill: 0x02 (start) -> 0x01 (length 5) -> 0x42 (Weight request received. Weight 
 | STATE - Requests the state of the drilling mechanism | 0x02 | None | Response is in table below |
 | DRILL AUTO - Automatically extract a deep sample from specified depth. Blocks manual commands. | 0x03 | Desired drill depth - uint8 [cm] | None |
 | STOP AUTO - Stops the automatic drilling procedure. Unlocks manual commands. | 0x04 | None | None |
-| CALIBRATE HEIGHT - Moves the carriage up, until it hits the top limit switch. Sets height = 0 at that position. | 0x05 | None | None |
+| CALIBRATE CARRIAGE DEPTH - Moves the carriage up, until it hits the top limit switch. Sets depth = 0 at that position. | 0x05 | None | None |
 | START DEVICE CHECK - Checks whether peripheral devices are connected and responding. | 0x06 | None | None |
 | GET DEVICE STATUS - Requests the result of the START DEVICE CHECK | 0x07 | None | uint16 (String of bits. Each bit corresponds to one peripheral device. 1 = OK, 0 = not OK. Order of devices in table below) |
 | DRILL SPEED - sets the speed of the drill/spiral | 0x20 | int16 [RPM] | None |
 | VERTICAL SPEED - sets the speed of the vertical drive | 0x21 | int8 [0,1 mm/s]<br>e.g.&nbsp;100 = 10mm/s | None |
 | STORAGE POSITION - sets the position of the deep sample storage box | 0x22 | uint8 [position] | None |
-| MEASURE HEIGHT - requests height measurement. | 0x23 | None | None |
-| GET HEIGHT - requests the value of the last height measurement. | 0x24 | None | uint16 [mm] |
+| MEASURE HEIGHT ABOVE GROUND - requests height measurement. | 0x23 | None | None |
+| GET HEIGHT ABOVE GROUND - requests the value of the last height measurement. | 0x24 | None | uint16 [mm] |
 | WEIGH DEEP - Start weighing the deep sample. | 0x40 | None | None |
 | WEIGH SURFACE - Start weighing the surface sample. | 0x41 | None | None |
 | GET WEIGHT DEEP - Requests the result of WEIGH DEEP. | 0x42 | None | float [grams], uint32 [raw ADC value] |
