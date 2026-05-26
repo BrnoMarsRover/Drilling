@@ -24,6 +24,7 @@ bool DeepSampler::begin()
 void DeepSampler::update()
 {
   _drillController.update();
+  _deepSampleHolder.update();
 }
 
 // Integrated carriage/spiral motor control

@@ -65,6 +65,7 @@ void CubeMarsV2::setERPM(int32_t erpm)
 {
   requestedERPM = erpm;
   transmitERPM();
+  debugSerial.println("[SPMOTOR] setERPM");
 }
 
 void CubeMarsV2::setRPM(float rpm)
@@ -204,6 +205,7 @@ void CubeMarsV2::handleRX()
           {
             _waitingForResponse = false;
             _isConnected = true;
+            debugSerial.println("[SPMOTOR] data received");
 
             readTmpCurrRPM(); // call interpreter
           }

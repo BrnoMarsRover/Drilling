@@ -26,6 +26,10 @@ bool DeepSampleHolder::begin()
   return beginOK;
 }
 
+void DeepSampleHolder::update(){
+  _stepperPositioner.update();
+}
+
 void DeepSampleHolder::storageMoveToAngle(int angleDeg) {
   _stepperPositioner.moveToAngle(angleDeg);
 }

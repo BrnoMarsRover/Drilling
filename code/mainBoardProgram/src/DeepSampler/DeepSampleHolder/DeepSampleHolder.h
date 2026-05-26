@@ -12,6 +12,8 @@ public:
   DeepSampleHolder(TwoWire& wire);
   bool begin();
 
+  void update();
+
   bool requestMeasure();
   bool requestTemp();
 
