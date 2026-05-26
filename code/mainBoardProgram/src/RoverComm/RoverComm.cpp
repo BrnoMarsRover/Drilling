@@ -118,7 +118,7 @@ void RoverComm::sendFloat(RoverCommand cmd, float value)
     _sendRaw(payload, 5);
 }
 
-void RoverComm::sendState(float carriageDepthMM, float carriageSpeedMMps, float stepperCurrent, float rpm, float tempC, float trayAngle, DrillState swState)
+void RoverComm::sendState(float carriageDepthMM, float carriageSpeedMMps, float stepperCurrent, float rpm, float tempC, uint16_t trayAngle, DrillState swState)
 {
     uint8_t payload[11];
     payload[0] = (uint8_t)CMD_STATE;
@@ -133,7 +133,7 @@ void RoverComm::sendState(float carriageDepthMM, float carriageSpeedMMps, float 
 
     payload[7] = (uint8_t)tempC;
 
-    ser::uint16ToBytes((uint16_t)trayAngle, payload + 8);
+    ser::uint16ToBytes(trayAngle, payload + 8);
 
     payload[10] = (uint8_t)swState;
 

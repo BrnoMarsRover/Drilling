@@ -33,6 +33,11 @@ public:
   bool setCalibration0();
   bool setCalibrationX(float weightX = 100);
 
+  bool storageMoveToSlot(uint8_t slot);
+  bool storageUnlock();
+  bool storageSetHoldMode(bool hold);
+  uint16_t storageGetCurrentAngle() const;
+
   bool getResultReady();
   WeightResult getLastWeight();
   float getLastTemp();

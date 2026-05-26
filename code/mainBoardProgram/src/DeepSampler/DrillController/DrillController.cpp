@@ -89,8 +89,8 @@ void DrillController::update()
       {
         if(spiralDepthBelowGroundMM() > _targetDepthMM)
         {
-          _linearAxis.setSpeedMMps(-10);
-          _motorDriver.setRPM(0);
+          _linearAxis.setSpeedMMps(-10.0);
+          _motorDriver.setRPM(0.0);
           _autoState = MOVING_UP;
         }
         else

@@ -61,6 +61,26 @@ float DeepSampler::getLastTemp() { return _deepSampleHolder.getLastTemp(); }
 bool DeepSampler::requestMeasure() { return _deepSampleHolder.requestMeasure(); }
 bool DeepSampler::requestTemp() { return _deepSampleHolder.requestTemp(); }
 
+bool DeepSampler::storageMoveToSlot(uint8_t slot)
+{
+  _deepSampleHolder.storageMoveToSlot(slot);
+  return true;
+}
+
+bool DeepSampler::storageUnlock()
+{
+  _deepSampleHolder.storageUnlock();
+  return true;
+}
+
+bool DeepSampler::storageSetHoldMode(bool hold)
+{
+  _deepSampleHolder.storageSetHoldMode(hold);
+  return true;
+}
+
+uint16_t DeepSampler::storageGetCurrentAngle()  const {return _deepSampleHolder.storageGetCurrentAngle(); }
+
 // Connection checks
 bool DeepSampler::verticalEncoderConnected() {return _drillController.encoderConnected();}
 bool DeepSampler::verticalStepperConnected() {return _drillController.stepperConnected();}
