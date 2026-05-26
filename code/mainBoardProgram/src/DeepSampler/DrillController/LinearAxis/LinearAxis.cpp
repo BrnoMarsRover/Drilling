@@ -90,7 +90,7 @@ void LinearAxis::setupDriver() {
 
 void LinearAxis::setupStepper() {
     _stepper = _stepperEngine.stepperConnectToPin(_stepPin);
-    
+
     if (_stepper == nullptr) {
         Serial.println(F("CHYBA: stepperConnectToPin() selhalo"));
         return;
@@ -208,7 +208,7 @@ void LinearAxis::stop() {
 
     if (_stepper != nullptr) {
         _stepper->forceStop();
-        //_stepper->setSpeedInHz(0);
+        _speedHz = 0;
     }
 
     Serial.println(F("Motor zastaven"));
@@ -487,7 +487,7 @@ void LinearAxis::stopAndZeroPosition() {
     if (_stepper != nullptr) {
         _stepper->forceStop();
         _stepper->setCurrentPosition(0);
-       //_stepper->setSpeedInHz(0);
+       _speedHz = 0;
     }
 
     if (_encoder != nullptr) {
