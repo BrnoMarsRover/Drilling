@@ -78,7 +78,7 @@ DeepSampleHolder::AutoState DeepSampleHolder::getAutoState(){
 
 
 bool DeepSampleHolder::startAutoWeighing() {
-  if(storageMoveToSlot(2)){
+  if(storageMoveToSlot(3)){
     _autoState = AutoState::STORAGE_MOVING;
     return true;
   }

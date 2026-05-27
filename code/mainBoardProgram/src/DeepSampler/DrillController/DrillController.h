@@ -67,8 +67,8 @@ private:
   float _targetSpiralRPS = 0;
   float _targetDepthMM = 0;
 
-  static constexpr float linAxisZeroToSensorMM = 77.5;
-  static constexpr float carriageTopToSpiralTipMM = 72.0;
+  static constexpr float linAxisZeroToSensorMM = 775.0;
+  static constexpr float carriageTopToSpiralTipMM = 720.0;
   float spiralDepthBelowGroundMM()
   {
     return _linearAxis.getDepthMM() + carriageTopToSpiralTipMM - linAxisZeroToSensorMM - _heightSensor.getDistanceMM();

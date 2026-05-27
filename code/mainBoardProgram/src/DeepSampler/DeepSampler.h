@@ -33,7 +33,6 @@ public:
   bool setManualControl();
   bool startDistFromSurfaceMeasure();
   float getDistFromSurfaceMM();
-  bool drillSetManualControl();
   bool autoSampleAndWeigh(float targetDepthMM);
 
   // Low level carriage/vertical drive control
@@ -80,7 +79,7 @@ private:
 
   AutoState _autoState = AutoState::MANUAL;
   float _targetDepthMM;
-  uint8_t storeSlot = 1;
+  uint8_t storeSlot = 2;
 
   uint32_t _storingStartTimeMS = 0;
   static constexpr uint32_t _storingDurationMS = 5000;

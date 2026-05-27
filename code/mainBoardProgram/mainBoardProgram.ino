@@ -154,7 +154,7 @@ void respondToMsg(const RoverMessage& msg)
 
     case CMD_STOP_AUTO:
     {
-      if(deepSampler.drillSetManualControl())
+      if(deepSampler.setManualControl())
       {
         roverComm.sendAck(CMD_STOP_AUTO);
       }

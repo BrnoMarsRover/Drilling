@@ -118,7 +118,7 @@ private:
     float _rSense;
 
     uint32_t _speedHz = 0;
-    uint32_t _accelHz = 2000;
+    uint32_t _accelHz = 6000;
     MotionState _motionState = Stop;
 
     bool _initialized = false;
