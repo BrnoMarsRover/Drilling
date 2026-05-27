@@ -312,21 +312,37 @@ void respondToMsg(const RoverMessage& msg)
     
     case CMD_ROCK_OPEN:
     {
+      if(surfaceSampleHolder.openRockBox())
+        roverComm.sendAck(CMD_ROCK_OPEN);
+      else
+        roverComm.sendNack();
       break;
     }
 
     case CMD_ROCK_CLOSE:
     {
+      if(surfaceSampleHolder.closeRockBox())
+        roverComm.sendAck(CMD_ROCK_CLOSE);
+      else
+        roverComm.sendNack();
       break;
     }
 
     case CMD_SAND_OPEN:
     {
+      if(surfaceSampleHolder.openSandBox())
+        roverComm.sendAck(CMD_SAND_OPEN);
+      else
+        roverComm.sendNack();
       break;
     }
     
     case CMD_SAND_CLOSE:
     {
+      if(surfaceSampleHolder.closeSandBox())
+        roverComm.sendAck(CMD_SAND_CLOSE);
+      else
+        roverComm.sendNack();
       break;
     }
   }
@@ -519,6 +535,7 @@ void setup()
 void loop()
 {
   deepSampler.update();
+  surfaceSampleHolder.update();
 
   #ifdef ADVANCED_COMMAND
   roverComm.handle();

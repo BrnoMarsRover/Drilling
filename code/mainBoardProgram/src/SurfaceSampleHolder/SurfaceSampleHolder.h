@@ -14,17 +14,19 @@ public:
   SurfaceSampleHolder(TwoWire& wire, HardwareSerial& debugSerial);
 
   //asi tady tak nějak?
-  void openRockBox();
-  void closeRockBox();
-  void weighRock();
-  float getRockWeight();
+  bool openRockBox();
+  bool closeRockBox();
+  //void weighRock();
+  //float getRockWeight();
 
-  void openSandBox();
-  void closeSandBox();
-  void weighSand();
-  float getSandWeight();
+  bool openSandBox();
+  bool closeSandBox();
+  //void weighSand();
+  //float getSandWeight();
 
   void update();
+  uint8_t getPosRock(); // useless?
+  uint8_t getPosSand(); // useless?
   // ADC
   bool begin();
 

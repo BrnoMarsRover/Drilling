@@ -21,6 +21,36 @@ void SurfaceSampleHolder::update()
   _servoSand.update();
 }
 
+uint8_t SurfaceSampleHolder::getPosRock()
+{
+  return _servoRock.getPos();
+}
+
+uint8_t SurfaceSampleHolder::getPosSand()
+{
+  return _servoSand.getPos();
+}
+
+bool SurfaceSampleHolder::openRockBox()
+{
+  return _servoRock.openBox();
+}
+
+bool SurfaceSampleHolder::openSandBox()
+{
+  return _servoSand.openBox();
+}
+
+bool SurfaceSampleHolder::closeRockBox()
+{
+  return _servoRock.closeBox();
+}
+
+bool SurfaceSampleHolder::closeSandBox()
+{
+  return _servoSand.closeBox();
+}
+
 bool SurfaceSampleHolder::begin()
 {
   _adcSurface.begin();
