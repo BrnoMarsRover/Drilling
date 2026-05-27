@@ -9,20 +9,20 @@
 #include "CubeMarsV2.h"
 #include "LinearAxis/LinearAxis.h"
 
-enum DrillControllerAutoState
-{
-  DRILL_MANUAL,
-  DRILL_WAITING_FOR_HEIGHT,
-  DRILL_MOVING_DOWN,
-  DRILL_DRILLING,
-  DRILL_MOVING_UP,
-  DRILL_DONE,
-  DRILL_ERROR
-};
-
 class DrillController
 {
 public:
+  enum class AutoState
+  {
+    MANUAL,
+    WAITING_FOR_HEIGHT,
+    MOVING_DOWN,
+    DRILLING,
+    MOVING_UP,
+    DONE,
+    ERROR
+  };
+
   DrillController(TwoWire& wire, HardwareSerial& debugSerial, FastAccelStepperEngine& stepperEngine);
   bool begin();
   void update();
@@ -38,15 +38,12 @@ public:
   float getSpiralMotorTmp();
 
   // Integrated drill control
+  AutoState getAutoState();
   bool startDistFromSurfaceMeasure();
   float getDistFromSurfaceMM();
   bool setManualControl();
   bool autoDrillToDepth(float rateOfPenetrationMMpRev, float targetRPM, float targetDepthMM);
-  //multiplier 1 -> spiral is "screwed" into the material
-  //higher multiplier -> motor needs more power, but can get into harder materials
-  //use multiplier about 10x
 
-  DrillControllerAutoState getAutoState();
 
   // Connection checks
   bool encoderConnected();
@@ -64,7 +61,7 @@ private:
   CubeMarsV2 _motorDriver;
   VL53L1X_Sensor _heightSensor;
 
-  DrillControllerAutoState _autoState = DRILL_MANUAL;
+  AutoState _autoState = AutoState::MANUAL;
 
   float _rateOfPenetrationMMpRev = 0;
   float _targetSpiralRPS = 0;

@@ -57,23 +57,23 @@ void DrillController::update()
 
   switch(_autoState)
   {
-    case DRILL_MANUAL:
+    case AutoState::MANUAL:
     {
       break;
     }
 
-    case DRILL_WAITING_FOR_HEIGHT:
+    case AutoState::WAITING_FOR_HEIGHT:
     {
       if(_heightSensor.dataReady())
       {
         if(spiralDepthBelowGroundMM() > -20.0)
         {
           _motorDriver.setRPM(_targetSpiralRPS*60);
-          _autoState = DRILL_DRILLING;
+          _autoState = AutoState::DRILLING;
         }
         else
         {
-          _autoState = DRILL_MOVING_DOWN;
+          _autoState = AutoState::MOVING_DOWN;
           _linearAxis.setSpeedMMps(10);
         }
       }
@@ -81,23 +81,23 @@ void DrillController::update()
       break;
     }
 
-    case DRILL_MOVING_DOWN:
+    case AutoState::MOVING_DOWN:
     {
       if(spiralDepthBelowGroundMM() > -20.0)
       {
         _motorDriver.setRPM(_targetSpiralRPS*60);
-        _autoState = DRILL_DRILLING;
+        _autoState = AutoState::DRILLING;
       }
       break;
     }
 
-    case DRILL_DRILLING:
+    case AutoState::DRILLING:
     {
       if(spiralDepthBelowGroundMM() > _targetDepthMM)
       {
         _linearAxis.setSpeedMMps(-10.0);
         _motorDriver.setRPM(0.0);
-        _autoState = DRILL_MOVING_UP;
+        _autoState = AutoState::MOVING_UP;
       }
       else
       {
@@ -106,22 +106,22 @@ void DrillController::update()
       break;
     }
 
-    case DRILL_MOVING_UP:
+    case AutoState::MOVING_UP:
     {
       if(_linearAxis.getDepthMM() == 0.0)
       {
-        _autoState = DRILL_DONE;
+        _autoState = AutoState::DONE;
       }
       break;
     }
     
-    case DRILL_DONE:
+    case AutoState::DONE:
     {
-      _autoState = DRILL_MANUAL;
+      _autoState = AutoState::MANUAL;
       break;
     }
     
-    case DRILL_ERROR:
+    case AutoState::ERROR:
     {
       break;
     }
@@ -130,7 +130,7 @@ void DrillController::update()
 
 bool DrillController::setCarriageSpeedMMps(float MMps)
 {
-  if (_autoState == DRILL_MANUAL)
+  if (_autoState == AutoState::MANUAL)
   {
     _linearAxis.setSpeedMMps(MMps);
     return true;
@@ -148,7 +148,7 @@ float DrillController::getCarriageDepthMM()
 
 bool DrillController::setSpiralRPM(float rpm)
 {
-  if (_autoState == DRILL_MANUAL)
+  if (_autoState == AutoState::MANUAL)
   {
     _motorDriver.setRPM(rpm);
     return true;
@@ -175,6 +175,8 @@ float DrillController::getSpiralMotorTmp()
 }
 
 // Integrated drill control
+DrillController::AutoState DrillController::getAutoState() {return _autoState;}
+
 bool DrillController::startDistFromSurfaceMeasure()
 {
   return _heightSensor.startMeasure();
@@ -187,7 +189,7 @@ float DrillController::getDistFromSurfaceMM()
 
 bool DrillController::setManualControl()
 {
-  _autoState = DRILL_MANUAL;
+  _autoState = AutoState::MANUAL;
   _motorDriver.setRPM(0);
   _linearAxis.setSpeedMMps(0);
   return true;
@@ -195,22 +197,19 @@ bool DrillController::setManualControl()
 
 bool DrillController::autoDrillToDepth(float rateOfPenetrationMMpRev, float targetRPM, float targetDepthMM)
 {
-  if (_autoState == DRILL_MANUAL)
+  if (_autoState == AutoState::MANUAL)
   {
     _rateOfPenetrationMMpRev = rateOfPenetrationMMpRev;
     _targetSpiralRPS = targetRPM/60.0;
     _targetDepthMM = targetDepthMM + 15.0; //additional 15 mm to account for potential spilling
 
     _heightSensor.startMeasure();
-    _autoState = DRILL_WAITING_FOR_HEIGHT;
+    _autoState = AutoState::WAITING_FOR_HEIGHT;
     return true;
   }
   else
     return false;
 }
-
-
-DrillControllerAutoState DrillController::getAutoState() {return _autoState;}
 
 // Connection checks
 bool DrillController::encoderConnected() {return false;}

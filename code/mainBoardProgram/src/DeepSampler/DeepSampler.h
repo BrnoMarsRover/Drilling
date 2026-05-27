@@ -7,28 +7,30 @@
 #include "DrillController/DrillController.h"
 #include "DeepSampleHolder/DeepSampleHolder.h"
 
-enum DeepSamplerAutoState
-{
-  MANUAL,
-  WAITING_FOR_STORAGE_CLEAR,
-  DRILLING,
-  MOVING_STORAGE,
-  MOVING_CARRIAGE_TO_STORE,
-  STORING,
-  WEIGHING,
-  MOVING_UP,
-  DONE,
-  ERROR
-};
-
 class DeepSampler
 {
 public:
+  enum class AutoState
+  {
+    MANUAL,
+    WAITING_FOR_STORAGE_CLEAR,
+    DRILLING,
+    MOVING_STORAGE,
+    MOVING_CARRIAGE_TO_STORE,
+    STORING,
+    WEIGHING,
+    MOVING_UP,
+    DONE,
+    ERROR
+  };
+
   DeepSampler(TwoWire& wire, HardwareSerial& debugSerial);
   bool begin();
   void update();
 
   // High level control/autonomy
+  AutoState getAutoState();
+  bool setManualControl();
   bool startDistFromSurfaceMeasure();
   float getDistFromSurfaceMM();
   bool drillSetManualControl();
@@ -76,5 +78,5 @@ private:
   DrillController _drillController;
   DeepSampleHolder _deepSampleHolder;
 
-  DeepSamplerAutoState _autoState = MANUAL;
+  AutoState _autoState = AutoState::MANUAL;
 };

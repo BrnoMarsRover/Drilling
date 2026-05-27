@@ -14,10 +14,20 @@
 class DeepSampleHolder
 {
 public:
+  enum class AutoState
+  {
+    MANUAL,
+    STORAGE_MOVING,
+    WEIGHING
+  };
+
   DeepSampleHolder(TwoWire& wire, FastAccelStepperEngine& stepperEngine);
   bool begin();
 
   void update();
+
+  bool startAutoWeighing();
+  AutoState getAutoState();
 
   bool requestMeasure();
   bool requestTemp();
@@ -55,4 +65,5 @@ private:
 
   StepperPositioner _stepperPositioner;
 
+  AutoState _autoState = AutoState::MANUAL;
 };

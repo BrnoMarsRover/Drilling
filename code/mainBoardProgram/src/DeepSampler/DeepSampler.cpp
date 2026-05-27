@@ -31,52 +31,52 @@ void DeepSampler::update()
 
   switch(_autoState)
   {
-    case MANUAL:
+    case AutoState::MANUAL:
     {
       break;
     }
 
-    case WAITING_FOR_STORAGE_CLEAR:
+    case AutoState::WAITING_FOR_STORAGE_CLEAR:
     {
       break;
     }
     
-    case DRILLING:
+    case AutoState::DRILLING:
     {
       break;
     }
     
-    case MOVING_STORAGE:
+    case AutoState::MOVING_STORAGE:
     {
       break;
     }
     
-    case MOVING_CARRIAGE_TO_STORE:
+    case AutoState::MOVING_CARRIAGE_TO_STORE:
     {
       break;
     }
     
-    case STORING:
+    case AutoState::STORING:
     {
       break;
     }
     
-    case WEIGHING:
+    case AutoState::WEIGHING:
     {
       break;
     }
     
-    case MOVING_UP:
+    case AutoState::MOVING_UP:
     {
       break;
     }
     
-    case DONE:
+    case AutoState::DONE:
     {
       break;
     }
     
-    case ERROR:
+    case AutoState::ERROR:
     {
       break;
     }
@@ -84,6 +84,13 @@ void DeepSampler::update()
 }
 
 // Integrated carriage/spiral motor control
+DeepSampler::AutoState DeepSampler::getAutoState() {return _autoState; }
+bool DeepSampler::setManualControl()
+{
+  _drillController.setManualControl();
+  _autoState = AutoState::MANUAL;
+  return true;
+}
 bool DeepSampler::startDistFromSurfaceMeasure() {return _drillController.startDistFromSurfaceMeasure(); }
 float DeepSampler::getDistFromSurfaceMM() {return _drillController.getDistFromSurfaceMM(); }
 bool DeepSampler::drillSetManualControl() {return _drillController.setManualControl(); }
