@@ -77,7 +77,7 @@ public:
     long getAngleFromEncoder() const;
     bool compareEncoderAndSteps(long angleSteps, long angleEncoder) const;
 
-    void setSpeedMMps(float mmPerSec);
+    bool setSpeedMMps(float mmPerSec);
     float getSpeedMMps() const;
     void printSpeed(Stream& out) const;
     void setSpeedPrintEnabled(bool enabled);

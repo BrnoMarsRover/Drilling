@@ -6,16 +6,16 @@ public:
   CubeMarsV2(HardwareSerial& serialPort, HardwareSerial& debugSerialPort, uint8_t rxPin, uint8_t txPin);
 
   bool begin();
-  void checkConnection();
+  bool checkConnection();
   bool isConnected();
 
   void update(); // Call this in loop()
 
-  void setERPM(int32_t erpm);
-  void setRPM(float rpm);
+  bool setERPM(int32_t erpm);
+  bool setRPM(float rpm);
 
-  void requestAllData();
-  void requestTmpCurrRPM();
+  bool requestAllData();
+  bool requestTmpCurrRPM();
 
   float getMOSTmp();
   float getMotorTmp();

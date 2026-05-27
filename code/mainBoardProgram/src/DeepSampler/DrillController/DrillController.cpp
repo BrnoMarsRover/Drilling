@@ -68,8 +68,14 @@ void DrillController::update()
       {
         if(spiralDepthBelowGroundMM() > -20.0)
         {
-          _motorDriver.setRPM(_targetSpiralRPS*60);
-          _autoState = AutoState::DRILLING;
+          if(_motorDriver.setRPM(_targetSpiralRPS*60))
+          {
+            _autoState = AutoState::DRILLING;
+          }
+          else
+          {
+            _autoState = AutoState::ERROR;
+          }
         }
         else
         {
@@ -85,8 +91,14 @@ void DrillController::update()
     {
       if(spiralDepthBelowGroundMM() > -20.0)
       {
-        _motorDriver.setRPM(_targetSpiralRPS*60);
-        _autoState = AutoState::DRILLING;
+        if(_motorDriver.setRPM(_targetSpiralRPS*60))
+        {
+          _autoState = AutoState::DRILLING;
+        }
+        else
+        {
+          _autoState = AutoState::ERROR;
+        }
       }
       break;
     }
@@ -95,13 +107,21 @@ void DrillController::update()
     {
       if(spiralDepthBelowGroundMM() > _targetDepthMM)
       {
-        _linearAxis.setSpeedMMps(-10.0);
-        _motorDriver.setRPM(0.0);
-        _autoState = AutoState::MOVING_UP;
+        if(_linearAxis.setSpeedMMps(-10.0) && _motorDriver.setRPM(0.0))
+        {
+          _autoState = AutoState::MOVING_UP;
+        }
+        else
+        {
+          _autoState = AutoState::ERROR;
+        }
       }
       else
       {
-        _linearAxis.setSpeedMMps((_motorDriver.getRPM()/60)*_rateOfPenetrationMMpRev);
+        if(!(_linearAxis.setSpeedMMps((_motorDriver.getRPM()/60)*_rateOfPenetrationMMpRev)))
+        {
+          _autoState = AutoState::ERROR;
+        }
       }
       break;
     }
@@ -117,7 +137,6 @@ void DrillController::update()
     
     case AutoState::DONE:
     {
-      _autoState = AutoState::MANUAL;
       break;
     }
     
@@ -150,8 +169,7 @@ bool DrillController::setSpiralRPM(float rpm)
 {
   if (_autoState == AutoState::MANUAL)
   {
-    _motorDriver.setRPM(rpm);
-    return true;
+    return _motorDriver.setRPM(rpm);
   }
   else
     return false;
@@ -175,7 +193,18 @@ float DrillController::getSpiralMotorTmp()
 }
 
 // Integrated drill control
-DrillController::AutoState DrillController::getAutoState() {return _autoState;}
+DrillController::AutoState DrillController::getAutoState()
+{
+  if(_autoState == AutoState::DONE)
+  {
+    _autoState = AutoState::MANUAL;
+    return AutoState::DONE;
+  }
+  else
+  {
+    return _autoState;
+  }
+}
 
 bool DrillController::startDistFromSurfaceMeasure()
 {

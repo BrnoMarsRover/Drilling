@@ -140,7 +140,7 @@ void respondToMsg(const RoverMessage& msg)
     {
       if(drillState == STATE_READY)
       {
-        if(deepSampler.autoDrillToDepth(2, 60, 10*((float)msg.getUint8Arg()) ) )
+        if(deepSampler.autoSampleAndWeigh(10*((float)msg.getUint8Arg()) ) )
           roverComm.sendAck(CMD_DRILL_AUTO);
         else
           roverComm.sendNack();

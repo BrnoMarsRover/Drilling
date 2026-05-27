@@ -34,7 +34,7 @@ public:
   bool startDistFromSurfaceMeasure();
   float getDistFromSurfaceMM();
   bool drillSetManualControl();
-  bool autoDrillToDepth(float rateOfPenetrationMMpRev, float targetRPM, float targetDepthMM);
+  bool autoSampleAndWeigh(float targetDepthMM);
 
   // Low level carriage/vertical drive control
   bool setCarriageSpeedMMps(float MMps);
@@ -79,4 +79,8 @@ private:
   DeepSampleHolder _deepSampleHolder;
 
   AutoState _autoState = AutoState::MANUAL;
+  float _targetDepthMM;
+
+  uint32_t _storingStartTimeMS = 0;
+  static constexpr uint32_t _storingDurationMS = 5000;
 };

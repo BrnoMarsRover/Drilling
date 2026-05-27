@@ -26,9 +26,10 @@ bool CubeMarsV2::begin()
   return true;
 }
 
-void CubeMarsV2::checkConnection()
+bool CubeMarsV2::checkConnection()
 {
   requestTmpCurrRPM();
+  return true;
 }
 
 bool CubeMarsV2::isConnected() {return _isConnected;}
@@ -65,24 +66,27 @@ void CubeMarsV2::update()
   }
 }
 
-void CubeMarsV2::setERPM(int32_t erpm)
+bool CubeMarsV2::setERPM(int32_t erpm)
 {
   requestedERPM = erpm;
   transmitERPM();
+  return true;
 }
 
-void CubeMarsV2::setRPM(float rpm)
+bool CubeMarsV2::setRPM(float rpm)
 {
   setERPM((int32_t)(rpm * poleCount * gearboxRatio));
+  return true;
 }
 
-void CubeMarsV2::requestAllData()
+bool CubeMarsV2::requestAllData()
 {
   uint8_t payload[1] = {4};
   transmitPayload(payload, 1);
+  return true;
 }
 
-void CubeMarsV2::requestTmpCurrRPM()
+bool CubeMarsV2::requestTmpCurrRPM()
 {
   uint8_t payload[5] = {50, 0,0,0,0};
   int32_t mask = RQMASK_MOSTMP | RQMASK_MOTORTMP | RQMASK_OUTCURRENT | RQMASK_RPM;
@@ -90,6 +94,7 @@ void CubeMarsV2::requestTmpCurrRPM()
   transmitPayload(payload, 5);
   _waitingForResponse = true;
   lastRequestMillis = millis();
+  return true;
 }
 
 float CubeMarsV2::getMOSTmp()  { return MOSTmp; }
