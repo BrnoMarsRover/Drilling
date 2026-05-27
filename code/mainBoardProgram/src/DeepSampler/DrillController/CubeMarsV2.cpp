@@ -125,7 +125,7 @@ void CubeMarsV2::transmitDuty(float duty)
   int32_t val = (int32_t)(duty * 100000.0f);
   ser::int32ToBytes(val, payload + 1);
   transmitPayload(payload, 5);
-  debugSerial.println("[SPMOTOR] txduty");
+  //debugSerial.println("[SPMOTOR] txduty");
 }
 
 void CubeMarsV2::transmitPayload(uint8_t* payload, uint8_t payloadLength)
@@ -210,7 +210,7 @@ void CubeMarsV2::handleRX()
           {
             _waitingForResponse = false;
             _isConnected = true;
-            debugSerial.println("[SPMOTOR] data received");
+            //debugSerial.println("[SPMOTOR] data received");
 
             readTmpCurrRPM(); // call interpreter
           }

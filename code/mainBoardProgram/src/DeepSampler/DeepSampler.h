@@ -32,7 +32,7 @@ public:
 
   //Storage control
   bool setCalibration0();
-  bool setCalibrationX(float weightX = 100);
+  bool setCalibrationX(float);
 
   bool storageMoveToSlot(uint8_t slot);
   bool storageUnlock();

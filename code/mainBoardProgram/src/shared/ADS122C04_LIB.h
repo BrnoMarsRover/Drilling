@@ -71,7 +71,7 @@ public:
     // dgnd-dvdd 100 0001 = 0x41
     // dvdd-dgnd 100 0100 = 0x44 deep samples
     // dvdd-dvdd 100 0101 = 0x45 surface samples
-    ADS122C04(TwoWire &wire, uint8_t addr = 0x44)
+    ADS122C04(TwoWire &wire, uint8_t addr)
         : _wire(&wire), _addr(addr), cal_a(0.00467235f), cal_b(-6054.52392578f), tare_grams(0.0f) // old: cal_a(1.0f), cal_b(0.0f), tare_grams(0.0f) _resetPin(resetPin)
     {
       /*

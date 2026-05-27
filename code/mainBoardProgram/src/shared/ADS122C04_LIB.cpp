@@ -75,7 +75,7 @@ void ADS122C04::begin(void) {
   //pinMode(2,OUTPUT);    // !! ---- FOR BOARD V1 ONLY ---- !!
   //digitalWrite(2, HIGH);    // !! ---- FOR BOARD V1 ONLY ---- !!
 
-  delay(1);
+  //delay(1);
   reset(); // should not pull down RST pin
   // REG0: MUX=0000 (AIN0+/AIN1-), GAIN=111 (x16), PGA_BYPASS=0  → 0x0E // old 1000 -> 0x08
   // REG1: DR=000 (20SPS), MODE=0, CM=1 (continuous), VREF=00 (ext), TS=0 → 0x08
