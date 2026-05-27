@@ -95,12 +95,17 @@ void ADS122C04::begin(void) {
     Serial.println(" INIT FAIL");
   }
 
-  prefs.begin("calibrate", true);
-  if(prefs.getFloat("a", 0.0) != 0.0 && prefs.getFloat("b", 0.0) != 0.0){
-    cal_a = prefs.getFloat("a", 0.0);
-    cal_b = prefs.getFloat("b", 0.0);
+  if(_addr == 0x44){
+    prefs.begin("calibration44", true);
+    cal_a = prefs.getFloat("a_44", 0.00467235f);
+    cal_b = prefs.getFloat("b_44", -6054.52392578f);
+    prefs.end();
+  }else if(_addr == 0x45){
+    prefs.begin("calibration45", true);
+    cal_a = prefs.getFloat("a_45", 0.00467235f);
+    cal_b = prefs.getFloat("b_45", -6054.52392578f);
+    prefs.end();
   }
-  prefs.end();
 }
 
 ADS122C04::~ADS122C04() {
@@ -208,9 +213,9 @@ void ADS122C04::tare(void) {
 
 void ADS122C04::scale_calibrate_0(void) {
   Serial.println(F("[ADC] Scale calibration 1/2. "));
-  Serial.print(F("On scale should be weight of 0g"));
+  Serial.println(F("On scale should be weight of 0g"));
 
-  float adc_zero = read_median(8);
+  float adc_zero = read_median(16);
   _cal_adc_zero = adc_zero;
   Serial.print(F("[ADC] at 0g: "));
   Serial.println(adc_zero, 2);
@@ -222,7 +227,7 @@ void ADS122C04::scale_calibrate_100(void) {
   Serial.println(F("[ADC] Scale calibration 2/2. "));
   Serial.print(F("On scale should be weight of Xg"));
 
-  float adc_100 = read_median(8);
+  float adc_100 = read_median(16);
   Serial.print(F("[ADC] at Xg: "));
   Serial.println(adc_100, 2);
 
@@ -231,13 +236,22 @@ void ADS122C04::scale_calibrate_100(void) {
     return;
   }
 
-  cal_a = _cal_weight / (adc_100 - _cal_adc_zero); // OLD 100.0f / (adc_100 - _cal_adc_zero)
+  //Serial.print(F("[ADC] Cal. weight:"));
+  //Serial.println(_cal_weight, 2);
+  cal_a = _cal_weight / (adc_100 - _cal_adc_zero); // OLD 100.0f / (adc_100 - _cal_adc_zero) // _cal_weight
   cal_b = 0.0f - cal_a * _cal_adc_zero;
 
-  prefs.begin("calibration", false);
-  prefs.putFloat("a", cal_a);
-  prefs.putFloat("b", cal_b);
-  prefs.end();
+  if(_addr == 0x44){
+    prefs.begin("calibration44", false);
+    prefs.putFloat("a_44", cal_a);
+    prefs.putFloat("b_44", cal_b);
+    prefs.end();
+  }else if(_addr == 0x45){
+    prefs.begin("calibration45", false);
+    prefs.putFloat("a_45", cal_a);
+    prefs.putFloat("b_45", cal_b);
+    prefs.end();
+  }
 
   Serial.print("[ADC] 0x");
   Serial.print(_addr, HEX);

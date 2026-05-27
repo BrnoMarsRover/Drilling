@@ -285,7 +285,7 @@ void respondToMsg(const RoverMessage& msg)
 
     case CMD_CALIBRATE_X_DEEP:
     {
-      if(deepSampler.setCalibrationX((float)msg.getInt16Arg()))
+      if(deepSampler.setCalibrationX(msg.getFloatArg())) // getFloat()
         roverComm.sendAck(CMD_CALIBRATE_X_DEEP);
       else
         roverComm.sendNack();
@@ -303,7 +303,7 @@ void respondToMsg(const RoverMessage& msg)
     
     case CMD_CALIBRATE_X_SURFACE:
     {
-      if(surfaceSampleHolder.setCalibrationX((float)msg.getInt16Arg()))
+      if(surfaceSampleHolder.setCalibrationX(msg.getFloatArg())) // getFloat()
         roverComm.sendAck(CMD_CALIBRATE_X_SURFACE);
       else
         roverComm.sendNack();
