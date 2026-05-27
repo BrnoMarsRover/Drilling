@@ -117,7 +117,7 @@ void StepperPositioner::update() {
     );
 
     int16_t err = shortestAngleDiff(expectedPos, realPos);
-
+/*
     // --- Průběžný debug výpis ---
     Serial.print(F("[DBG] motor="));
     Serial.print(expectedPos);
@@ -132,7 +132,7 @@ void StepperPositioner::update() {
     Serial.print(F(" deltaSteps="));
     Serial.println(deltaSteps);
     // ----------------------------
-
+*/
     if (abs(err) > STALL_ANGLE_ERR_DEG) {
         Serial.print(F("[STORAGE] ZASEKUTI: ocekavano="));
         Serial.print(expectedPos);

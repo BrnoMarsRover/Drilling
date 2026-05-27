@@ -124,8 +124,8 @@ private:
 
     static constexpr int POSITIONS[NUM_POSITIONS] = {
         0,
-        30,
-        60,
-        150
+        120,
+        180,
+        240
     };
 };

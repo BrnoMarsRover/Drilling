@@ -80,6 +80,7 @@ private:
 
   AutoState _autoState = AutoState::MANUAL;
   float _targetDepthMM;
+  uint8_t storeSlot = 1;
 
   uint32_t _storingStartTimeMS = 0;
   static constexpr uint32_t _storingDurationMS = 5000;

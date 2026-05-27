@@ -167,8 +167,8 @@ void LinearAxis::update() {
     if (isMoving()) {
         long angleSteps = getAngleFromSteps();
         long angleEncoder = getAngleFromEncoder();
-        Serial.print("anglesteps");Serial.print(angleSteps);
-        Serial.print("angleencoder");Serial.println(angleEncoder);
+        //Serial.print("anglesteps");Serial.print(angleSteps);
+        //Serial.print("angleencoder");Serial.println(angleEncoder);
 
         if (compareEncoderAndSteps(angleSteps, -angleEncoder)) {
             Serial.println(F("[LINEAR] VAROVANI: mozna ztrata kroku!"));

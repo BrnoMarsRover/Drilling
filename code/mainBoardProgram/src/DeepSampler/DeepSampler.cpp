@@ -40,7 +40,7 @@ void DeepSampler::update()
     {
       if(!_deepSampleHolder.storageIsMoving())
       {
-        if(_deepSampleHolder.storageGetCurrentSlot() == 0)
+        if(_deepSampleHolder.storageGetCurrentSlot() == 1)
         {
           if(_drillController.autoDrillToDepth(2, 60, _targetDepthMM ) )
           {
@@ -65,7 +65,7 @@ void DeepSampler::update()
       {
         if(_drillController.getCarriageDepthMM() < 50.0)
         {
-          if(_deepSampleHolder.storageMoveToSlot(1))
+          if(_deepSampleHolder.storageMoveToSlot(storeSlot))
           {
             _autoState = AutoState::MOVING_STORAGE; 
           }
@@ -90,7 +90,7 @@ void DeepSampler::update()
     {
       if(!_deepSampleHolder.storageIsMoving())
       {
-        if(_deepSampleHolder.storageGetCurrentSlot() == 1)
+        if(_deepSampleHolder.storageGetCurrentSlot() == storeSlot)
         {
           if(_drillController.getCarriageDepthMM() < 50.0)
           {
@@ -214,7 +214,7 @@ bool DeepSampler::autoSampleAndWeigh(float targetDepthMM)
 {
   if(_autoState == AutoState::MANUAL)
   {
-    if(_deepSampleHolder.storageMoveToSlot(0))
+    if(_deepSampleHolder.storageMoveToSlot(1))
     {
       _targetDepthMM = targetDepthMM;
       _autoState = AutoState::WAITING_FOR_STORAGE_CLEAR;
