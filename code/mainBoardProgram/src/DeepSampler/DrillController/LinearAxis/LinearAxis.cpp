@@ -38,10 +38,10 @@ bool LinearAxis::begin(uint16_t rmsCurrent, uint16_t microsteps) {
 
     _encoder = new AS5600L(_wire, _encoderAddress);
     if (!_encoder->begin()) {
-        Serial.println(F("CHYBA: AS5600L nenalezen"));
+        Serial.println(F("[LINEAR] CHYBA: AS5600L nenalezen"));
         _fatalError = true;
     } else {
-        Serial.println(F("AS5600L OK"));
+        Serial.println(F("[LINEAR] AS5600L OK"));
         _encoder->setZero();
     }
 
@@ -92,7 +92,7 @@ void LinearAxis::setupStepper() {
     _stepper = _stepperEngine.stepperConnectToPin(_stepPin);
 
     if (_stepper == nullptr) {
-        Serial.println(F("CHYBA: stepperConnectToPin() selhalo"));
+        Serial.println(F("[LINEAR] CHYBA: stepperConnectToPin() selhalo"));
         return;
     }
 
@@ -126,13 +126,13 @@ void LinearAxis::update() {
     // horní koncák - zastaví pohyb nahoru a vynuluje pozici
     if (_limitTop != nullptr && _limitTop->wasPressed() && _motionState == Up) {
         stopAndZeroPosition();
-        Serial.println(F("Horni koncak sepnut"));
+        Serial.println(F("[LINEAR] Horni koncak sepnut"));
     }
 
     // dolní koncák - zastaví pohyb dolů
     if (_limitBottom != nullptr && _limitBottom->wasPressed() && _motionState == Down) {
         stop();
-        Serial.println(F("Dolni koncak sepnut"));
+        Serial.println(F("[LINEAR] Dolni koncak sepnut"));
     }
 
     _loadUnfiltered = getLoad();
@@ -169,12 +169,11 @@ void LinearAxis::update() {
         long angleEncoder = getAngleFromEncoder();
         Serial.print("anglesteps");Serial.print(angleSteps);
         Serial.print("angleencoder");Serial.println(angleEncoder);
-/*
+
         if (compareEncoderAndSteps(angleSteps, -angleEncoder)) {
-            Serial.println(F("VAROVANI: mozna ztrata kroku!"));
+            Serial.println(F("[LINEAR] VAROVANI: mozna ztrata kroku!"));
             stop();
         }
-*/
     }
     
 }
@@ -183,7 +182,7 @@ void LinearAxis::moveUp() {
     if (_fatalError || !_initialized) return;
 
     if (isTopLimitPressed()) {
-        Serial.println(F("Horni koncak je sepnuty, nahoru nelze jet."));
+        Serial.println(F("[LINEAR] Horni koncak je sepnuty, nahoru nelze jet."));
         //stopAndZeroPosition(); //možny fix proč je potřeba davat dvakrát DOWN
         return;
     }
@@ -195,7 +194,7 @@ void LinearAxis::moveDown() {
     if (_fatalError || !_initialized) return;
 
     if (isBottomLimitPressed()) {
-        Serial.println(F("Dolni koncak je sepnuty, dolu nelze jet."));
+        Serial.println(F("[LINEAR] Dolni koncak je sepnuty, dolu nelze jet."));
         //stop(); //možny fix proč je potřeba davat dvakrát DOWN
         return;
     }
@@ -211,7 +210,7 @@ void LinearAxis::stop() {
         _speedHz = 0;
     }
 
-    Serial.println(F("Motor zastaven"));
+    Serial.println(F("[LINEAR] Motor zastaven"));
 }
 
 void LinearAxis::zero() {
@@ -223,7 +222,7 @@ void LinearAxis::zero() {
         _encoder->setZero();
     }
 
-    Serial.println(F("Pozice a encoder nulovany"));
+    Serial.println(F("[LINEAR] Pozice a encoder nulovany"));
 }
 
 void LinearAxis::setSpeed(uint32_t speedHz) {
@@ -471,11 +470,11 @@ void LinearAxis::setMotionState(MotionState state) {
     _motionState = state;
 
     if (_motionState == Up) {
-        Serial.println(F("Smer: NAHORU"));
+        Serial.println(F("[LINEAR] Smer: NAHORU"));
     } else if (_motionState == Down) {
-        Serial.println(F("Smer: DOLU"));
+        Serial.println(F("[LINEAR] Smer: DOLU"));
     } else {
-        Serial.println(F("Motor STOP"));
+        Serial.println(F("[LINEAR] Motor STOP"));
     }
 
     applyMotion();
@@ -494,5 +493,5 @@ void LinearAxis::stopAndZeroPosition() {
         _encoder->setZero();
     }
 
-    Serial.println(F("Koncak sepnut -> motor zastaven, pozice nulovana"));
+    Serial.println(F("[LINEAR] Koncak sepnut -> motor zastaven, pozice nulovana"));
 }

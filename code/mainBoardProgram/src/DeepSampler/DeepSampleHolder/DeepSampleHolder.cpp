@@ -18,13 +18,11 @@ DeepSampleHolder::DeepSampleHolder(TwoWire& wire, FastAccelStepperEngine& steppe
 
 bool DeepSampleHolder::begin()
 {
-  bool beginOK = true;
-
   _adcDeep.begin();
   _adcDeep.task_start();
   _stepperPositioner.begin(1000, 16);  // rmsCurrent, microsteps
 
-  return beginOK;
+  return true;
 }
 
 void DeepSampleHolder::update(){

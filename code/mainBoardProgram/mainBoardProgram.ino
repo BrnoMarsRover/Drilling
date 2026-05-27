@@ -511,6 +511,7 @@ void setup()
   setupI2CBus();
 
   deepSampler.begin();
+  surfaceSampleHolder.begin();
 
   drillState = STATE_READY;
 }
