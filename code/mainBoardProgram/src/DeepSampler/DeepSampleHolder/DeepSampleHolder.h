@@ -47,7 +47,8 @@ public:
   void storageUnlock();
   void storageSetHoldMode(bool hold);
   bool storageIsHoldMode() const { return _stepperPositioner.isHoldMode(); }
-  int  storageGetCurrentAngle()  const;
+  int16_t storageGetCurrentAngle()  const;
+  uint8_t storageGetCurrentSlot() const;
   bool storageIsMoving() const {return _stepperPositioner.isMoving(); }
 
 private:

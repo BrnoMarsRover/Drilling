@@ -28,6 +28,29 @@ bool DeepSampleHolder::begin()
 void DeepSampleHolder::update(){
   _stepperPositioner.update();
 
+  switch(_autoState){
+    case MANUAL:
+    {
+
+    }
+    case STORAGE_MOVING:
+    {
+      
+
+    }
+    case WEIGHING:
+    {
+      
+    }
+  }
+  
+  
+
+}
+
+bool DeepSampleHolder::startAutoWeighing() {¨
+  _autoState = STORAGE_MOVING;
+
 }
 
 void DeepSampleHolder::storageMoveToAngle(int angleDeg) {
@@ -46,8 +69,12 @@ void DeepSampleHolder::storageSetHoldMode(bool hold) {
   _stepperPositioner.setHoldMode(hold);
 }
 
-int DeepSampleHolder::storageGetCurrentAngle() const {
+int16_t DeepSampleHolder::storageGetCurrentAngle() const {
   return _stepperPositioner.getCurrentAngle();
+}
+
+uint8_t DeepSampleHolder::storageGetCurrentSlot() const {
+  return _stepperPositioner.getCurrentSlot();
 }
 
 bool DeepSampleHolder::requestMeasure()
