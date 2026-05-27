@@ -7,6 +7,20 @@
 #include "DrillController/DrillController.h"
 #include "DeepSampleHolder/DeepSampleHolder.h"
 
+enum DeepSamplerAutoState
+{
+  MANUAL,
+  WAITING_FOR_STORAGE_CLEAR,
+  DRILLING,
+  MOVING_STORAGE,
+  MOVING_CARRIAGE_TO_STORE,
+  STORING,
+  WEIGHING,
+  MOVING_UP,
+  DONE,
+  ERROR
+};
+
 class DeepSampler
 {
 public:
@@ -62,5 +76,5 @@ private:
   DrillController _drillController;
   DeepSampleHolder _deepSampleHolder;
 
-
+  DeepSamplerAutoState _autoState = MANUAL;
 };

@@ -9,20 +9,15 @@
 #include "CubeMarsV2.h"
 #include "LinearAxis/LinearAxis.h"
 
-enum ControlMode
+enum DrillControllerAutoState
 {
-  MANUAL,
-  AUTOMATIC
-};
-
-enum AutoState
-{
-  WAITING_FOR_HEIGHT,
-  MOVING_DOWN,
-  DRILLING,
-  MOVING_UP,
-  DONE,
-  ERROR
+  DRILL_MANUAL,
+  DRILL_WAITING_FOR_HEIGHT,
+  DRILL_MOVING_DOWN,
+  DRILL_DRILLING,
+  DRILL_MOVING_UP,
+  DRILL_DONE,
+  DRILL_ERROR
 };
 
 class DrillController
@@ -51,8 +46,7 @@ public:
   //higher multiplier -> motor needs more power, but can get into harder materials
   //use multiplier about 10x
 
-  ControlMode getControlMode();
-  AutoState getAutoState();
+  DrillControllerAutoState getAutoState();
 
   // Connection checks
   bool encoderConnected();
@@ -70,8 +64,7 @@ private:
   CubeMarsV2 _motorDriver;
   VL53L1X_Sensor _heightSensor;
 
-  ControlMode _controlMode = MANUAL;
-  AutoState _autoState = DONE;
+  DrillControllerAutoState _autoState = DRILL_MANUAL;
 
   float _rateOfPenetrationMMpRev = 0;
   float _targetSpiralRPS = 0;

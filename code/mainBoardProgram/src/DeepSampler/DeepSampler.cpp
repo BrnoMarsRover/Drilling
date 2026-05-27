@@ -28,6 +28,59 @@ void DeepSampler::update()
 {
   _drillController.update();
   _deepSampleHolder.update();
+
+  switch(_autoState)
+  {
+    case MANUAL:
+    {
+      break;
+    }
+
+    case WAITING_FOR_STORAGE_CLEAR:
+    {
+      break;
+    }
+    
+    case DRILLING:
+    {
+      break;
+    }
+    
+    case MOVING_STORAGE:
+    {
+      break;
+    }
+    
+    case MOVING_CARRIAGE_TO_STORE:
+    {
+      break;
+    }
+    
+    case STORING:
+    {
+      break;
+    }
+    
+    case WEIGHING:
+    {
+      break;
+    }
+    
+    case MOVING_UP:
+    {
+      break;
+    }
+    
+    case DONE:
+    {
+      break;
+    }
+    
+    case ERROR:
+    {
+      break;
+    }
+  }
 }
 
 // Integrated carriage/spiral motor control

@@ -54,79 +54,83 @@ void DrillController::update()
   _motorDriver.update();
   _heightSensor.update();
 
-  if(_controlMode == AUTOMATIC)
+
+  switch(_autoState)
   {
-    switch(_autoState)
+    case DRILL_MANUAL:
     {
-      case WAITING_FOR_HEIGHT:
-      {
-        if(_heightSensor.dataReady())
-        {
-          if(spiralDepthBelowGroundMM() > -20.0)
-          {
-            _motorDriver.setRPM(_targetSpiralRPS*60);
-            _autoState = DRILLING;
-          }
-          else
-          {
-            _autoState = MOVING_DOWN;
-            _linearAxis.setSpeedMMps(10);
-          }
-        }
+      break;
+    }
 
-        break;
-      }
-
-      case MOVING_DOWN:
+    case DRILL_WAITING_FOR_HEIGHT:
+    {
+      if(_heightSensor.dataReady())
       {
         if(spiralDepthBelowGroundMM() > -20.0)
         {
           _motorDriver.setRPM(_targetSpiralRPS*60);
-          _autoState = DRILLING;
-        }
-        break;
-      }
-
-      case DRILLING:
-      {
-        if(spiralDepthBelowGroundMM() > _targetDepthMM)
-        {
-          _linearAxis.setSpeedMMps(-10.0);
-          _motorDriver.setRPM(0.0);
-          _autoState = MOVING_UP;
+          _autoState = DRILL_DRILLING;
         }
         else
         {
-          _linearAxis.setSpeedMMps((_motorDriver.getRPM()/60)*_rateOfPenetrationMMpRev);
+          _autoState = DRILL_MOVING_DOWN;
+          _linearAxis.setSpeedMMps(10);
         }
-        break;
       }
 
-      case MOVING_UP:
+      break;
+    }
+
+    case DRILL_MOVING_DOWN:
+    {
+      if(spiralDepthBelowGroundMM() > -20.0)
       {
-        if(_linearAxis.getDepthMM() == 0.0)
-        {
-          _autoState = DONE;
-        }
-        break;
+        _motorDriver.setRPM(_targetSpiralRPS*60);
+        _autoState = DRILL_DRILLING;
       }
-      
-      case DONE:
+      break;
+    }
+
+    case DRILL_DRILLING:
+    {
+      if(spiralDepthBelowGroundMM() > _targetDepthMM)
       {
-        break;
+        _linearAxis.setSpeedMMps(-10.0);
+        _motorDriver.setRPM(0.0);
+        _autoState = DRILL_MOVING_UP;
       }
-      
-      case ERROR:
+      else
       {
-        break;
+        _linearAxis.setSpeedMMps((_motorDriver.getRPM()/60)*_rateOfPenetrationMMpRev);
       }
+      break;
+    }
+
+    case DRILL_MOVING_UP:
+    {
+      if(_linearAxis.getDepthMM() == 0.0)
+      {
+        _autoState = DRILL_DONE;
+      }
+      break;
+    }
+    
+    case DRILL_DONE:
+    {
+      _autoState = DRILL_MANUAL;
+      break;
+    }
+    
+    case DRILL_ERROR:
+    {
+      break;
     }
   }
 }
 
 bool DrillController::setCarriageSpeedMMps(float MMps)
 {
-  if (_controlMode == MANUAL)
+  if (_autoState == DRILL_MANUAL)
   {
     _linearAxis.setSpeedMMps(MMps);
     return true;
@@ -144,7 +148,7 @@ float DrillController::getCarriageDepthMM()
 
 bool DrillController::setSpiralRPM(float rpm)
 {
-  if (_controlMode == MANUAL)
+  if (_autoState == DRILL_MANUAL)
   {
     _motorDriver.setRPM(rpm);
     return true;
@@ -183,7 +187,7 @@ float DrillController::getDistFromSurfaceMM()
 
 bool DrillController::setManualControl()
 {
-  _controlMode = MANUAL;
+  _autoState = DRILL_MANUAL;
   _motorDriver.setRPM(0);
   _linearAxis.setSpeedMMps(0);
   return true;
@@ -191,24 +195,22 @@ bool DrillController::setManualControl()
 
 bool DrillController::autoDrillToDepth(float rateOfPenetrationMMpRev, float targetRPM, float targetDepthMM)
 {
-  if (_controlMode == MANUAL)
+  if (_autoState == DRILL_MANUAL)
   {
-    _controlMode = AUTOMATIC;
-
     _rateOfPenetrationMMpRev = rateOfPenetrationMMpRev;
     _targetSpiralRPS = targetRPM/60.0;
     _targetDepthMM = targetDepthMM + 15.0; //additional 15 mm to account for potential spilling
 
     _heightSensor.startMeasure();
-    _autoState = WAITING_FOR_HEIGHT;
+    _autoState = DRILL_WAITING_FOR_HEIGHT;
     return true;
   }
   else
     return false;
 }
 
-ControlMode DrillController::getControlMode() {return _controlMode;}
-AutoState DrillController::getAutoState() {return _autoState;}
+
+DrillControllerAutoState DrillController::getAutoState() {return _autoState;}
 
 // Connection checks
 bool DrillController::encoderConnected() {return false;}

@@ -4,7 +4,7 @@
 #include <cstring>
 
 namespace ser
-{
+{ 
   inline uint16_t bytesToUint16(const uint8_t* bytes)
   {
     return (static_cast<uint16_t>(bytes[0]) << 8) |
