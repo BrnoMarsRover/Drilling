@@ -5,6 +5,8 @@
 #include <Wire.h>
 
 #include "../shared/ADS122C04_LIB.h"
+#include "servo_mg.h"
+
 
 class SurfaceSampleHolder
 {
@@ -22,6 +24,7 @@ public:
   void weighSand();
   float getSandWeight();
 
+  void update();
   // ADC
   bool begin();
 
@@ -36,11 +39,11 @@ public:
   bool setTare();
   bool setCalibration0();
   bool setCalibrationX(float);
-  void reset();
 
 private:
   TwoWire& _wire;
   HardwareSerial& _debugSerial;
   ADS122C04 _adcSurface;
-  //servo
+  SERVO_MG _servoRock;
+  SERVO_MG _servoSand;
 };

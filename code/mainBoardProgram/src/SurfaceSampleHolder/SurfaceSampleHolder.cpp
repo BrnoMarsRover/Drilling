@@ -10,19 +10,26 @@ SurfaceSampleHolder::SurfaceSampleHolder(TwoWire& wire, HardwareSerial& debugSer
   _adcSurface(
     wire,
     0x45  // address for surface sample weight
-  )
-  //servo?
+  ),
+  _servoRock(4),
+  _servoSand(15)
 {
+}
+void SurfaceSampleHolder::update()
+{
+  _servoRock.update();
+  _servoSand.update();
 }
 
 bool SurfaceSampleHolder::begin()
 {
-  bool beginOK = true;
-
   _adcSurface.begin();
   _adcSurface.task_start();
 
-  return beginOK;
+  _servoRock.begin();
+  _servoSand.begin();
+
+  return true;
 }
 
 bool SurfaceSampleHolder::requestMeasure()
@@ -73,11 +80,6 @@ bool SurfaceSampleHolder::setCalibrationX(float weightX)
 {
   _adcSurface.set_calibration_100(weightX);
   return true;
-}
-
-void SurfaceSampleHolder::reset()
-{
-  _adcSurface.reset();
 }
 
 // ------------------------------------------------------------------ //
