@@ -117,7 +117,7 @@ private:
     float _mmPerRevolution;
     float _rSense;
 
-    uint32_t _speedHz = 500;
+    uint32_t _speedHz = 0;
     uint32_t _accelHz = 2000;
     MotionState _motionState = Stop;
 

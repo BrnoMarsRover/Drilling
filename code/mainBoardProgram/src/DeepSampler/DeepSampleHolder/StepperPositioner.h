@@ -10,7 +10,6 @@
 // ---------------------------------------------------------------
 //  StepperPositioner
 //  Otáčí zásobníkem na zadanou pozici (slot 1..NUM_SLOTS).
-//  Pozice jsou rovnoměrně rozmístěny: slot N = (N-1) * (360 / NUM_SLOTS).
 //  Enkodér AS5600L ověřuje pohyb; při zaseknutí provede 1 retry,
 //  pak zablokuje motor a nastaví fatalError.
 // ---------------------------------------------------------------
@@ -19,7 +18,6 @@ class StepperPositioner {
 public:
     // Piny: STEP, DIR, EN, TMC2209 RX, TMC2209 TX, SDA, SCL
     // uartPort: 1 nebo 2 (HardwareSerial na ESP32)
-    // numSlots: počet pozic zásobníku (rovnoměrné rozdělení)
     StepperPositioner(uint8_t stepPin,
                        uint8_t dirPin,
                        uint8_t enPin,
@@ -27,8 +25,7 @@ public:
                        uint8_t txPin,
                        TwoWire& wire,
                        FastAccelStepperEngine& stepperEngine,
-                       uint8_t uartPort = 2,
-                       uint8_t numSlots = 6);
+                       uint8_t uartPort = 2);
 
     // Inicializace – volejte v setup()
     // rmsCurrent: RMS proud v mA (např. 600)
@@ -67,7 +64,6 @@ public:
     int16_t     getCurrentAngle()  const;
     uint16_t     getTargetAngle()   const { return _targetAngle; }
     uint8_t getCurrentSlot()   const;   // nejbližší slot k aktuální pozici
-    uint8_t getNumSlots()      const { return _numSlots; }
     int32_t getZeroOffset() const;
     float getZeroOffsetDegrees() const;
     void setZeroOffset(int32_t offsetCounts);
@@ -89,7 +85,6 @@ private:
     uint8_t _rxPin,   _txPin;
     uint8_t _sdaPin,  _sclPin;
     uint8_t _uartPort;
-    uint8_t _numSlots;
 
     // Periferie
     HardwareSerial*      _serialDriver = &Serial1;

@@ -10,8 +10,7 @@ StepperPositioner::StepperPositioner(uint8_t stepPin,
                                        uint8_t txPin,
                                        TwoWire& wire,
                                        FastAccelStepperEngine& stepperEngine,
-                                       uint8_t uartPort,
-                                       uint8_t numSlots)
+                                       uint8_t uartPort)
     : _stepPin(stepPin),
       _dirPin(dirPin),
       _enPin(enPin),
@@ -19,8 +18,7 @@ StepperPositioner::StepperPositioner(uint8_t stepPin,
       _txPin(txPin),
       _wire(wire),
       _stepperEngine(stepperEngine),
-      _uartPort(uartPort),
-      _numSlots(numSlots)
+      _uartPort(uartPort)
 {}
 
 // ---------------------------------------------------------------
@@ -46,16 +44,15 @@ bool StepperPositioner::begin(uint16_t rmsCurrent, uint16_t microsteps) {
 
     _encoder = new AS5600L(_wire, 0x41);   // 0x36 = výchozí adresa AS5600L
 
-    //delay(20);
     if (!_encoder->begin()) {
         _fatalError = true;
-        Serial.println(F("[MAG] CHYBA: AS5600L nenalezen na I2C."));
+        Serial.println(F("[STORAGE] CHYBA: AS5600L nenalezen na I2C."));
         return false;
     }
 
-    //delay(20);
+
     if (!_encoder->magnetDetected()) {
-        Serial.println(F("[MAG] VAROVANI: Slaby nebo zadny magnet!"));
+        Serial.println(F("[STORAGE] VAROVANI: Slaby nebo zadny magnet!"));
     }
 
     _encoder->setDirection(true);
@@ -64,7 +61,7 @@ bool StepperPositioner::begin(uint16_t rmsCurrent, uint16_t microsteps) {
     _stepper = _stepperEngine.stepperConnectToPin(_stepPin);
     if (_stepper == nullptr) {
         _fatalError = true;
-        Serial.println(F("[MAG] CHYBA: Nelze inicializovat stepper."));
+        Serial.println(F("[STORAGE] CHYBA: Nelze inicializovat stepper."));
         return false;
     }
 
@@ -74,13 +71,11 @@ bool StepperPositioner::begin(uint16_t rmsCurrent, uint16_t microsteps) {
     _stepper->setSpeedInHz(3000);
     _stepper->setAcceleration(1500);
 
-    //delay(200);
+
     setZeroOffsetDegrees(290); // konstanta podle natočení magentu vůči senzoru -> zaručí úhel nula na uprostřed pod roverem
-    //setZero();
 
     _initialized = true;
-    Serial.print(F("[MAG] Inicializovano. Pocet slotu: "));
-    Serial.println(_numSlots);
+    Serial.print(F("[STORAGE] Inicializovano"));
     return true;
 }
 
@@ -99,7 +94,7 @@ void StepperPositioner::update() {
     if (!_stepper->isRunning()) {
         _moving    = false;
         _lastAngle = getCurrentAngle();
-        Serial.print(F("[MAG] Dojeto. Aktualni uhel: "));
+        Serial.print(F("[STORAGE] Dojeto. Aktualni uhel: "));
         Serial.print(_lastAngle);
         Serial.print(F("°  (slot "));
         Serial.print(getCurrentSlot());
@@ -139,7 +134,7 @@ void StepperPositioner::update() {
     // ----------------------------
 
     if (abs(err) > STALL_ANGLE_ERR_DEG) {
-        Serial.print(F("[MAG] ZASEKUTI: ocekavano="));
+        Serial.print(F("[STORAGE] ZASEKUTI: ocekavano="));
         Serial.print(expectedPos);
         Serial.print(F("° skutecne="));
         Serial.print(realPos);
@@ -158,14 +153,14 @@ void StepperPositioner::update() {
 // ---------------------------------------------------------------
 bool StepperPositioner::moveToSlot(uint8_t slot) {
     if (slot < 1 || slot > NUM_POSITIONS) {
-        Serial.print(F("[MAG] Neplatny slot: "));
+        Serial.print(F("[STORAGE] Neplatny slot: "));
         Serial.println(slot);
         return false;
     }
 
     uint16_t angle = POSITIONS[slot - 1];
 
-    Serial.print(F("[MAG] Slot "));
+    Serial.print(F("[STORAGE] Slot "));
     Serial.print(slot);
     Serial.print(F(" -> "));
     Serial.print(angle);
@@ -187,11 +182,11 @@ bool StepperPositioner::moveToAngle(int16_t angleDeg) {
 
 void StepperPositioner::_doMoveToAngle(int16_t angleDeg) {
     if (_fatalError) {
-        Serial.println(F("[MAG] CHYBA: System zablokovan. Pouzij unlock()."));
+        Serial.println(F("[STORAGE] CHYBA: System zablokovan. Pouzij unlock()."));
         return;
     }
     if (!_initialized || _stepper == nullptr || _encoder == nullptr) {
-        Serial.println(F("[MAG] CHYBA: System neni inicializovan."));
+        Serial.println(F("[STORAGE] CHYBA: System neni inicializovan."));
         return;
     }
 
@@ -200,7 +195,7 @@ void StepperPositioner::_doMoveToAngle(int16_t angleDeg) {
     int16_t diff  = shortestAngleDiff(currentEnc, _targetAngle);
 
     if (abs(diff) <= 1) {
-        Serial.println(F("[MAG] Cil uz dosazen."));
+        Serial.println(F("[STORAGE] Cil uz dosazen."));
         return;
     }
 
@@ -212,7 +207,7 @@ void StepperPositioner::_doMoveToAngle(int16_t angleDeg) {
 
     long stepsToMove = (long)diff * (long)_stepsPerRevolution / 360L;
 
-    Serial.print(F("[MAG] Pohyb: "));
+    Serial.print(F("[STORAGE] Pohyb: "));
     Serial.print(currentEnc);
     Serial.print(F("° -> "));
     Serial.print(_targetAngle);
@@ -234,7 +229,7 @@ void StepperPositioner::_doMoveToAngle(int16_t angleDeg) {
 void StepperPositioner::stop() {
     if (_stepper) _stepper->forceStop();
     _moving = false;
-    Serial.println(F("[MAG] Zastaveno."));
+    Serial.println(F("[STORAGE] Zastaveno."));
     _applyHoldState(); 
 }
 
@@ -258,7 +253,7 @@ void StepperPositioner::setZero() {
     _encoder->update();   // zajistit aktuální sample
     _encoder->setZero();  // nula přímo v enkodéru
     _lastAngle = 0;
-    Serial.print(F("[MAG] Nulova poloha ulozena, offset = "));
+    Serial.print(F("[STORAGE] Nulova poloha ulozena, offset = "));
     Serial.print(getZeroOffsetDegrees(), 2);
     Serial.println(F("°"));
 }
@@ -271,9 +266,9 @@ void StepperPositioner::unlock() {
         _fatalError  = false;
         _retryCount  = 0;
         _moving      = false;
-        Serial.println(F("[MAG] System odblokovam. Zadejte novou pozici."));
+        Serial.println(F("[STORAGE] System odblokovam. Zadejte novou pozici."));
     } else {
-        Serial.println(F("[MAG] System nebyl zablokovan."));
+        Serial.println(F("[STORAGE] System nebyl zablokovan."));
     }
 }
 
@@ -357,7 +352,7 @@ void StepperPositioner::setHoldMode(bool hold) {
     if (!_moving) {
         _applyHoldState();
     }
-    Serial.print(F("[MAG] Hold mode: "));
+    Serial.print(F("[STORAGE] Hold mode: "));
     Serial.println(hold ? F("ON (drzi polohu)") : F("OFF (volny)"));
 }
 
@@ -390,12 +385,12 @@ void StepperPositioner::handleStall() {
     if (_retryCount > MAX_RETRIES) {
         _moving     = false;
         _fatalError = true;
-        Serial.println(F("[MAG] !!! MOTOR ZABLOKOVAN !!! Pouzij unlock()."));
+        Serial.println(F("[STORAGE] !!! MOTOR ZABLOKOVAN !!! Pouzij unlock()."));
         _applyHoldState(); 
         return;
     }
 
-    Serial.print(F("[MAG] Pokus o uvolneni (retry "));
+    Serial.print(F("[STORAGE] Pokus o uvolneni (retry "));
     Serial.print(_retryCount);
     Serial.println(F(")..."));
 
