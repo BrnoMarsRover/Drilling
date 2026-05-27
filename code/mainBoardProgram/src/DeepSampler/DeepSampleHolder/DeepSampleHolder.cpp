@@ -29,18 +29,36 @@ void DeepSampleHolder::update(){
   _stepperPositioner.update();
 
   switch(_autoState){
-    case MANUAL:
+    case AutoState::MANUAL:
     {
 
     }
-    case STORAGE_MOVING:
+    case AutoState::STORAGE_MOVING:
     {
-      
+      if(!storageIsMoving()) {
+        if (storageGetCurrentSlot() == 2) {
+          if(!requestMeasure()) {
+            _autoState = AutoState::ERROR;
+            }
+        }
+        else {
+          _autoState = AutoState::ERROR;
+        }
+      }
+    }
+    case AutoState::WEIGHING:
+    {
+      if (getResultReady()) {
+        _autoState = AutoState::DONE;
+      }
+    }
+    case AutoState::DONE:
+    {
 
     }
-    case WEIGHING:
+    case AutoState::ERROR:
     {
-      
+
     }
   }
   
@@ -48,25 +66,56 @@ void DeepSampleHolder::update(){
 
 }
 
-bool DeepSampleHolder::startAutoWeighing() {¨
-  _autoState = STORAGE_MOVING;
-
+DeepSampleHolder::AutoState DeepSampleHolder::getAutoState(){
+  if(_autoState == AutoState::DONE){
+    _autoState = AutoState::MANUAL;
+    return AutoState::DONE;
+  }
+  else{
+  return _autoState;
+  }
 }
 
-void DeepSampleHolder::storageMoveToAngle(int angleDeg) {
-  _stepperPositioner.moveToAngle(angleDeg);
+
+bool DeepSampleHolder::startAutoWeighing() {
+  if(storageMoveToSlot(2)){
+    _autoState = AutoState::STORAGE_MOVING;
+    return true;
+  }
+  else {
+    return false;
+  }
 }
 
-void DeepSampleHolder::storageMoveToSlot(uint8_t slot) {
-  _stepperPositioner.moveToSlot(slot);
+bool DeepSampleHolder::storageMoveToAngle(int angleDeg) {
+  if(storageIsBlocked()){
+    return false;
+  }
+  else {
+    _stepperPositioner.moveToAngle(angleDeg);
+    return true;
+  }
+ 
 }
 
-void DeepSampleHolder::storageUnlock() {
+bool DeepSampleHolder::storageMoveToSlot(uint8_t slot) {
+  if(storageIsBlocked()){
+    _autoState = AutoState::ERROR;
+    return false;
+  }
+  else {
+    _stepperPositioner.moveToSlot(slot);
+    return true;
+  }
+}
+
+bool DeepSampleHolder::storageUnlock() {
   _stepperPositioner.unlock();
 }
 
-void DeepSampleHolder::storageSetHoldMode(bool hold) {
+bool DeepSampleHolder::storageSetHoldMode(bool hold) {
   _stepperPositioner.setHoldMode(hold);
+  return true;
 }
 
 int16_t DeepSampleHolder::storageGetCurrentAngle() const {
@@ -80,6 +129,7 @@ uint8_t DeepSampleHolder::storageGetCurrentSlot() const {
 bool DeepSampleHolder::requestMeasure()
 {
   _adcDeep.request_measure();
+   _autoState = AutoState::WEIGHING;
   return 1;
 }
 
@@ -125,11 +175,6 @@ bool DeepSampleHolder::setCalibrationX(float weightX)
 {
   _adcDeep.set_calibration_100(weightX);
   return true;
-}
-
-void DeepSampleHolder::reset()
-{
-  _adcDeep.reset();
 }
 
 // ------------------------------------------------------------------ //

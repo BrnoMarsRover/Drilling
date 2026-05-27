@@ -18,7 +18,9 @@ public:
   {
     MANUAL,
     STORAGE_MOVING,
-    WEIGHING
+    WEIGHING,
+    DONE,
+    ERROR
   };
 
   DeepSampleHolder(TwoWire& wire, FastAccelStepperEngine& stepperEngine);
@@ -40,13 +42,13 @@ public:
   bool setTare();
   bool setCalibration0();
   bool setCalibrationX(float);
-  void reset();
 
-  void storageMoveToAngle(int angleDeg);
-  void storageMoveToSlot(uint8_t slot);
-  void storageUnlock();
-  void storageSetHoldMode(bool hold);
+  bool storageMoveToAngle(int angleDeg);
+  bool storageMoveToSlot(uint8_t slot);
+  bool storageUnlock();
+  bool storageSetHoldMode(bool hold);
   bool storageIsHoldMode() const { return _stepperPositioner.isHoldMode(); }
+  bool storageIsBlocked() const { return _stepperPositioner.hasFatalError(); }
   int16_t storageGetCurrentAngle()  const;
   uint8_t storageGetCurrentSlot() const;
   bool storageIsMoving() const {return _stepperPositioner.isMoving(); }

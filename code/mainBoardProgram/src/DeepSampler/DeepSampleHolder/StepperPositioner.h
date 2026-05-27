@@ -116,7 +116,8 @@ private:
     static constexpr int  STALL_ANGLE_ERR_DEG = 15;   // °  – max. odchylka
     static constexpr int  STALL_CHECK_MS      = 200;  // ms – interval kontroly
     static constexpr int  MAX_RETRIES         = 1;    // počet pokusů uvolnění
-    static constexpr long STALL_RELEASE_STEPS = 400;  // kroky zpět při uvolnění
+
+    static constexpr uint16_t SLOT_TOLERANCE = 3;
 
     private:
     static constexpr uint8_t NUM_POSITIONS = 4;

@@ -290,16 +290,20 @@ uint8_t StepperPositioner::getCurrentSlot() const {
     uint16_t angle = getCurrentAngle();
 
     uint8_t nearestSlot = 1;
-    uint16_t minError = 360;
+    uint16_t lastError = 360;
 
     for (uint8_t i = 0; i < NUM_POSITIONS; i++) {
 
         int16_t err = shortestAngleDiff(angle, POSITIONS[i]);
 
-        if (abs(err) < minError) {
-            minError = abs(err);
+        if (abs(err) < lastError) {
+            lastError = abs(err);
             nearestSlot = i + 1;
         }
+    }
+
+    if (lastError < SLOT_TOLERANCE) {
+        return 9;
     }
 
     return nearestSlot;
