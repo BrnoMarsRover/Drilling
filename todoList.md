@@ -1,28 +1,18 @@
 # TODO list
 
 ## Hardware
-Zkrácení profilů
-
-Upevnění řetězu k vozíku. Možná koupení novýho řetězu z laskakitu?\
+Zkrácení profilů vodorovných\
 Kabeláž - nakrimpovat a oplést\
-Umístění PCB na vrtáku, přizpůsobení kabelů, umístění měniče\
-Vyřešit spodní uložení závitové tyče\
+Krytka spodního ložiska\
 Upevnění kamery
 
-Upevnění tenzometru na storage
-
-## Nová PCB
-
-
 ## Software
-Sekvence vrtání automaticky, regulace lineárního posuvu v závislosti na vrtání\
-Protokol komunikace s roverem\
-Obslužný program co bude simulovat rover potenciálně
+Úprava rate of penetration  v závislosti na hloubce\
+Brát v úvahu proud vertikálního krokáče
 
+Kontrola připojených zařízení. Od roveru přijde žádost o kontrolu. Potom žádost o odpověď aby to nebylo blokovací. Stav připojení se musí ukládat v private proměnné každé low level classy, něco jako bool _isConnected. Public metody checkConnection() a getter bool isConnected().
+
+Možnost spustit automatické vrtání jenom po kalibraci výšky linearAxis.
 
 ## Misc
 Dopisovat do seznamu materiál co chceme mít redundantní\
-Koupit víc písku
-
-
-
