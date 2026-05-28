@@ -128,7 +128,7 @@ void respondToMsg(const RoverMessage& msg)
       roverComm.sendState(
         deepSampler.getCarriageDepthMM(),
         deepSampler.getCarriageSpeedMMps(),
-        0.0,  //vertical drive stepper current
+        deepSampler.getVerticalStepperCurrentA(),
         deepSampler.getSpiralRPM(),
         deepSampler.getSpiralMotorTmp(),
         deepSampler.storageGetCurrentAngle(),  //deep sample storage angle
@@ -216,7 +216,7 @@ void respondToMsg(const RoverMessage& msg)
 
     case CMD_STORAGE_POSITION:
     {
-      if(deepSampler.storageMoveToSlot(msg.getUint8Arg()))
+      if(deepSampler.storageMoveToSlot((StepperPositioner::StoragePosition)msg.getUint8Arg()))
         roverComm.sendAck(CMD_STORAGE_POSITION);
       else
         roverComm.sendNack();

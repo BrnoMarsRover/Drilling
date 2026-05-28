@@ -28,7 +28,8 @@ LinearAxis::LinearAxis(uint8_t stepPin,
       _mmPerRevolution(mmPerRevolution),
       _rSense(rSense),
       _wire(wire),
-      _stepperEngine(stepperEngine)
+      _stepperEngine(stepperEngine),
+      _currentSensor(wire)
 {
 }
 
@@ -71,6 +72,8 @@ bool LinearAxis::begin(uint16_t rmsCurrent, uint16_t microsteps) {
     } else {
         _stepsPerRevolution = 200U * microsteps;
     }
+
+    _currentSensor.begin();
 
     _initialized = true;
     return !_fatalError;
@@ -145,7 +148,7 @@ void LinearAxis::update() {
             printLoad(Serial);
         }
     }
-
+/*
     if (isMoving()) {
         long angleSteps = getAngleFromSteps();
         long angleEncoder = getAngleFromEncoder();
@@ -157,7 +160,8 @@ void LinearAxis::update() {
             stop();
         }
     }
-    
+*/ 
+    _currentSensor.update();
 }
 
 void LinearAxis::moveUp() {
@@ -265,6 +269,10 @@ float LinearAxis::getSpeedMMps() const {
     if (_stepsPerRevolution == 0) return 0.0f;
 
     return ((float)_speedHz * _mmPerRevolution) / (float)_stepsPerRevolution;
+}
+
+float LinearAxis::getStepperCurrentA() const {
+    return _currentSensor.getAveragedCurrentA();
 }
 
 bool LinearAxis::isMoving() const {
@@ -415,9 +423,11 @@ void LinearAxis::applyMotion() {
     Serial.print(" _speedHz="); Serial.println(_speedHz);
 
     if (_motionState == Up) {
-        _stepper->runForward();
-    } else if (_motionState == Down) {
+        //_stepper->runForward();
         _stepper->runBackward();
+    } else if (_motionState == Down) {
+       // _stepper->runBackward();
+       _stepper->runForward();
     } else {
         _stepper->stopMove();
     }

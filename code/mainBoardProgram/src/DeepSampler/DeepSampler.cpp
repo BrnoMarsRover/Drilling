@@ -40,7 +40,7 @@ void DeepSampler::update()
     {
       if(!_deepSampleHolder.storageIsMoving())
       {
-        if(_deepSampleHolder.storageGetCurrentSlot() == 1) // && horní koncák sepnutý
+        if (_deepSampleHolder.storageGetCurrentSlot() == StepperPositioner::StoragePosition::Home)
         {
           if(_drillController.autoDrillToDepth(2, 60, _targetDepthMM ) )
           {
@@ -53,7 +53,6 @@ void DeepSampler::update()
         }
         else
         {
-          _debugSerial.println(_deepSampleHolder.storageGetCurrentSlot());
           _autoState = AutoState::ERROR;
         }
       }
@@ -120,7 +119,7 @@ void DeepSampler::update()
     
     case AutoState::MOVING_CARRIAGE_TO_STORE:
     {
-      if(_drillController.getCarriageDepthMM() > 50.0)
+      if(_drillController.spiralDepthBelowSensor() > -5.0)
       {
         if(_drillController.setCarriageSpeedMMps(0))
         {
@@ -160,7 +159,6 @@ void DeepSampler::update()
     
     case AutoState::WEIGHING:
     {
-      _debugSerial.println("auto weighing");
       if(_deepSampleHolder.getAutoState() == DeepSampleHolder::AutoState::DONE)
       {
         if(_drillController.setCarriageSpeedMMps(-10.0))
@@ -190,13 +188,11 @@ void DeepSampler::update()
     
     case AutoState::DONE:
     {
-      _debugSerial.println("auto Done");
       break;
     }
     
     case AutoState::ERROR:
     {
-      _debugSerial.println("auto error");
       break;
     }
   }
@@ -218,7 +214,7 @@ bool DeepSampler::autoSampleAndWeigh(float targetDepthMM)
 {
   if(_autoState == AutoState::MANUAL)
   {
-    if(_deepSampleHolder.storageMoveToSlot(1))
+    if(_deepSampleHolder.storageMoveToSlot(StepperPositioner::StoragePosition::Home))
     {
       _targetDepthMM = targetDepthMM;
       _autoState = AutoState::WAITING_FOR_STORAGE_CLEAR;
@@ -234,13 +230,11 @@ bool DeepSampler::setCarriageSpeedMMps(float MMps)
 }
 
 float DeepSampler::getCarriageSpeedMMps() const { return _drillController.getCarriageSpeedMMps(); }
-float DeepSampler::getCarriageDepthMM() { return _drillController.getCarriageDepthMM(); }
+float DeepSampler::getCarriageDepthMM() const { return _drillController.getCarriageDepthMM(); }
+float DeepSampler::getVerticalStepperCurrentA() const { return _drillController.getVerticalStepperCurrentA(); }
 
 // Low level spiral motor control
-bool DeepSampler::setSpiralRPM(float rpm)
-{
-  return _drillController.setSpiralRPM(rpm);
-}
+bool DeepSampler::setSpiralRPM(float rpm) { return _drillController.setSpiralRPM(rpm); }
 
 float DeepSampler::getSpiralRPM() { return _drillController.getSpiralRPM(); }
 float DeepSampler::getSpiralMotorTmp() { return _drillController.getSpiralMotorTmp(); }
@@ -256,9 +250,9 @@ float DeepSampler::getLastTemp() { return _deepSampleHolder.getLastTemp(); }
 bool DeepSampler::requestMeasure() { return _deepSampleHolder.requestMeasure(); }
 bool DeepSampler::requestTemp() { return _deepSampleHolder.requestTemp(); }
 
-bool DeepSampler::storageMoveToSlot(uint8_t slot)
+bool DeepSampler::storageMoveToSlot(StepperPositioner::StoragePosition position)
 {
-  _deepSampleHolder.storageMoveToSlot(slot);
+  _deepSampleHolder.storageMoveToSlot(position);
   return true;
 }
 

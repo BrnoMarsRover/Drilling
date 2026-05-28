@@ -7,6 +7,7 @@
 
 #include "../../../shared/as5600.h"
 #include "LimitSwitch.h"
+#include "INA219_Sensor.h"
 
 class LinearAxis {
 public:
@@ -76,6 +77,8 @@ public:
     bool setSpeedMMps(float mmPerSec);
     float getSpeedMMps() const;
 
+    float getStepperCurrentA() const;
+
 private:
     enum MotionState : int8_t {
         Stop = 0,
@@ -137,4 +140,6 @@ private:
     float _loadAlpha = 0.1;
 
     FastAccelStepperEngine& _stepperEngine;
+
+    INA219_Sensor _currentSensor;
 };

@@ -161,10 +161,9 @@ bool DrillController::setCarriageSpeedMMps(float MMps)
 
 float DrillController::getCarriageSpeedMMps() const { return _linearAxis.getSpeedMMps(); }
 
-float DrillController::getCarriageDepthMM()
-{
-  return _linearAxis.getDepthMM();
-}
+float DrillController::getCarriageDepthMM() const { return _linearAxis.getDepthMM(); }
+
+float DrillController::getVerticalStepperCurrentA() const { return _linearAxis.getStepperCurrentA(); }
 
 bool DrillController::setSpiralRPM(float rpm)
 {

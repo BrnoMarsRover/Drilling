@@ -30,7 +30,18 @@ public:
   // Linear Axis
   bool setCarriageSpeedMMps(float MMps);
   float getCarriageSpeedMMps() const;
-  float getCarriageDepthMM();
+  float getCarriageDepthMM() const;
+  float getVerticalStepperCurrentA() const;
+
+  float spiralDepthBelowSensor()
+  {
+    return _linearAxis.getDepthMM() + carriageTopToSpiralTipMM - linAxisZeroToSensorMM;
+  }
+
+  float spiralDepthBelowGroundMM()
+  {
+    return _linearAxis.getDepthMM() + carriageTopToSpiralTipMM - linAxisZeroToSensorMM - _heightSensor.getDistanceMM();
+  }
 
   // Spiral motor
   bool setSpiralRPM(float rpm);
@@ -69,10 +80,6 @@ private:
 
   static constexpr float linAxisZeroToSensorMM = 775.0;
   static constexpr float carriageTopToSpiralTipMM = 720.0;
-  float spiralDepthBelowGroundMM()
-  {
-    return _linearAxis.getDepthMM() + carriageTopToSpiralTipMM - linAxisZeroToSensorMM - _heightSensor.getDistanceMM();
-  }
 
   static constexpr float spiralLead = 80.0; //millimeters per revolution of the spiral. Currently Unused.
 };

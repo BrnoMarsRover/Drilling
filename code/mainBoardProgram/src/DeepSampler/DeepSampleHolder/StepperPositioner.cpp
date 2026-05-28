@@ -97,7 +97,7 @@ void StepperPositioner::update() {
         Serial.print(F("[STORAGE] Dojeto. Aktualni uhel: "));
         Serial.print(_lastAngle);
         Serial.print(F("°  (slot "));
-        Serial.print(getCurrentSlot());
+        Serial.print((uint8_t)getCurrentSlot());
         Serial.println(F(")"));
         _applyHoldState();
         return;
@@ -151,17 +151,17 @@ void StepperPositioner::update() {
 // ---------------------------------------------------------------
 //  moveToSlot()
 // ---------------------------------------------------------------
-bool StepperPositioner::moveToSlot(uint8_t slot) {
-    if (slot < 1 || slot > NUM_POSITIONS) {
-        Serial.print(F("[STORAGE] Neplatny slot: "));
-        Serial.println(slot);
+bool StepperPositioner::moveToSlot(StoragePosition position) {
+    uint8_t idx = (uint8_t)position;
+    if (idx >= NUM_POSITIONS) {
+        Serial.print(F("[STORAGE] Neplatna pozice: "));
+        Serial.println(idx);
         return false;
     }
 
-    uint16_t angle = POSITIONS[slot - 1];
-
-    Serial.print(F("[STORAGE] Slot "));
-    Serial.print(slot);
+    uint16_t angle = POSITIONS[idx];
+    Serial.print(F("[STORAGE] Pozice "));
+    Serial.print(idx);
     Serial.print(F(" -> "));
     Serial.print(angle);
     Serial.println(F("°"));
@@ -286,9 +286,9 @@ int16_t StepperPositioner::getCurrentAngle() const {
 // ---------------------------------------------------------------
 //  getCurrentSlot() – nejbližší slot
 // ---------------------------------------------------------------
-uint8_t StepperPositioner::getCurrentSlot() const {
+StepperPositioner::StoragePosition StepperPositioner::getCurrentSlot() const {
     uint16_t angle = getCurrentAngle();
-    uint8_t nearestSlot = 1;
+    uint8_t nearestIdx = 0;
     uint16_t lastError = 360;
 
     for (uint8_t i = 0; i < NUM_POSITIONS; i++) {
@@ -297,15 +297,15 @@ uint8_t StepperPositioner::getCurrentSlot() const {
 
         if (abs(err) < lastError) {
             lastError = abs(err);
-            nearestSlot = i + 1;
+            nearestIdx = i;
         }
     }
 
     if (lastError > SLOT_TOLERANCE) {
-        return 9;
+        return StoragePosition::Unknown;
     }
 
-    return nearestSlot;
+    return (StoragePosition)nearestIdx;;
 }
 
 // ---------------------------------------------------------------
@@ -339,7 +339,7 @@ void StepperPositioner::printStatus(Stream& out) const {
     out.print(F("Fatal error    : ")); out.println(_fatalError  ? F("ANO") : F("NE"));
     out.print(F("Pohyb          : ")); out.println(_moving       ? F("ANO") : F("NE"));
     out.print(F("Aktualni uhel  : ")); out.print(getCurrentAngle()); out.println(F("°"));
-    out.print(F("Aktualni slot  : ")); out.println(getCurrentSlot());
+    out.print(F("Aktualni slot  : ")); out.println((uint8_t)getCurrentSlot());
     out.print(F("Cilovy uhel    : ")); out.print(_targetAngle);   out.println(F("°"));
     out.print(F("Steps/rev      : ")); out.println(_stepsPerRevolution);
     if (_stepper) {
@@ -365,7 +365,7 @@ void StepperPositioner::_applyHoldState() {
 
     if (_holdMode) {
         // Plný hold proud – motor drží polohu, nelze otočit rukou
-        _driver->ihold(20);          // 0..31, max hold proud
+        _driver->ihold(15);          // 0..31, max hold proud
         _stepper->setAutoEnable(false);
         digitalWrite(_enPin, LOW);   // EN active-low = motor zapnutý
     } else {

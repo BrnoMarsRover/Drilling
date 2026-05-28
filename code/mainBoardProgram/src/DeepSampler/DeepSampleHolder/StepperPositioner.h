@@ -16,6 +16,15 @@
 
 class StepperPositioner {
 public:
+    // Pozice zásobníku
+    enum class StoragePosition : uint8_t {
+        Home   = 0,
+        First  = 1,
+        Second = 2,
+        Third  = 3,
+        Unknown = 4
+    };
+    
     // Piny: STEP, DIR, EN, TMC2209 RX, TMC2209 TX, SDA, SCL
     // uartPort: 1 nebo 2 (HardwareSerial na ESP32)
     StepperPositioner(uint8_t stepPin,
@@ -36,7 +45,7 @@ public:
     void update();
 
     // Otočit na slot 1..numSlots
-    bool moveToSlot(uint8_t slot);
+    bool moveToSlot(StoragePosition position);
 
     // Přímé zadání úhlu 0..359°
     bool moveToAngle(int16_t angleDeg);
@@ -63,13 +72,12 @@ public:
     bool    isInitialized() const { return _initialized; }
     int16_t     getCurrentAngle()  const;
     uint16_t     getTargetAngle()   const { return _targetAngle; }
-    uint8_t getCurrentSlot()   const;   // nejbližší slot k aktuální pozici
+    StoragePosition getCurrentSlot()   const;   // nejbližší slot k aktuální pozici
     int32_t getZeroOffset() const;
     float getZeroOffsetDegrees() const;
     void setZeroOffset(int32_t offsetCounts);
     void setZeroOffsetDegrees(float offsetDegrees);
     void printStatus(Stream& out) const;
-
 
 private:
     // interní pohyb (bez resetu retry)
