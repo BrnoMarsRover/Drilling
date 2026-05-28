@@ -64,7 +64,6 @@ void DrillController::update()
 
     case AutoState::WAITING_FOR_HEIGHT:
     {
-      _debugSerial.println("drillAuto waitingForheight");
       if(_heightSensor.dataReady())
       {
         if(spiralDepthBelowGroundMM() > -20.0)
