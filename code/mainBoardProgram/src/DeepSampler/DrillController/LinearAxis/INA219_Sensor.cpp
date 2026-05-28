@@ -179,6 +179,9 @@ float INA219_Sensor::getRShunt()          const { return _rShunt; }
 // Neblokující průměrované měření
 // ---------------------------------------------------------------------------
 bool INA219_Sensor::startMeasure() {
+    if (!_initialized) return false;
+    _lastUpdateMs      = 0;       // vynutí první měření okamžitě
+    _measuring         = true;
     _filterInitialized = false;
     return true;
 }
@@ -197,8 +200,14 @@ float INA219_Sensor::getAveragedCurrentMA() {
 
 void INA219_Sensor::update()
 {
-    if (!_initialized) return;
+    if (!_initialized || !_measuring) return;
+   
+    uint32_t now = millis();
+    if (now - _lastUpdateMs < _intervalMs) return;   // ještě není čas
+
     if (!isConversionReady()) return;
+
+    _lastUpdateMs = now;
 
     int16_t raw = (int16_t)readRegister(REG_CURRENT);
     float sample = raw * _currentLSB;
