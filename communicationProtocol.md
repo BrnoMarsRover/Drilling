@@ -59,7 +59,7 @@ Drill: 0x02 (start) -> 0x01 (length 5) -> 0x42 (Weight request received. Weight 
 STATE response table
 | Variable meaning | Data type | Unit |
 |-                 |-          |-     |
-| Carriage depth - current distance of the carriage from uppermost position. It is possible to calculate other heights:<br>Depth under surface = CarriageDepth + carriageTopToSpiralTipMM - linAxisZeroToSensorMM - heightAboveGround (the sensor value).<br>Depth under rover = CarriageDepth + carriageTopToSpiralTipMM - linAxisZeroToSensorMM<br>Where carriageTopToSpiralTipMM = 720<br>linAxisZeroToSensorMM = 775   | int16 | mm |
+| Carriage depth - current distance of the carriage from uppermost position.<br>It is possible to calculate other distances:<br>Depth under surface = CarriageDepth + carriageTopToSpiralTipMM - linAxisZeroToSensorMM - heightAboveGround (the sensor value).<br>Depth under rover = CarriageDepth + carriageTopToSpiralTipMM - linAxisZeroToSensorMM<br>Where carriageTopToSpiralTipMM = 720<br>linAxisZeroToSensorMM = 775   | int16 | mm |
 | Vertical drive speed | int8 | 0,1 mm/s (10 = 1 mm/s) |
 | Vertical drive stepper current | uint8 | 0,01 A (100 = 1 A) |
 | Spiral motor speed | int16 | RPM |
