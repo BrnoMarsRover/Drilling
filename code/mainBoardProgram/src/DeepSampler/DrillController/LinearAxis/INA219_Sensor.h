@@ -120,7 +120,7 @@ public:
     // Stav a info
     // -----------------------------------------------------------------------
 
-    bool    isConnected();
+    bool    isConnected() const;
     uint8_t getAddress() const;
 
     // Vrací true pokud je nastaven Math Overflow Flag
@@ -154,10 +154,10 @@ public:
     bool dataReady();
 
     // Vrací zprůměrovaný proud [A] z posledního dokončeného měření.
-    float getAveragedCurrentA();
+    float getAveragedCurrentA() const;
 
     // Vrací zprůměrovaný proud [mA] z posledního dokončeného měření.
-    float getAveragedCurrentMA();
+    float getAveragedCurrentMA() const;
 
     // Volat periodicky ve smyčce – bez blokování načte vzorek,
     // jakmile INA219 hlásí dokončenou konverzi.

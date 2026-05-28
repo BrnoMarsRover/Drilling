@@ -148,7 +148,7 @@ float INA219_Sensor::readPowerMW() {
 // ---------------------------------------------------------------------------
 // Stav a info
 // ---------------------------------------------------------------------------
-bool INA219_Sensor::isConnected() {
+bool INA219_Sensor::isConnected() const {
     _wire->beginTransmission(_address);
     return (_wire->endTransmission() == 0);
 }
@@ -190,11 +190,11 @@ bool INA219_Sensor::dataReady() {
     return _filterInitialized;
 }
 
-float INA219_Sensor::getAveragedCurrentA() {
+float INA219_Sensor::getAveragedCurrentA() const {
     return _filteredCurrentA;
 }
 
-float INA219_Sensor::getAveragedCurrentMA() {
+float INA219_Sensor::getAveragedCurrentMA() const {
     return _filteredCurrentA * 1000.0f;
 }
 

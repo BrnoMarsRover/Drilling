@@ -232,6 +232,7 @@ bool DeepSampler::setCarriageSpeedMMps(float MMps)
 float DeepSampler::getCarriageSpeedMMps() const { return _drillController.getCarriageSpeedMMps(); }
 float DeepSampler::getCarriageDepthMM() const { return _drillController.getCarriageDepthMM(); }
 float DeepSampler::getVerticalStepperCurrentA() const { return _drillController.getVerticalStepperCurrentA(); }
+bool DeepSampler::currentSensorIsConnected() const {return _drillController.currentSensorIsConnected(); }
 
 // Low level spiral motor control
 bool DeepSampler::setSpiralRPM(float rpm) { return _drillController.setSpiralRPM(rpm); }

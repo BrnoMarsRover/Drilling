@@ -78,6 +78,7 @@ public:
     float getSpeedMMps() const;
 
     float getStepperCurrentA() const;
+    bool currentSensorIsConnected() const;
 
 private:
     enum MotionState : int8_t {

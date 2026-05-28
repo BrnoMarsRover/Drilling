@@ -40,6 +40,7 @@ public:
   float getCarriageSpeedMMps() const;
   float getCarriageDepthMM() const;
   float getVerticalStepperCurrentA() const;
+  bool currentSensorIsConnected() const;
 
   // Low level spiral motor control
   bool setSpiralRPM(float rpm);

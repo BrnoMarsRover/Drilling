@@ -271,33 +271,20 @@ float LinearAxis::getSpeedMMps() const {
     return ((float)_speedHz * _mmPerRevolution) / (float)_stepsPerRevolution;
 }
 
-float LinearAxis::getStepperCurrentA() const {
-    return _currentSensor.getAveragedCurrentA();
-}
+float LinearAxis::getStepperCurrentA() const { return _currentSensor.getAveragedCurrentA(); }
+bool LinearAxis::currentSensorIsConnected() const {return _currentSensor.isConnected(); }
 
-bool LinearAxis::isMoving() const {
-    return _motionState != Stop;
-}
+bool LinearAxis::isMoving() const { return _motionState != Stop; }
 
-bool LinearAxis::isMovingUp() const {
-    return _motionState == Up;
-}
+bool LinearAxis::isMovingUp() const { return _motionState == Up; }
 
-bool LinearAxis::isMovingDown() const {
-    return _motionState == Down;
-}
+bool LinearAxis::isMovingDown() const { return _motionState == Down; }
 
-bool LinearAxis::isStopped() const {
-    return _motionState == Stop;
-}
+bool LinearAxis::isStopped() const { return _motionState == Stop; }
 
-bool LinearAxis::isTopLimitPressed() const {
-    return digitalRead(_limitTopPin) == LOW;
-}
+bool LinearAxis::isTopLimitPressed() const { return digitalRead(_limitTopPin) == LOW; }
 
-bool LinearAxis::isBottomLimitPressed() const {
-    return digitalRead(_limitBottomPin) == LOW;
-}
+bool LinearAxis::isBottomLimitPressed() const { return digitalRead(_limitBottomPin) == LOW; }
 
 int32_t LinearAxis::getStepperPosition() const {
     if (_stepper == nullptr) return 0;
@@ -309,26 +296,18 @@ float LinearAxis::getDepthMM() const {
     return _encoder->getRevolutions() * _mmPerRevolution;
 }
 
-uint32_t LinearAxis::getSpeedHz() const {
-    return _speedHz;
-}
+uint32_t LinearAxis::getSpeedHz() const { return _speedHz; }
 
-uint32_t LinearAxis::getAccelerationHz() const {
-    return _accelHz;
-}
+uint32_t LinearAxis::getAccelerationHz() const { return _accelHz; }
 
-bool LinearAxis::hasFatalError() const {
-    return _fatalError;
-}
+bool LinearAxis::hasFatalError() const { return _fatalError; }
 
 uint16_t LinearAxis::getLoad() const {
     if (_driver == nullptr) return 0;
     return _driver->sg_result();
 }
 
-float LinearAxis::getFilteredLoad() const {
-    return _loadFiltered;
-}
+float LinearAxis::getFilteredLoad() const { return _loadFiltered; }
 
 void LinearAxis::updateLoadFilter(uint16_t raw) {
     _loadUnfiltered = raw;

@@ -165,6 +165,8 @@ float DrillController::getCarriageDepthMM() const { return _linearAxis.getDepthM
 
 float DrillController::getVerticalStepperCurrentA() const { return _linearAxis.getStepperCurrentA(); }
 
+bool DrillController::currentSensorIsConnected() const {return _linearAxis.currentSensorIsConnected(); }
+
 bool DrillController::setSpiralRPM(float rpm)
 {
   if (_autoState == AutoState::MANUAL)

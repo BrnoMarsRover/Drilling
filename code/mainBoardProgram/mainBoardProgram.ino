@@ -185,7 +185,7 @@ void respondToMsg(const RoverMessage& msg)
       roverComm.sendDeviceStatus(
         deepSampler.verticalStepperConnected(), //vertStepper
         deepSampler.verticalEncoderConnected(), //vertEncoder
-        false, //vertCurrentSensor
+        deepSampler.currentSensorIsConnected(),
         deepSampler.spiralMotorConnected(), //spiralMotor
         deepSampler.heightSensorConnected(), //heightSensor
         false, //deepSampleStepper
