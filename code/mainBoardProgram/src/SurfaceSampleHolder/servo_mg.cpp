@@ -9,7 +9,7 @@ SERVO_MG::SERVO_MG(int pin)
 
 bool SERVO_MG::begin() {
   _servo.setPeriodHertz(50);
-  _servo.attach(_pin, 1000, 2000);
+  _servo.attach(_pin, 500, 2500);
   _servo.write(_currentPos);
   return true;
 }

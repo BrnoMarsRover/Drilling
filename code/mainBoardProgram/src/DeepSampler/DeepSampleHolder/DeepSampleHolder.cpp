@@ -45,12 +45,14 @@ void DeepSampleHolder::update(){
           _autoState = AutoState::ERROR;
         }
       }
+      break;
     }
     case AutoState::WEIGHING:
     {
       if (getResultReady()) {
         _autoState = AutoState::DONE;
       }
+      break;
     }
     case AutoState::DONE:
     {

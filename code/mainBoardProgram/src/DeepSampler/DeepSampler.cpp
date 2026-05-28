@@ -41,7 +41,7 @@ void DeepSampler::update()
       _debugSerial.println("auto waitingForClear");
       if(!_deepSampleHolder.storageIsMoving())
       {
-        if(_deepSampleHolder.storageGetCurrentSlot() == 1)
+        if(_deepSampleHolder.storageGetCurrentSlot() == 1) // && horní koncák sepnutý
         {
           if(_drillController.autoDrillToDepth(2, 60, _targetDepthMM ) )
           {

@@ -22,7 +22,7 @@ private:
  
     static const uint8_t CLOSED_ANGLE  = 0;
     static const uint8_t OPEN_ANGLE    = 180;
-    static const uint8_t STEP_DELAY_MS = 2;
+    static const uint8_t STEP_DELAY_MS = 1;
  
     Servo _servo;
 };

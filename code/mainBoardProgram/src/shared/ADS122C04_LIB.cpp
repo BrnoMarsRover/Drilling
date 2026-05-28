@@ -384,8 +384,8 @@ void ADS122C04::_adcTask(void *pvParameters) {
     }
 }
 
-bool ADS122C04::get_result_ready(void) { // get_result_ready to be added
-    xSemaphoreTake(_mutex, portMAX_DELAY); // this->_mutex not needed due to the fnc being implicit "self"
+bool ADS122C04::get_result_ready(void) {
+    xSemaphoreTake(_mutex, portMAX_DELAY);
     bool r = _result_ready;
     xSemaphoreGive(_mutex);
     return r;
