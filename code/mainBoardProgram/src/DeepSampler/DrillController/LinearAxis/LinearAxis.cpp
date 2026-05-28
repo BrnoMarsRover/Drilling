@@ -73,8 +73,12 @@ bool LinearAxis::begin(uint16_t rmsCurrent, uint16_t microsteps) {
         _stepsPerRevolution = 200U * microsteps;
     }
 
-    _currentSensor.begin();
-
+    if (!_currentSensor.begin()) {
+        Serial.println(F("[LINEAR] CHYBA: INA219 nenalezen"));
+    } else {
+        Serial.println(F("[LINEAR] INA219 OK"));
+        _currentSensor.startMeasure();
+    }
     _initialized = true;
     return !_fatalError;
 }
