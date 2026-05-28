@@ -345,6 +345,32 @@ void respondToMsg(const RoverMessage& msg)
         roverComm.sendNack();
       break;
     }
+
+    case SET_HOLD_MODE:
+    {
+      if(deepSampler.storageSetHoldMode(true))
+      {
+        roverComm.sendAck(SET_HOLD_MODE);
+      }
+      else
+      {
+        roverComm.sendNack();
+      }
+      break;
+    }
+
+    CLEAR_HOLD_MODE:
+    {
+      if(deepSampler.storageSetHoldMode(false))
+      {
+        roverComm.sendAck(CLEAR_HOLD_MODE);
+      }
+      else
+      {
+        roverComm.sendNack();
+      }
+      break;
+    }
   }
 }
 

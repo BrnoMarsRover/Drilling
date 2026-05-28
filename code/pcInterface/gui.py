@@ -96,6 +96,8 @@ class App(tk.Tk):
 
         labels = [
             ("Carriage depth",         "carriage_depth_var",  "mm"),
+            ("Depth under rover",      "depth_under_rover_var","mm"),
+            ("Depth under surface",    "depth_under_surface_var","mm"),
             ("Vertical speed (actual)","vert_speed_actual_var","mm/s"),
             ("Stepper current",        "current_var",         "A"),
             ("Motor speed",            "rpm_var",             "RPM"),
@@ -210,6 +212,8 @@ class App(tk.Tk):
             ("Rock box — close",     self._rock_close),
             ("Sand box — open",      self._sand_open),
             ("Sand box — close",     self._sand_close),
+            ("Storage — set hold",   self._set_hold_mode),
+            ("Storage — clear hold", self._clear_hold_mode),
         ]
         for i, (label, cmd) in enumerate(buttons):
             ttk.Button(frame, text=label, command=cmd).grid(
@@ -293,6 +297,31 @@ class App(tk.Tk):
         self.log_text.config(state="disabled")
 
     # ------------------------------------------------------------------ #
+    #  Computed depth helpers                                              #
+    # ------------------------------------------------------------------ #
+
+    # Constants from protocol spec (mm)
+    _CARRIAGE_TOP_TO_SPIRAL_TIP_MM = 720
+    _LIN_AXIS_ZERO_TO_SENSOR_MM    = 775
+
+    # Last known values — None until first data arrives
+    _last_carriage_depth_mm      = None
+    _last_height_above_ground_mm = None
+
+    def _update_computed_depths(self):
+        if self._last_carriage_depth_mm is None:
+            return
+
+        offset = self._last_carriage_depth_mm + self._CARRIAGE_TOP_TO_SPIRAL_TIP_MM - self._LIN_AXIS_ZERO_TO_SENSOR_MM
+        self.depth_under_rover_var.set(str(offset))
+
+        if self._last_height_above_ground_mm is not None:
+            under_surface = offset - self._last_height_above_ground_mm
+            self.depth_under_surface_var.set(str(under_surface))
+        else:
+            self.depth_under_surface_var.set("— (no height reading)")
+
+    # ------------------------------------------------------------------ #
     #  Polling loops                                                       #
     # ------------------------------------------------------------------ #
 
@@ -327,7 +356,9 @@ class App(tk.Tk):
 
         if code == protocol.CMD_STATE and "state" in msg:
             s = msg["state"]
+            self._last_carriage_depth_mm = s["height_mm"]
             self.carriage_depth_var.set(str(s["height_mm"]))
+            self._update_computed_depths()
             self.vert_speed_actual_var.set(f"{s['vert_speed']:.1f}")
             self.current_var.set(f"{s['current_a']:.2f}")
             self.rpm_var.set(str(s["rpm"]))
@@ -336,7 +367,9 @@ class App(tk.Tk):
             self.sw_state_var.set(s["sw_state_str"])
 
         elif code == protocol.CMD_GET_HEIGHT and "height_mm" in msg:
+            self._last_height_above_ground_mm = msg["height_mm"]
             self.height_above_ground_var.set(str(msg["height_mm"]))
+            self._update_computed_depths()
             self._log(f"Height above ground: {msg['height_mm']} mm")
 
         elif code == protocol.CMD_GET_WEIGHT_DEEP and "weight" in msg:
@@ -456,6 +489,12 @@ class App(tk.Tk):
             self._send(protocol.cmd_calibrate_x_surface(weight), f"CALIBRATE X SURFACE ({weight} g)")
         except ValueError:
             self._log("Invalid calibration weight.")
+
+    def _set_hold_mode(self):
+        self._send(protocol.cmd_set_hold_mode(), "SET HOLD MODE")
+
+    def _clear_hold_mode(self):
+        self._send(protocol.cmd_clear_hold_mode(), "CLEAR HOLD MODE")
 
     def _rock_open(self):
         self._send(protocol.cmd_rock_open(), "ROCK OPEN")

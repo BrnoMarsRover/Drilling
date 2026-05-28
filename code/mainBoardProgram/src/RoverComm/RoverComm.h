@@ -39,6 +39,8 @@ enum RoverCommand : uint8_t
     CMD_ROCK_CLOSE        = 0x51,
     CMD_SAND_OPEN         = 0x52,
     CMD_SAND_CLOSE        = 0x53,
+    SET_HOLD_MODE         = 0x54,
+    CLEAR_HOLD_MODE       =	0x55
 };
 
 // ------------------------------------------------------------------ //
