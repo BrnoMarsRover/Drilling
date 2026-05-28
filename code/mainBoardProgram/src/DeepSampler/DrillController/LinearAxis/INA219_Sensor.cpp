@@ -191,6 +191,8 @@ bool INA219_Sensor::dataReady() {
 }
 
 float INA219_Sensor::getAveragedCurrentA() const {
+    //Serial0.println(_lastCurrentA);
+    //Serial0.println(_filteredCurrentA);
     return _filteredCurrentA;
 }
 

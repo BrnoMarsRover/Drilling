@@ -120,7 +120,7 @@ public:
     void sendFloat(RoverCommand cmd, float value);
 
     // Send the full STATE response
-    void sendState(float carriageDepthMM, float carriageSpeedMMps, float stepperCurrent, float rpm, float tempC, uint16_t trayAngle, DrillState swState);
+    void sendState(float carriageDepthMM, float carriageSpeedMMps, float stepperCurrentA, float rpm, float tempC, uint16_t trayAngle, DrillState swState);
 
     void sendDeviceStatus(bool vertStepper, bool vertEncoder, bool vertCurrentSensor, bool spiralMotor, bool heightSensor, bool deepSampleStepper, bool deepSampleEncoder, bool deepSampleADC, bool surfaceSampleADC);
 
