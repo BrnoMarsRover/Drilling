@@ -43,7 +43,7 @@ public:
     // nastavení pohybu
     void setSpeed(uint32_t speedHz);
     void setAcceleration(uint32_t accelHz);
-    void changeSpeedRelative(int32_t deltaHz);
+
 
     // stav
     bool isMoving() const;
@@ -56,10 +56,6 @@ public:
 
     int32_t getStepperPosition() const;
     float getDepthMM() const;
-    float getDepthCM() const;
-    float getDepthM() const;
-    void printDepth(Stream& out) const;
-    void setDepthPrintEnabled(bool enabled);
 
     uint32_t getSpeedHz() const;
     uint32_t getAccelerationHz() const;
@@ -79,11 +75,6 @@ public:
 
     bool setSpeedMMps(float mmPerSec);
     float getSpeedMMps() const;
-    void printSpeed(Stream& out) const;
-    void setSpeedPrintEnabled(bool enabled);
-
-    void setSpeedMps(float mPerSec);
-    float getSpeedMps() const;
 
 private:
     enum MotionState : int8_t {
@@ -124,15 +115,9 @@ private:
     bool _initialized = false;
     bool _fatalError = false;
     bool _loadPrintEnabled = false;
-    bool _speedPrintEnabled = false;
-    bool _heightPrintEnabled = false;
 
     uint32_t _loadPrintIntervalMs = 0;
-    uint32_t _speedPrintIntervalMs = 300;
-    uint32_t _heightPrintIntervalMs = 300;
     uint32_t _lastLoadPrintMs = 0;
-    uint32_t _lastSpeedPrintMs = 0;
-    uint32_t _lastHeightPrintMs = 0;
 
     long _stepCompareThresholdDeg = 90;
     bool _stepComparePrintEnabled = false;

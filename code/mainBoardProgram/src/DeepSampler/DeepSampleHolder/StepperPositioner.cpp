@@ -75,7 +75,7 @@ bool StepperPositioner::begin(uint16_t rmsCurrent, uint16_t microsteps) {
     setZeroOffsetDegrees(290); // konstanta podle natočení magentu vůči senzoru -> zaručí úhel nula na uprostřed pod roverem
 
     _initialized = true;
-    Serial.print(F("[STORAGE] Inicializovano"));
+    Serial.println(F("[STORAGE] Inicializovano"));
     return true;
 }
 

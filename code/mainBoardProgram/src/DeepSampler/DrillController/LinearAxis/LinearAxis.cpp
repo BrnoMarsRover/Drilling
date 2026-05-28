@@ -146,24 +146,6 @@ void LinearAxis::update() {
         }
     }
 
-    if (_heightPrintEnabled) {
-        uint32_t now = millis();
-        if (now - _lastHeightPrintMs >= _heightPrintIntervalMs) {
-            _lastHeightPrintMs = now;
-            printDepth(Serial);
-        }
-    }
-
-    if (_speedPrintEnabled) {
-        uint32_t now = millis();
-        if (now - _lastSpeedPrintMs >= _speedPrintIntervalMs) {
-            _lastSpeedPrintMs = now;
-            printSpeed(Serial);
-        }
-    }
-
-
-
     if (isMoving()) {
         long angleSteps = getAngleFromSteps();
         long angleEncoder = getAngleFromEncoder();
@@ -203,13 +185,19 @@ void LinearAxis::moveDown() {
 }
 
 void LinearAxis::stop() {
+
+    if (_stepper != nullptr && !_stepper->isRunning()) {
+        _motionState = Stop;
+        _speedHz = 0;
+        return;
+    }
+
     _motionState = Stop;
 
     if (_stepper != nullptr) {
         _stepper->forceStop();
         _speedHz = 0;
     }
-
     Serial.println(F("[LINEAR] Motor zastaven"));
 }
 
@@ -245,16 +233,15 @@ void LinearAxis::setAcceleration(uint32_t accelHz) {
     }
 }
 
-void LinearAxis::changeSpeedRelative(int32_t deltaHz) {
-    int32_t newSpeed = (int32_t)_speedHz + deltaHz;
-    if (newSpeed < 1) newSpeed = 1;
-    setSpeed((uint32_t)newSpeed);
-}
-
 bool LinearAxis::setSpeedMMps(float mmPerSec) {
     //if (mmPerSec <= 0.0f) mmPerSec = 0.1f;
 
     float stepsPerSec = abs(mmPerSec) * ((float)_stepsPerRevolution / _mmPerRevolution);
+      
+    Serial.print("[DBG] setSpeedMMps="); Serial.print(mmPerSec);
+    Serial.print(" stepsPerSec="); Serial.print(stepsPerSec);
+    Serial.print(" _speedHz pred="); Serial.println(_speedHz);
+
 
     setSpeed((uint32_t)stepsPerSec);
 
@@ -278,14 +265,6 @@ float LinearAxis::getSpeedMMps() const {
     if (_stepsPerRevolution == 0) return 0.0f;
 
     return ((float)_speedHz * _mmPerRevolution) / (float)_stepsPerRevolution;
-}
-
-void LinearAxis::setSpeedMps(float mPerSec) {
-    setSpeedMMps(mPerSec * 1000.0f);
-}
-
-float LinearAxis::getSpeedMps() const {
-    return getSpeedMMps() / 1000.0f;
 }
 
 bool LinearAxis::isMoving() const {
@@ -319,15 +298,7 @@ int32_t LinearAxis::getStepperPosition() const {
 
 float LinearAxis::getDepthMM() const {
     if (_encoder == nullptr) return 0.0f;
-    return _encoder->getLinearDistanceMM(_mmPerRevolution);
-}
-
-float LinearAxis::getDepthCM() const {
-    return getDepthMM() / 10.0f;
-}
-
-float LinearAxis::getDepthM() const {
-    return getDepthMM() / 1000.0f;
+    return _encoder->getRevolutions() * _mmPerRevolution;
 }
 
 uint32_t LinearAxis::getSpeedHz() const {
@@ -373,26 +344,6 @@ void LinearAxis::printLoad(Stream& out) const {
 void LinearAxis::setLoadPrintEnabled(bool enabled) {
     _loadPrintEnabled = enabled;
     _lastLoadPrintMs = millis();
-}
-
-void LinearAxis::printSpeed(Stream& out) const {
-    out.print(F("Rychlost (mm/s): "));
-    out.println(getSpeedMMps());
-}
-
-void LinearAxis::setSpeedPrintEnabled(bool enabled) {
-    _speedPrintEnabled = enabled;
-    _lastSpeedPrintMs = millis();
-}
-
-void LinearAxis::printDepth(Stream& out) const {
-    out.print(F("Vyska (mm): "));
-    out.println(getDepthMM());
-}
-
-void LinearAxis::setDepthPrintEnabled(bool enabled) {
-    _heightPrintEnabled = enabled;
-    _lastHeightPrintMs = millis();
 }
 
 long LinearAxis::getAngleFromSteps() const {
@@ -460,6 +411,9 @@ void LinearAxis::applyMotion() {
     _stepper->setAcceleration(_accelHz);
     _stepper->applySpeedAcceleration();
 
+    Serial.print("[DBG] applyMotion state="); Serial.print(_motionState);
+    Serial.print(" _speedHz="); Serial.println(_speedHz);
+
     if (_motionState == Up) {
         _stepper->runForward();
     } else if (_motionState == Down) {
@@ -467,6 +421,11 @@ void LinearAxis::applyMotion() {
     } else {
         _stepper->stopMove();
     }
+
+    // debug - přidej výpis návratové hodnoty
+    Serial.print("[DBG] runBackward/Forward zavolano, isRunning=");
+    Serial.println(_stepper->isRunning());
+    
 }
 
 void LinearAxis::setMotionState(MotionState state) {

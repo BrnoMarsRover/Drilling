@@ -194,14 +194,3 @@ float AS5600L::getTotalAngleDegrees() const {
   return getRevolutions() * 360.0f;
 }
 
-float AS5600L::getLinearDistanceMM(float mmPerRevolution) const {
-  return getRevolutions() * mmPerRevolution;
-}
-
-float AS5600L::getLinearDistanceCM(float mmPerRevolution) const {
-  return getLinearDistanceMM(mmPerRevolution) / 10.0f;
-}
-
-float AS5600L::getLinearDistanceM(float mmPerRevolution) const {
-  return getLinearDistanceMM(mmPerRevolution) / 1000.0f;
-}

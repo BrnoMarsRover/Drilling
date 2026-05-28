@@ -39,11 +39,6 @@ public:
   float getRevolutions() const;           // otáčky včetně zlomku od setZero()
   float getTotalAngleDegrees() const;     // celkový úhel od setZero()
 
-  // Lineární převod
-  float getLinearDistanceMM(float mmPerRevolution) const;
-  float getLinearDistanceCM(float mmPerRevolution) const;
-  float getLinearDistanceM(float mmPerRevolution) const;
-
 private:
   static constexpr uint8_t REG_STATUS     = 0x0B;
   static constexpr uint8_t REG_RAW_ANGLE  = 0x0C;
