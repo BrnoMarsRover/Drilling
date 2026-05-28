@@ -49,7 +49,7 @@ public:
   bool setCalibration0();
   bool setCalibrationX(float);
 
-  bool storageMoveToSlot(uint8_t slot);
+  bool storageMoveToSlot(StepperPositioner::StoragePosition position);
   bool storageUnlock();
   bool storageSetHoldMode(bool hold);
   uint16_t storageGetCurrentAngle() const;
@@ -79,7 +79,7 @@ private:
 
   AutoState _autoState = AutoState::MANUAL;
   float _targetDepthMM;
-  uint8_t storeSlot = 2;
+  StepperPositioner::StoragePosition storeSlot = StepperPositioner::StoragePosition::Second;
 
   uint32_t _storingStartTimeMS = 0;
   static constexpr uint32_t _storingDurationMS = 5000;

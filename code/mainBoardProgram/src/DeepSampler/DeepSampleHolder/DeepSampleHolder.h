@@ -44,13 +44,13 @@ public:
   bool setCalibrationX(float);
 
   bool storageMoveToAngle(int angleDeg);
-  bool storageMoveToSlot(uint8_t slot);
+  bool storageMoveToSlot(StepperPositioner::StoragePosition);
   bool storageUnlock();
   bool storageSetHoldMode(bool hold);
   bool storageIsHoldMode() const { return _stepperPositioner.isHoldMode(); }
   bool storageIsBlocked() const { return _stepperPositioner.hasFatalError(); }
   int16_t storageGetCurrentAngle()  const;
-  uint8_t storageGetCurrentSlot() const;
+  StepperPositioner::StoragePosition storageGetCurrentSlot() const;
   bool storageIsMoving() const {return _stepperPositioner.isMoving(); }
 
 private:

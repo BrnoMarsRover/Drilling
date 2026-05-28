@@ -41,7 +41,7 @@ void DeepSampler::update()
       _debugSerial.println("auto waitingForClear");
       if(!_deepSampleHolder.storageIsMoving())
       {
-        if(_deepSampleHolder.storageGetCurrentSlot() == 1) // && horní koncák sepnutý
+        if (_deepSampleHolder.storageGetCurrentSlot() == StepperPositioner::StoragePosition::Home)
         {
           if(_drillController.autoDrillToDepth(2, 60, _targetDepthMM ) )
           {
@@ -56,8 +56,7 @@ void DeepSampler::update()
         else
         {
           _debugSerial.println("auto notCleared");
-          _debugSerial.println(_deepSampleHolder.storageGetCurrentSlot());
-          _autoState = AutoState::ERROR;
+          _debugSerial.println((uint8_t)_deepSampleHolder.storageGetCurrentSlot());          _autoState = AutoState::ERROR;
         }
       }
       break;
@@ -226,7 +225,7 @@ bool DeepSampler::autoSampleAndWeigh(float targetDepthMM)
 {
   if(_autoState == AutoState::MANUAL)
   {
-    if(_deepSampleHolder.storageMoveToSlot(1))
+    if(_deepSampleHolder.storageMoveToSlot(StepperPositioner::StoragePosition::Home))
     {
       _targetDepthMM = targetDepthMM;
       _autoState = AutoState::WAITING_FOR_STORAGE_CLEAR;
@@ -264,9 +263,9 @@ float DeepSampler::getLastTemp() { return _deepSampleHolder.getLastTemp(); }
 bool DeepSampler::requestMeasure() { return _deepSampleHolder.requestMeasure(); }
 bool DeepSampler::requestTemp() { return _deepSampleHolder.requestTemp(); }
 
-bool DeepSampler::storageMoveToSlot(uint8_t slot)
+bool DeepSampler::storageMoveToSlot(StepperPositioner::StoragePosition position)
 {
-  _deepSampleHolder.storageMoveToSlot(slot);
+  _deepSampleHolder.storageMoveToSlot(position);
   return true;
 }
 
