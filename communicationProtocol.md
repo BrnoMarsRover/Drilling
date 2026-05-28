@@ -53,11 +53,13 @@ Drill: 0x02 (start) -> 0x01 (length 5) -> 0x42 (Weight request received. Weight 
 | ROCK CLOSE - closes the rock sample box | 0x51 | None | None |
 | SAND OPEN - opens the sand sample box  | 0x52 | None | None |
 | SAND CLOSE - closes the sand sample box  | 0x53 | None | None |
+| SET HOLD MODE - sets hold mode on the deep storage - locks it in place, but continuously draws current. | 0x54 | None | None |
+| CLEAR HOLD MODE - clears hold mode on the deep storage. | 0x55 | None | None |
 
 STATE response table
 | Variable meaning | Data type | Unit |
 |-                 |-          |-     |
-| Current distance of the carriage from uppermost position | int16 | mm |
+| Carriage depth - current distance of the carriage from uppermost position. It is possible to calculate other heights:<br>Depth under surface = CarriageDepth + 720 - 775 - heightAboveGround.  | int16 | mm |
 | Vertical drive speed | int8 | 0,1 mm/s (10 = 1 mm/s) |
 | Vertical drive stepper current | uint8 | 0,01 A (100 = 1 A) |
 | Spiral motor speed | int16 | RPM |
