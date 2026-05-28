@@ -46,6 +46,8 @@ CMD_ROCK_OPEN          = 0x50
 CMD_ROCK_CLOSE         = 0x51
 CMD_SAND_OPEN          = 0x52
 CMD_SAND_CLOSE         = 0x53
+CMD_SET_HOLD_MODE      = 0x54
+CMD_CLEAR_HOLD_MODE    = 0x55
 
 # --- Software state codes ---
 STATE_CODES = {
@@ -152,6 +154,12 @@ def cmd_calibrate_0_surface():
 
 def cmd_calibrate_x_surface(weight_g: float):
     return build_command(CMD_CALIBRATE_X_SURFACE, struct.pack(">f", weight_g))
+
+def cmd_set_hold_mode():
+    return build_command(CMD_SET_HOLD_MODE)
+
+def cmd_clear_hold_mode():
+    return build_command(CMD_CLEAR_HOLD_MODE)
 
 def cmd_rock_open():
     return build_command(CMD_ROCK_OPEN)
