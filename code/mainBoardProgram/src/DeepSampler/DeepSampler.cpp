@@ -9,7 +9,7 @@ DeepSampler::DeepSampler(TwoWire& wire, HardwareSerial& debugSerial):
   _debugSerial(debugSerial),
   _stepperEngine(),
   _drillController(wire, debugSerial, _stepperEngine),
-  _deepSampleHolder(wire, _stepperEngine)
+  _deepSampleHolder(wire, debugSerial, _stepperEngine)
 {
   
 }
@@ -38,7 +38,6 @@ void DeepSampler::update()
 
     case AutoState::WAITING_FOR_STORAGE_CLEAR:
     {
-      _debugSerial.println("auto waitingForClear");
       if(!_deepSampleHolder.storageIsMoving())
       {
         if(_deepSampleHolder.storageGetCurrentSlot() == 1) // && horní koncák sepnutý
@@ -49,13 +48,11 @@ void DeepSampler::update()
           }
           else
           {
-            _debugSerial.println("auto failedToDrill");
             _autoState = AutoState::ERROR;
           }
         }
         else
         {
-          _debugSerial.println("auto notCleared");
           _debugSerial.println(_deepSampleHolder.storageGetCurrentSlot());
           _autoState = AutoState::ERROR;
         }
@@ -65,7 +62,6 @@ void DeepSampler::update()
     
     case AutoState::DRILLING:
     {
-      _debugSerial.println("auto drilling");
       if(_drillController.getAutoState() == DrillController::AutoState::DONE)
       {
         if(_drillController.getCarriageDepthMM() < 50.0)
@@ -93,7 +89,6 @@ void DeepSampler::update()
     
     case AutoState::MOVING_STORAGE:
     {
-      _debugSerial.println("auto movingStorage");
       if(!_deepSampleHolder.storageIsMoving())
       {
         if(_deepSampleHolder.storageGetCurrentSlot() == storeSlot)
@@ -125,7 +120,6 @@ void DeepSampler::update()
     
     case AutoState::MOVING_CARRIAGE_TO_STORE:
     {
-      _debugSerial.println("auto movingCarriageToStore");
       if(_drillController.getCarriageDepthMM() > 50.0)
       {
         if(_drillController.setCarriageSpeedMMps(0))
@@ -150,7 +144,6 @@ void DeepSampler::update()
     
     case AutoState::STORING:
     {
-      _debugSerial.println("auto storing");
       if(millis() > _storingStartTimeMS + _storingDurationMS)
       {
         if(_drillController.setSpiralRPM(0) && _deepSampleHolder.startAutoWeighing())
@@ -188,7 +181,6 @@ void DeepSampler::update()
     
     case AutoState::MOVING_UP:
     {
-      _debugSerial.println("auto movingUp");
       if(_drillController.getCarriageDepthMM() == 0.0)
       {
         _autoState = AutoState::DONE;

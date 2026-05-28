@@ -23,7 +23,7 @@ public:
     ERROR
   };
 
-  DeepSampleHolder(TwoWire& wire, FastAccelStepperEngine& stepperEngine);
+  DeepSampleHolder(TwoWire& wire, HardwareSerial& debugSerial, FastAccelStepperEngine& stepperEngine);
   bool begin();
 
   void update();
@@ -55,6 +55,7 @@ public:
 
 private:
   TwoWire& _wire;
+  HardwareSerial& _debugSerial;
 
   ADS122C04 _adcDeep;
   FastAccelStepperEngine& _stepperEngine;

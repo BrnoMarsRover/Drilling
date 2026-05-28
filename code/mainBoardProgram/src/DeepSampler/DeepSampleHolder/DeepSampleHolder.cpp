@@ -4,8 +4,9 @@
 //  Public                                                            //
 // ------------------------------------------------------------------ //
 
-DeepSampleHolder::DeepSampleHolder(TwoWire& wire, FastAccelStepperEngine& stepperEngine) :
+DeepSampleHolder::DeepSampleHolder(TwoWire& wire, HardwareSerial& debugSerial, FastAccelStepperEngine& stepperEngine) :
   _wire(wire),
+  _debugSerial(debugSerial),
   _stepperEngine(stepperEngine),
   _adcDeep(
     wire,
@@ -35,11 +36,15 @@ void DeepSampleHolder::update(){
     }
     case AutoState::STORAGE_MOVING:
     {
+      _debugSerial.println("storageMoving");
       if(!storageIsMoving()) {
         if (storageGetCurrentSlot() == 2) {
-          if(!requestMeasure()) {
+          if(requestMeasure()) {
+            _autoState = AutoState::WEIGHING;
+          }
+          else{
             _autoState = AutoState::ERROR;
-            }
+          }
         }
         else {
           _autoState = AutoState::ERROR;
@@ -49,6 +54,7 @@ void DeepSampleHolder::update(){
     }
     case AutoState::WEIGHING:
     {
+      _debugSerial.println("Weighing");
       if (getResultReady()) {
         _autoState = AutoState::DONE;
       }
@@ -56,16 +62,13 @@ void DeepSampleHolder::update(){
     }
     case AutoState::DONE:
     {
-
+      _debugSerial.println("Done");
     }
     case AutoState::ERROR:
     {
 
     }
   }
-  
-  
-
 }
 
 DeepSampleHolder::AutoState DeepSampleHolder::getAutoState(){
@@ -74,7 +77,7 @@ DeepSampleHolder::AutoState DeepSampleHolder::getAutoState(){
     return AutoState::DONE;
   }
   else{
-  return _autoState;
+    return _autoState;
   }
 }
 
@@ -131,8 +134,7 @@ uint8_t DeepSampleHolder::storageGetCurrentSlot() const {
 bool DeepSampleHolder::requestMeasure()
 {
   _adcDeep.request_measure();
-   _autoState = AutoState::WEIGHING;
-  return 1;
+  return true;
 }
 
 bool DeepSampleHolder::getResultReady()

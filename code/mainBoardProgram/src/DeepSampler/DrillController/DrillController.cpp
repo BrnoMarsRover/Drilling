@@ -90,8 +90,6 @@ void DrillController::update()
 
     case AutoState::MOVING_DOWN:
     {
-      _debugSerial.print("spiralDepth:");
-      _debugSerial.println(spiralDepthBelowGroundMM());
       if(spiralDepthBelowGroundMM() > -20.0)
       {
         if(_motorDriver.setRPM(_targetSpiralRPS*60))
@@ -108,7 +106,6 @@ void DrillController::update()
 
     case AutoState::DRILLING:
     {
-      _debugSerial.println("drillAuto Drilling");
       if(spiralDepthBelowGroundMM() > _targetDepthMM)
       {
         if(_linearAxis.setSpeedMMps(-10.0) && _motorDriver.setRPM(0.0))
@@ -132,7 +129,6 @@ void DrillController::update()
 
     case AutoState::MOVING_UP:
     {
-      _debugSerial.println("drillAuto MovingUp");
       if(_linearAxis.getDepthMM() == 0.0)
       {
         _autoState = AutoState::DONE;
@@ -142,13 +138,11 @@ void DrillController::update()
     
     case AutoState::DONE:
     {
-      _debugSerial.println("drillAuto done");
       break;
     }
     
     case AutoState::ERROR:
     {
-      _debugSerial.println("drillAuto error");
       break;
     }
   }

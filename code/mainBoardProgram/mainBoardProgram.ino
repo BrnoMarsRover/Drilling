@@ -359,7 +359,7 @@ void respondToMsg(const RoverMessage& msg)
       break;
     }
 
-    CLEAR_HOLD_MODE:
+    case CLEAR_HOLD_MODE:
     {
       if(deepSampler.storageSetHoldMode(false))
       {
