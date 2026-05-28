@@ -213,6 +213,8 @@ private:
     float _filteredCurrentA = 0.0f;
     float _alpha = 0.1f;
     bool  _filterInitialized = false;
+    uint32_t _intervalMs = 5;        // minimální interval mezi vzorky [ms]
+    uint32_t _lastUpdateMs;      // timestamp posledního vzorku
 };
 
 #endif // INA219_SENSOR_H
