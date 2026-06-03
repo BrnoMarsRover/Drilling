@@ -11,8 +11,11 @@ SurfaceSampleHolder::SurfaceSampleHolder(TwoWire& wire, HardwareSerial& debugSer
     wire,
     0x45  // address for surface sample weight
   ),
-  _servoRock(4),
-  _servoSand(15)
+  _servoRock(4, 
+    0,  // closed angle
+    180 // open angle
+    ),
+  _servoSand(15, 180, 0)
 {
 }
 void SurfaceSampleHolder::update()

@@ -4,7 +4,7 @@
  
 class SERVO_MG {
 public:
-    SERVO_MG(int pin);
+    SERVO_MG(int pin, uint8_t closed_ang, uint8_t open_ang);
  
     bool begin();
     bool openBox();
@@ -15,6 +15,8 @@ public:
  
 private:
     uint8_t _pin;
+    uint8_t _closed_ang;
+    uint8_t _open_ang;
     uint8_t _currentPos;
     uint8_t _targetPos;
     bool  _moving;

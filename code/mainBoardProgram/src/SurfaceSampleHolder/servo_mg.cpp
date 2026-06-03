@@ -1,7 +1,9 @@
 #include "SERVO_MG.h"
 
-SERVO_MG::SERVO_MG(int pin)
+SERVO_MG::SERVO_MG(int pin, uint8_t closed_ang, uint8_t open_ang)
   : _pin(pin),
+    _closed_ang(closed_ang),
+    _open_ang(open_ang),
     _currentPos(CLOSED_ANGLE),
     _targetPos(CLOSED_ANGLE),
     _lastStepTime(0)
