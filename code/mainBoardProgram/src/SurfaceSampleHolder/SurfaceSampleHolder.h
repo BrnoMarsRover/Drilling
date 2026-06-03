@@ -12,24 +12,19 @@ class SurfaceSampleHolder
 {
 public:
   SurfaceSampleHolder(TwoWire& wire, HardwareSerial& debugSerial);
-
-  //asi tady tak nějak?
+  bool begin();
+  void update();
+  
+  // -- Servo
   bool openRockBox();
   bool closeRockBox();
-  //void weighRock();
-  //float getRockWeight();
-
   bool openSandBox();
   bool closeSandBox();
-  //void weighSand();
-  //float getSandWeight();
 
-  void update();
   uint8_t getPosRock(); // useless?
   uint8_t getPosSand(); // useless?
-  // ADC
-  bool begin();
 
+  // -- ADC
   bool requestMeasure();
   bool requestTemp();
 

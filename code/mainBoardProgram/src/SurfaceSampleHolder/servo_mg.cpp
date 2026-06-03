@@ -4,8 +4,8 @@ SERVO_MG::SERVO_MG(int pin, uint8_t closed_ang, uint8_t open_ang)
   : _pin(pin),
     _closed_ang(closed_ang),
     _open_ang(open_ang),
-    _currentPos(CLOSED_ANGLE),
-    _targetPos(CLOSED_ANGLE),
+    _currentPos(closed_ang),
+    _targetPos(closed_ang),
     _lastStepTime(0)
 {}
 
@@ -17,11 +17,11 @@ bool SERVO_MG::begin() {
 }
 
 bool SERVO_MG::openBox() {
-  return setPos(OPEN_ANGLE);
+  return setPos(_open_ang);
 }
 
 bool SERVO_MG::closeBox() {
-  return setPos(CLOSED_ANGLE);
+  return setPos(_closed_ang);
 }
 
 bool SERVO_MG::setPos(uint8_t angle) {
