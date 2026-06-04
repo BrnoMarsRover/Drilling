@@ -7764,30 +7764,6 @@
 			)
 		)
 	)
-	(global_label "RST"
-		(shape input)
-		(at 308.61 68.58 180)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "12bd83e6-909f-4d2d-aee9-1df079c0504d")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 302.1777 68.58 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-	)
 	(global_label "RX0"
 		(shape input)
 		(at 143.51 127 180)
@@ -7873,30 +7849,6 @@
 		(uuid "255d4b1a-5695-4603-958c-2f97f6f8abce")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 217.17 173.4071 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-	)
-	(global_label "RST"
-		(shape input)
-		(at 360.68 68.58 180)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "29c7ce9e-04a9-4c02-ac85-31d7db528fc8")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 354.2477 68.58 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -10074,6 +10026,83 @@
 			(project "drill_pcb"
 				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313"
 					(reference "#PWR043")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:+3.3VP")
+		(at 360.68 68.58 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "2cec99c6-e806-46b8-8267-1e838a32b3ce")
+		(property "Reference" "#PWR045"
+			(at 361.95 64.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "+3.3VP"
+			(at 353.822 68.58 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 360.68 68.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 360.68 68.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"+3.3VP\""
+			(at 360.68 68.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "371b1739-e706-4c66-914a-6f090ea85344")
+		)
+		(instances
+			(project "drill_pcb"
+				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313"
+					(reference "#PWR045")
 					(unit 1)
 				)
 			)
@@ -12849,6 +12878,83 @@
 			(project "drill_pcb"
 				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313"
 					(reference "#PWR040")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:+3.3VP")
+		(at 308.61 68.58 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "7d585c4b-bb78-43d7-8664-a13586b5dc85")
+		(property "Reference" "#PWR044"
+			(at 309.88 64.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "+3.3VP"
+			(at 301.752 68.58 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 308.61 68.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 308.61 68.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"+3.3VP\""
+			(at 308.61 68.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "5b7943ec-eb39-45bb-b23c-69e7e2964780")
+		)
+		(instances
+			(project "drill_pcb"
+				(path "/bebf97b1-2f7f-4d03-a427-fe976f4b2313"
+					(reference "#PWR044")
 					(unit 1)
 				)
 			)

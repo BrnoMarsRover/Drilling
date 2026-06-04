@@ -646,7 +646,7 @@
 		(descr "JST XH series connector, B3B-XH-A (http://www.jst-mfg.com/product/pdf/eng/eXH.pdf), generated with kicad-footprint-generator")
 		(tags "connector JST XH vertical")
 		(property "Reference" "J13"
-			(at -1.7 4.9 0)
+			(at 9.11 -0.91 0)
 			(layer "F.SilkS")
 			(uuid "1f297d7e-f49b-4aa7-a9e3-200380703485")
 			(effects
@@ -656,8 +656,8 @@
 				)
 			)
 		)
-		(property "Value" "SERVO 1"
-			(at 4.5 4.9 0)
+		(property "Value" "SERVO ROCK"
+			(at 2.6 5.02 0)
 			(layer "F.SilkS")
 			(uuid "ce5bbf19-8961-4d71-a4c1-7d54dc96557d")
 			(effects
@@ -17651,7 +17651,7 @@
 		(descr "JST XH series connector, B3B-XH-A (http://www.jst-mfg.com/product/pdf/eng/eXH.pdf), generated with kicad-footprint-generator")
 		(tags "connector JST XH vertical")
 		(property "Reference" "J14"
-			(at -1.5 5.1 0)
+			(at 8.64 -0.79 0)
 			(layer "F.SilkS")
 			(uuid "95983f6e-c93f-4e19-bb49-82c6aea11b73")
 			(effects
@@ -17661,8 +17661,8 @@
 				)
 			)
 		)
-		(property "Value" "SERVO 2"
-			(at 4.9 5.1 0)
+		(property "Value" "SERVO SAND"
+			(at 2.6 4.98 0)
 			(layer "F.SilkS")
 			(uuid "23848552-cea5-484b-bfaf-14be46760fee")
 			(effects
