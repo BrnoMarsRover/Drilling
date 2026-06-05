@@ -1,18 +1,28 @@
 #include "SERVO_MG.h"
 
+SemaphoreHandle_t SERVO_MG::_servoMutex = nullptr;
+bool SERVO_MG::_mutexCreated = false;
+
 SERVO_MG::SERVO_MG(int pin, uint8_t closed_ang, uint8_t open_ang)
   : _pin(pin),
     _closed_ang(closed_ang),
     _open_ang(open_ang),
     _currentPos(closed_ang),
     _targetPos(closed_ang),
-    _lastStepTime(0)
+    _moving(false),
+    _taskHandle(nullptr)
 {}
 
 bool SERVO_MG::begin() {
+  if (!_mutexCreated) {
+    _servoMutex   = xSemaphoreCreateMutex();
+    _mutexCreated = true;
+  }
+
   _servo.setPeriodHertz(50);
   _servo.attach(_pin, 500, 2500);
   _servo.write(_currentPos);
+  _task_start();
   return true;
 }
 
@@ -28,7 +38,11 @@ bool SERVO_MG::setPos(uint8_t angle) {
   if (angle > 180) 
     angle = 180;
   if (angle != _currentPos) {
+    if (!_servo.attached()) {
+        _servo.attach(_pin, 500, 2500);  // re-acquire LEDC channel
+      }
     _targetPos = angle;
+    _moving = true;
   }
   return true;
 }
@@ -38,17 +52,54 @@ uint8_t SERVO_MG::getPos() {
 }
 
 void SERVO_MG::update() {
-  unsigned long now = millis();
-  if (now - _lastStepTime < STEP_DELAY_MS) return;
-  _lastStepTime = now;
+  if (!_moving) return;
 
   if (_currentPos < _targetPos) {
-      _currentPos++;
+    _currentPos++;
   } else if (_currentPos > _targetPos) {
-      _currentPos--;
+    _currentPos--;
   } else {
-      return;
+    _servo.detach();
+    _moving = false;
+    return;
   }
+ 
+  if (xSemaphoreTake(_servoMutex, pdMS_TO_TICKS(2))) {
+    _servo.write(_currentPos);
+    xSemaphoreGive(_servoMutex);
+  }
+}
 
-  _servo.write(_currentPos);
+void SERVO_MG::_task_start() {
+  char taskName[16];
+  snprintf(taskName, sizeof(taskName), "SERVO_pin:%d", _pin); // dynamic "SERVO_pin:14" OR "SERVO_pin:4"
+
+  xTaskCreatePinnedToCore(
+    _servoTask,               // fnc to run
+    taskName,               // old "ADC_Task" system name
+    3072,                   // stack size in bytes 4096
+    this,                   // pvParameters
+    1,                      // priority low
+    &_taskHandle,      // handle stored here not used now
+    0                       // loop() runs on core 1
+  );
+}
+
+void SERVO_MG::_servoTask(void* pvParameters) {
+  SERVO_MG* self = static_cast<SERVO_MG*>(pvParameters);
+  const TickType_t interval = pdMS_TO_TICKS(TICK_MS);
+  TickType_t lastWake = xTaskGetTickCount();
+
+  while (true) {
+    self->update();
+    //UBaseType_t hwm = uxTaskGetStackHighWaterMark(NULL); // NULL refers to this task; to erase after testing
+    //Serial.print("[_servoTask] remaining words till overflow: "); // to erase after testing
+    //Serial.println(hwm); // to erase after testing; i wish for this to be max 1000 words left
+
+    TickType_t now = xTaskGetTickCount();
+    if ((now - lastWake) >= interval * 2) {
+      lastWake = now;
+    }
+    vTaskDelayUntil(&lastWake, interval);
+  }
 }

@@ -1,28 +1,37 @@
 #pragma once
  
 #include <ESP32Servo.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/semphr.h"
  
 class SERVO_MG {
 public:
-    SERVO_MG(int pin, uint8_t closed_ang, uint8_t open_ang);
+  SERVO_MG(int pin, uint8_t closed_ang, uint8_t open_ang);
  
-    bool begin();
-    bool openBox();
-    bool closeBox();
-    bool setPos(uint8_t angle);
-    uint8_t getPos();
-    void update();
+  bool begin();
+  bool openBox();
+  bool closeBox();
+  bool setPos(uint8_t angle);
+  uint8_t getPos();
+  void update();
+
+  TaskHandle_t _taskHandle;
  
 private:
-    uint8_t _pin;
-    uint8_t _closed_ang;
-    uint8_t _open_ang;
-    uint8_t _currentPos;
-    uint8_t _targetPos;
-    bool  _moving;
-    unsigned long _lastStepTime;
+  uint8_t _pin;
+  uint8_t _closed_ang;
+  uint8_t _open_ang;
+  uint8_t _currentPos;
+  uint8_t _targetPos;
+  bool _moving;
 
-    static const uint8_t STEP_DELAY_MS = 1;
+  static const uint32_t TICK_MS = 20;   // FreeRTOS task interval
  
-    Servo _servo;
+  void _task_start();
+  static SemaphoreHandle_t _servoMutex;
+  static bool              _mutexCreated;
+  static void _servoTask(void* pvParameters);
+ 
+  Servo _servo;
 };
