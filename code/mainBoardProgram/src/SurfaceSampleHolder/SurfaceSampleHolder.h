@@ -13,7 +13,6 @@ class SurfaceSampleHolder
 public:
   SurfaceSampleHolder(TwoWire& wire, HardwareSerial& debugSerial);
   bool begin();
-  void update();
   
   // -- Servo
   bool openRockBox();

@@ -23,11 +23,6 @@ SurfaceSampleHolder::SurfaceSampleHolder(TwoWire& wire, HardwareSerial& debugSer
     )
 {
 }
-void SurfaceSampleHolder::update()
-{
-  _servoRock.update();
-  _servoSand.update();
-}
 
 uint8_t SurfaceSampleHolder::getPosRock()
 {

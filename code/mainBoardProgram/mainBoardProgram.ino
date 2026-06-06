@@ -561,7 +561,6 @@ void setup()
 void loop()
 {
   deepSampler.update();
-  surfaceSampleHolder.update();
 
   #ifdef ADVANCED_COMMAND
   roverComm.handle();
