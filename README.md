@@ -5,10 +5,10 @@ Currently working on an overhauled design for ERC 2026.
 
 ## Authors
 
-- **Filip Slima** *(Leader)* 
+- **Filip Slima** *(Leader)*  
   Responsible for mechanical construction, linear motion system.
 
-- **Vilem Strachon**
+- **Vilem Strachon**  
   Responsible for the weighing and storing.
 
 - **Ondrej Stafa**  
