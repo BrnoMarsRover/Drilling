@@ -355,6 +355,8 @@ void ADS122C04::_adcTask(void *pvParameters) {
                     self->_lastWeightRaw = (uint32_t)raw;
                     self->_result_ready = true;
                     xSemaphoreGive(self->_mutex);
+                    Serial.print("after request weight:");
+                    Serial.println(w);
                     //UBaseType_t hwm = uxTaskGetStackHighWaterMark(NULL); // NULL refers to this task; to erase after testing
                     //Serial.print("[_adcTask] remaining words till overflow: "); // to erase after testing
                     //Serial.println(hwm); // to erase after testing; with 4096 words i wish for this to be max 1000 words left

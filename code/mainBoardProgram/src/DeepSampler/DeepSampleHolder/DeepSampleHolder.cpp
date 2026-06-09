@@ -38,11 +38,14 @@ void DeepSampleHolder::update(){
     {
       if(!storageIsMoving()) {
         if (storageGetCurrentSlot() == StepperPositioner::StoragePosition::Second) {
-          if(requestMeasure()) {
-            _autoState = AutoState::WEIGHING;
-          }
-          else{
-            _autoState = AutoState::ERROR;
+          if (_sample_to_be_measured == true && millis() - _measureStateEntryTime >= 5000) { // time for vibrations to calm
+            if(requestMeasure()) {
+              _sample_to_be_measured = false;
+              Serial.println("measure request sent");
+              _autoState = AutoState::WEIGHING;
+            } else{
+              _autoState = AutoState::ERROR;
+            }
           }
         }
         else {
@@ -54,7 +57,9 @@ void DeepSampleHolder::update(){
     case AutoState::WEIGHING:
     {
       if (getResultReady()) {
+        requestMeasure();
         _autoState = AutoState::DONE;
+        
       }
       break;
     }
@@ -81,6 +86,8 @@ DeepSampleHolder::AutoState DeepSampleHolder::getAutoState(){
 
 bool DeepSampleHolder::startAutoWeighing() {
   if(storageMoveToSlot(StepperPositioner::StoragePosition::Second)){
+    _sample_to_be_measured = true;
+    _measureStateEntryTime = millis();
     _autoState = AutoState::STORAGE_MOVING;
     return true;
   }
