@@ -9,54 +9,7 @@
 #include "freertos/task.h"
 #include "freertos/queue.h"
 #include "freertos/semphr.h"
-
-// Commands
-#define CMD_RESET     0x06
-#define CMD_STARTSYNC 0x08
-#define CMD_POWERDOWN 0x02
-#define CMD_RDATA     0x10
-#define CMD_RREG(reg) (0x20 | ((reg) << 2))
-#define CMD_WREG(reg) (0x40 | ((reg) << 2))
-
-// Register addresses
-#define REG_MUX_GAIN     0x00
-#define REG_DR_MODE      0x01
-#define REG_DATA_STATUS  0x02
-#define REG_IDAC_MUX     0x03
-
-// MUX settings (bits 7:4)
-#define MUX_AIN0_AIN1  0x00
-#define MUX_AIN2_AIN3  0x60
-#define MUX_SHORT      0xE0
-
-// Gain settings (bits 3:1, raw field values)
-#define GAIN_1   0x00
-#define GAIN_2   0x01
-#define GAIN_4   0x02
-#define GAIN_8   0x03
-#define GAIN_16  0x04
-#define GAIN_32  0x05
-#define GAIN_64  0x06
-#define GAIN_128 0x07 // used
-
-// Data rate (bits 7:5 of REG1)
-#define DR_20SPS  0x00 // used
-#define DR_45SPS  0x20
-#define DR_90SPS  0x40
-#define DR_175SPS 0x60
-#define DR_330SPS 0x80
-#define DR_600SPS 0xA0
-#define DR_1000SPS 0xC0
-
-// IDAC current (bits 2:0 of REG2)
-#define IDAC_OFF    0x00
-#define IDAC_10UA   0x01
-#define IDAC_50UA   0x02
-#define IDAC_100UA  0x03
-#define IDAC_250UA  0x04
-#define IDAC_500UA  0x05
-#define IDAC_1000UA 0x06
-#define IDAC_1500UA 0x07
+#include <cstdint>
 
 struct WeightResult
 {
@@ -66,40 +19,77 @@ struct WeightResult
 
 class ADS122C04 {
 public:
-    // Constructor: set default I2C address and calibration values
-    // dgnd-dgnd 100 0000 = 0x40
-    // dgnd-dvdd 100 0001 = 0x41
-    // dvdd-dgnd 100 0100 = 0x44 deep samples
-    // dvdd-dvdd 100 0101 = 0x45 surface samples
-    ADS122C04(TwoWire &wire, uint8_t addr)
-        : _wire(&wire), _addr(addr), _cal_adc_zero(0.0f), _cal_weight(100.0f), cal_a(0.00467235f), cal_b(-6054.52392578f), tare_grams(0.0f) // old: cal_a(1.0f), cal_b(0.0f), tare_grams(0.0f) _resetPin(resetPin)
+    /*
+    struct WeightResult
     {
-      /*
-      delay(1);
-      reset(); // should not pull down RST pin
-      // REG0: MUX=0000 (AIN0+/AIN1-), GAIN=111 (x16), PGA_BYPASS=0  → 0x0E // old 1000 -> 0x08
-      // REG1: DR=000 (20SPS), MODE=0, CM=1 (continuous), VREF=00 (ext), TS=0 → 0x08
-      // REG2: IDAC=101 (500uA), rest 0 → 0x05
-      // REG3: I1MUX=011 (AIN2), I2MUX=100 (AIN3) → 0x70
-      uint8_t cfg[4] = { 0x0E, 0x08, 0x07, 0x70 };
-      for (int i = 0; i < 4; i++) _write_reg(i, cfg[i]);
-      start();
+      float grams;
+      uint32_t raw;
+    };
+    */
 
-      if (_verify_regs(cfg, 4)) {
-        Serial.print("[ADC] 0x");
-        Serial.print(addr, HEX);
-        Serial.println(" OK");
-      } else {
-        Serial.print("[ADC] 0x");
-        Serial.print(addr, HEX);
-        Serial.println(" INIT FAIL");
-      }
-      */
+    enum class Cmd : uint8_t {
+        Reset     = 0x06,
+        StartSync = 0x08,
+        PowerDown = 0x02,
+        RData     = 0x10,
+    };
+
+    enum class Reg : uint8_t {
+        MuxGain    = 0x00,
+        DrMode     = 0x01,
+        DataStatus = 0x02,
+        IdacMux    = 0x03,
+    };
+
+    // MUX input selection (bits 7:4 of REG_MUX_GAIN)
+    enum class Mux : uint8_t {
+        AIN0_AIN1 = 0x00,
+        AIN2_AIN3 = 0x60,
+        Short      = 0xE0,
+    };
+
+    // PGA gain (bits 3:1 of REG_MUX_GAIN)
+    enum class Gain : uint8_t {
+        x1   = 0x00,
+        x2   = 0x01,
+        x4   = 0x02,
+        x8   = 0x03,
+        x16  = 0x04,
+        x32  = 0x05,
+        x64  = 0x06,
+        x128 = 0x07,
+    };
+
+    // Data rate (bits 7:5 of REG_DR_MODE)
+    enum class DataRate : uint8_t {
+        SPS_20   = 0x00, // used
+        SPS_45   = 0x20,
+        SPS_90   = 0x40,
+        SPS_175  = 0x60,
+        SPS_330  = 0x80,
+        SPS_600  = 0xA0,
+        SPS_1000 = 0xC0,
+    };
+
+    // IDAC excitation current (bits 2:0 of REG_IDAC_MUX)
+    enum class Idac : uint8_t {
+        Off    = 0x00,
+        uA_10  = 0x01,
+        uA_50  = 0x02,
+        uA_100 = 0x03,
+        uA_250 = 0x04,
+        uA_500 = 0x05,
+        mA_1   = 0x06,
+        mA_1_5 = 0x07, // used
+    };
+
+    ADS122C04(TwoWire &wire, uint8_t addr)
+        : _wire(&wire), _addr(addr), _cal_adc_zero(0.0f), _cal_weight(100.0f), cal_a(0.00467235f), cal_b(-654.52392578f), tare_grams(0.0f) // old: cal_a(1.0f), cal_b(0.0f), tare_grams(0.0f) _resetPin(resetPin)
+    {
     }
     ~ADS122C04();
 
     // Low-level control
-    //void    init(void);
     void    begin(void);
     void    reset(void);
     void    start(void);
@@ -112,6 +102,12 @@ public:
     bool    data_ready(void);
     int32_t read(void);
     void    set_address(uint8_t addr);
+
+    // Helpers
+    template<typename E>
+    constexpr uint8_t to_U8(E num) { return static_cast<uint8_t>(num); }
+    constexpr uint8_t cmdRReg(uint8_t reg) { return 0x20 | (reg << 2); }
+    constexpr uint8_t cmdWReg(uint8_t reg) { return 0x40 | (reg << 2); }
 
     // Higher-level scale functions
     float   read_median(uint8_t n);

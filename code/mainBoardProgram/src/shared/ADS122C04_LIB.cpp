@@ -10,7 +10,7 @@ Preferences prefs;
 
 uint8_t ADS122C04::_read_reg(uint8_t reg) {
   _wire->beginTransmission(_addr);
-  _wire->write(CMD_RREG(reg));
+  _wire->write(cmdRReg(reg));
   _wire->endTransmission(false);
   _wire->requestFrom(_addr, (uint8_t)1);
   return _wire->read();
@@ -18,7 +18,7 @@ uint8_t ADS122C04::_read_reg(uint8_t reg) {
 
 void ADS122C04::_write_reg(uint8_t reg, uint8_t val) {
   _wire->beginTransmission(_addr);
-  _wire->write(CMD_WREG(reg));
+  _wire->write(cmdWReg(reg));
   _wire->write(val);
   _wire->endTransmission();
 }
@@ -55,19 +55,19 @@ bool ADS122C04::_verify_regs(const uint8_t *expected, uint8_t n) {
 
 void ADS122C04::reset(void) {
   _wire->beginTransmission(_addr);
-  _wire->write(CMD_RESET);
+  _wire->write(to_U8(Cmd::Reset));
   _wire->endTransmission();
 }
 
 void ADS122C04::start(void) {
   _wire->beginTransmission(_addr);
-  _wire->write(CMD_STARTSYNC);
+  _wire->write(to_U8(Cmd::StartSync));
   _wire->endTransmission();
 }
 
 void ADS122C04::powerdown(void) {
   _wire->beginTransmission(_addr);
-  _wire->write(CMD_POWERDOWN);
+  _wire->write(to_U8(Cmd::PowerDown));
   _wire->endTransmission();
 }
 
@@ -114,44 +114,44 @@ ADS122C04::~ADS122C04() {
 }
 
 void ADS122C04::set_gain(uint8_t gain) { // Gain set
-  uint8_t reg0 = _read_reg(REG_MUX_GAIN);
+  uint8_t reg0 = _read_reg(to_U8(Reg::MuxGain));
   reg0 = (reg0 & 0xF1) | ((gain & 0x07) << 1);
-  if (gain > GAIN_4) reg0 &= ~0x01;
-  _write_reg(REG_MUX_GAIN, reg0);
+  if (gain > to_U8(Gain::x4)) reg0 &= ~0x01;
+  _write_reg(to_U8(Reg::MuxGain), reg0);
   start();
 }
 
 void ADS122C04::set_mux(uint8_t mux) { // MUX set
-  uint8_t reg0 = _read_reg(REG_MUX_GAIN);
+  uint8_t reg0 = _read_reg(to_U8(Reg::MuxGain));
   reg0 = (reg0 & 0x0F) | (mux & 0xF0);
-  _write_reg(REG_MUX_GAIN, reg0);
+  _write_reg(to_U8(Reg::MuxGain), reg0);
   start();
 }
 
 void ADS122C04::set_data_rate(uint8_t dr) { // Data rate set
-  uint8_t reg1 = _read_reg(REG_DR_MODE);
+  uint8_t reg1 = _read_reg(to_U8(Reg::DrMode));
   reg1 = (reg1 & 0x1F) | (dr & 0xE0);
-  _write_reg(REG_DR_MODE, reg1);
+  _write_reg(to_U8(Reg::DrMode), reg1);
   start();
 }
 
 void ADS122C04::set_idac(uint8_t i1mux, uint8_t i2mux, uint8_t current) { // IDAC set
-  uint8_t reg2 = _read_reg(REG_DATA_STATUS);
+  uint8_t reg2 = _read_reg(to_U8(Reg::DataStatus));
   reg2 = (reg2 & 0xF8) | (current & 0x07);
-  _write_reg(REG_DATA_STATUS, reg2);
+  _write_reg(to_U8(Reg::DataStatus), reg2);
 
   uint8_t reg3 = ((i1mux & 0x07) << 5) | ((i2mux & 0x07) << 2);
-  _write_reg(REG_IDAC_MUX, reg3);
+  _write_reg(to_U8(Reg::IdacMux), reg3);
   start();
 }
 
 bool ADS122C04::data_ready(void) { // Data ready
-  return (_read_reg(REG_DATA_STATUS) & 0x80) != 0;
+  return (_read_reg(to_U8(Reg::DataStatus)) & 0x80) != 0;
 }
 
 int32_t ADS122C04::read(void) { // Read raw 24-bit result
   _wire->beginTransmission(_addr);
-  _wire->write(CMD_RDATA);
+  _wire->write(to_U8(Cmd::RData));
   _wire->endTransmission(false);
   _wire->requestFrom(_addr, (uint8_t)3);
 
@@ -263,10 +263,10 @@ void ADS122C04::scale_calibrate_100(void) {
 
 float ADS122C04::read_temperature(void) { // to update to non-blocking fnc
   // Save current REG1 to restore after reading
-  uint8_t reg1 = _read_reg(REG_DR_MODE);
+  uint8_t reg1 = _read_reg(to_U8(Reg::DrMode));
 
   // Set TS=1 (bit 0), keep other settings
-  _write_reg(REG_DR_MODE, reg1 | 0x01);
+  _write_reg(to_U8(Reg::DrMode), reg1 | 0x01);
   start();
 
   // Wait for conversion
@@ -275,7 +275,7 @@ float ADS122C04::read_temperature(void) { // to update to non-blocking fnc
 
   // Read raw 24-bit result
   _wire->beginTransmission(_addr);
-  _wire->write(CMD_RDATA);
+  _wire->write(to_U8(Cmd::RData));
   _wire->endTransmission(false);
   _wire->requestFrom(_addr, (uint8_t)3);
   uint8_t b2 = _wire->read();
@@ -283,7 +283,7 @@ float ADS122C04::read_temperature(void) { // to update to non-blocking fnc
   _wire->read();
 
   // Restore previous REG1 (clears TS bit)
-  _write_reg(REG_DR_MODE, reg1);
+  _write_reg(to_U8(Reg::DrMode), reg1);
   start();
 
   int16_t raw = ((int16_t)b2 << 6) | (b1 >> 2);
