@@ -7,8 +7,8 @@ SERVO_MG::SERVO_MG(int pin, uint8_t closed_ang, uint8_t open_ang)
   : _pin(pin),
     _closed_ang(closed_ang),
     _open_ang(open_ang),
-    _currentPos(closed_ang),
-    _targetPos(closed_ang),
+    _currentPos((uint16_t)closed_ang*10),
+    _targetPos((uint16_t)closed_ang*10),
     _moving(false),
     _taskHandle(nullptr)
 {}
@@ -21,7 +21,8 @@ bool SERVO_MG::begin() {
 
   _servo.setPeriodHertz(50);
   _servo.attach(_pin, 500, 2500);
-  _servo.write(_currentPos);
+  _servo.writeMicroseconds(500 + ((uint32_t)_currentPos * 2000) / 1800);
+  //_servo.write(_currentPos/10);
   _task_start();
   return true;
 }
@@ -37,11 +38,11 @@ bool SERVO_MG::closeBox() {
 bool SERVO_MG::setPos(uint8_t angle) {
   if (angle > 180) 
     angle = 180;
-  if (angle != _currentPos) {
+  if (angle != (uint8_t)(_currentPos/10)) {
     if (!_servo.attached()) {
         _servo.attach(_pin, 500, 2500);  // re-acquire LEDC channel
       }
-    _targetPos = angle;
+    _targetPos = (uint16_t)angle*10;
     _moving = true;
     _job_active = true;
   }
@@ -49,16 +50,16 @@ bool SERVO_MG::setPos(uint8_t angle) {
 }
 
 uint8_t SERVO_MG::getPos() {
-  return (uint8_t)_currentPos;
+  return (uint8_t)(_currentPos/10);
 }
 
 void SERVO_MG::update() {
   if (!_moving) return;
 
   if (_currentPos < _targetPos) {
-    _currentPos++;
+    _currentPos = _currentPos + 20;
   } else if (_currentPos > _targetPos) {
-    _currentPos--;
+    _currentPos = _currentPos -20;
   } else {
     _servo.detach();
     _moving = false;
@@ -67,7 +68,8 @@ void SERVO_MG::update() {
   }
  
   if (xSemaphoreTake(_servoMutex, pdMS_TO_TICKS(2))) {
-    _servo.write(_currentPos);
+    _servo.writeMicroseconds(500 + ((uint32_t)_currentPos * 2000) / 1800);
+    //_servo.write(_currentPos/10);
     xSemaphoreGive(_servoMutex);
   }
 }

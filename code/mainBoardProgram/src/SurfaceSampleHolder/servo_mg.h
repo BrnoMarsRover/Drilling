@@ -22,8 +22,8 @@ private:
   uint8_t _pin;
   uint8_t _closed_ang;
   uint8_t _open_ang;
-  uint8_t _currentPos;
-  uint8_t _targetPos;
+  uint16_t _currentPos;
+  uint16_t _targetPos;
   bool _moving = false;
   bool _job_active = false;
 
