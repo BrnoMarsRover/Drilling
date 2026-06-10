@@ -43,6 +43,7 @@ bool SERVO_MG::setPos(uint8_t angle) {
       }
     _targetPos = angle;
     _moving = true;
+    _job_active = true;
   }
   return true;
 }
@@ -61,6 +62,7 @@ void SERVO_MG::update() {
   } else {
     _servo.detach();
     _moving = false;
+    _job_active = false;
     return;
   }
  
@@ -76,8 +78,8 @@ void SERVO_MG::_task_start() {
 
   xTaskCreatePinnedToCore(
     _servoTask,               // fnc to run
-    taskName,               // old "ADC_Task" system name
-    3072,                   // stack size in bytes 4096
+    taskName,
+    3072,                   // stack size in bytes
     this,                   // pvParameters
     1,                      // priority low
     &_taskHandle,      // handle stored here not used now
@@ -87,19 +89,14 @@ void SERVO_MG::_task_start() {
 
 void SERVO_MG::_servoTask(void* pvParameters) {
   SERVO_MG* self = static_cast<SERVO_MG*>(pvParameters);
-  const TickType_t interval = pdMS_TO_TICKS(TICK_MS);
-  TickType_t lastWake = xTaskGetTickCount();
 
   while (true) {
-    self->update();
-    //UBaseType_t hwm = uxTaskGetStackHighWaterMark(NULL); // NULL refers to this task; to erase after testing
-    //Serial.print("[_servoTask] remaining words till overflow: "); // to erase after testing
-    //Serial.println(hwm); // to erase after testing; i wish for this to be max 1000 words left
-
-    TickType_t now = xTaskGetTickCount();
-    if ((now - lastWake) >= interval * 2) {
-      lastWake = now;
+    if (self->_job_active == true) {
+      self->update();
     }
-    vTaskDelayUntil(&lastWake, interval);
+      //UBaseType_t hwm = uxTaskGetStackHighWaterMark(NULL); // NULL refers to this task; to erase after testing
+      //Serial.print("[_servoTask] remaining words till overflow: "); // to erase after testing
+      //Serial.println(hwm); // to erase after testing; i wish for this to be max 1000 words left
+    vTaskDelay(pdMS_TO_TICKS(TICK_MS));
   }
 }

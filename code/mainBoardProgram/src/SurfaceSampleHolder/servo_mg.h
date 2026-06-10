@@ -24,7 +24,8 @@ private:
   uint8_t _open_ang;
   uint8_t _currentPos;
   uint8_t _targetPos;
-  bool _moving;
+  bool _moving = false;
+  bool _job_active = false;
 
   static const uint32_t TICK_MS = 20;   // FreeRTOS task interval
  
