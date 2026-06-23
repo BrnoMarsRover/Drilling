@@ -22,7 +22,6 @@ bool SERVO_MG::begin() {
   _servo.setPeriodHertz(50);
   _servo.attach(_pin, 500, 2500);
   _servo.writeMicroseconds(500 + ((uint32_t)_currentPos * 2000) / 1800);
-  //_servo.write(_currentPos/10);
   _task_start();
   return true;
 }
@@ -40,7 +39,7 @@ bool SERVO_MG::setPos(uint8_t angle) {
     angle = 180;
   if (angle != (uint8_t)(_currentPos/10)) {
     if (!_servo.attached()) {
-        _servo.attach(_pin, 500, 2500);  // re-acquire LEDC channel
+        _servo.attach(_pin, 500, 2500);  // re-acquire channel
       }
     _targetPos = (uint16_t)angle*10;
     _moving = true;
@@ -57,9 +56,9 @@ void SERVO_MG::update() {
   if (!_moving) return;
 
   if (_currentPos < _targetPos) {
-    _currentPos = _currentPos + 20;
+    _currentPos = _currentPos + 50;
   } else if (_currentPos > _targetPos) {
-    _currentPos = _currentPos -20;
+    _currentPos = _currentPos - 50;
   } else {
     _servo.detach();
     _moving = false;
@@ -69,7 +68,6 @@ void SERVO_MG::update() {
  
   if (xSemaphoreTake(_servoMutex, pdMS_TO_TICKS(2))) {
     _servo.writeMicroseconds(500 + ((uint32_t)_currentPos * 2000) / 1800);
-    //_servo.write(_currentPos/10);
     xSemaphoreGive(_servoMutex);
   }
 }
@@ -84,7 +82,7 @@ void SERVO_MG::_task_start() {
     3072,                   // stack size in bytes
     this,                   // pvParameters
     1,                      // priority low
-    &_taskHandle,      // handle stored here not used now
+    &_taskHandle,           // handle stored here not used now
     0                       // loop() runs on core 1
   );
 }

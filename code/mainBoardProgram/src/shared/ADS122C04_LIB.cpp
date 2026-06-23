@@ -270,23 +270,41 @@ float ADS122C04::read_temperature(void) { // to update to non-blocking fnc
   start();
 
   // Wait for conversion
-  uint16_t timeout = 60;
-  while (!data_ready() && timeout--) delay(1);
+  uint16_t timeout = 100;
+  while (data_ready() && timeout--) delay(1);   // wait for LOW (stale cleared)
+  timeout = 100;
+  while (!data_ready() && timeout--) delay(1);  // wait for HIGH (new result)
+
+  if (timeout == 0) {
+    _write_reg(to_U8(Reg::DrMode), reg1);
+    start();
+    return 0;
+  }  
 
   // Read raw 24-bit result
   _wire->beginTransmission(_addr);
   _wire->write(to_U8(Cmd::RData));
   _wire->endTransmission(false);
   _wire->requestFrom(_addr, (uint8_t)3);
+  uint8_t b0 = _wire->read();
+  uint8_t b1 = _wire->read();
+  uint8_t b2 = _wire->read();
+
+  Serial.printf("raw bytes: 0x%02X 0x%02X 0x%02X\n", b0, b1, b2);
+  /*
   uint8_t b2 = _wire->read();
   uint8_t b1 = _wire->read();
   _wire->read();
+*/
 
   // Restore previous REG1 (clears TS bit)
   _write_reg(to_U8(Reg::DrMode), reg1);
   start();
 
-  int16_t raw = ((int16_t)b2 << 6) | (b1 >> 2);
+  timeout = 100;
+  while (data_ready() && timeout--) delay(1);   // wait for LOW
+
+  int16_t raw = ((int16_t)b0 << 6) | (b1 >> 2);
 
   // raw is 14-bit two's complement, sign extend from bit 13
   if (raw & 0x2000) raw |= 0xC000;
@@ -315,7 +333,9 @@ void ADS122C04::task_start() {
 
 void ADS122C04::request_measure() {
   _result_ready = false;  // prevents repetitive readings and states that new value is to be written
-  adc_cmd cmd = adc_cmd::MEASURE;
+  adc_cmd cmd = adc_cmd::TEMPERATURE;
+  xQueueSend(_cmdQueue, &cmd, 0);
+  cmd = adc_cmd::MEASURE;
   xQueueSend(_cmdQueue, &cmd, 0);
 }
 
@@ -379,6 +399,8 @@ void ADS122C04::_adcTask(void *pvParameters) {
                     xSemaphoreTake(self->_mutex, portMAX_DELAY);
                     self->_lastTemp = t;
                     xSemaphoreGive(self->_mutex);
+                    Serial.print("chip tmp: ");
+                    Serial.println(t);
                     break;
                 }
             }
