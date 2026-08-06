@@ -57,7 +57,7 @@ void DeepSampleHolder::update(){
     case AutoState::WEIGHING:
     {
       if (getResultReady()) {
-        requestMeasure();
+        //requestMeasure();
         _autoState = AutoState::DONE;
         
       }

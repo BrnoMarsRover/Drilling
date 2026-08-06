@@ -295,7 +295,7 @@ float ADS122C04::read_temperature(void) { // to update to non-blocking fnc
   uint8_t b2 = _wire->read();
   uint8_t b1 = _wire->read();
   _wire->read();
-*/
+  */
 
   // Restore previous REG1 (clears TS bit)
   _write_reg(to_U8(Reg::DrMode), reg1);

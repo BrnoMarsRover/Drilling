@@ -18,6 +18,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import serial.tools.list_ports
 import protocol
+import time
 
 POLL_INTERVAL_MS       = 100
 STATE_POLL_INTERVAL_MS = 500
@@ -291,8 +292,11 @@ class App(tk.Tk):
         frame.columnconfigure(0, weight=1)
 
     def _log(self, message: str):
+        timestamp = time.strftime("%H:%M:%S")
         self.log_text.config(state="normal")
-        self.log_text.insert("end", message + "\n")
+        # self.log_text.insert("end", f"[{timestamp}] {message}\n")
+        self.log_text.insert("end", "[" + timestamp + "] " + message + "\n")
+        # self.log_text.insert("end", message + "\n")
         self.log_text.see("end")
         self.log_text.config(state="disabled")
 
