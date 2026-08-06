@@ -181,7 +181,12 @@ void DeepSampler::update()
     {
       if(_drillController.getCarriageDepthMM() == 0.0)
       {
-        _autoState = AutoState::DONE;
+        _deepSampleHolder.startAutoWeighing();
+        if(_deepSampleHolder.getAutoState() == DeepSampleHolder::AutoState::DONE)
+        {
+          _autoState = AutoState::DONE;
+        }
+        //_autoState = AutoState::DONE;
       }
       break;
     }

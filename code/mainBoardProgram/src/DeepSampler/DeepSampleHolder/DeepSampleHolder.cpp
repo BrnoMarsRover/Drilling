@@ -38,10 +38,10 @@ void DeepSampleHolder::update(){
     {
       if(!storageIsMoving()) {
         if (storageGetCurrentSlot() == StepperPositioner::StoragePosition::Second) {
-          if (_sample_to_be_measured == true && millis() - _measureStateEntryTime >= 5000) { // time for vibrations to calm
+          if (_sample_to_be_measured == true && millis() - _measureStateEntryTime >= 6000) { // time for vibrations to calm
             if(requestMeasure()) {
               _sample_to_be_measured = false;
-              Serial.println("measure request sent");
+              Serial.println("[ADC] measure request sent");
               _autoState = AutoState::WEIGHING;
             } else{
               _autoState = AutoState::ERROR;
@@ -57,7 +57,6 @@ void DeepSampleHolder::update(){
     case AutoState::WEIGHING:
     {
       if (getResultReady()) {
-        //requestMeasure();
         _autoState = AutoState::DONE;
         
       }

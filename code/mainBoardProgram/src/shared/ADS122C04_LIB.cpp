@@ -269,17 +269,16 @@ float ADS122C04::read_temperature(void) { // to update to non-blocking fnc
   _write_reg(to_U8(Reg::DrMode), reg1 | 0x01);
   start();
 
-  // Wait for conversion
+  // Discard conversion #1: still reflects the previous channel/mode
   uint16_t timeout = 100;
-  while (data_ready() && timeout--) delay(1);   // wait for LOW (stale cleared)
-  timeout = 100;
-  while (!data_ready() && timeout--) delay(1);  // wait for HIGH (new result)
+  while (!data_ready() && timeout--) delay(1);
+  if (timeout == 0) { _write_reg(to_U8(Reg::DrMode), reg1); start(); return 0; }
+  read();  // throw away the stale sample
 
-  if (timeout == 0) {
-    _write_reg(to_U8(Reg::DrMode), reg1);
-    start();
-    return 0;
-  }  
+  // Conversion #2 is the real temperature reading
+  timeout = 100;
+  while (!data_ready() && timeout--) delay(1);
+  if (timeout == 0) { _write_reg(to_U8(Reg::DrMode), reg1); start(); return 0; }
 
   // Read raw 24-bit result
   _wire->beginTransmission(_addr);
@@ -290,12 +289,7 @@ float ADS122C04::read_temperature(void) { // to update to non-blocking fnc
   uint8_t b1 = _wire->read();
   uint8_t b2 = _wire->read();
 
-  Serial.printf("raw bytes: 0x%02X 0x%02X 0x%02X\n", b0, b1, b2);
-  /*
-  uint8_t b2 = _wire->read();
-  uint8_t b1 = _wire->read();
-  _wire->read();
-  */
+  //Serial.printf("raw bytes: 0x%02X 0x%02X 0x%02X\n", b0, b1, b2); // just for checking
 
   // Restore previous REG1 (clears TS bit)
   _write_reg(to_U8(Reg::DrMode), reg1);
@@ -375,7 +369,7 @@ void ADS122C04::_adcTask(void *pvParameters) {
                     self->_lastWeightRaw = (uint32_t)raw;
                     self->_result_ready = true;
                     xSemaphoreGive(self->_mutex);
-                    Serial.print("after request weight:");
+                    Serial.print("[ADC] weight: ");
                     Serial.println(w);
                     //UBaseType_t hwm = uxTaskGetStackHighWaterMark(NULL); // NULL refers to this task; to erase after testing
                     //Serial.print("[_adcTask] remaining words till overflow: "); // to erase after testing
@@ -399,7 +393,7 @@ void ADS122C04::_adcTask(void *pvParameters) {
                     xSemaphoreTake(self->_mutex, portMAX_DELAY);
                     self->_lastTemp = t;
                     xSemaphoreGive(self->_mutex);
-                    Serial.print("chip tmp: ");
+                    Serial.print("[ADC] chip tmp: ");
                     Serial.println(t);
                     break;
                 }
@@ -436,23 +430,3 @@ bool ADS122C04::get_adc_connected(void) {
 
 // -------- High end fncs ---------
 // acquisition in time
-
-/*
-void ADS122C04::task_start_acqu() {
-    _cmdQueue = xQueueCreate(5, sizeof(adc_cmd));  // queue of 5 commands -> i need just 1?
-    //_mutex    = xSemaphoreCreateMutex();
-
-    char taskName[16];
-    snprintf(taskName, sizeof(taskName), "ADC_0x%02X", _addr); // dynamic "ADC_0x44", "ADC_0x45"
-
-    xTaskCreatePinnedToCore(
-        _adc_acq_Task,          // fnc to run
-        taskName,               // old "ADC_Task" system name
-        4096,                   // stack size in bytes
-        this,                   // pvParameters
-        1,                      // priority low
-        NULL,                   // handle stored here not used now
-        1                       // set core 1
-    );
-}
-*/
