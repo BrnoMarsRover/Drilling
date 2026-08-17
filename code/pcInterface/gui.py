@@ -285,13 +285,17 @@ class App(tk.Tk):
         frame = ttk.LabelFrame(self, text="Log")
         frame.grid(row=1, column=3, rowspan=2, padx=8, pady=6, sticky="nsew")
 
+        self.auto_scroll_var = tk.BooleanVar(value=True)
+        ttk.Checkbutton(frame, text="Auto-scroll", variable=self.auto_scroll_var).grid(
+            row=0, column=0, columnspan=2, sticky="w", padx=4, pady=(4, 0))
+
         self.log_text = tk.Text(frame, height=30, width=50, state="disabled",
                                 wrap="word", font=("Courier New", 9))
-        self.log_text.grid(row=0, column=0, sticky="nsew", padx=4, pady=4)
+        self.log_text.grid(row=1, column=0, sticky="nsew", padx=4, pady=4)
         scrollbar = ttk.Scrollbar(frame, command=self.log_text.yview)
-        scrollbar.grid(row=0, column=1, sticky="ns")
+        scrollbar.grid(row=1, column=1, sticky="ns")
         self.log_text.config(yscrollcommand=scrollbar.set)
-        frame.rowconfigure(0, weight=1)
+        frame.rowconfigure(1, weight=1)
         frame.columnconfigure(0, weight=1)
 
     def _log(self, message: str):
@@ -299,7 +303,8 @@ class App(tk.Tk):
         self.log_text.config(state="normal")
         self.log_text.insert("end", "[" + timestamp + "] " + message + "\n")
         # self.log_text.insert("end", message + "\n")
-        self.log_text.see("end")
+        if self.auto_scroll_var.get():
+            self.log_text.see("end")
         self.log_text.config(state="disabled")
 
     # ------------------------------------------------------------------ #
