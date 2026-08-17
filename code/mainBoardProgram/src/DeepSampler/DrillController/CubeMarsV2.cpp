@@ -237,6 +237,7 @@ void CubeMarsV2::readAllData()
   _motorData.MOSTmpC = 0.1 * ser::bytesToInt16(rxBuffer + 1);
   _motorData.motorTmpC = 0.1 * ser::bytesToInt16(rxBuffer + 3);
   _motorData.windingCurrentA = 0.01 * ser::bytesToInt32(rxBuffer + 5);
+  _motorData.torque = NmPerAmp*_motorData.windingCurrentA;
   _motorData.currentDrawA = 0.01 * ser::bytesToInt32(rxBuffer + 9);
   _motorData.RPM = (1.0 / (poleCount * gearboxRatio)) * ser::bytesToInt32(rxBuffer + 23);
 }

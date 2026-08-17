@@ -56,6 +56,7 @@ private:
 
   static constexpr float poleCount = 14.0;
   static constexpr float gearboxRatio = 10.0;
+  static constexpr float NmPerAmp = 0.127;
 
   // RX buffer
   static constexpr uint8_t MAX_PAYLOAD = 80;
