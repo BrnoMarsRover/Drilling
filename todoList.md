@@ -14,5 +14,11 @@ Kontrola připojených zařízení. Od roveru přijde žádost o kontrolu. Potom
 
 Možnost spustit automatické vrtání jenom po kalibraci výšky linearAxis.
 
+Zkontrolovat max moment/proud.
+
 ## Misc
-Dopisovat do seznamu materiál co chceme mít redundantní\
+Dopisovat do seznamu materiál co chceme mít redundantní.
+
+Zkontrolovat přesnost vážení.
+
+Přetisknout kastli na elektroniku
