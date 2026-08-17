@@ -83,6 +83,8 @@ bool StepperPositioner::begin(uint16_t rmsCurrent, uint16_t microsteps) {
 //  update() – volat každý loop()
 // ---------------------------------------------------------------
 void StepperPositioner::update() {
+
+
     // Enkodér musí být updateován každý loop pro správné multi-turn počítání
     if (_encoder != nullptr) {
         _encoder->update();
@@ -117,7 +119,7 @@ void StepperPositioner::update() {
     );
 
     int16_t err = shortestAngleDiff(expectedPos, realPos);
-/*
+
     // --- Průběžný debug výpis ---
     Serial.print(F("[DBG] motor="));
     Serial.print(expectedPos);
@@ -132,7 +134,7 @@ void StepperPositioner::update() {
     Serial.print(F(" deltaSteps="));
     Serial.println(deltaSteps);
     // ----------------------------
-*/
+
     if (abs(err) > STALL_ANGLE_ERR_DEG) {
         Serial.print(F("[STORAGE] ZASEKUTI: ocekavano="));
         Serial.print(expectedPos);

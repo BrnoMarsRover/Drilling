@@ -32,7 +32,7 @@ void DeepSampleHolder::update(){
   switch(_autoState){
     case AutoState::MANUAL:
     {
-
+      break;
     }
     case AutoState::STORAGE_MOVING:
     {
@@ -64,10 +64,11 @@ void DeepSampleHolder::update(){
     }
     case AutoState::DONE:
     {
+      break;
     }
     case AutoState::ERROR:
     {
-
+      break;
     }
   }
 }

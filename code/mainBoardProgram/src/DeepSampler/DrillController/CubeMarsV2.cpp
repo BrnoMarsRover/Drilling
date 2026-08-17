@@ -217,12 +217,15 @@ void CubeMarsV2::handleRX()
             switch (rxBuffer[0])
             {
               case 4:
+              {
                 readAllData();
                 break;
-              
+              }
               case 50:
+              {
                 readTmpCurrRPM(); // call interpreter
                 break;
+              }
             }
           }
         }
