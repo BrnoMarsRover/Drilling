@@ -49,7 +49,8 @@ void CubeMarsV2::update()
       transmitERPM();
     }
 
-    requestTmpCurrRPM();
+    //requestTmpCurrRPM();
+    requestAllData();
 
     while(millis() >= commNextMillis)
     {
@@ -83,6 +84,8 @@ bool CubeMarsV2::requestAllData()
 {
   uint8_t payload[1] = {4};
   transmitPayload(payload, 1);
+  _waitingForResponse = true;
+  lastRequestMillis = millis();
   return true;
 }
 
@@ -96,22 +99,20 @@ bool CubeMarsV2::requestTmpCurrRPM()
   lastRequestMillis = millis();
   return true;
 }
+ 
+CubeMarsData CubeMarsV2::getMotorData() { return _motorData; }
 
-float CubeMarsV2::getMOSTmp()  { return MOSTmp; }
-float CubeMarsV2::getMotorTmp() { return motorTmp; }
-float CubeMarsV2::getCurrent() { return current; }
-float CubeMarsV2::getRPM()     { return RPM; }
 
 void CubeMarsV2::printMotorInfoToDebug()
 {
   debugSerial.print("MOS tmp: ");
-  debugSerial.println(MOSTmp);
+  debugSerial.println(_motorData.MOSTmpC);
   debugSerial.print("Motor tmp: ");
-  debugSerial.println(motorTmp);
+  debugSerial.println(_motorData.motorTmpC);
   debugSerial.print("Current: ");
-  debugSerial.println(current);
+  debugSerial.println(_motorData.currentDrawA);
   debugSerial.print("Speed: ");
-  debugSerial.println(RPM);
+  debugSerial.println(_motorData.RPM);
 }
 
 // ---------------- PRIVATE ----------------
@@ -213,9 +214,16 @@ void CubeMarsV2::handleRX()
           {
             _waitingForResponse = false;
             _isConnected = true;
-            //debugSerial.println("[SPMOTOR] data received");
-
-            readTmpCurrRPM(); // call interpreter
+            switch (rxBuffer[0])
+            {
+              case 4:
+                readAllData();
+                break;
+              
+              case 50:
+                readTmpCurrRPM(); // call interpreter
+                break;
+            }
           }
         }
         parserState = WAIT_START;
@@ -224,14 +232,24 @@ void CubeMarsV2::handleRX()
   }
 }
 
+void CubeMarsV2::readAllData()
+{
+  _motorData.MOSTmpC = 0.1 * ser::bytesToInt16(rxBuffer + 1);
+  _motorData.motorTmpC = 0.1 * ser::bytesToInt16(rxBuffer + 3);
+  _motorData.windingCurrentA = 0.01 * ser::bytesToInt32(rxBuffer + 5);
+  _motorData.currentDrawA = 0.01 * ser::bytesToInt32(rxBuffer + 9);
+  _motorData.RPM = (1.0 / (poleCount * gearboxRatio)) * ser::bytesToInt32(rxBuffer + 23);
+}
+
 void CubeMarsV2::readTmpCurrRPM()
 {
-  if (rxLength != 17 || rxBuffer[0] != 50) return;
+  if (rxLength == 17)
+  {
+    uint8_t begin = 5;
 
-  uint8_t begin = 5;
-
-  MOSTmp = 0.1 * ser::bytesToInt16(rxBuffer + begin);
-  motorTmp = 0.1 * ser::bytesToInt16(rxBuffer + begin + 2);
-  current = 0.01 * ser::bytesToInt32(rxBuffer + begin + 4);
-  RPM = (1.0 / (poleCount * gearboxRatio)) * ser::bytesToInt32(rxBuffer + begin + 8);
+    _motorData.MOSTmpC = 0.1 * ser::bytesToInt16(rxBuffer + begin);
+    _motorData.motorTmpC = 0.1 * ser::bytesToInt16(rxBuffer + begin + 2);
+    _motorData.currentDrawA = 0.01 * ser::bytesToInt32(rxBuffer + begin + 4);
+    _motorData.RPM = (1.0 / (poleCount * gearboxRatio)) * ser::bytesToInt32(rxBuffer + begin + 8);
+  }
 }

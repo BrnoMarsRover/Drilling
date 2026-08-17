@@ -242,9 +242,7 @@ bool DeepSampler::currentSensorIsConnected() const {return _drillController.curr
 
 // Low level spiral motor control
 bool DeepSampler::setSpiralRPM(float rpm) { return _drillController.setSpiralRPM(rpm); }
-
-float DeepSampler::getSpiralRPM() { return _drillController.getSpiralRPM(); }
-float DeepSampler::getSpiralMotorTmp() { return _drillController.getSpiralMotorTmp(); }
+CubeMarsData DeepSampler::getSpiralMotorData() { return _drillController.getSpiralMotorData(); }
 
 //Storage control
 bool DeepSampler::setCalibration0() { return _deepSampleHolder.setCalibration0(); }

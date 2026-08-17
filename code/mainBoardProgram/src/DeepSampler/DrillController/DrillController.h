@@ -46,8 +46,7 @@ public:
 
   // Spiral motor
   bool setSpiralRPM(float rpm);
-  float getSpiralRPM();
-  float getSpiralMotorTmp();
+  CubeMarsData getSpiralMotorData();
 
   // Integrated drill control
   AutoState getAutoState();

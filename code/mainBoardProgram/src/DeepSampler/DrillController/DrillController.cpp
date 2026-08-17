@@ -118,7 +118,7 @@ void DrillController::update()
       }
       else
       {
-        if(!(_linearAxis.setSpeedMMps((_motorDriver.getRPM()/60)*_rateOfPenetrationMMpRev)))
+        if(!(_linearAxis.setSpeedMMps((_motorDriver.getMotorData().RPM/60)*_rateOfPenetrationMMpRev)))
         {
           _autoState = AutoState::ERROR;
         }
@@ -176,22 +176,7 @@ bool DrillController::setSpiralRPM(float rpm)
     return false;
 }
 
-float DrillController::getSpiralRPM()
-{
-  return _motorDriver.getRPM();
-}
-
-float DrillController::getSpiralMotorTmp()
-{
-  if(_motorDriver.getMOSTmp() > _motorDriver.getMotorTmp())
-  {
-    return _motorDriver.getMOSTmp();
-  }
-  else
-  {
-    return _motorDriver.getMotorTmp();
-  }
-}
+CubeMarsData DrillController::getSpiralMotorData() { return _motorDriver.getMotorData(); }
 
 // Integrated drill control
 DrillController::AutoState DrillController::getAutoState()

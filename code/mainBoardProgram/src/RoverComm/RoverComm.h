@@ -3,6 +3,7 @@
 
 #include "../shared/ADS122C04_LIB.h"
 #include "../shared/serializer.h"
+#include "../DeepSampler/DrillController/CubeMarsV2.h"
 
 // ------------------------------------------------------------------ //
 //  Message queue depth — increase if commands are arriving faster    //
@@ -120,7 +121,13 @@ public:
     void sendFloat(RoverCommand cmd, float value);
 
     // Send the full STATE response
-    void sendState(float carriageDepthMM, float carriageSpeedMMps, float stepperCurrentA, float rpm, float tempC, uint16_t trayAngle, DrillState swState);
+    void sendState(
+        float carriageDepthMM,
+        float carriageSpeedMMps,
+        float stepperCurrentA,
+        CubeMarsData spiralMotorData,
+        uint16_t trayAngle,
+        DrillState swState);
 
     void sendDeviceStatus(bool vertStepper, bool vertEncoder, bool vertCurrentSensor, bool spiralMotor, bool heightSensor, bool deepSampleStepper, bool deepSampleEncoder, bool deepSampleADC, bool surfaceSampleADC);
 

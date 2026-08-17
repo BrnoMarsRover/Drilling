@@ -102,6 +102,9 @@ class App(tk.Tk):
             ("Vertical speed (actual)","vert_speed_actual_var","mm/s"),
             ("Stepper current",        "current_var",         "A"),
             ("Motor speed",            "rpm_var",             "RPM"),
+            ("Motor winding current",  "motor_winding_current_var", "A"),
+            ("Motor current draw",     "motor_current_draw_var",    "A"),
+            ("Motor torque",           "motor_torque_var",    "Nm"),
             ("Motor temp",             "temp_var",            "°C"),
             ("Tray angle",             "tray_var",            "°"),
             ("State",                  "sw_state_var",        ""),
@@ -365,6 +368,9 @@ class App(tk.Tk):
             self.vert_speed_actual_var.set(f"{s['vert_speed']:.1f}")
             self.current_var.set(f"{s['current_a']:.2f}")
             self.rpm_var.set(str(s["rpm"]))
+            self.motor_winding_current_var.set(f"{s['motor_winding_current_a']:.2f}")
+            self.motor_current_draw_var.set(f"{s['motor_current_draw_a']:.2f}")
+            self.motor_torque_var.set(f"{s['motor_torque_nm']:.2f}")
             self.temp_var.set(str(s["temp_c"]))
             self.tray_var.set(str(s["tray_angle"]))
             self.sw_state_var.set(s["sw_state_str"])
