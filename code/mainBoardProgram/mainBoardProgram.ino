@@ -129,8 +129,7 @@ void respondToMsg(const RoverMessage& msg)
         deepSampler.getCarriageDepthMM(),
         deepSampler.getCarriageSpeedMMps(),
         deepSampler.getVerticalStepperCurrentA(),
-        deepSampler.getSpiralRPM(),
-        deepSampler.getSpiralMotorTmp(),
+        deepSampler.getSpiralMotorData(),
         deepSampler.storageGetCurrentAngle(),  //deep sample storage angle
         drillState );
       break;

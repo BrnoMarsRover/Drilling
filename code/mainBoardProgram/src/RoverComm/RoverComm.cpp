@@ -118,9 +118,15 @@ void RoverComm::sendFloat(RoverCommand cmd, float value)
     _sendRaw(payload, 5);
 }
 
-void RoverComm::sendState(float carriageDepthMM, float carriageSpeedMMps, float stepperCurrentA, float rpm, float tempC, uint16_t trayAngle, DrillState swState)
+void RoverComm::sendState(
+    float carriageDepthMM,
+    float carriageSpeedMMps,
+    float stepperCurrentA,
+    CubeMarsData spiralMotorData,
+    uint16_t trayAngle,
+    DrillState swState)
 {
-    uint8_t payload[11];
+    uint8_t payload[17];
     payload[0] = (uint8_t)CMD_STATE;
 
     ser::int16ToBytes((int16_t)carriageDepthMM, payload + 1);
@@ -129,15 +135,21 @@ void RoverComm::sendState(float carriageDepthMM, float carriageSpeedMMps, float 
 
     payload[4] = (uint8_t)(100*stepperCurrentA);
 
-    ser::int16ToBytes((int16_t)rpm, payload + 5);
+    ser::int16ToBytes((int16_t)spiralMotorData.RPM, payload + 5);
 
-    payload[7] = (uint8_t)tempC;
+    ser::int16ToBytes((int16_t)spiralMotorData.windingCurrentA, payload + 7);
 
-    ser::uint16ToBytes(trayAngle, payload + 8);
+    ser::int16ToBytes((int16_t)spiralMotorData.currentDrawA, payload + 9);
 
-    payload[10] = (uint8_t)swState;
+    ser::int16ToBytes((int16_t)spiralMotorData.torque, payload + 11);
 
-    _sendRaw(payload, 11);
+    payload[13] = (uint8_t)max(spiralMotorData.MOSTmpC, spiralMotorData.motorTmpC);
+
+    ser::uint16ToBytes(trayAngle, payload + 14);
+
+    payload[16] = (uint8_t)swState;
+
+    _sendRaw(payload, 17);
 }
 
 void RoverComm::sendDeviceStatus(bool vertStepper, bool vertEncoder, bool vertCurrentSensor, bool spiralMotor, bool heightSensor, bool deepSampleStepper, bool deepSampleEncoder, bool deepSampleADC, bool surfaceSampleADC)

@@ -1,5 +1,15 @@
 #pragma once
 
+struct CubeMarsData
+{
+  float RPM;
+  float windingCurrentA;
+  float currentDrawA;
+  float MOSTmpC;
+  float motorTmpC;
+  float torque;
+};
+
 class CubeMarsV2
 {
 public:
@@ -17,22 +27,18 @@ public:
   bool requestAllData();
   bool requestTmpCurrRPM();
 
-  float getMOSTmp();
-  float getMotorTmp();
-  float getCurrent();
-  float getRPM();
+  CubeMarsData getMotorData();
 
   void printMotorInfoToDebug();
 
 private:
-  float MOSTmp = 0;
-  float motorTmp = 0;
-  float current = 0;
-  float RPM = 0;
+  CubeMarsData _motorData{0,0,0,0,0,0};
 
   int32_t requestedERPM = 0;
   void transmitERPM();
   void transmitDuty(float duty);
+
+  void readAllData();
   void readTmpCurrRPM();
 
   // UART
@@ -52,7 +58,7 @@ private:
   static constexpr float gearboxRatio = 10.0;
 
   // RX buffer
-  static constexpr uint8_t MAX_PAYLOAD = 32;
+  static constexpr uint8_t MAX_PAYLOAD = 60;
   uint8_t rxBuffer[MAX_PAYLOAD + 2]; // payload + 2 CRC bytes
   uint8_t rxLength = 0;
   uint8_t rxIndex = 0;

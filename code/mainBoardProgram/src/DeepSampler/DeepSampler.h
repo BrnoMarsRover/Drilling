@@ -44,8 +44,7 @@ public:
 
   // Low level spiral motor control
   bool setSpiralRPM(float rpm);
-  float getSpiralRPM();
-  float getSpiralMotorTmp();
+  CubeMarsData getSpiralMotorData();
 
   //Storage control
   bool setCalibration0();
