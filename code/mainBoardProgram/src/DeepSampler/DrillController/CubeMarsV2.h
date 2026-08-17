@@ -58,7 +58,7 @@ private:
   static constexpr float gearboxRatio = 10.0;
 
   // RX buffer
-  static constexpr uint8_t MAX_PAYLOAD = 60;
+  static constexpr uint8_t MAX_PAYLOAD = 80;
   uint8_t rxBuffer[MAX_PAYLOAD + 2]; // payload + 2 CRC bytes
   uint8_t rxLength = 0;
   uint8_t rxIndex = 0;

@@ -137,11 +137,11 @@ void RoverComm::sendState(
 
     ser::int16ToBytes((int16_t)spiralMotorData.RPM, payload + 5);
 
-    ser::int16ToBytes((int16_t)spiralMotorData.windingCurrentA, payload + 7);
+    ser::int16ToBytes((int16_t)(100*spiralMotorData.windingCurrentA), payload + 7);
 
-    ser::int16ToBytes((int16_t)spiralMotorData.currentDrawA, payload + 9);
+    ser::int16ToBytes((int16_t)(100*spiralMotorData.currentDrawA), payload + 9);
 
-    ser::int16ToBytes((int16_t)spiralMotorData.torque, payload + 11);
+    ser::int16ToBytes((int16_t)(100*spiralMotorData.torque), payload + 11);
 
     payload[13] = (uint8_t)max(spiralMotorData.MOSTmpC, spiralMotorData.motorTmpC);
 

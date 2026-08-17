@@ -49,8 +49,8 @@ void CubeMarsV2::update()
       transmitERPM();
     }
 
-    requestTmpCurrRPM();
-    //requestAllData();
+    //requestTmpCurrRPM();
+    requestAllData();
 
     while(millis() >= commNextMillis)
     {
@@ -86,7 +86,6 @@ bool CubeMarsV2::requestAllData()
   transmitPayload(payload, 1);
   _waitingForResponse = true;
   lastRequestMillis = millis();
-  debugSerial.println("[SPMOTOR] all data requested");
   return true;
 }
 
@@ -209,14 +208,12 @@ void CubeMarsV2::handleRX()
       case WAIT_END:
         if (b == 3) // ETX
         {
-          debugSerial.println("[SPMOTOR] data received");
           uint16_t receivedCRC = (uint16_t)((rxBuffer[rxLength] << 8) | rxBuffer[rxLength + 1]);
           uint16_t computedCRC = crc16(rxBuffer, rxLength);
           if (receivedCRC == computedCRC)
           {
             _waitingForResponse = false;
             _isConnected = true;
-            debugSerial.println("[SPMOTOR] crc passed");
             switch (rxBuffer[0])
             {
               case 4:
@@ -237,8 +234,6 @@ void CubeMarsV2::handleRX()
 
 void CubeMarsV2::readAllData()
 {
-  debugSerial.println("[SPMOTOR]all data received");
-
   _motorData.MOSTmpC = 0.1 * ser::bytesToInt16(rxBuffer + 1);
   _motorData.motorTmpC = 0.1 * ser::bytesToInt16(rxBuffer + 3);
   _motorData.windingCurrentA = 0.01 * ser::bytesToInt32(rxBuffer + 5);
