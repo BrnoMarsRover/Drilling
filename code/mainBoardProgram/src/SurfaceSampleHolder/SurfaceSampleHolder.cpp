@@ -14,7 +14,7 @@ SurfaceSampleHolder::SurfaceSampleHolder(TwoWire& wire, HardwareSerial& debugSer
   _servoRock(
     4,  // pin 
     172, // closed angle
-    80 // open angle
+    72 // open angle
     ),
   _servoSand(
     15,
