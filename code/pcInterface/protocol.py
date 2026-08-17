@@ -211,19 +211,25 @@ def parse_response(data: bytes):
 
     result = {"code": code, "nack": False}
 
-    if code == CMD_STATE and len(payload) >= 10:
+    if code == CMD_STATE and len(payload) >= 17:
         # int16 height_mm, int8 vert_speed, uint8 stepper_current,
-        # int16 rpm, uint8 temp, uint16 tray_angle, uint8 sw_state
-        height, vert_speed, current, rpm, temp, tray_angle, sw_state = \
-            struct.unpack_from(">hbBhBHB", payload, 1)
+        # int16 rpm, int16 motor_winding_current, int16 motor_current_draw,
+        # int16 motor_torque, uint8 temp, uint16 tray_angle, uint8 sw_state
+        (height, vert_speed, current, rpm,
+         motor_winding_current, motor_current_draw, motor_torque,
+         temp, tray_angle, sw_state) = \
+            struct.unpack_from(">hbBhhhhBHB", payload, 1)
         result["state"] = {
-            "height_mm":    height,
-            "vert_speed":   vert_speed / 10.0,
-            "current_a":    current / 100.0,
-            "rpm":          rpm,
-            "temp_c":       temp,
-            "tray_angle":   tray_angle,
-            "sw_state":     sw_state,
+            "height_mm":               height,
+            "vert_speed":              vert_speed / 10.0,
+            "current_a":               current / 100.0,
+            "rpm":                     rpm,
+            "motor_winding_current_a": motor_winding_current / 100.0,
+            "motor_current_draw_a":    motor_current_draw / 100.0,
+            "motor_torque_nm":         motor_torque / 100.0,
+            "temp_c":                  temp,
+            "tray_angle":              tray_angle,
+            "sw_state":                sw_state,
             "sw_state_str": STATE_CODES.get(sw_state, f"Unknown (0x{sw_state:02X})"),
         }
 
