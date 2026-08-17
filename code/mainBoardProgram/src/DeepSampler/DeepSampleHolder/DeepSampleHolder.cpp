@@ -26,7 +26,8 @@ bool DeepSampleHolder::begin()
   return true;
 }
 
-void DeepSampleHolder::update(){
+void DeepSampleHolder::update()
+{
   _stepperPositioner.update();
 
   switch(_autoState){
@@ -36,19 +37,31 @@ void DeepSampleHolder::update(){
     }
     case AutoState::STORAGE_MOVING:
     {
-      if(!storageIsMoving()) {
-        if (storageGetCurrentSlot() == StepperPositioner::StoragePosition::Second) {
-          if (_sample_to_be_measured == true && millis() - _measureStateEntryTime >= 6000) { // time for vibrations to calm
-            if(requestMeasure()) {
-              _sample_to_be_measured = false;
-              Serial.println("[ADC] measure request sent");
-              _autoState = AutoState::WEIGHING;
-            } else{
-              _autoState = AutoState::ERROR;
-            }
-          }
+      if(!storageIsMoving())
+      {
+        if (storageGetCurrentSlot() == StepperPositioner::StoragePosition::Second)
+        {
+          _measureStateEntryTime = millis();
+          _autoState = AutoState::WAITING_FOR_SETTLE;
         }
-        else {
+        else
+        {
+          _autoState = AutoState::ERROR;
+        }
+      }
+      break;
+    }
+    case AutoState::WAITING_FOR_SETTLE:
+    {
+      if(millis() - _measureStateEntryTime >= 2000)
+      {
+        if(requestMeasure())
+        {
+          Serial.println("[ADC] measure request sent");
+          _autoState = AutoState::WEIGHING;
+        }
+        else
+        {
           _autoState = AutoState::ERROR;
         }
       }
@@ -56,9 +69,9 @@ void DeepSampleHolder::update(){
     }
     case AutoState::WEIGHING:
     {
-      if (getResultReady()) {
+      if (getResultReady())
+      {
         _autoState = AutoState::DONE;
-        
       }
       break;
     }
@@ -85,15 +98,12 @@ DeepSampleHolder::AutoState DeepSampleHolder::getAutoState(){
 
 
 bool DeepSampleHolder::startAutoWeighing() {
-  if(storageMoveToSlot(StepperPositioner::StoragePosition::Second)){
-    _sample_to_be_measured = true;
-    _measureStateEntryTime = millis();
+  if(storageMoveToSlot(StepperPositioner::StoragePosition::Second))
+  {
     _autoState = AutoState::STORAGE_MOVING;
     return true;
   }
-  else {
-    return false;
-  }
+  else { return false; }
 }
 
 bool DeepSampleHolder::storageMoveToAngle(int angleDeg) {
@@ -119,6 +129,7 @@ bool DeepSampleHolder::storageMoveToSlot(StepperPositioner::StoragePosition posi
 
 bool DeepSampleHolder::storageUnlock() {
   _stepperPositioner.unlock();
+  return true;
 }
 
 bool DeepSampleHolder::storageSetHoldMode(bool hold) {

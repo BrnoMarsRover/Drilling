@@ -18,6 +18,7 @@ public:
   {
     MANUAL,
     STORAGE_MOVING,
+    WAITING_FOR_SETTLE,
     WEIGHING,
     DONE,
     ERROR

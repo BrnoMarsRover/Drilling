@@ -16,10 +16,9 @@ DeepSampler::DeepSampler(TwoWire& wire, HardwareSerial& debugSerial):
 
 bool DeepSampler::begin()
 {
-  _deepSampleHolder.begin();
   _stepperEngine.init();
-  Serial.println("begin executed well");
-  if(_drillController.begin()) // && _deepSampleHolder.begin())
+
+  if(_drillController.begin() && _deepSampleHolder.begin())
     return true;
   else
     return false;  
