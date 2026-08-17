@@ -1,5 +1,5 @@
-pcbs/adc board/adc board-backups
-pcbs/adc board/.history
+pcbs/**/*-backups
+pcbs/**/.history
 
 pcbs/**/*.lck
 pcbs/**/fp-info-cache
