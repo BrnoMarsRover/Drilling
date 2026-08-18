@@ -13,6 +13,7 @@ public:
   enum class AutoState
   {
     MANUAL,
+    RAISING_BEFORE_STORE,        // nové — vyjetí nahoru před uložením
     WAITING_FOR_STORAGE_CLEAR,
     DRILLING,
     MOVING_STORAGE,
@@ -34,6 +35,7 @@ public:
   bool startDistFromSurfaceMeasure();
   float getDistFromSurfaceMM();
   bool autoSampleAndWeigh(float targetDepthMM);
+  bool autoStoreSample();
 
   // Low level carriage/vertical drive control
   bool setCarriageSpeedMMps(float MMps);

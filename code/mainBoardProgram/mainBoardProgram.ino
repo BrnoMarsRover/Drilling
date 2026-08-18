@@ -370,6 +370,22 @@ void respondToMsg(const RoverMessage& msg)
       }
       break;
     }
+    
+    case CMD_AUTO_STORE:
+    {
+      if(drillState == STATE_READY)
+      {
+        if(deepSampler.autoStoreSample())
+          roverComm.sendAck(CMD_AUTO_STORE);
+        else
+          roverComm.sendNack();
+      }
+      else
+      {
+        roverComm.sendNack();
+      }
+      break;
+    }
   }
 }
 

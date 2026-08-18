@@ -190,6 +190,22 @@ void DeepSampler::update()
       }
       break;
     }
+
+    case AutoState::RAISING_BEFORE_STORE:
+    {
+      if(_drillController.getCarriageDepthMM() == 0.0)
+      {
+        if(_deepSampleHolder.storageMoveToSlot(storeSlot))
+        {
+          _autoState = AutoState::MOVING_STORAGE;
+        }
+        else
+        {
+          _autoState = AutoState::ERROR;
+        }
+      }
+      break;
+    }
     
     case AutoState::DONE:
     {
@@ -226,6 +242,32 @@ bool DeepSampler::autoSampleAndWeigh(float targetDepthMM)
       return true;
     }
   }
+}
+
+bool DeepSampler::autoStoreSample()
+{
+  if(_autoState == AutoState::MANUAL)
+  {
+    if(_drillController.getCarriageDepthMM() == 0.0)
+    {
+      // uz je nahore -> muzeme rovnou zacit tocit zasobnikem
+      if(_deepSampleHolder.storageMoveToSlot(storeSlot))
+      {
+        _autoState = AutoState::MOVING_STORAGE;
+        return true;
+      }
+    }
+    else
+    {
+      // je dole (napr. zaseknuty vrt) -> nejdriv vyjet nahoru
+      if(_drillController.setCarriageSpeedMMps(-10.0))
+      {
+        _autoState = AutoState::RAISING_BEFORE_STORE;
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 // Low level carriage/vertical drive control

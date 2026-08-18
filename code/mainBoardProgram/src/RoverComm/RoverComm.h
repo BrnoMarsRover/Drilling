@@ -23,6 +23,7 @@ enum RoverCommand : uint8_t
     CMD_CALIBRATE_CARRIAGE_DEPTH  = 0x05,
     CMD_START_DEVICE_CHECK = 0x06,
     CMD_GET_DEVICE_STATUS = 0x07,
+    CMD_AUTO_STORE        = 0x08,   
     CMD_DRILL_SPEED       = 0x20,
     CMD_VERTICAL_SPEED    = 0x21,
     CMD_STORAGE_POSITION  = 0x22,
