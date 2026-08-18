@@ -187,8 +187,8 @@ void respondToMsg(const RoverMessage& msg)
         deepSampler.currentSensorIsConnected(),
         deepSampler.spiralMotorConnected(), //spiralMotor
         deepSampler.heightSensorConnected(), //heightSensor
-        false, //deepSampleStepper
-        false, //deepSampleEncoder
+        deepSampler.deepSampleStepperConnected(),  // deepSampleStepper
+        deepSampler.deepSampleEncoderConnected(),  // deepSampleEncoder
         deepSampler.getAdcConnected(), //deepSampleADC
         surfaceSampleHolder.getAdcConnected() //surfaceSampleADC
       );

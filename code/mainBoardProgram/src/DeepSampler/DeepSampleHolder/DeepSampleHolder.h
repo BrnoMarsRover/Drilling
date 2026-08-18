@@ -53,6 +53,8 @@ public:
   int16_t storageGetCurrentAngle()  const;
   StepperPositioner::StoragePosition storageGetCurrentSlot() const;
   bool storageIsMoving() const {return _stepperPositioner.isMoving(); }
+  bool storageEncoderConnected() const;
+  bool storageStepperConnected();
 
 private:
   TwoWire& _wire;

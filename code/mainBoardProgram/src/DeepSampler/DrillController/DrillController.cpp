@@ -227,8 +227,8 @@ bool DrillController::autoDrillToDepth(float rateOfPenetrationMMpRev, float targ
 }
 
 // Connection checks
-bool DrillController::encoderConnected() {return false;}
-bool DrillController::stepperConnected() {return false;}
+bool DrillController::encoderConnected() {return _linearAxis.encoderConnected(); }
+bool DrillController::stepperConnected() {return _linearAxis.driverConnected(); }
 bool DrillController::spiralMotorConnected() {return _motorDriver.isConnected(); }
 bool DrillController::heightSensorConnected() {return _heightSensor.isConnected(); }
 

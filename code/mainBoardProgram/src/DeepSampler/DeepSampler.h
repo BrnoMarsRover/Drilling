@@ -69,6 +69,9 @@ public:
   bool heightSensorConnected();
   bool getAdcConnected(); // to be finished
 
+  bool deepSampleEncoderConnected();
+  bool deepSampleStepperConnected();
+
 private:
   TwoWire& _wire;
   HardwareSerial& _debugSerial;

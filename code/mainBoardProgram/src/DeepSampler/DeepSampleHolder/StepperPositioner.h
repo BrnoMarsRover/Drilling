@@ -78,6 +78,8 @@ public:
     void setZeroOffset(int32_t offsetCounts);
     void setZeroOffsetDegrees(float offsetDegrees);
     void printStatus(Stream& out) const;
+    bool encoderConnected() const;
+    bool driverConnected();
 
 private:
     // interní pohyb (bez resetu retry)

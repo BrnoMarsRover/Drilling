@@ -80,6 +80,9 @@ public:
     float getStepperCurrentA() const;
     bool currentSensorIsConnected() const;
 
+    bool encoderConnected() const;
+    bool driverConnected();
+
 private:
     enum MotionState : int8_t {
         Stop = 0,

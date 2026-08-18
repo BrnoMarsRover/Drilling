@@ -195,6 +195,10 @@ bool DeepSampleHolder::setCalibrationX(float weightX)
   return true;
 }
 
-// ------------------------------------------------------------------ //
-//  Private                                                           //
-// ------------------------------------------------------------------ //
+bool DeepSampleHolder::storageEncoderConnected() const {
+  return _stepperPositioner.encoderConnected();
+}
+
+bool DeepSampleHolder::storageStepperConnected() {
+  return _stepperPositioner.driverConnected();
+}

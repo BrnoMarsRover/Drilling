@@ -421,3 +421,13 @@ int16_t StepperPositioner::shortestAngleDiff(int16_t from, int16_t to)
 
     return diff;
 }
+
+bool StepperPositioner::encoderConnected() const {
+    if (_encoder == nullptr) return false;
+    return _encoder->isConnected();
+}
+
+bool StepperPositioner::driverConnected() {
+    if (_driver == nullptr) return false;
+    return _driver->test_connection() == 0;
+}

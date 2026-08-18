@@ -450,3 +450,13 @@ void LinearAxis::stopAndZeroPosition() {
 
     Serial.println(F("[LINEAR] Koncak sepnut -> motor zastaven, pozice nulovana"));
 }
+
+bool LinearAxis::encoderConnected() const {
+    if (_encoder == nullptr) return false;
+    return _encoder->isConnected();
+}
+
+bool LinearAxis::driverConnected() {
+    if (_driver == nullptr) return false;
+    return _driver->test_connection() == 0;
+}
