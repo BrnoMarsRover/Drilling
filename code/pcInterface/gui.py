@@ -259,25 +259,29 @@ class App(tk.Tk):
 
         ttk.Button(frame, text="Start auto drill", command=self._drill_auto).grid(
             row=1, column=0, columnspan=2, sticky="ew", padx=6, pady=4)
-        ttk.Button(frame, text="Stop auto drill", command=self._stop_auto).grid(
+        ttk.Button(frame, text="Start auto store", command=self._store_auto).grid(
             row=2, column=0, columnspan=2, sticky="ew", padx=6, pady=2)
-        ttk.Button(frame, text="Store sample (auto)", command=self._store_auto).grid(
-            row=3, column=0, columnspan=2, sticky="ew", padx=6, pady=2)
 
         ttk.Separator(frame, orient="horizontal").grid(
-            row=4, column=0, columnspan=2, sticky="ew", pady=6)
+            row=3, column=0, columnspan=2, sticky="ew", pady=6)
 
         ttk.Label(frame, text="Height above ground:").grid(
-            row=5, column=0, sticky="w", padx=6, pady=2)
+            row=4, column=0, sticky="w", padx=6, pady=2)
         self.height_above_ground_var = tk.StringVar(value="—")
         ttk.Label(frame, textvariable=self.height_above_ground_var, width=10, anchor="w").grid(
-            row=5, column=1, padx=4)
-        ttk.Label(frame, text="mm").grid(row=5, column=2, sticky="w")
+            row=4, column=1, padx=4)
+        ttk.Label(frame, text="mm").grid(row=4, column=2, sticky="w")
 
         ttk.Button(frame, text="Measure height above ground", command=self._measure_height).grid(
-            row=6, column=0, columnspan=3, sticky="ew", padx=6, pady=2)
+            row=5, column=0, columnspan=3, sticky="ew", padx=6, pady=2)
         ttk.Button(frame, text="Get height above ground", command=self._get_height).grid(
-            row=7, column=0, columnspan=3, sticky="ew", padx=6, pady=2)
+            row=6, column=0, columnspan=3, sticky="ew", padx=6, pady=2)
+
+        ttk.Separator(frame, orient="horizontal").grid(
+            row=7, column=0, columnspan=3, sticky="ew", pady=6)
+
+        ttk.Button(frame, text="Stop auto", command=self._stop_auto).grid(
+            row=8, column=0, columnspan=3, sticky="ew", padx=6, pady=2)
 
     # ------------------------------------------------------------------ #
     #  Sample handling — column 1                                          #

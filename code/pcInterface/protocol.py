@@ -24,12 +24,9 @@ ETX = 0x03
 # --- Command codes ---
 CMD_RESTART            = 0x01
 CMD_STATE              = 0x02
-CMD_DRILL_AUTO         = 0x03
-CMD_STOP_AUTO          = 0x04
-CMD_CALIBRATE_HEIGHT   = 0x05
-CMD_START_DEV_CHECK    = 0x06
-CMD_GET_DEVICE_STATUS  = 0x07
-CMD_STORE_AUTO         = 0x08
+CMD_CALIBRATE_HEIGHT   = 0x03
+CMD_START_DEV_CHECK    = 0x04
+CMD_GET_DEVICE_STATUS  = 0x05
 CMD_DRILL_SPEED        = 0x20
 CMD_VERTICAL_SPEED     = 0x21
 CMD_STORAGE_POSITION   = 0x22
@@ -49,6 +46,10 @@ CMD_SAND_OPEN          = 0x52
 CMD_SAND_CLOSE         = 0x53
 CMD_SET_HOLD_MODE      = 0x54
 CMD_CLEAR_HOLD_MODE    = 0x55
+CMD_STOP_AUTO          = 0x60
+CMD_DRILL_AUTO         = 0x61
+CMD_STORE_AUTO         = 0x62
+
 
 # --- Software state codes ---
 STATE_CODES = {

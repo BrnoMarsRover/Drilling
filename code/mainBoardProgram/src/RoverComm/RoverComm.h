@@ -18,12 +18,9 @@ enum RoverCommand : uint8_t
 {
     CMD_RESTART           = 0x01,
     CMD_STATE             = 0x02,
-    CMD_DRILL_AUTO        = 0x03,
-    CMD_STOP_AUTO         = 0x04,
-    CMD_CALIBRATE_CARRIAGE_DEPTH  = 0x05,
-    CMD_START_DEVICE_CHECK = 0x06,
-    CMD_GET_DEVICE_STATUS = 0x07,
-    CMD_AUTO_STORE        = 0x08,   
+    CMD_CALIBRATE_CARRIAGE_DEPTH  = 0x03,
+    CMD_START_DEVICE_CHECK = 0x04,
+    CMD_GET_DEVICE_STATUS = 0x05,
     CMD_DRILL_SPEED       = 0x20,
     CMD_VERTICAL_SPEED    = 0x21,
     CMD_STORAGE_POSITION  = 0x22,
@@ -42,7 +39,11 @@ enum RoverCommand : uint8_t
     CMD_SAND_OPEN         = 0x52,
     CMD_SAND_CLOSE        = 0x53,
     SET_HOLD_MODE         = 0x54,
-    CLEAR_HOLD_MODE       =	0x55
+    CLEAR_HOLD_MODE       =	0x55,
+    CMD_STOP_AUTO         = 0x60,
+    CMD_DRILL_AUTO        = 0x61,
+    CMD_STORE_AUTO        = 0x62, 
+    
 };
 
 // ------------------------------------------------------------------ //
