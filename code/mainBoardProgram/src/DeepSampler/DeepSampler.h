@@ -76,7 +76,6 @@ public:
   bool deepSampleEncoderConnected();
   bool deepSampleStepperConnected();
 
-  bool autoDivideSample();
 
 private:
   TwoWire& _wire;
@@ -89,20 +88,14 @@ private:
 
   AutoState _autoState = AutoState::MANUAL;
   float _targetDepthMM;
-  StepperPositioner::StoragePosition storeSlot = StepperPositioner::StoragePosition::First;
 
   uint32_t _storingStartTimeMS = 0;
   static constexpr uint32_t _storingDurationMS = 8000;
+  uint8_t  _divideSlotIndex = 0;
 
   StepperPositioner::StoragePosition _divideSlots[3] = {
-  StepperPositioner::StoragePosition::First,
-  StepperPositioner::StoragePosition::Second,
-  StepperPositioner::StoragePosition::Third
+    StepperPositioner::StoragePosition::First,
+    StepperPositioner::StoragePosition::Second,
+    StepperPositioner::StoragePosition::Third
   };
-
-  uint8_t  _divideSlotIndex = 0;
-  uint32_t _divideSpinStartTimeMS = 0;
-  static constexpr uint32_t _divideSpinDurationMS = 1500; // délka zpětného otočení [ms]
-  static constexpr float    _divideSpinRPM = -20.0f;      // rychlost zpětného otočení
-
 };

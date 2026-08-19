@@ -63,9 +63,44 @@ void DeepSampler::update()
     {
       if(_drillController.getAutoState() == DrillController::AutoState::DONE)
       {
-        if(_drillController.getCarriageDepthMM() < 50.0)
+        if(_drillController.spiralDepthBelowSensor() < -5.0)
         {
-          if(_deepSampleHolder.storageMoveToSlot(storeSlot))
+          if(_drillController.setCarriageSpeedMMps(8))
+          {
+            
+          }
+          else
+          {
+            _autoState = AutoState::ERROR;
+          }
+        }
+        else if(_drillController.spiralDepthBelowSensor() > -2.0)
+        {
+          if(_drillController.setCarriageSpeedMMps(-8))
+          {
+        
+          }
+          else
+          {
+            _autoState = AutoState::ERROR;
+          }
+        }
+        _autoState = AutoState::MOVING_CARRIAGE_TO_STORE;
+      }
+      if(_drillController.getAutoState() == DrillController::AutoState::ERROR)
+      {
+        _autoState = AutoState::ERROR;
+      }
+      break;
+    }
+
+    case AutoState::MOVING_CARRIAGE_TO_STORE:
+    {
+      if(_drillController.spiralDepthBelowSensor() > -5.0 && _drillController.spiralDepthBelowSensor() < -2.0)
+      {
+        if(_drillController.setCarriageSpeedMMps(0))
+        {
+          if(_deepSampleHolder.storageMoveToSlot(_divideSlots[_divideSlotIndex]))
           {
             _autoState = AutoState::MOVING_STORAGE; 
           }
@@ -79,10 +114,6 @@ void DeepSampler::update()
           _autoState = AutoState::ERROR;
         }
       }
-      if(_drillController.getAutoState() == DrillController::AutoState::ERROR)
-      {
-        _autoState = AutoState::ERROR;
-      }
       break;
     }
     
@@ -90,38 +121,7 @@ void DeepSampler::update()
     {
       if(!_deepSampleHolder.storageIsMoving())
       {
-        if(_deepSampleHolder.storageGetCurrentSlot() == storeSlot)
-        {
-          if(_drillController.getCarriageDepthMM() < 50.0)
-          {
-            if(_drillController.setCarriageSpeedMMps(8))
-            {
-              _autoState = AutoState::MOVING_CARRIAGE_TO_STORE;
-            }
-            else
-            {
-              _autoState = AutoState::ERROR;
-            }
-          }
-          else
-          {
-            _autoState = AutoState::ERROR;
-          }
-        }
-        else
-        {
-          _autoState = AutoState::ERROR;
-        }
-      }
-
-      break;
-    }
-    
-    case AutoState::MOVING_CARRIAGE_TO_STORE:
-    {
-      if(_drillController.spiralDepthBelowSensor() > -5.0)
-      {
-        if(_drillController.setCarriageSpeedMMps(0))
+        if(_deepSampleHolder.storageGetCurrentSlot() == _divideSlots[_divideSlotIndex])
         {
           if(_drillController.setSpiralRPM(-30))
           {
@@ -138,6 +138,7 @@ void DeepSampler::update()
           _autoState = AutoState::ERROR;
         }
       }
+
       break;
     }
     
@@ -145,9 +146,28 @@ void DeepSampler::update()
     {
       if(millis() > _storingStartTimeMS + _storingDurationMS)
       {
-        if(_drillController.setSpiralRPM(0) && _deepSampleHolder.startAutoWeighing())
+        if(_drillController.setSpiralRPM(0))
         {
-          _autoState = AutoState::WEIGHING;
+          _divideSlotIndex++;
+          if(_divideSlotIndex < 3)
+          {
+            if(_deepSampleHolder.storageMoveToSlot(_divideSlots[_divideSlotIndex]))
+            {
+              _autoState = AutoState::MOVING_STORAGE;
+            }
+            else
+            {
+              _autoState = AutoState::ERROR;
+            }
+          }
+          else
+          {
+            if(_deepSampleHolder.startAutoWeighing())
+            {
+              _autoState = AutoState::WEIGHING;
+            }
+            else {_autoState = AutoState::ERROR;}
+          }
         }
         else
         {
@@ -181,83 +201,7 @@ void DeepSampler::update()
     {
       if(_drillController.getCarriageDepthMM() == 0.0)
       {
-        _deepSampleHolder.startAutoWeighing();
-        if(_deepSampleHolder.getAutoState() == DeepSampleHolder::AutoState::DONE)
-        {
-          _autoState = AutoState::DONE;
-        }
-        //_autoState = AutoState::DONE;
-      }
-      break;
-    }
-
-    case AutoState::RAISING_BEFORE_STORE:
-    {
-      if(_drillController.getCarriageDepthMM() == 0.0)
-      {
-        if(_deepSampleHolder.storageMoveToSlot(storeSlot))
-        {
-          _autoState = AutoState::MOVING_STORAGE;
-        }
-        else
-        {
-          _autoState = AutoState::ERROR;
-        }
-      }
-      break;
-    }
-
-    case AutoState::DIVIDING_MOVING_STORAGE:
-    {
-      if(!_deepSampleHolder.storageIsMoving())
-      {
-        if(_deepSampleHolder.storageGetCurrentSlot() == _divideSlots[_divideSlotIndex])
-        {
-          if(_drillController.setSpiralRPM(_divideSpinRPM))
-          {
-            _divideSpinStartTimeMS = millis();
-            _autoState = AutoState::DIVIDING_SPINNING_BACK;
-          }
-          else
-          {
-            _autoState = AutoState::ERROR;
-          }
-        }
-        else
-        {
-          _autoState = AutoState::ERROR;
-        }
-      }
-      break;
-    }
-
-    case AutoState::DIVIDING_SPINNING_BACK:
-    {
-      if(millis() > _divideSpinStartTimeMS + _divideSpinDurationMS)
-      {
-        if(_drillController.setSpiralRPM(0))
-        {
-          _divideSlotIndex++;
-          if(_divideSlotIndex < 3)
-          {
-            if(_deepSampleHolder.storageMoveToSlot(_divideSlots[_divideSlotIndex]))
-            {
-              _autoState = AutoState::DIVIDING_MOVING_STORAGE;
-            }
-            else
-            {
-              _autoState = AutoState::ERROR;
-            }
-          }
-          else
-          {
-            _autoState = AutoState::DONE;
-          }
-        }
-        else
-        {
-          _autoState = AutoState::ERROR;
-        }
+        _autoState = AutoState::DONE;
       }
       break;
     }
@@ -303,40 +247,11 @@ bool DeepSampler::autoStoreSample()
 {
   if(_autoState == AutoState::MANUAL)
   {
-    if(_drillController.getCarriageDepthMM() == 0.0)
-    {
-      // uz je nahore -> muzeme rovnou zacit tocit zasobnikem
-      if(_deepSampleHolder.storageMoveToSlot(storeSlot))
-      {
-        _autoState = AutoState::MOVING_STORAGE;
-        return true;
-      }
-    }
-    else
-    {
-      // je dole (napr. zaseknuty vrt) -> nejdriv vyjet nahoru
-      if(_drillController.setCarriageSpeedMMps(-10.0))
-      {
-        _autoState = AutoState::RAISING_BEFORE_STORE;
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-bool DeepSampler::autoDivideSample()
-{
-  if(_autoState == AutoState::MANUAL)
-  {
     _divideSlotIndex = 0;
-    if(_deepSampleHolder.storageMoveToSlot(_divideSlots[_divideSlotIndex]))
-    {
-      _autoState = AutoState::DIVIDING_MOVING_STORAGE;
-      return true;
-    }
+    _autoState = AutoState::MOVING_CARRIAGE_TO_STORE;
+    return true;
   }
-  return false;
+  else {return false;}
 }
 
 // Low level carriage/vertical drive control
