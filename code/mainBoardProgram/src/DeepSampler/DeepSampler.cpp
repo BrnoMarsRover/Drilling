@@ -206,7 +206,62 @@ void DeepSampler::update()
       }
       break;
     }
-    
+
+    case AutoState::DIVIDING_MOVING_STORAGE:
+    {
+      if(!_deepSampleHolder.storageIsMoving())
+      {
+        if(_deepSampleHolder.storageGetCurrentSlot() == _divideSlots[_divideSlotIndex])
+        {
+          if(_drillController.setSpiralRPM(_divideSpinRPM))
+          {
+            _divideSpinStartTimeMS = millis();
+            _autoState = AutoState::DIVIDING_SPINNING_BACK;
+          }
+          else
+          {
+            _autoState = AutoState::ERROR;
+          }
+        }
+        else
+        {
+          _autoState = AutoState::ERROR;
+        }
+      }
+      break;
+    }
+
+    case AutoState::DIVIDING_SPINNING_BACK:
+    {
+      if(millis() > _divideSpinStartTimeMS + _divideSpinDurationMS)
+      {
+        if(_drillController.setSpiralRPM(0))
+        {
+          _divideSlotIndex++;
+          if(_divideSlotIndex < 3)
+          {
+            if(_deepSampleHolder.storageMoveToSlot(_divideSlots[_divideSlotIndex]))
+            {
+              _autoState = AutoState::DIVIDING_MOVING_STORAGE;
+            }
+            else
+            {
+              _autoState = AutoState::ERROR;
+            }
+          }
+          else
+          {
+            _autoState = AutoState::DONE;
+          }
+        }
+        else
+        {
+          _autoState = AutoState::ERROR;
+        }
+      }
+      break;
+    }
+  
     case AutoState::DONE:
     {
       break;
@@ -265,6 +320,20 @@ bool DeepSampler::autoStoreSample()
         _autoState = AutoState::RAISING_BEFORE_STORE;
         return true;
       }
+    }
+  }
+  return false;
+}
+
+bool DeepSampler::autoDivideSample()
+{
+  if(_autoState == AutoState::MANUAL)
+  {
+    _divideSlotIndex = 0;
+    if(_deepSampleHolder.storageMoveToSlot(_divideSlots[_divideSlotIndex]))
+    {
+      _autoState = AutoState::DIVIDING_MOVING_STORAGE;
+      return true;
     }
   }
   return false;

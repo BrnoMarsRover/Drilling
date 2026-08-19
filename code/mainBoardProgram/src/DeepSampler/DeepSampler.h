@@ -13,7 +13,7 @@ public:
   enum class AutoState
   {
     MANUAL,
-    RAISING_BEFORE_STORE,        // nové — vyjetí nahoru před uložením
+    RAISING_BEFORE_STORE,
     WAITING_FOR_STORAGE_CLEAR,
     DRILLING,
     MOVING_STORAGE,
@@ -21,6 +21,8 @@ public:
     STORING,
     WEIGHING,
     MOVING_UP,
+    DIVIDING_MOVING_STORAGE,
+    DIVIDING_SPINNING_BACK, 
     DONE,
     ERROR
   };
@@ -74,6 +76,8 @@ public:
   bool deepSampleEncoderConnected();
   bool deepSampleStepperConnected();
 
+  bool autoDivideSample();
+
 private:
   TwoWire& _wire;
   HardwareSerial& _debugSerial;
@@ -89,4 +93,16 @@ private:
 
   uint32_t _storingStartTimeMS = 0;
   static constexpr uint32_t _storingDurationMS = 8000;
+
+  StepperPositioner::StoragePosition _divideSlots[3] = {
+  StepperPositioner::StoragePosition::First,
+  StepperPositioner::StoragePosition::Second,
+  StepperPositioner::StoragePosition::Third
+  };
+
+  uint8_t  _divideSlotIndex = 0;
+  uint32_t _divideSpinStartTimeMS = 0;
+  static constexpr uint32_t _divideSpinDurationMS = 1500; // délka zpětného otočení [ms]
+  static constexpr float    _divideSpinRPM = -20.0f;      // rychlost zpětného otočení
+
 };
