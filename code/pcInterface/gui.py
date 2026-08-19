@@ -2,8 +2,10 @@
 gui.py
 
 Tkinter GUI for the drilling HMI.
-All serial communication goes through the SerialWorker — the GUI never
-touches the serial port directly.
+All communication goes through the CommWorker — the GUI never touches the
+serial port or UDP socket directly. CommWorker supports two transports,
+switchable from the Connection bar: direct USB serial to the ESP32, or a
+localhost UDP link to the main rover communication app.
 
 Layout (4 columns, 2 content rows):
   Col 0: Drill status + Manual controls
@@ -51,16 +53,69 @@ class App(tk.Tk):
         frame = ttk.LabelFrame(self, text="Connection")
         frame.grid(row=0, column=0, columnspan=4, padx=8, pady=6, sticky="ew")
 
-        ttk.Label(frame, text="COM port:").grid(row=0, column=0, padx=4, pady=4)
+        # --- Transport mode selector ---
+        ttk.Label(frame, text="Mode:").grid(row=0, column=0, padx=4, pady=4)
+        self.conn_mode_var = tk.StringVar(value="serial")
+        self.serial_radio = ttk.Radiobutton(
+            frame, text="USB Serial", variable=self.conn_mode_var,
+            value="serial", command=self._on_mode_change)
+        self.serial_radio.grid(row=0, column=1, padx=(4, 0), pady=4, sticky="w")
+        self.udp_radio = ttk.Radiobutton(
+            frame, text="UDP (localhost)", variable=self.conn_mode_var,
+            value="udp", command=self._on_mode_change)
+        self.udp_radio.grid(row=0, column=2, padx=(4, 12), pady=4, sticky="w")
+
+        # --- Serial-specific controls (shown when Mode == USB Serial) ---
+        self.serial_frame = ttk.Frame(frame)
+        self.serial_frame.grid(row=0, column=3, padx=4, pady=4, sticky="w")
+        ttk.Label(self.serial_frame, text="COM port:").pack(side="left")
         self.port_var = tk.StringVar()
-        self.port_combo = ttk.Combobox(frame, textvariable=self.port_var, width=12, state="readonly")
-        self.port_combo.grid(row=0, column=1, padx=4, pady=4)
-        ttk.Button(frame, text="Refresh", command=self._refresh_ports).grid(row=0, column=2, padx=4)
+        self.port_combo = ttk.Combobox(
+            self.serial_frame, textvariable=self.port_var, width=12, state="readonly")
+        self.port_combo.pack(side="left", padx=4)
+        self.refresh_btn = ttk.Button(self.serial_frame, text="Refresh", command=self._refresh_ports)
+        self.refresh_btn.pack(side="left")
+
+        # --- UDP-specific controls (shown when Mode == UDP) ---
+        self.udp_frame = ttk.Frame(frame)
+        self.udp_frame.grid(row=0, column=3, padx=4, pady=4, sticky="w")
+        ttk.Label(self.udp_frame, text="Listen port (from main app):").pack(side="left")
+        self.udp_local_port_var = tk.StringVar(value="5599")
+        ttk.Entry(self.udp_frame, textvariable=self.udp_local_port_var, width=6).pack(
+            side="left", padx=(4, 12))
+        ttk.Label(self.udp_frame, text="Send port (to main app):").pack(side="left")
+        self.udp_remote_port_var = tk.StringVar(value="5600")
+        ttk.Entry(self.udp_frame, textvariable=self.udp_remote_port_var, width=6).pack(
+            side="left", padx=4)
+
         self.connect_btn = ttk.Button(frame, text="Connect", command=self._toggle_connection)
-        self.connect_btn.grid(row=0, column=3, padx=4)
+        self.connect_btn.grid(row=0, column=4, padx=4)
         self.conn_status = ttk.Label(frame, text="Disconnected", foreground="red")
-        self.conn_status.grid(row=0, column=4, padx=8)
+        self.conn_status.grid(row=0, column=5, padx=8)
+
         self._refresh_ports()
+        self._on_mode_change()
+
+    def _on_mode_change(self):
+        """Show the controls relevant to the selected transport mode."""
+        if self.conn_mode_var.get() == "serial":
+            self.udp_frame.grid_remove()
+            self.serial_frame.grid()
+        else:
+            self.serial_frame.grid_remove()
+            self.udp_frame.grid()
+
+    def _set_mode_controls_enabled(self, enabled: bool):
+        """Lock the mode switch and its fields while connected."""
+        state = "normal" if enabled else "disabled"
+        combo_state = "readonly" if enabled else "disabled"
+        self.serial_radio.config(state=state)
+        self.udp_radio.config(state=state)
+        self.port_combo.config(state=combo_state)
+        self.refresh_btn.config(state=state)
+        for child in self.udp_frame.winfo_children():
+            if isinstance(child, ttk.Entry):
+                child.config(state=state)
 
     def _refresh_ports(self):
         ports = [p.device for p in serial.tools.list_ports.comports()]
@@ -73,19 +128,42 @@ class App(tk.Tk):
             self.worker.disconnect()
             self.connect_btn.config(text="Connect")
             self.conn_status.config(text="Disconnected", foreground="red")
+            self._set_mode_controls_enabled(True)
             self._log("Disconnected.")
-        else:
+            return
+
+        mode = self.conn_mode_var.get()
+
+        if mode == "serial":
             port = self.port_var.get()
             if not port:
                 messagebox.showerror("Error", "No COM port selected.")
                 return
-            ok = self.worker.connect(port)
-            if ok:
-                self.connect_btn.config(text="Disconnect")
-                self.conn_status.config(text=f"Connected ({port})", foreground="green")
-                self._log(f"Connected on {port}.")
-            else:
-                self._log(f"Failed to connect on {port}.")
+            ok = self.worker.connect_serial(port)
+            description = port
+        else:
+            try:
+                local_port = int(self.udp_local_port_var.get())
+                remote_port = int(self.udp_remote_port_var.get())
+            except ValueError:
+                messagebox.showerror("Error", "UDP ports must be numbers.")
+                return
+            if not (0 < local_port <= 65535 and 0 < remote_port <= 65535):
+                messagebox.showerror("Error", "UDP ports must be between 1 and 65535.")
+                return
+            if local_port == remote_port:
+                messagebox.showerror("Error", "Listen port and send port must be different.")
+                return
+            ok = self.worker.connect_udp(local_port, remote_port)
+            description = f"UDP — listen {local_port} / send {remote_port}"
+
+        if ok:
+            self.connect_btn.config(text="Disconnect")
+            self.conn_status.config(text=f"Connected ({description})", foreground="green")
+            self._set_mode_controls_enabled(False)
+            self._log(f"Connected: {description}.")
+        else:
+            self._log(f"Failed to connect: {description}.")
 
     # ------------------------------------------------------------------ #
     #  Status panel (STATE response)  — column 0                          #
@@ -183,21 +261,23 @@ class App(tk.Tk):
             row=1, column=0, columnspan=2, sticky="ew", padx=6, pady=4)
         ttk.Button(frame, text="Stop auto drill", command=self._stop_auto).grid(
             row=2, column=0, columnspan=2, sticky="ew", padx=6, pady=2)
+        ttk.Button(frame, text="Store sample (auto)", command=self._store_auto).grid(
+            row=3, column=0, columnspan=2, sticky="ew", padx=6, pady=2)
 
         ttk.Separator(frame, orient="horizontal").grid(
-            row=3, column=0, columnspan=2, sticky="ew", pady=6)
+            row=4, column=0, columnspan=2, sticky="ew", pady=6)
 
         ttk.Label(frame, text="Height above ground:").grid(
-            row=4, column=0, sticky="w", padx=6, pady=2)
+            row=5, column=0, sticky="w", padx=6, pady=2)
         self.height_above_ground_var = tk.StringVar(value="—")
         ttk.Label(frame, textvariable=self.height_above_ground_var, width=10, anchor="w").grid(
-            row=4, column=1, padx=4)
-        ttk.Label(frame, text="mm").grid(row=4, column=2, sticky="w")
+            row=5, column=1, padx=4)
+        ttk.Label(frame, text="mm").grid(row=5, column=2, sticky="w")
 
         ttk.Button(frame, text="Measure height above ground", command=self._measure_height).grid(
-            row=5, column=0, columnspan=3, sticky="ew", padx=6, pady=2)
-        ttk.Button(frame, text="Get height above ground", command=self._get_height).grid(
             row=6, column=0, columnspan=3, sticky="ew", padx=6, pady=2)
+        ttk.Button(frame, text="Get height above ground", command=self._get_height).grid(
+            row=7, column=0, columnspan=3, sticky="ew", padx=6, pady=2)
 
     # ------------------------------------------------------------------ #
     #  Sample handling — column 1                                          #
@@ -471,6 +551,9 @@ class App(tk.Tk):
 
     def _stop_auto(self):
         self._send(protocol.cmd_stop_auto(), "STOP AUTO")
+
+    def _store_auto(self):
+        self._send(protocol.cmd_store_auto(), "STORE AUTO")
 
     def _weigh_deep(self):
         self._send(protocol.cmd_weigh_deep(), "WEIGH DEEP")

@@ -29,6 +29,7 @@ CMD_STOP_AUTO          = 0x04
 CMD_CALIBRATE_HEIGHT   = 0x05
 CMD_START_DEV_CHECK    = 0x06
 CMD_GET_DEVICE_STATUS  = 0x07
+CMD_STORE_AUTO         = 0x08
 CMD_DRILL_SPEED        = 0x20
 CMD_VERTICAL_SPEED     = 0x21
 CMD_STORAGE_POSITION   = 0x22
@@ -113,6 +114,9 @@ def cmd_start_dev_check():
 
 def cmd_get_device_status():
     return build_command(CMD_GET_DEVICE_STATUS)
+
+def cmd_store_auto():
+    return build_command(CMD_STORE_AUTO)
 
 def cmd_drill_speed(rpm: int):
     return build_command(CMD_DRILL_SPEED, struct.pack(">h", rpm))

@@ -12,9 +12,6 @@
 ## Matrix build for espidf using platformio
 [![Build espidf](https://github.com/gin66/FastAccelStepper/actions/workflows/build_idf_examples_matrix.yml/badge.svg)](https://github.com/gin66/FastAccelStepper/actions/workflows/build_idf_examples_matrix.yml)
 
-## Build for esp32 with tasmota
-[![`V2_0_15`](https://github.com/gin66/FastAccelStepper/actions/workflows/build_examples_esp32_tasmota_2_0_15.yml/badge.svg)](https://github.com/gin66/FastAccelStepper/actions/workflows/build_examples_esp32_tasmota_2_0_15.yml)
-
 ## Arduino and esp32
 
 Arduino core v3.0.x are using esp-idf v5.0 up to v5.1 and FastAccelStepper will fail to compile.
@@ -658,4 +655,5 @@ As mentioned by kthod861 in [Issue #110](https://github.com/gin66/FastAccelStepp
 - Thanks viteo for pull request (https://github.com/gin66/FastAccelStepper/pull/319): add dir pin input to `attachToPulseCounter()`
 - Thanks Magnus for pico sdk support and code improvement hints (#334)
 - Thanks Sam W for pull request (https://github.com/gin66/FastAccelStepper/pull/351) samx3-due: Fix null result from `tryAllocateQueue()`
+- Thanks drayde for pull request (https://github.com/gin66/FastAccelStepper/pull/366) Fix ESP-IDF 6 RMT header include
 

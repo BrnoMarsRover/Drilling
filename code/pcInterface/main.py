@@ -5,12 +5,12 @@ Entry point for the Drilling HMI application.
 Run this file with: python main.py
 """
 
-from serial_worker import SerialWorker
+from comm_worker import CommWorker
 from gui import App
 
 
 def main():
-    worker = SerialWorker()
+    worker = CommWorker()
     app = App(worker)
     app.mainloop()
     worker.disconnect()

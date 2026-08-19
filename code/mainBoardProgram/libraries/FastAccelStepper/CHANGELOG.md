@@ -1,3 +1,10 @@
+1.2.7:
+- esp32_idf: Fix StepperDemo.cpp build for ESP-IDF 6 (uses `esp_task_wdt_init(const esp_task_wdt_config_t*)` API via `ESP_IDF_VERSION_MAJOR >= 5` guard)
+- ci: Switch IDF build flags from `-Wno-error=attributes` to `-Wno-attributes` to silence `'noreturn' attribute does not apply to types` warning emitted by ESP-IDF 6 `hal/assert.h`
+
+1.2.6:
+- esp32: Fix ESP-IDF 6 RMT header include (#366)
+
 1.2.5:
 - ESP32: Enable MCPWM/PCNT driver for IDF 5.3+ on ESP32-S3, ESP32-C6, ESP32-H2
 - Add driverType()/driverTypeString() API to query ESP32 driver at runtime
