@@ -31,12 +31,9 @@ Drill: 0x02 (start) -> 0x01 (length 5) -> 0x42 (Weight request received. Weight 
 |-                     |-                   |-                             |-                         |
 | RESTART - Restarts the microcontroller. Retracts the deep sample box. Returns the vertical drive to its uppermost position. Also calibrates the vertical position value. | 0x01 | None | None |
 | STATE - Requests the state of the drilling mechanism | 0x02 | None | Response is in table below |
-| DRILL AUTO - Automatically extract, store and weigh a deep sample from specified depth. Blocks manual commands. | 0x03 | Desired drill depth - uint8 [cm] | None |
-| STOP AUTO - Stops the automatic drilling or storing procedure. Unlocks manual commands. | 0x04 | None | None |
-| CALIBRATE CARRIAGE DEPTH - Moves the carriage up, until it hits the top limit switch. Sets depth = 0 at that position. | 0x05 | None | None |
-| START DEVICE CHECK - Checks whether peripheral devices are connected and responding. | 0x06 | None | None |
-| GET DEVICE STATUS - Requests the result of the START DEVICE CHECK | 0x07 | None | uint16 (String of bits. Each bit corresponds to one peripheral device. 1 = OK, 0 = not OK. Order of devices in table below) |
-| STORE AUTO - Automatically store and weigh a sample that is already in the spiral. Blocks manual commands. | 0x08 | None | None |
+| CALIBRATE CARRIAGE DEPTH - Moves the carriage up, until it hits the top limit switch. Sets depth = 0 at that position. | 0x03 | None | None |
+| START DEVICE CHECK - Checks whether peripheral devices are connected and responding. | 0x04 | None | None |
+| GET DEVICE STATUS - Requests the result of the START DEVICE CHECK | 0x05 | None | uint16 (String of bits. Each bit corresponds to one peripheral device. 1 = OK, 0 = not OK. Order of devices in table below) |
 | DRILL SPEED - sets the speed of the drill/spiral | 0x20 | int16 [RPM] | None |
 | VERTICAL SPEED - sets the speed of the vertical drive | 0x21 | int8 [0,1 mm/s]<br>e.g.&nbsp;100 = 10mm/s | None |
 | STORAGE POSITION - sets the position of the deep sample storage box | 0x22 | uint8 [position] | None |
@@ -56,6 +53,9 @@ Drill: 0x02 (start) -> 0x01 (length 5) -> 0x42 (Weight request received. Weight 
 | SAND CLOSE - closes the sand sample box  | 0x53 | None | None |
 | SET HOLD MODE - sets hold mode on the deep storage - locks it in place, but continuously draws current. | 0x54 | None | None |
 | CLEAR HOLD MODE - clears hold mode on the deep storage. | 0x55 | None | None |
+| STOP AUTO - Stops all automatic procedures. Unlocks manual commands. | 0x60 | None | None |
+| DRILL AUTO - Automatically extract, store and weigh a deep sample from specified depth. Blocks manual commands. | 0x61 | Desired drill depth - uint8 [cm] | None |
+| STORE AUTO - Automatically store and weigh a sample that is already in the spiral. Blocks manual commands. | 0x62 | None | None |
 
 STATE response table
 | Variable meaning | Data type | Unit |
