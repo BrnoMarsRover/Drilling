@@ -63,34 +63,40 @@ void DeepSampler::update()
     {
       if(_drillController.getAutoState() == DrillController::AutoState::DONE)
       {
-        if(_drillController.spiralDepthBelowSensor() < -5.0)
-        {
-          if(_drillController.setCarriageSpeedMMps(8))
-          {
-            
-          }
-          else
-          {
-            _autoState = AutoState::ERROR;
-          }
-        }
-        else if(_drillController.spiralDepthBelowSensor() > -2.0)
-        {
-          if(_drillController.setCarriageSpeedMMps(-8))
-          {
-        
-          }
-          else
-          {
-            _autoState = AutoState::ERROR;
-          }
-        }
-        _autoState = AutoState::MOVING_CARRIAGE_TO_STORE;
+        _autoState = AutoState::MOVE_CARRIAGE_TO_STORE;
       }
       if(_drillController.getAutoState() == DrillController::AutoState::ERROR)
       {
         _autoState = AutoState::ERROR;
       }
+      break;
+    }
+
+    case AutoState::MOVE_CARRIAGE_TO_STORE:
+    {        
+      if(_drillController.spiralDepthBelowSensor() < -5.0)
+      {
+        if(_drillController.setCarriageSpeedMMps(8))
+        {
+          
+        }
+        else
+        {
+          _autoState = AutoState::ERROR;
+        }
+      }
+      else if(_drillController.spiralDepthBelowSensor() > -2.0)
+      {
+        if(_drillController.setCarriageSpeedMMps(-8))
+        {
+      
+        }
+        else
+        {
+          _autoState = AutoState::ERROR;
+        }
+      }
+      _autoState = AutoState::MOVING_CARRIAGE_TO_STORE;
       break;
     }
 
@@ -181,7 +187,7 @@ void DeepSampler::update()
     {
       if(_deepSampleHolder.getAutoState() == DeepSampleHolder::AutoState::DONE)
       {
-        if(_drillController.setCarriageSpeedMMps(-10.0))
+        if(_drillController.setCarriageSpeedMMps(-10.0) && _deepSampleHolder.storageMoveToSlot(StepperPositioner::StoragePosition::Home))
         {
           _autoState = AutoState::MOVING_UP;
         }
@@ -199,7 +205,7 @@ void DeepSampler::update()
     
     case AutoState::MOVING_UP:
     {
-      if(_drillController.getCarriageDepthMM() == 0.0)
+      if(_drillController.getCarriageDepthMM() == 0.0 && _deepSampleHolder.storageGetCurrentSlot() == StepperPositioner::StoragePosition::Home)
       {
         _autoState = AutoState::DONE;
       }
@@ -248,7 +254,7 @@ bool DeepSampler::autoStoreSample()
   if(_autoState == AutoState::MANUAL)
   {
     _divideSlotIndex = 0;
-    _autoState = AutoState::MOVING_CARRIAGE_TO_STORE;
+    _autoState = AutoState::MOVE_CARRIAGE_TO_STORE;
     return true;
   }
   else {return false;}

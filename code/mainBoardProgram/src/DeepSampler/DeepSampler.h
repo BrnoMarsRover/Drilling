@@ -16,13 +16,12 @@ public:
     RAISING_BEFORE_STORE,
     WAITING_FOR_STORAGE_CLEAR,
     DRILLING,
-    MOVING_STORAGE,
+    MOVE_CARRIAGE_TO_STORE,
     MOVING_CARRIAGE_TO_STORE,
+    MOVING_STORAGE,
     STORING,
     WEIGHING,
     MOVING_UP,
-    DIVIDING_MOVING_STORAGE,
-    DIVIDING_SPINNING_BACK, 
     DONE,
     ERROR
   };
@@ -90,7 +89,7 @@ private:
   float _targetDepthMM;
 
   uint32_t _storingStartTimeMS = 0;
-  static constexpr uint32_t _storingDurationMS = 8000;
+  static constexpr uint32_t _storingDurationMS = 5000;
   uint8_t  _divideSlotIndex = 0;
 
   StepperPositioner::StoragePosition _divideSlots[3] = {
