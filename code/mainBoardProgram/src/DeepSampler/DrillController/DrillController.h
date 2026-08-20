@@ -12,15 +12,14 @@
 class DrillController
 {
 public:
-  enum class AutoState
+  enum class AutoState : uint8_t
   {
-    MANUAL,
-    WAITING_FOR_HEIGHT,
-    MOVING_DOWN,
-    DRILLING,
-    MOVING_UP,
-    DONE,
-    ERROR
+    MANUAL = 0x00,
+    WAITING_FOR_HEIGHT = 0x01,
+    MOVING_DOWN = 0x02,
+    DRILLING = 0x03,
+    DONE = 0xFE,
+    ERROR = 0xFF
   };
 
   DrillController(TwoWire& wire, HardwareSerial& debugSerial, FastAccelStepperEngine& stepperEngine);

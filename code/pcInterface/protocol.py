@@ -51,15 +51,40 @@ CMD_DRILL_AUTO         = 0x61
 CMD_STORE_AUTO         = 0x62
 
 
-# --- Software state codes ---
-STATE_CODES = {
-    0x00: "Initializing",
-    0x01: "Error — try restarting",
-    0x02: "Ready",
-    0xF0: "Auto: drilling down",
-    0xF1: "Auto: could not reach depth",
-    0xF2: "Auto: depth reached, moving up",
-    0xF3: "Auto: storing sample",
+# --- Autonomy state codes ---
+# Three independent state machines, each reported as its own uint8 in the
+# STATE response. Codes and meanings per protocol spec.
+
+DEEP_SAMPLER_STATE_CODES = {
+    0x00: "MANUAL",
+    0x01: "WAITING_FOR_STORAGE_CLEAR",
+    0x02: "DRILLING",
+    0x03: "MOVE_CARRIAGE_TO_STORE",
+    0x04: "MOVING_CARRIAGE_TO_STORE",
+    0x05: "MOVING_STORAGE",
+    0x06: "STORING",
+    0x07: "WEIGHING",
+    0x08: "MOVING_UP",
+    0xFE: "DONE",
+    0xFF: "ERROR",
+}
+
+DRILL_CONTROLLER_STATE_CODES = {
+    0x00: "MANUAL",
+    0x01: "WAITING_FOR_HEIGHT",
+    0x02: "MOVING_DOWN",
+    0x03: "DRILLING",
+    0xFE: "DONE",
+    0xFF: "ERROR",
+}
+
+DEEP_SAMPLE_HOLDER_STATE_CODES = {
+    0x00: "MANUAL",
+    0x01: "STORAGE_MOVING",
+    0x02: "WAITING_FOR_SETTLE",
+    0x03: "WEIGHING",
+    0xFE: "DONE",
+    0xFF: "ERROR",
 }
 
 # --- Device status bit order (LSB first) ---
@@ -189,7 +214,11 @@ def parse_response(data: bytes):
     Possible keys in the returned dict:
       'code'          : int   — the echoed command code (or 0 for NACK)
       'nack'          : bool  — True if the drill refused the command
-      'state'         : dict  — present if code == CMD_STATE
+      'state'         : dict  — present if code == CMD_STATE. Includes
+                                 separate deep_sampler_state,
+                                 drill_controller_state, and
+                                 deep_sample_holder_state fields (each
+                                 with a matching *_str name).
       'weight'        : float — present if code == CMD_GET_WEIGHT_DEEP/SURFACE
       'adc_raw'       : int   — raw ADC value, present alongside 'weight'
       'height_mm'     : int   — present if code == CMD_GET_HEIGHT
@@ -216,14 +245,17 @@ def parse_response(data: bytes):
 
     result = {"code": code, "nack": False}
 
-    if code == CMD_STATE and len(payload) >= 17:
+    if code == CMD_STATE and len(payload) >= 19:
         # int16 height_mm, int8 vert_speed, uint8 stepper_current,
         # int16 rpm, int16 motor_winding_current, int16 motor_current_draw,
-        # int16 motor_torque, uint8 temp, uint16 tray_angle, uint8 sw_state
+        # int16 motor_torque, uint8 temp, uint16 tray_angle,
+        # uint8 deep_sampler_state, uint8 drill_controller_state,
+        # uint8 deep_sample_holder_state
         (height, vert_speed, current, rpm,
          motor_winding_current, motor_current_draw, motor_torque,
-         temp, tray_angle, sw_state) = \
-            struct.unpack_from(">hbBhhhhBHB", payload, 1)
+         temp, tray_angle, deep_sampler_state, drill_controller_state,
+         deep_sample_holder_state) = \
+            struct.unpack_from(">hbBhhhhBHBBB", payload, 1)
         result["state"] = {
             "height_mm":               height,
             "vert_speed":              vert_speed / 10.0,
@@ -234,8 +266,15 @@ def parse_response(data: bytes):
             "motor_torque_nm":         motor_torque / 100.0,
             "temp_c":                  temp,
             "tray_angle":              tray_angle,
-            "sw_state":                sw_state,
-            "sw_state_str": STATE_CODES.get(sw_state, f"Unknown (0x{sw_state:02X})"),
+            "deep_sampler_state":      deep_sampler_state,
+            "deep_sampler_state_str": DEEP_SAMPLER_STATE_CODES.get(
+                deep_sampler_state, f"Unknown (0x{deep_sampler_state:02X})"),
+            "drill_controller_state":  drill_controller_state,
+            "drill_controller_state_str": DRILL_CONTROLLER_STATE_CODES.get(
+                drill_controller_state, f"Unknown (0x{drill_controller_state:02X})"),
+            "deep_sample_holder_state": deep_sample_holder_state,
+            "deep_sample_holder_state_str": DEEP_SAMPLE_HOLDER_STATE_CODES.get(
+                deep_sample_holder_state, f"Unknown (0x{deep_sample_holder_state:02X})"),
         }
 
     elif code in (CMD_GET_WEIGHT_DEEP, CMD_GET_WEIGHT_SURFACE) and len(payload) >= 9:

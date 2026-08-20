@@ -14,14 +14,14 @@
 class DeepSampleHolder
 {
 public:
-  enum class AutoState
+  enum class AutoState : uint8_t
   {
-    MANUAL,
-    STORAGE_MOVING,
-    WAITING_FOR_SETTLE,
-    WEIGHING,
-    DONE,
-    ERROR
+    MANUAL = 0x00,
+    STORAGE_MOVING = 0x01,
+    WAITING_FOR_SETTLE = 0x02,
+    WEIGHING = 0x03,
+    DONE = 0xFE,
+    ERROR = 0xFF
   };
 
   DeepSampleHolder(TwoWire& wire, HardwareSerial& debugSerial, FastAccelStepperEngine& stepperEngine);
@@ -31,6 +31,7 @@ public:
 
   bool startAutoWeighing();
   AutoState getAutoState();
+  bool setManualControl();
 
   bool requestMeasure();
   bool requestTemp();

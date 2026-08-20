@@ -195,12 +195,12 @@ void LinearAxis::moveDown() {
     setMotionState(Down);
 }
 
-void LinearAxis::stop() {
+bool LinearAxis::stop() {
 
     if (_stepper != nullptr && !_stepper->isRunning()) {
         _motionState = Stop;
         _speedHz = 0;
-        return;
+        return true;
     }
 
     _motionState = Stop;
@@ -210,6 +210,8 @@ void LinearAxis::stop() {
         _speedHz = 0;
     }
     Serial.println(F("[LINEAR] Motor zastaven"));
+
+    return true;
 }
 
 void LinearAxis::zero() {

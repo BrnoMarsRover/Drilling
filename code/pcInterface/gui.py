@@ -185,7 +185,9 @@ class App(tk.Tk):
             ("Motor torque",           "motor_torque_var",    "Nm"),
             ("Motor temp",             "temp_var",            "°C"),
             ("Tray angle",             "tray_var",            "°"),
-            ("State",                  "sw_state_var",        ""),
+            ("DeepSampler state",         "deep_sampler_state_var",       ""),
+            ("DrillController state",     "drill_controller_state_var",   ""),
+            ("DeepSampleHolder state",    "deep_sample_holder_state_var", ""),
         ]
 
         for i, (label, attr, unit) in enumerate(labels):
@@ -462,7 +464,9 @@ class App(tk.Tk):
             self.motor_torque_var.set(f"{s['motor_torque_nm']:.2f}")
             self.temp_var.set(str(s["temp_c"]))
             self.tray_var.set(str(s["tray_angle"]))
-            self.sw_state_var.set(s["sw_state_str"])
+            self.deep_sampler_state_var.set(s["deep_sampler_state_str"])
+            self.drill_controller_state_var.set(s["drill_controller_state_str"])
+            self.deep_sample_holder_state_var.set(s["deep_sample_holder_state_str"])
 
         elif code == protocol.CMD_GET_HEIGHT and "height_mm" in msg:
             self._last_height_above_ground_mm = msg["height_mm"]

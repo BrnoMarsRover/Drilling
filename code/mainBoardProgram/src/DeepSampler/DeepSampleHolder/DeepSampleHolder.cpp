@@ -86,7 +86,8 @@ void DeepSampleHolder::update()
   }
 }
 
-DeepSampleHolder::AutoState DeepSampleHolder::getAutoState(){
+DeepSampleHolder::AutoState DeepSampleHolder::getAutoState()
+{
   if(_autoState == AutoState::DONE){
     _autoState = AutoState::MANUAL;
     return AutoState::DONE;
@@ -94,6 +95,12 @@ DeepSampleHolder::AutoState DeepSampleHolder::getAutoState(){
   else{
     return _autoState;
   }
+}
+
+bool DeepSampleHolder::setManualControl()
+{
+  _autoState = AutoState::MANUAL;
+  return true;
 }
 
 

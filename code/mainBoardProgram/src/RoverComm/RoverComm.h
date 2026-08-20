@@ -3,7 +3,10 @@
 
 #include "../shared/ADS122C04_LIB.h"
 #include "../shared/serializer.h"
+#include "../DeepSampler/DeepSampler.h"
+#include "../DeepSampler/DrillController/DrillController.h"
 #include "../DeepSampler/DrillController/CubeMarsV2.h"
+#include "../DeepSampler/DeepSampleHolder/DeepSampleHolder.h"
 
 // ------------------------------------------------------------------ //
 //  Message queue depth — increase if commands are arriving faster    //
@@ -44,20 +47,6 @@ enum RoverCommand : uint8_t
     CMD_DRILL_AUTO        = 0x61,
     CMD_STORE_AUTO        = 0x62, 
     
-};
-
-// ------------------------------------------------------------------ //
-//  Software state codes (used when sending STATE response)           //
-// ------------------------------------------------------------------ //
-enum DrillState : uint8_t
-{
-    STATE_INITIALIZING        = 0x00,
-    STATE_ERROR               = 0x01,
-    STATE_READY               = 0x02,
-    STATE_AUTO_DRILLING_DOWN  = 0xF0,
-    STATE_AUTO_CANT_REACH     = 0xF1,
-    STATE_AUTO_MOVING_UP      = 0xF2,
-    STATE_AUTO_STORING        = 0xF3,
 };
 
 // ------------------------------------------------------------------ //
@@ -129,7 +118,9 @@ public:
         float stepperCurrentA,
         CubeMarsData spiralMotorData,
         uint16_t trayAngle,
-        DrillState swState);
+        DeepSampler::AutoState deepSamplerState,
+        DrillController::AutoState drillControllerState,
+        DeepSampleHolder::AutoState deepSampleHolderState);
 
     void sendDeviceStatus(bool vertStepper, bool vertEncoder, bool vertCurrentSensor, bool spiralMotor, bool heightSensor, bool deepSampleStepper, bool deepSampleEncoder, bool deepSampleADC, bool surfaceSampleADC);
 

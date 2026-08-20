@@ -10,20 +10,19 @@
 class DeepSampler
 {
 public:
-  enum class AutoState
+  enum class AutoState : uint8_t
   {
-    MANUAL,
-    RAISING_BEFORE_STORE,
-    WAITING_FOR_STORAGE_CLEAR,
-    DRILLING,
-    MOVE_CARRIAGE_TO_STORE,
-    MOVING_CARRIAGE_TO_STORE,
-    MOVING_STORAGE,
-    STORING,
-    WEIGHING,
-    MOVING_UP,
-    DONE,
-    ERROR
+    MANUAL = 0x00,
+    WAITING_FOR_STORAGE_CLEAR = 0x01,
+    DRILLING = 0x02,
+    MOVE_CARRIAGE_TO_STORE = 0x03,
+    MOVING_CARRIAGE_TO_STORE = 0x04,
+    MOVING_STORAGE = 0x05,
+    STORING = 0x06,
+    WEIGHING = 0x07,
+    MOVING_UP = 0x08,
+    DONE = 0xFE,
+    ERROR = 0xFF
   };
 
   DeepSampler(TwoWire& wire, HardwareSerial& debugSerial);
@@ -32,6 +31,8 @@ public:
 
   // High level control/autonomy
   AutoState getAutoState();
+  DrillController::AutoState getDrillControllerState();
+  DeepSampleHolder::AutoState getDeepSampleHolderState();
   bool setManualControl();
   bool startDistFromSurfaceMeasure();
   float getDistFromSurfaceMM();

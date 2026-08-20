@@ -42,7 +42,7 @@ void DeepSampler::update()
       {
         if (_deepSampleHolder.storageGetCurrentSlot() == StepperPositioner::StoragePosition::Home)
         {
-          if(_drillController.autoDrillToDepth(5, 60, _targetDepthMM ) )
+          if(_drillController.autoDrillToDepth(8, 60, _targetDepthMM ) )
           {
             _autoState = AutoState::DRILLING;
           }
@@ -219,6 +219,8 @@ void DeepSampler::update()
     
     case AutoState::ERROR:
     {
+      _drillController.setCarriageSpeedMMps(0);
+      _drillController.setSpiralRPM(0);
       break;
     }
   }
@@ -226,11 +228,15 @@ void DeepSampler::update()
 
 // Integrated carriage/spiral motor control
 DeepSampler::AutoState DeepSampler::getAutoState() {return _autoState; }
+DrillController::AutoState DeepSampler::getDrillControllerState() {return _drillController.getAutoState(); }
+DeepSampleHolder::AutoState DeepSampler::getDeepSampleHolderState() {return _deepSampleHolder.getAutoState(); }
+
 bool DeepSampler::setManualControl()
 {
-
   _autoState = AutoState::MANUAL;
-  return _drillController.setManualControl();
+  _deepSampleHolder.setManualControl();
+  _drillController.setManualControl();
+  return true;
 }
 bool DeepSampler::startDistFromSurfaceMeasure() {return _drillController.startDistFromSurfaceMeasure(); }
 float DeepSampler::getDistFromSurfaceMM() {return _drillController.getDistFromSurfaceMM(); }

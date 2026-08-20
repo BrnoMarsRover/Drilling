@@ -38,7 +38,7 @@ public:
     // pohyb
     void moveUp();
     void moveDown();
-    void stop();
+    bool stop();
     void zero();
 
     // nastavení pohybu

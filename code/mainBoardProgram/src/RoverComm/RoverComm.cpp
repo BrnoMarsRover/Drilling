@@ -124,9 +124,11 @@ void RoverComm::sendState(
     float stepperCurrentA,
     CubeMarsData spiralMotorData,
     uint16_t trayAngle,
-    DrillState swState)
+    DeepSampler::AutoState deepSamplerState,
+    DrillController::AutoState drillControllerState,
+    DeepSampleHolder::AutoState deepSampleHolderState)
 {
-    uint8_t payload[17];
+    uint8_t payload[19];
     payload[0] = (uint8_t)CMD_STATE;
 
     ser::int16ToBytes((int16_t)carriageDepthMM, payload + 1);
@@ -147,9 +149,11 @@ void RoverComm::sendState(
 
     ser::uint16ToBytes(trayAngle, payload + 14);
 
-    payload[16] = (uint8_t)swState;
+    payload[16] = (uint8_t)deepSamplerState;
+    payload[17] = (uint8_t)drillControllerState;
+    payload[18] = (uint8_t)deepSampleHolderState;
 
-    _sendRaw(payload, 17);
+    _sendRaw(payload, 19);
 }
 
 void RoverComm::sendDeviceStatus(bool vertStepper, bool vertEncoder, bool vertCurrentSensor, bool spiralMotor, bool heightSensor, bool deepSampleStepper, bool deepSampleEncoder, bool deepSampleADC, bool surfaceSampleADC)
