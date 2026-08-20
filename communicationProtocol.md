@@ -69,7 +69,7 @@ STATE response table
 | Spiral motor torque | int16 | 0,01 Nm (100 = 1 Nm) |
 | Spiral motor temperature | uint8 | °C |
 | Deep sample storage angle | uint16 | ° |
-| Software state | uint8 | Code of the state - meaning in table below yet again :) |
+| Autonomy state | uint8 | Code of the state of the autonomy state machine - meaning in table below yet again :) |
 
 Autonomy state codes 
 | Code | Meaning |
