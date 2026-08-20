@@ -59,6 +59,8 @@ public:
     {
         code = (RoverCommand)buffer[0];
         argLength = length - 1;           // argument bytes after the code
+        if (argLength > sizeof(argArray))
+            argLength = sizeof(argArray);
         for (uint8_t i = 0; i < argLength; i++)
         {
             argArray[i] = buffer[i + 1];

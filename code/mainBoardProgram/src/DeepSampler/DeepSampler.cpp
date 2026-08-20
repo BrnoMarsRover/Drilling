@@ -48,12 +48,12 @@ void DeepSampler::update()
           }
           else
           {
-            _autoState = AutoState::ERROR;
+            enterError();
           }
         }
         else
         {
-          _autoState = AutoState::ERROR;
+          enterError();
         }
       }
       break;
@@ -68,7 +68,7 @@ void DeepSampler::update()
       }
       if(_drillController.getAutoState() == DrillController::AutoState::ERROR)
       {
-        _autoState = AutoState::ERROR;
+        enterError();
       }
       break;
     }
@@ -83,7 +83,7 @@ void DeepSampler::update()
         }
         else
         {
-          _autoState = AutoState::ERROR;
+          enterError();
         }
       }
       else if(_drillController.spiralDepthBelowSensor() > -2.0)
@@ -94,8 +94,12 @@ void DeepSampler::update()
         }
         else
         {
-          _autoState = AutoState::ERROR;
+          enterError();
         }
+      }
+      else
+      {
+        _autoState = AutoState::MOVING_CARRIAGE_TO_STORE;
       }
       
       break;
@@ -113,12 +117,12 @@ void DeepSampler::update()
           }
           else
           {
-            _autoState = AutoState::ERROR;
+            enterError();
           }
         }
         else
         {
-          _autoState = AutoState::ERROR;
+          enterError();
         }
       }
       break;
@@ -137,12 +141,12 @@ void DeepSampler::update()
           }
           else
           {
-            _autoState = AutoState::ERROR;
+            enterError();
           }
         }
         else
         {
-          _autoState = AutoState::ERROR;
+          enterError();
         }
       }
 
@@ -151,7 +155,7 @@ void DeepSampler::update()
     
     case AutoState::STORING:
     {
-      if(millis() > _storingStartTimeMS + _storingDurationMS)
+      if(millis() - _storingStartTimeMS > _storingDurationMS)
       {
         if(_drillController.setSpiralRPM(0))
         {
@@ -164,7 +168,7 @@ void DeepSampler::update()
             }
             else
             {
-              _autoState = AutoState::ERROR;
+              enterError();
             }
           }
           else
@@ -173,12 +177,12 @@ void DeepSampler::update()
             {
               _autoState = AutoState::WEIGHING;
             }
-            else {_autoState = AutoState::ERROR;}
+            else {enterError();}
           }
         }
         else
         {
-          _autoState = AutoState::ERROR;
+          enterError();
         }
       }
       break;
@@ -196,19 +200,19 @@ void DeepSampler::update()
         }
         else
         {
-          _autoState = AutoState::ERROR;
+          enterError();
         }
       }
       if(_deepSampleHolder.getAutoState() == DeepSampleHolder::AutoState::ERROR)
       {
-        _autoState = AutoState::ERROR;
+        enterError();
       }
       break;
     }
     
     case AutoState::MOVING_UP:
     {
-      if(_drillController.getCarriageDepthMM() == 0.0 && _deepSampleHolder.storageGetCurrentSlot() == StepperPositioner::StoragePosition::Home)
+      if(_drillController.getCarriageDepthMM() < 1.0 && _deepSampleHolder.storageGetCurrentSlot() == StepperPositioner::StoragePosition::Home)
       {
         _autoState = AutoState::DONE;
       }
@@ -222,8 +226,7 @@ void DeepSampler::update()
     
     case AutoState::ERROR:
     {
-      _drillController.setCarriageSpeedMMps(0);
-      _drillController.setSpiralRPM(0);
+
       break;
     }
   }
@@ -251,6 +254,7 @@ bool DeepSampler::autoSampleAndWeigh(float targetDepthMM)
   {
     if(_deepSampleHolder.storageMoveToSlot(StepperPositioner::StoragePosition::Home))
     {
+      _divideSlotIndex = 0;
       _targetDepthMM = targetDepthMM;
       _autoState = AutoState::WAITING_FOR_STORAGE_CLEAR;
       return true;
@@ -325,3 +329,12 @@ bool DeepSampler::heightSensorConnected() {return _drillController.heightSensorC
 bool DeepSampler::getAdcConnected() {return _deepSampleHolder.getAdcConnected();}
 bool DeepSampler::deepSampleEncoderConnected() {return _deepSampleHolder.storageEncoderConnected(); }
 bool DeepSampler::deepSampleStepperConnected() {return _deepSampleHolder.storageStepperConnected(); }
+
+void DeepSampler::enterError()
+{
+  _drillController.setManualControl();
+  _drillController.setCarriageSpeedMMps(0);
+  _drillController.setSpiralRPM(0);
+  _deepSampleHolder.setManualControl();
+  _autoState = AutoState::ERROR;
+}

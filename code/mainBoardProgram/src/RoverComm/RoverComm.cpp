@@ -32,7 +32,7 @@ void RoverComm::handle()
 
             case READ_LENGTH:
                 // Reject zero-length or oversized packets
-                if (b == 0 || b > sizeof(_rxBuffer) - 1)
+                if (b == 0 || b > 5)   // 1 byte code + max 4 bytes of argument
                 {
                     _parserState = WAIT_START;
                     break;

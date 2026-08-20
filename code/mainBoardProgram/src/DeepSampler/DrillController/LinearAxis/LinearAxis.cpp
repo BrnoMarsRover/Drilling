@@ -250,11 +250,11 @@ bool LinearAxis::setSpeedMMps(float mmPerSec) {
     //if (mmPerSec <= 0.0f) mmPerSec = 0.1f;
 
     float stepsPerSec = abs(mmPerSec) * ((float)_stepsPerRevolution / _mmPerRevolution);
-      
+    /*
     Serial.print("[DBG] setSpeedMMps="); Serial.print(mmPerSec);
     Serial.print(" stepsPerSec="); Serial.print(stepsPerSec);
     Serial.print(" _speedHz pred="); Serial.println(_speedHz);
-
+    */
 
     setSpeed((uint32_t)stepsPerSec);
 
@@ -409,9 +409,11 @@ void LinearAxis::applyMotion() {
     _stepper->setAcceleration(_accelHz);
     _stepper->applySpeedAcceleration();
 
+    /*
     Serial.print("[DBG] applyMotion state="); Serial.print(_motionState);
     Serial.print(" _speedHz="); Serial.println(_speedHz);
-
+    */
+    
     if (_motionState == Up) {
         //_stepper->runForward();
         _stepper->runBackward();

@@ -87,6 +87,7 @@ private:
   DeepSampleHolder _deepSampleHolder;
 
   AutoState _autoState = AutoState::MANUAL;
+  void enterError();
   float _targetDepthMM;
 
   uint32_t _storingStartTimeMS = 0;
