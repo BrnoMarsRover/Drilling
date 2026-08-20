@@ -79,7 +79,7 @@ void DeepSampler::update()
       {
         if(_drillController.setCarriageSpeedMMps(8))
         {
-          
+          _autoState = AutoState::MOVING_CARRIAGE_TO_STORE;
         }
         else
         {
@@ -90,14 +90,14 @@ void DeepSampler::update()
       {
         if(_drillController.setCarriageSpeedMMps(-8))
         {
-      
+          _autoState = AutoState::MOVING_CARRIAGE_TO_STORE; 
         }
         else
         {
           _autoState = AutoState::ERROR;
         }
       }
-      _autoState = AutoState::MOVING_CARRIAGE_TO_STORE;
+      
       break;
     }
 
@@ -255,6 +255,7 @@ bool DeepSampler::autoSampleAndWeigh(float targetDepthMM)
       _autoState = AutoState::WAITING_FOR_STORAGE_CLEAR;
       return true;
     }
+    else { return false; }
   }
   else { return false; }
 }
