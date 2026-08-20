@@ -80,6 +80,10 @@ bool LinearAxis::begin(uint16_t rmsCurrent, uint16_t microsteps) {
         _currentSensor.startMeasure();
     }
 
+    // Vstupy uz mely od pinMode() cas se ustalit - az ted je odecet platny
+    if (_limitTop != nullptr)    _limitTop->resync();
+    if (_limitBottom != nullptr) _limitBottom->resync();
+
     _depthCalibrated = isTopLimitPressed();
 
     _initialized = true;

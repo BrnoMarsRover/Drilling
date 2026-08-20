@@ -5,6 +5,10 @@ LimitSwitch::LimitSwitch(uint8_t pinNumber, uint16_t debounceMillis) {
   debounceMs = debounceMillis;
   pinMode(switchPin, INPUT);
 
+  resync();
+}
+
+void LimitSwitch::resync() {
   currentState = (digitalRead(switchPin) == LOW);
 
   candidateState   = currentState;

@@ -12,6 +12,11 @@ public:
   bool wasPressed() const;
   bool wasReleased() const;
 
+  // Okamzite prevezme aktualni hodnotu pinu jako potvrzeny stav, bez debounce.
+  // Urceno pro inicializaci - po pinMode() potrebuje vstup cas na ustaleni,
+  // takze hodnota z konstruktoru jeste nemusi byt platna.
+  void resync();
+
   // Nefiltrovana hodnota pinu - jen pro diagnostiku, ne pro rizeni
   bool rawIsPressed() const;
 
