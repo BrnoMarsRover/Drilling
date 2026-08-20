@@ -389,9 +389,9 @@ void StepperPositioner::handleStall() {
 
     if (_retryCount > MAX_RETRIES) {
         _moving     = false;
-        _fatalError = true;
-        Serial.println(F("[STORAGE] !!! MOTOR ZABLOKOVAN !!! Pouzij unlock()."));
-        _applyHoldState(); 
+        //_fatalError = true;
+        Serial.println(F("[STORAGE] !!! MOTOR ZABLOKOVAN !!!."));
+        //_applyHoldState(); 
         return;
     }
 
