@@ -55,6 +55,8 @@ public:
     bool isTopLimitPressed() const;
     bool isBottomLimitPressed() const;
 
+    bool isDepthCalibrated() const;
+
     int32_t getStepperPosition() const;
     float getDepthMM() const;
 
@@ -122,6 +124,7 @@ private:
     bool _initialized = false;
     bool _fatalError = false;
     bool _loadPrintEnabled = false;
+    bool _depthCalibrated = false;
 
     uint32_t _loadPrintIntervalMs = 0;
     uint32_t _lastLoadPrintMs = 0;

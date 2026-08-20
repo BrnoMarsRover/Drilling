@@ -33,6 +33,7 @@ public:
   float getCarriageDepthMM() const;
   float getVerticalStepperCurrentA() const;
   bool currentSensorIsConnected() const;
+  bool isDepthCalibrated() const;
 
   float spiralDepthBelowSensor()
   {

@@ -166,6 +166,8 @@ float DrillController::getVerticalStepperCurrentA() const { return _linearAxis.g
 
 bool DrillController::currentSensorIsConnected() const {return _linearAxis.currentSensorIsConnected(); }
 
+bool DrillController::isDepthCalibrated() const {return _linearAxis.isDepthCalibrated(); }
+
 bool DrillController::setSpiralRPM(float rpm)
 {
   if (_autoState == AutoState::MANUAL)

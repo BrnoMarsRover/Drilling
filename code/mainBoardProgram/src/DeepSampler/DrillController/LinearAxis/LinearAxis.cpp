@@ -79,6 +79,9 @@ bool LinearAxis::begin(uint16_t rmsCurrent, uint16_t microsteps) {
         Serial.println(F("[LINEAR] INA219 OK"));
         _currentSensor.startMeasure();
     }
+
+    _depthCalibrated = isTopLimitPressed();
+
     _initialized = true;
     return !_fatalError;
 }
@@ -290,6 +293,8 @@ bool LinearAxis::isTopLimitPressed() const { return digitalRead(_limitTopPin) ==
 
 bool LinearAxis::isBottomLimitPressed() const { return digitalRead(_limitBottomPin) == LOW; }
 
+bool LinearAxis::isDepthCalibrated() const { return _depthCalibrated; }
+
 int32_t LinearAxis::getStepperPosition() const {
     if (_stepper == nullptr) return 0;
     return _stepper->getCurrentPosition();
@@ -447,6 +452,8 @@ void LinearAxis::stopAndZeroPosition() {
     if (_encoder != nullptr) {
         _encoder->setZero();
     }
+
+    _depthCalibrated = true;
 
     Serial.println(F("[LINEAR] Koncak sepnut -> motor zastaven, pozice nulovana"));
 }
