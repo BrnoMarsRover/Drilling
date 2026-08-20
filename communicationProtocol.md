@@ -69,9 +69,12 @@ STATE response table
 | Spiral motor torque | int16 | 0,01 Nm (100 = 1 Nm) |
 | Spiral motor temperature | uint8 | °C |
 | Deep sample storage angle | uint16 | ° |
-| Autonomy state | uint8 | Code of the state of the autonomy state machine - meaning in table below yet again :) |
+| DeepSampler state | uint8 | Code of the state of the autonomous state machine of DeepSampler - meaning in table below. |
+| DrillController state | uint8 | Meaning in table below. |
+| DeepSampleHolder state | uint8 | Meaning in table below. |
 
-Autonomy state codes 
+
+DeepSampler state codes 
 | Code | Meaning |
 |-     |-        |
 | 0x00 | MANUAL |
@@ -83,8 +86,28 @@ Autonomy state codes
 | 0x06 | STORING |
 | 0x07 | WEIGHING |
 | 0x08 | MOVING_UP |
-| 0x09 | DONE |
-| 0x0A | ERROR |
+| 0xFE | DONE |
+| 0xFF | ERROR |
+
+DrillController state codes
+| Code | Meaning |
+|-     |-        |
+| 0x00 | MANUAL |
+| 0x01 | WAITING_FOR_HEIGHT |
+| 0x02 | MOVING_DOWN |
+| 0x03 | DRILLING |
+| 0xFE | DONE |
+| 0xFF | ERROR |
+
+DeepSampleHolder state codes
+| Code | Meaning |
+|-     |-        |
+| 0x00 | MANUAL |
+| 0x01 | STORAGE_MOVING |
+| 0x02 | WAITING_FOR_SETTLE |
+| 0x03 | WEIGHING |
+| 0xFE | DONE |
+| 0xFF | ERROR |
 
 CHECK DEVICES response order
 | Order | Device |
