@@ -136,29 +136,6 @@ void respondToMsg(const RoverMessage& msg)
       break;
     }
 
-    case CMD_DRILL_AUTO:
-    {
-      if(deepSampler.autoSampleAndWeigh(10*((float)msg.getUint8Arg()) ) )
-        roverComm.sendAck(CMD_DRILL_AUTO);
-      else
-        roverComm.sendNack();
-
-      break;
-    }
-
-    case CMD_STOP_AUTO:
-    {
-      if(deepSampler.setManualControl())
-      {
-        roverComm.sendAck(CMD_STOP_AUTO);
-      }
-      else
-      {
-        roverComm.sendNack();
-      }
-      break;
-    }
-
     case CMD_CALIBRATE_CARRIAGE_DEPTH:
     {
       if(deepSampler.setCarriageSpeedMMps(-10.0))
@@ -365,10 +342,32 @@ void respondToMsg(const RoverMessage& msg)
       }
       break;
     }
+
+    case CMD_STOP_AUTO:
+    {
+      if(deepSampler.setManualControl())
+      {
+        roverComm.sendAck(CMD_STOP_AUTO);
+      }
+      else
+      {
+        roverComm.sendNack();
+      }
+      break;
+    }
+
+    case CMD_DRILL_AUTO:
+    {
+      if(deepSampler.autoDrillStoreWeigh(10*((float)msg.getUint8Arg()) ) )
+        roverComm.sendAck(CMD_DRILL_AUTO);
+      else
+        roverComm.sendNack();
+      break;
+    }
     
     case CMD_STORE_AUTO:
     {
-      if(deepSampler.autoStoreSample())
+      if(deepSampler.autoStoreWeigh())
         roverComm.sendAck(CMD_STORE_AUTO);
       else
         roverComm.sendNack();

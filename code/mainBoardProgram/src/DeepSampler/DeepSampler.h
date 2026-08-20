@@ -36,8 +36,8 @@ public:
   bool setManualControl();
   bool startDistFromSurfaceMeasure();
   float getDistFromSurfaceMM();
-  bool autoSampleAndWeigh(float targetDepthMM);
-  bool autoStoreSample();
+  bool autoDrillStoreWeigh(float targetDepthMM);
+  bool autoStoreWeigh();
 
   // Low level carriage/vertical drive control
   bool setCarriageSpeedMMps(float MMps);
@@ -91,6 +91,7 @@ private:
   float _targetDepthMM;
 
   uint32_t _storingStartTimeMS = 0;
+  const float _storingRPM = -60.0; 
   static constexpr uint32_t _storingDurationMS = 5000;
   uint8_t  _divideSlotIndex = 0;
 

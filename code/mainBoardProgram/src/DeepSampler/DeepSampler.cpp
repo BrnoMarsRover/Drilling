@@ -42,7 +42,7 @@ void DeepSampler::update()
       {
         if (_deepSampleHolder.storageGetCurrentSlot() == StepperPositioner::StoragePosition::Home)
         {
-          if(_drillController.autoDrillToDepth(8, 60, _targetDepthMM ) )
+          if(_drillController.autoDrillToDepth(12, 60, _targetDepthMM ) )
           {
             _autoState = AutoState::DRILLING;
           }
@@ -134,7 +134,7 @@ void DeepSampler::update()
       {
         if(_deepSampleHolder.storageGetCurrentSlot() == _divideSlots[_divideSlotIndex])
         {
-          if(_drillController.setSpiralRPM(-30))
+          if(_drillController.setSpiralRPM(_storingRPM))
           {
             _storingStartTimeMS = millis();
             _autoState = AutoState::STORING;
@@ -248,23 +248,25 @@ bool DeepSampler::startDistFromSurfaceMeasure() {return _drillController.startDi
 float DeepSampler::getDistFromSurfaceMM() {return _drillController.getDistFromSurfaceMM(); }
 
 
-bool DeepSampler::autoSampleAndWeigh(float targetDepthMM)
+bool DeepSampler::autoDrillStoreWeigh(float targetDepthMM)
 {
+  if(!_drillController.isDepthCalibrated())
+    _debugSerial.println("not calibrated");
   if(_autoState == AutoState::MANUAL && _drillController.isDepthCalibrated())
   {
-    if(_deepSampleHolder.storageMoveToSlot(StepperPositioner::StoragePosition::Home))
+    //if(_deepSampleHolder.storageMoveToSlot(StepperPositioner::StoragePosition::Home))
     {
       _divideSlotIndex = 0;
       _targetDepthMM = targetDepthMM;
       _autoState = AutoState::WAITING_FOR_STORAGE_CLEAR;
       return true;
     }
-    else { return false; }
+    //else{ return false; }
   }
   else { return false; }
 }
 
-bool DeepSampler::autoStoreSample()
+bool DeepSampler::autoStoreWeigh()
 {
   if(_autoState == AutoState::MANUAL && _drillController.isDepthCalibrated())
   {
