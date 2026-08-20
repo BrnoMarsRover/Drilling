@@ -215,7 +215,7 @@ void ADS122C04::scale_calibrate_0(void) {
   Serial.println(F("[ADC] Scale calibration 1/2. "));
   Serial.println(F("On scale should be weight of 0g"));
 
-  float adc_zero = read_median(16);
+  float adc_zero = read_median(10); // old 16
   _cal_adc_zero = adc_zero;
   Serial.print(F("[ADC] at 0g: "));
   Serial.println(adc_zero, 2);
@@ -227,7 +227,7 @@ void ADS122C04::scale_calibrate_100(void) {
   Serial.println(F("[ADC] Scale calibration 2/2. "));
   Serial.print(F("On scale should be weight of Xg"));
 
-  float adc_100 = read_median(16);
+  float adc_100 = read_median(10); // old 16
   Serial.print(F("[ADC] at Xg: "));
   Serial.println(adc_100, 2);
 
