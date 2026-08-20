@@ -174,18 +174,7 @@ bool DrillController::setSpiralRPM(float rpm)
 CubeMarsData DrillController::getSpiralMotorData() { return _motorDriver.getMotorData(); }
 
 // Integrated drill control
-DrillController::AutoState DrillController::getAutoState()
-{
-  if(_autoState == AutoState::DONE)
-  {
-    _autoState = AutoState::MANUAL;
-    return AutoState::DONE;
-  }
-  else
-  {
-    return _autoState;
-  }
-}
+DrillController::AutoState DrillController::getAutoState() { return _autoState; }
 
 bool DrillController::startDistFromSurfaceMeasure()
 {
