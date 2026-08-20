@@ -8,9 +8,9 @@ public:
   LimitSwitch(uint8_t pinNumber, uint16_t debounceMillis = 8);
 
   void update();
-  bool isPressed();
-  bool wasPressed();
-  bool wasReleased();
+  bool isPressed() const;
+  bool wasPressed() const;
+  bool wasReleased() const;
 
   // Nefiltrovana hodnota pinu - jen pro diagnostiku, ne pro rizeni
   bool rawIsPressed() const;

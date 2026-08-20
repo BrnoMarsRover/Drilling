@@ -52,15 +52,15 @@ void LimitSwitch::update() {
   }
 }
 
-bool LimitSwitch::isPressed() {
+bool LimitSwitch::isPressed() const {
   return currentState;
 }
 
-bool LimitSwitch::wasPressed() {
+bool LimitSwitch::wasPressed() const {
   return pressedEvent;
 }
 
-bool LimitSwitch::wasReleased() {
+bool LimitSwitch::wasReleased() const {
   return releasedEvent;
 }
 

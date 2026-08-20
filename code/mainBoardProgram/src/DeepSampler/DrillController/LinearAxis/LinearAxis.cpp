@@ -291,9 +291,18 @@ bool LinearAxis::isMovingDown() const { return _motionState == Down; }
 
 bool LinearAxis::isStopped() const { return _motionState == Stop; }
 
-bool LinearAxis::isTopLimitPressed() const { return digitalRead(_limitTopPin) == LOW; }
+// Koncaky se ctou vyhradne pres LimitSwitch, aby platil debounce filtr.
+// Pred begin() jeste objekty neexistuji - tam hlasime nesepnuto, pohyb
+// je v te dobe stejne blokovan pres _initialized.
+bool LinearAxis::isTopLimitPressed() const {
+    if (_limitTop == nullptr) return false;
+    return _limitTop->isPressed();
+}
 
-bool LinearAxis::isBottomLimitPressed() const { return digitalRead(_limitBottomPin) == LOW; }
+bool LinearAxis::isBottomLimitPressed() const {
+    if (_limitBottom == nullptr) return false;
+    return _limitBottom->isPressed();
+}
 
 bool LinearAxis::isDepthCalibrated() const { return _depthCalibrated; }
 
