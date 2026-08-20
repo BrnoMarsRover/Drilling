@@ -71,16 +71,20 @@ STATE response table
 | Deep sample storage angle | uint16 | ° |
 | Software state | uint8 | Code of the state - meaning in table below yet again :) |
 
-Software state codes 
+Autonomy state codes 
 | Code | Meaning |
 |-     |-        |
-| 0x00 | Drill is initializing. |
-| 0x01 | Error. Try restarting. |
-| 0x02 | Device ready. Automatic drilling procedure disabled. |
-| 0xF0 | Automatic procedure active. Drilling down. |
-| 0xF1 | Automatic procedure active. Could not reach the desired depth. |
-| 0xF2 | Automatic procedure active. Desired depth reached. Moving up. |
-| 0xF3 | Automatic procedure active. Storing the sample. |
+| 0x00 | MANUAL |
+| 0x01 | WAITING_FOR_STORAGE_CLEAR |
+| 0x02 | DRILLING |
+| 0x03 | MOVE_CARRIAGE_TO_STORE |
+| 0x04 | MOVING_CARRIAGE_TO_STORE |
+| 0x05 | MOVING_STORAGE |
+| 0x06 | STORING |
+| 0x07 | WEIGHING |
+| 0x08 | MOVING_UP |
+| 0x09 | DONE |
+| 0x0A | ERROR |
 
 CHECK DEVICES response order
 | Order | Device |
