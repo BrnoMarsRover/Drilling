@@ -66,21 +66,28 @@ void DrillController::update()
     {
       if(_heightSensor.dataReady())
       {
-        if(spiralDepthBelowGroundMM() > -20.0)
+        if(_heightSensor.getDistanceMM() < 400.0)
         {
-          if(_motorDriver.setRPM(_targetSpiralRPS*60))
+          if(spiralDepthBelowGroundMM() > -20.0)
           {
-            _autoState = AutoState::DRILLING;
+            if(_motorDriver.setRPM(_targetSpiralRPS*60))
+            {
+              _autoState = AutoState::DRILLING;
+            }
+            else
+            {
+              enterError();
+            }
           }
           else
           {
-            enterError();
+            _autoState = AutoState::MOVING_DOWN;
+            _linearAxis.setSpeedMMps(10);
           }
         }
         else
         {
-          _autoState = AutoState::MOVING_DOWN;
-          _linearAxis.setSpeedMMps(10);
+          _heightSensor.startMeasure();
         }
       }
 

@@ -75,9 +75,9 @@ void DeepSampler::update()
 
     case AutoState::MOVE_CARRIAGE_TO_STORE:
     {        
-      if(_drillController.spiralDepthBelowSensor() < -5.0)
+      if(_drillController.spiralDepthBelowSensor() < storingPositionTop)
       {
-        if(_drillController.setCarriageSpeedMMps(8))
+        if(_drillController.setCarriageSpeedMMps(10))
         {
           _autoState = AutoState::MOVING_CARRIAGE_TO_STORE;
         }
@@ -86,9 +86,9 @@ void DeepSampler::update()
           enterError();
         }
       }
-      else if(_drillController.spiralDepthBelowSensor() > -2.0)
+      else if(_drillController.spiralDepthBelowSensor() > storingPositionBottom)
       {
-        if(_drillController.setCarriageSpeedMMps(-8))
+        if(_drillController.setCarriageSpeedMMps(-10))
         {
           _autoState = AutoState::MOVING_CARRIAGE_TO_STORE; 
         }
@@ -107,7 +107,7 @@ void DeepSampler::update()
 
     case AutoState::MOVING_CARRIAGE_TO_STORE:
     {
-      if(_drillController.spiralDepthBelowSensor() > -5.0 && _drillController.spiralDepthBelowSensor() < -2.0)
+      if(_drillController.spiralDepthBelowSensor() > storingPositionTop && _drillController.spiralDepthBelowSensor() < storingPositionBottom)
       {
         if(_drillController.setCarriageSpeedMMps(0))
         {
