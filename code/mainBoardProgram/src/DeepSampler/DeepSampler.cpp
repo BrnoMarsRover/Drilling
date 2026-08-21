@@ -42,7 +42,7 @@ void DeepSampler::update()
       {
         if (_deepSampleHolder.storageGetCurrentSlot() == StepperPositioner::StoragePosition::Home)
         {
-          if(_drillController.autoDrillToDepth(12, 60, _targetDepthMM ) )
+          if(_drillController.autoDrillToDepth(9, 50, _targetDepthMM ) )
           {
             _autoState = AutoState::DRILLING;
           }

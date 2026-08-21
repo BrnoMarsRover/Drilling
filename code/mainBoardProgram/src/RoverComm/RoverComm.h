@@ -77,7 +77,7 @@ public:
 
 private:
     enum RoverCommand code;
-    uint8_t argArray[4];   // raw argument bytes, big-endian
+    uint8_t argArray[4] = {0};   // raw argument bytes, big-endian
     uint8_t argLength; // number of argument bytes (0 if none)
 };
 

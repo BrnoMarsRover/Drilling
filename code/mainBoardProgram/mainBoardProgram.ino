@@ -102,12 +102,6 @@ bool i2cRecoverBus()
 DeepSampler deepSampler(I2CBus, roverSerial);
 SurfaceSampleHolder surfaceSampleHolder(I2CBus, roverSerial);
 
-//------UART COMMUNICATION
-//Define ADVANCE_COMMAND to utilize command via Python app.
-//Comment out to command via ASCII messages through ArduinoIDE console.
-#define ADVANCED_COMMAND
-
-#ifdef ADVANCED_COMMAND
 RoverComm roverComm(roverSerial);
 
 void respondToMsg(const RoverMessage& msg)
@@ -374,154 +368,14 @@ void respondToMsg(const RoverMessage& msg)
 
       break;
     }
-  }
-}
 
-#else
-
-void handleSimpleCommand()
-{
-  if (roverSerial.available())
-  {
-    String cmd = roverSerial.readStringUntil('\n');
-    cmd.trim();
-    cmd.toUpperCase();
-
-    if (cmd.length() == 0) return;
-    /*
-    if (cmd == "U") {
-      linearAxis.moveUp();
-    }
-    else if (cmd == "D") {
-      linearAxis.moveDown();
-    }
-    else if (cmd == "S") {
-      linearAxis.stop();
-    }
-    else if (cmd == "+") {
-      linearAxis.changeSpeedRelative(100);
-    }
-    else if (cmd == "-") {
-      linearAxis.changeSpeedRelative(-100);
-    }
-    else if (cmd.startsWith("R")) {
-      int value = cmd.substring(1).toInt();
-      if (value > 0) {
-        linearAxis.setSpeed((uint32_t)value);
-      } else {
-        roverSerial.println("Chyba: pouzij napr. R100");
-      }
-    }
-    */
-    else if (cmd.startsWith("RM")) { // mm/s
-      float value = cmd.substring(2).toFloat();
-      if (value > 0) {
-        deepSampler.setCarriageSpeedMMps(value);
-        roverSerial.print("Rychlost mm/s: ");
-        //roverSerial.println(linearAxis.getSpeedMMps());
-        }
-    }
-    /*
-    else if (cmd == "X") {
-      linearAxis.zero();
-    }
-    else if (cmd == "?") {
-      linearAxis.printStatus(roverSerial);
-    }
-    else if (cmd == "TOF") {
-      roverSerial.print("Vzdálenost: ");
-      roverSerial.println(distanceSensor.readSingle());
-    }
-    else if (cmd == "SG") {
-      linearAxis.setLoadPrintEnabled(true);
-    }
-    else if (cmd == "NSG") {
-      linearAxis.setLoadPrintEnabled(false);
-    }
-    else if (cmd == "H") {
-      linearAxis.setDepthPrintEnabled(true);
-    }
-    else if (cmd == "NH") {
-      linearAxis.setDepthPrintEnabled(false);
-    }
-    */
-    else if (cmd.startsWith("M")) {   //CUBEMARS MOTOR COMMANDS
-      int value = cmd.substring(1).toFloat();
-      deepSampler.setSpiralRPM(value);
-    }
-    /*
-    else if(cmd == "Z")
+    default:
     {
-      motorDriver.printMotorInfoToDebug();
-    }
-    else if (cmd.startsWith("WGH")) {
-      ADS122C04 *target = cmd.endsWith("D") ? adc1 :
-                          cmd.endsWith("S") ? adc2 : nullptr;
-      if (target == nullptr) { return; }
-      target->request_measure(); // old float w = target->measure_weight();
-    }
-    else if (cmd.startsWith("GW")) {
-      ADS122C04 *target = cmd.endsWith("D") ? adc1 :
-                          cmd.endsWith("S") ? adc2 : nullptr;
-      if (target == nullptr) { return; }
-      if(target->result_ready() == true){
-        float w = target->get_last_weight();
-        roverSerial.print(w, 4);
-        roverSerial.println("g");
-        if (w > 2000.0f) roverSerial.println("[ADC] Scale overweight");
-      }
-      else {
-        roverSerial.println("[ADC] No weight result ready");
-      }
-    }
-    else if (cmd.startsWith("TRE")) {
-      ADS122C04 *target = cmd.endsWith("D") ? adc1 : cmd.endsWith("S") ? adc2 : nullptr;
-      if (target == nullptr) { return; }
-      roverSerial.println("[ADC] Tare start");
-      target->set_tare();
-    }
-    else if (cmd.startsWith("CLB0")) {
-      ADS122C04 *target = cmd.endsWith("D") ? adc1 : cmd.endsWith("S") ? adc2 : nullptr;
-      if (target == nullptr) { return; }
-      roverSerial.println("[ADC] Calibration start 0g");
-      target->set_calibration_0();
-    }
-    else if (cmd.startsWith("CLB100")) {
-      ADS122C04 *target = cmd.endsWith("D") ? adc1 : cmd.endsWith("S") ? adc2 : nullptr;
-      if (target == nullptr) { return; }
-      roverSerial.println("[ADC] Calibration start 100g");
-      target->set_calibration_100();
-    }
-    else if (cmd.startsWith("ADCTMP")) {
-      ADS122C04 *target = cmd.endsWith("D") ? adc1 : cmd.endsWith("S") ? adc2 : nullptr;
-      if (target == nullptr) { return; }
-      roverSerial.println("[ADC] tmp measured");
-      target->request_tmp();
-    }
-    else if (cmd.startsWith("GT")) {
-      ADS122C04 *target = cmd.endsWith("D") ? adc1 : cmd.endsWith("S") ? adc2 : nullptr;
-      if (target == nullptr) { return; }
-      roverSerial.print("[ADC] Chip tmp: ");
-      roverSerial.print(target->get_last_temp(), 4);
-      roverSerial.println(" °C");
-    }
-    else if (cmd.startsWith("ADCRST")) {
-      //ADS122C04 *target = adc1;
-      //if (target == nullptr) { roverSerial.println("ADC deep sample not assigned"); }
-      adc1->reset();
-      //ADS122C04 *target = adc2;
-      //if (target == nullptr) { roverSerial.println("ADC surface sample not assigned"); }
-      adc2->reset();
-      roverSerial.println("[ADC] resets complete");
-    }
-    */
-    else {
-      roverSerial.println("Neznamy prikaz.");
-      roverSerial.println("Pouzij: U, D, S, R100, +, -, A2000, X, ?, WGH+D/S, TRE+D/S, CLB+0/100+D/S, ADCTMP+D/S, ADCRST, GW+D/S, GT+D/S");
+      roverComm.sendNack();
+      break;
     }
   }
 }
-#endif
 
 // 3,3 V MOSFET switch - RESET pin
 constexpr uint8_t resetPin = 2;
@@ -546,12 +400,7 @@ void setup()
 {
   pinMode(resetPin, OUTPUT);
   activeDelayReset();
-  #ifdef ADVANCED_COMMAND
   roverSerial.begin(38400);
-  #else
-  roverSerial.begin(115200);
-  roverSerial.setTimeout(10);
-  #endif
 
   setupI2CBus();
 
@@ -563,15 +412,11 @@ void loop()
 {
   deepSampler.update();
 
-  #ifdef ADVANCED_COMMAND
   roverComm.handle();
-  if(roverComm.messageAvailable())
+  while(roverComm.messageAvailable())
   {
     respondToMsg(roverComm.popMessage());
   }
-  #else
-  handleSimpleCommand();
-  #endif
 }
 
 

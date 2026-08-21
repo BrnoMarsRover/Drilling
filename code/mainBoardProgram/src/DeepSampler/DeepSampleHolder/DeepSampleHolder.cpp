@@ -53,7 +53,7 @@ void DeepSampleHolder::update()
     }
     case AutoState::WAITING_FOR_SETTLE:
     {
-      if(millis() - _measureStateEntryTime >= 2000)
+      if(millis() - _measureStateEntryTime > _settleDuration)
       {
         if(requestMeasure())
         {

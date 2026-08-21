@@ -62,8 +62,8 @@ private:
   HardwareSerial& _debugSerial;
 
   ADS122C04 _adcDeep;
-  unsigned long _measureStateEntryTime = 0;
-  bool _sample_to_be_measured = false;
+  uint32_t _measureStateEntryTime = 0;
+  uint32_t _settleDuration = 4000;
   FastAccelStepperEngine& _stepperEngine;
 
   // Piny pro StepperPositioner
