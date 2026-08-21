@@ -91,7 +91,7 @@ bool VL53L1X_Sensor::startMeasure() {
 
     // Spustíme kontinuální měření senzoru (pokud ještě neběží).
     // Perioda 50 ms odpovídá timing budget 50 000 µs nastaveném v begin().
-    _sensor.startContinuous(50);
+    _sensor.startContinuous(60);
 
     return true;
 }

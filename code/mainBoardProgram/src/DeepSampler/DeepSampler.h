@@ -92,7 +92,7 @@ private:
 
   uint32_t _storingStartTimeMS = 0;
   const float _storingRPM = -60.0; 
-  static constexpr uint32_t _storingDurationMS = 3000;
+  static constexpr uint32_t _storingDurationMS = 2000;
   uint8_t  _divideSlotIndex = 0;
 
   StepperPositioner::StoragePosition _divideSlots[3] = {
