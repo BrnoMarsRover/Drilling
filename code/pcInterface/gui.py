@@ -25,13 +25,18 @@ import time
 POLL_INTERVAL_MS       = 100
 STATE_POLL_INTERVAL_MS = 500
 
+# Localhost UDP ports, per communicationProtocol.md:
+# this app sends to the main rover app on 5610 and receives replies on 5611.
+DEFAULT_UDP_SEND_PORT   = 5610
+DEFAULT_UDP_LISTEN_PORT = 5611
+
 
 class App(tk.Tk):
     def __init__(self, worker):
         super().__init__()
         self.worker = worker
         self.title("Drilling HMI")
-        self.resizable(False, False)
+        self.resizable(True, True)
 
         self._build_connection_bar()
         self._build_status_panel()
@@ -42,8 +47,26 @@ class App(tk.Tk):
         self._build_calibration_panel()
         self._build_log()
 
+        self._configure_resizing()
+
         self._poll_rx()
         self._poll_state()
+
+    def _configure_resizing(self):
+        """
+        Let the window be resized. The log column takes the extra width and
+        the two content rows share the extra height; the fixed-content
+        columns keep their natural size. The minimum size is locked to the
+        laid-out size so nothing can be clipped by shrinking the window.
+        """
+        # Column 3 (log) absorbs horizontal growth
+        self.columnconfigure(3, weight=1)
+        # Content rows absorb vertical growth; row 0 (connection bar) stays fixed
+        self.rowconfigure(1, weight=1)
+        self.rowconfigure(2, weight=1)
+
+        self.update_idletasks()
+        self.minsize(self.winfo_reqwidth(), self.winfo_reqheight())
 
     # ------------------------------------------------------------------ #
     #  Connection bar                                                      #
@@ -80,11 +103,11 @@ class App(tk.Tk):
         self.udp_frame = ttk.Frame(frame)
         self.udp_frame.grid(row=0, column=3, padx=4, pady=4, sticky="w")
         ttk.Label(self.udp_frame, text="Listen port (from main app):").pack(side="left")
-        self.udp_local_port_var = tk.StringVar(value="5599")
+        self.udp_local_port_var = tk.StringVar(value=str(DEFAULT_UDP_LISTEN_PORT))
         ttk.Entry(self.udp_frame, textvariable=self.udp_local_port_var, width=6).pack(
             side="left", padx=(4, 12))
         ttk.Label(self.udp_frame, text="Send port (to main app):").pack(side="left")
-        self.udp_remote_port_var = tk.StringVar(value="5600")
+        self.udp_remote_port_var = tk.StringVar(value=str(DEFAULT_UDP_SEND_PORT))
         ttk.Entry(self.udp_frame, textvariable=self.udp_remote_port_var, width=6).pack(
             side="left", padx=4)
 
@@ -228,11 +251,15 @@ class App(tk.Tk):
         self.drill_speed_var = tk.StringVar(value="0")
         ttk.Entry(frame, textvariable=self.drill_speed_var, width=8).grid(row=0, column=1, padx=4)
         ttk.Button(frame, text="Set", command=self._set_drill_speed).grid(row=0, column=2, padx=4)
+        ttk.Button(frame, text="Stop", width=5, command=self._stop_drill_speed).grid(
+            row=0, column=3, padx=(0, 6))
 
         ttk.Label(frame, text="Vertical speed (mm/s):").grid(row=1, column=0, sticky="w", padx=6, pady=3)
         self.vert_speed_request_var = tk.StringVar(value="0")
         ttk.Entry(frame, textvariable=self.vert_speed_request_var, width=8).grid(row=1, column=1, padx=4)
         ttk.Button(frame, text="Set", command=self._set_vertical_speed).grid(row=1, column=2, padx=4)
+        ttk.Button(frame, text="Stop", width=5, command=self._stop_vertical_speed).grid(
+            row=1, column=3, padx=(0, 6))
 
         ttk.Label(frame, text="Storage position:").grid(row=2, column=0, sticky="w", padx=6, pady=3)
         self.storage_pos_var = tk.StringVar(value="0")
@@ -240,12 +267,12 @@ class App(tk.Tk):
         ttk.Button(frame, text="Set", command=self._set_storage_position).grid(row=2, column=2, padx=4)
 
         ttk.Separator(frame, orient="horizontal").grid(
-            row=3, column=0, columnspan=3, sticky="ew", pady=6)
+            row=3, column=0, columnspan=4, sticky="ew", pady=6)
 
         ttk.Button(frame, text="Calibrate carriage depth", command=self._calibrate_height).grid(
-            row=4, column=0, columnspan=3, sticky="ew", padx=6, pady=2)
+            row=4, column=0, columnspan=4, sticky="ew", padx=6, pady=2)
         ttk.Button(frame, text="RESTART", command=self._restart).grid(
-            row=5, column=0, columnspan=3, sticky="ew", padx=6, pady=2)
+            row=5, column=0, columnspan=4, sticky="ew", padx=6, pady=2)
 
     # ------------------------------------------------------------------ #
     #  Automatic drilling — column 1                                       #
@@ -539,6 +566,14 @@ class App(tk.Tk):
             self._send(protocol.cmd_vertical_speed(mm_s), f"VERTICAL SPEED {mm_s} mm/s")
         except ValueError:
             self._log("Invalid speed value.")
+
+    def _stop_drill_speed(self):
+        """Send drill speed 0. The entry keeps its value so Set can resume it."""
+        self._send(protocol.cmd_drill_speed(0), "DRILL SPEED 0 RPM")
+
+    def _stop_vertical_speed(self):
+        """Send vertical speed 0. The entry keeps its value so Set can resume it."""
+        self._send(protocol.cmd_vertical_speed(0.0), "VERTICAL SPEED 0 mm/s")
 
     def _set_storage_position(self):
         try:
