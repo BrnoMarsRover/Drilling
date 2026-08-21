@@ -129,6 +129,10 @@ private:
     uint32_t _loadPrintIntervalMs = 0;
     uint32_t _lastLoadPrintMs = 0;
 
+    // Kdy naposled applyMotion() zadalo pohyb - pro znovuzadani spolknuteho prikazu
+    uint32_t _motionAppliedMs = 0;
+    static constexpr uint32_t MOTION_RETRY_MS = 50;
+
     long _stepCompareThresholdDeg = 90;
     bool _stepComparePrintEnabled = false;
 

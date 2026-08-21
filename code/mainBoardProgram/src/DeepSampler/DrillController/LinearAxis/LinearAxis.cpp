@@ -149,6 +149,21 @@ void LinearAxis::update() {
         Serial.println(F("[LINEAR] Dolni koncak sepnut"));
     }
 
+    // Zadany pohyb se nerozjel -> zopakovat.
+    // FastAccelStepper umi spolknout runForward()/runBackward(), pokud prijde
+    // driv, nez dobehne predchozi forceStop(). Rezim runForward()/runBackward()
+    // sam od sebe nikdy neskonci, takze "mame jet, ale stepper nebezi" vzdy
+    // znamena zahozeny prikaz.
+    if (_motionState != Stop && _stepper != nullptr && !_stepper->isRunning()) {
+        bool blockedByLimit = (_motionState == Up   && isTopLimitPressed()) ||
+                              (_motionState == Down && isBottomLimitPressed());
+
+        if (!blockedByLimit && (millis() - _motionAppliedMs) > MOTION_RETRY_MS) {
+            Serial.println(F("[LINEAR] Pohyb se nerozjel - opakuji"));
+            applyMotion();
+        }
+    }
+
     _loadUnfiltered = getLoad();
     updateLoadFilter(_loadUnfiltered);
 
@@ -262,17 +277,22 @@ bool LinearAxis::setSpeedMMps(float mmPerSec) {
 
     setSpeed((uint32_t)stepsPerSec);
 
+    // Smer zadavame jen kdyz se opravdu meni. Ve stavu DRILLING se tahle
+    // funkce vola kazdy tik smycky, aby posuv sledoval otacky vrtaku - kdyby
+    // se pokazde volalo moveDown(), znovu by se spoustel runForward() na uz
+    // bezicim motoru. Samotnou rychlost uz zmenil setSpeed() vyse pres
+    // applySpeedAcceleration(), takze bezici pohyb ji prevezme za chodu.
     if(mmPerSec < 0)
     {
-        moveUp();
+        if (_motionState != Up) moveUp();
     }
     else if (mmPerSec > 0)
     {
-        moveDown();
+        if (_motionState != Down) moveDown();
     }
     else if (mmPerSec == 0)
     {
-        stop();
+        if (_motionState != Stop) stop();
     }
 
     return true;
@@ -418,6 +438,8 @@ void LinearAxis::printStatus(Stream& out) const {
 void LinearAxis::applyMotion() {
     if (_stepper == nullptr) return;
 
+    _motionAppliedMs = millis();
+
     _stepper->setSpeedInHz(_speedHz);
     _stepper->setAcceleration(_accelHz);
     _stepper->applySpeedAcceleration();
@@ -438,14 +460,18 @@ void LinearAxis::applyMotion() {
     }
 
     // debug - přidej výpis návratové hodnoty
+    /*
     Serial.print("[DBG] runBackward/Forward zavolano, isRunning=");
     Serial.println(_stepper->isRunning());
-    
+    */
 }
 
 void LinearAxis::setMotionState(MotionState state) {
     _motionState = state;
 
+    // Volano kazdy tik smycky ve stavu DRILLING - vypis by pri 38400 baudech
+    // smycku zpomalil natolik, ze by enkoder zacal ztracet otacky.
+    /*
     if (_motionState == Up) {
         Serial.println(F("[LINEAR] Smer: NAHORU"));
     } else if (_motionState == Down) {
@@ -453,6 +479,7 @@ void LinearAxis::setMotionState(MotionState state) {
     } else {
         Serial.println(F("[LINEAR] Motor STOP"));
     }
+    */
 
     applyMotion();
 }
