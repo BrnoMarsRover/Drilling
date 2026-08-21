@@ -19,6 +19,11 @@ All multi-byte variables are to be sent and received as big-endian - most signif
 The chekcsum algorithm is "Sum complement". See: https://en.wikipedia.org/wiki/Checksum#Sum_complement
 The checksum is computed only from the payload.
 
+## Communication program
+A program has been developed for communicating with the drill according to this protocol. The program supports two modes of communication
+1. The drill can be connected directly to a computer running the program via USB. This is simpler and meant for testing purposes when the drill is not mounted on the rover.
+2. When the drill is mounted and connected to the rover, direct USB communication with a PC is not possible. A broader, main program exists for wireless communication with the rover. Our drill communication program then runs on the same computer as the main program. These two programs communicate via UDP localhost. The main program and the rover's computer then act as middlemen between this app and the drill itself. The drill program should send messages to port 5610 and can receive the drill's responses on port 5611.
+
 ## Example 1
 Rover: 0x02 (start) -> 0x01 (length 1) -> 0x01 (message - reset) -> 0x?? (checksum) -> 0x03 (end)\
 Drill: 0x02 (start) -> 0x01 (length 1) -> 0x01 (message - request to reset received. Resetting.) -> 0x?? (checksum) -> 0x03 (end) 
@@ -27,6 +32,7 @@ Drill: 0x02 (start) -> 0x01 (length 1) -> 0x01 (message - request to reset recei
 Rover: 0x02 (start) -> 0x01 (length 1) -> 0x42 (GET WEIGHT DEEP) -> 0x?? (checksum) -> 0x03 (end)\
 Drill: 0x02 (start) -> 0x01 (length 5) -> 0x42 (Weight request received. Weight follows.) -> 4 bytes-float -> 0x?? (checksum) -> 0x03 (end)
 
+## Function list
 | Name and description | Message from rover | Function argument from rover | Response data from drill |
 |-                     |-                   |-                             |-                         |
 | RESTART - Restarts the microcontroller. Retracts the deep sample box. Returns the vertical drive to its uppermost position. Also calibrates the vertical position value. | 0x01 | None | None |
@@ -57,7 +63,7 @@ Drill: 0x02 (start) -> 0x01 (length 5) -> 0x42 (Weight request received. Weight 
 | DRILL AUTO - Automatically extract, store and weigh a deep sample from specified depth. Blocks manual commands. | 0x61 | Desired drill depth - uint8 [cm] | None |
 | STORE AUTO - Automatically store and weigh a sample that is already in the spiral. Blocks manual commands. | 0x62 | None | None |
 
-STATE response table
+## STATE response table
 | Variable meaning | Data type | Unit |
 |-                 |-          |-     |
 | Carriage depth - current distance of the carriage from uppermost position.<br>It is possible to calculate other distances:<br>Depth under surface = CarriageDepth + carriageTopToSpiralTipMM - linAxisZeroToSensorMM - heightAboveGround (the sensor value).<br>Depth under rover = CarriageDepth + carriageTopToSpiralTipMM - linAxisZeroToSensorMM<br>Where carriageTopToSpiralTipMM = 720<br>linAxisZeroToSensorMM = 775   | int16 | mm |
@@ -89,7 +95,7 @@ DeepSampler state codes
 | 0xFE | DONE |
 | 0xFF | ERROR |
 
-DrillController state codes
+## DrillController state codes
 | Code | Meaning |
 |-     |-        |
 | 0x00 | MANUAL |
@@ -99,7 +105,7 @@ DrillController state codes
 | 0xFE | DONE |
 | 0xFF | ERROR |
 
-DeepSampleHolder state codes
+## DeepSampleHolder state codes
 | Code | Meaning |
 |-     |-        |
 | 0x00 | MANUAL |
@@ -109,7 +115,7 @@ DeepSampleHolder state codes
 | 0xFE | DONE |
 | 0xFF | ERROR |
 
-CHECK DEVICES response order
+## CHECK DEVICES response order
 | Order | Device |
 | - | - |
 | least significant bit - 0 | Vertical drive stepper driver |
