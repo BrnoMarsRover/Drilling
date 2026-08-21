@@ -74,7 +74,7 @@ void DrillController::update()
           }
           else
           {
-            _autoState = AutoState::ERROR;
+            enterError();
           }
         }
         else
@@ -97,7 +97,7 @@ void DrillController::update()
         }
         else
         {
-          _autoState = AutoState::ERROR;
+          enterError();
         }
       }
       break;
@@ -113,14 +113,14 @@ void DrillController::update()
         }
         else
         {
-          _autoState = AutoState::ERROR;
+          enterError();
         }
       }
       else
       {
         if(!(_linearAxis.setSpeedMMps((_motorDriver.getMotorData().RPM/60)*_rateOfPenetrationMMpRev)))
         {
-          _autoState = AutoState::ERROR;
+          enterError();
         }
       }
       break;
@@ -133,8 +133,6 @@ void DrillController::update()
     
     case AutoState::ERROR:
     {
-      _linearAxis.stop();
-      _motorDriver.setRPM(0);
       break;
     }
   }
@@ -206,7 +204,7 @@ bool DrillController::autoDrillToDepth(float rateOfPenetrationMMpRev, float targ
     {
       _autoState = AutoState::WAITING_FOR_HEIGHT;
     }
-    else { _autoState = AutoState::ERROR; }
+    else { enterError(); }
     
     return true;
   }
@@ -223,3 +221,10 @@ bool DrillController::heightSensorConnected() {return _heightSensor.isConnected(
 // ------------------------------------------------------------------ //
 //  Private                                                           //
 // ------------------------------------------------------------------ //
+
+void DrillController::enterError()
+{
+  _linearAxis.stop();
+  _motorDriver.setRPM(0);
+  _autoState = AutoState::ERROR;
+}

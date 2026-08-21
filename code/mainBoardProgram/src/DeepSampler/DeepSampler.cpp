@@ -336,5 +336,6 @@ void DeepSampler::enterError()
   _drillController.setCarriageSpeedMMps(0);
   _drillController.setSpiralRPM(0);
   _deepSampleHolder.setManualControl();
+  _deepSampleHolder.storageStop();
   _autoState = AutoState::ERROR;
 }

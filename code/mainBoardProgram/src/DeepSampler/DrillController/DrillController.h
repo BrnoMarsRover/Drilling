@@ -73,6 +73,7 @@ private:
   VL53L1X_Sensor _heightSensor;
 
   AutoState _autoState = AutoState::MANUAL;
+  void enterError();
 
   float _rateOfPenetrationMMpRev = 0;
   float _targetSpiralRPS = 0;
@@ -82,4 +83,5 @@ private:
   static constexpr float carriageTopToSpiralTipMM = 720.0;
 
   static constexpr float spiralLead = 80.0; //millimeters per revolution of the spiral. Currently Unused.
+
 };

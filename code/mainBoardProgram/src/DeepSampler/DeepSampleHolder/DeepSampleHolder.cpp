@@ -46,7 +46,7 @@ void DeepSampleHolder::update()
         }
         else
         {
-          _autoState = AutoState::ERROR;
+          enterError();
         }
       }
       break;
@@ -62,7 +62,7 @@ void DeepSampleHolder::update()
         }
         else
         {
-          _autoState = AutoState::ERROR;
+          enterError();
         }
       }
       break;
@@ -193,10 +193,22 @@ bool DeepSampleHolder::setCalibrationX(float weightX)
   return true;
 }
 
+bool DeepSampleHolder::storageStop()
+{
+  _stepperPositioner.stop();
+  return true;
+}
+
 bool DeepSampleHolder::storageEncoderConnected() const {
   return _stepperPositioner.encoderConnected();
 }
 
 bool DeepSampleHolder::storageStepperConnected() {
   return _stepperPositioner.driverConnected();
+}
+
+void DeepSampleHolder::enterError()
+{
+  _stepperPositioner.stop();
+  _autoState = AutoState::ERROR;
 }

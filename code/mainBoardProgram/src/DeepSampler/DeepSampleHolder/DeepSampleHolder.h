@@ -54,6 +54,8 @@ public:
   int16_t storageGetCurrentAngle()  const;
   StepperPositioner::StoragePosition storageGetCurrentSlot() const;
   bool storageIsMoving() const {return _stepperPositioner.isMoving(); }
+  bool storageStop();
+
   bool storageEncoderConnected() const;
   bool storageStepperConnected();
 
@@ -76,4 +78,6 @@ private:
   StepperPositioner _stepperPositioner;
 
   AutoState _autoState = AutoState::MANUAL;
+
+  void enterError();
 };
