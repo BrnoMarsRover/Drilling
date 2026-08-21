@@ -39,11 +39,14 @@ class App(tk.Tk):
         self.resizable(True, True)
 
         self._build_connection_bar()
+        self._build_columns()
         self._build_status_panel()
         self._build_manual_controls()
-        self._build_auto_controls()
+        self._build_height_panel()
+        self._build_autonomy_controls()
         self._build_sample_controls()
         self._build_device_status_panel()
+        self._build_weight_panel()
         self._build_calibration_panel()
         self._build_log()
 
@@ -52,6 +55,18 @@ class App(tk.Tk):
         self._poll_rx()
         self._poll_state()
 
+    def _build_columns(self):
+        """
+        One container per column. Panels are packed vertically inside their
+        column, so a tall panel in one column no longer forces gaps between
+        the panels of its neighbours (which a shared grid row would).
+        """
+        self.columns = []
+        for i in range(4):
+            container = ttk.Frame(self)
+            container.grid(row=1, column=i, sticky="nsew")
+            self.columns.append(container)
+
     def _configure_resizing(self):
         """
         Let the window be resized. The log column takes the extra width and
@@ -59,11 +74,12 @@ class App(tk.Tk):
         columns keep their natural size. The minimum size is locked to the
         laid-out size so nothing can be clipped by shrinking the window.
         """
-        # Column 3 (log) absorbs horizontal growth
+        # Column 3 (log) absorbs horizontal growth; the other columns hold
+        # fixed-size controls and keep their natural width.
         self.columnconfigure(3, weight=1)
-        # Content rows absorb vertical growth; row 0 (connection bar) stays fixed
+        # The single content row absorbs vertical growth;
+        # row 0 (connection bar) stays fixed.
         self.rowconfigure(1, weight=1)
-        self.rowconfigure(2, weight=1)
 
         self.update_idletasks()
         self.minsize(self.winfo_reqwidth(), self.winfo_reqheight())
@@ -193,14 +209,16 @@ class App(tk.Tk):
     # ------------------------------------------------------------------ #
 
     def _build_status_panel(self):
-        frame = ttk.LabelFrame(self, text="Drill status  (auto-refreshed)")
-        frame.grid(row=1, column=0, padx=8, pady=6, sticky="nsew")
+        frame = ttk.LabelFrame(self.columns[0], text="Drill status  (auto-refreshed)")
+        frame.pack(fill="x", padx=8, pady=6)
 
+        # Numeric readouts — a narrow fixed width is enough for every value
+        # these ever hold, and it keeps the left column compact.
         labels = [
             ("Carriage depth",         "carriage_depth_var",  "mm"),
             ("Depth under rover",      "depth_under_rover_var","mm"),
             ("Depth under surface",    "depth_under_surface_var","mm"),
-            ("Vertical speed (actual)","vert_speed_actual_var","mm/s"),
+            ("Vertical speed",         "vert_speed_actual_var","mm/s"),
             ("Stepper current",        "current_var",         "A"),
             ("Motor speed",            "rpm_var",             "RPM"),
             ("Motor winding current",  "motor_winding_current_var", "A"),
@@ -208,63 +226,66 @@ class App(tk.Tk):
             ("Motor torque",           "motor_torque_var",    "Nm"),
             ("Motor temp",             "temp_var",            "°C"),
             ("Tray angle",             "tray_var",            "°"),
-            ("DeepSampler state",         "deep_sampler_state_var",       ""),
-            ("DrillController state",     "drill_controller_state_var",   ""),
-            ("DeepSampleHolder state",    "deep_sample_holder_state_var", ""),
         ]
 
         for i, (label, attr, unit) in enumerate(labels):
             ttk.Label(frame, text=label + ":").grid(row=i, column=0, sticky="w", padx=6, pady=2)
             var = tk.StringVar(value="—")
             setattr(self, attr, var)
-            ttk.Label(frame, textvariable=var, width=22, anchor="w").grid(row=i, column=1, padx=4)
+            ttk.Label(frame, textvariable=var, width=10, anchor="w").grid(
+                row=i, column=1, sticky="w", padx=4)
             if unit:
-                ttk.Label(frame, text=unit).grid(row=i, column=2, sticky="w")
+                ttk.Label(frame, text=unit).grid(row=i, column=2, sticky="w", padx=(0, 6))
 
         ttk.Separator(frame, orient="horizontal").grid(
             row=len(labels), column=0, columnspan=3, sticky="ew", pady=4)
 
-        # Weight displays
-        ttk.Label(frame, text="Weight (deep):").grid(
-            row=len(labels)+1, column=0, sticky="w", padx=6, pady=2)
-        self.weight_deep_var = tk.StringVar(value="—")
-        ttk.Label(frame, textvariable=self.weight_deep_var, width=22, anchor="w").grid(
-            row=len(labels)+1, column=1, padx=4)
-        ttk.Label(frame, text="g").grid(row=len(labels)+1, column=2, sticky="w")
-
-        ttk.Label(frame, text="Weight (surface):").grid(
-            row=len(labels)+2, column=0, sticky="w", padx=6, pady=2)
-        self.weight_surface_var = tk.StringVar(value="—")
-        ttk.Label(frame, textvariable=self.weight_surface_var, width=22, anchor="w").grid(
-            row=len(labels)+2, column=1, padx=4)
-        ttk.Label(frame, text="g").grid(row=len(labels)+2, column=2, sticky="w")
+        # State names are long (e.g. MOVING_CARRIAGE_TO_STORE). Wrapping them
+        # instead of reserving a wide column keeps the text fully readable
+        # without stretching the panel.
+        states = [
+            ("DeepSampler",      "deep_sampler_state_var"),
+            ("DrillController",  "drill_controller_state_var"),
+            ("DeepSampleHolder", "deep_sample_holder_state_var"),
+        ]
+        for j, (label, attr) in enumerate(states):
+            row = len(labels) + 1 + j
+            ttk.Label(frame, text=label + ":").grid(row=row, column=0, sticky="nw", padx=6, pady=2)
+            var = tk.StringVar(value="—")
+            setattr(self, attr, var)
+            ttk.Label(frame, textvariable=var, wraplength=110,
+                      justify="left", anchor="w").grid(
+                row=row, column=1, columnspan=2, sticky="w", padx=4)
 
     # ------------------------------------------------------------------ #
     #  Manual controls — column 0                                          #
     # ------------------------------------------------------------------ #
 
     def _build_manual_controls(self):
-        frame = ttk.LabelFrame(self, text="Manual controls")
-        frame.grid(row=2, column=0, padx=8, pady=6, sticky="nsew")
+        frame = ttk.LabelFrame(self.columns[0], text="Manual controls")
+        frame.pack(fill="x", padx=8, pady=6)
 
         ttk.Label(frame, text="Drill speed (RPM):").grid(row=0, column=0, sticky="w", padx=6, pady=3)
         self.drill_speed_var = tk.StringVar(value="0")
         ttk.Entry(frame, textvariable=self.drill_speed_var, width=8).grid(row=0, column=1, padx=4)
-        ttk.Button(frame, text="Set", command=self._set_drill_speed).grid(row=0, column=2, padx=4)
+        ttk.Button(frame, text="Set", width=4, command=self._set_drill_speed).grid(
+            row=0, column=2, padx=4)
         ttk.Button(frame, text="Stop", width=5, command=self._stop_drill_speed).grid(
             row=0, column=3, padx=(0, 6))
 
         ttk.Label(frame, text="Vertical speed (mm/s):").grid(row=1, column=0, sticky="w", padx=6, pady=3)
         self.vert_speed_request_var = tk.StringVar(value="0")
         ttk.Entry(frame, textvariable=self.vert_speed_request_var, width=8).grid(row=1, column=1, padx=4)
-        ttk.Button(frame, text="Set", command=self._set_vertical_speed).grid(row=1, column=2, padx=4)
+        ttk.Button(frame, text="Set", width=4, command=self._set_vertical_speed).grid(
+            row=1, column=2, padx=4)
         ttk.Button(frame, text="Stop", width=5, command=self._stop_vertical_speed).grid(
             row=1, column=3, padx=(0, 6))
 
         ttk.Label(frame, text="Storage position:").grid(row=2, column=0, sticky="w", padx=6, pady=3)
         self.storage_pos_var = tk.StringVar(value="0")
         ttk.Entry(frame, textvariable=self.storage_pos_var, width=8).grid(row=2, column=1, padx=4)
-        ttk.Button(frame, text="Set", command=self._set_storage_position).grid(row=2, column=2, padx=4)
+        ttk.Button(frame, text="Set", width=4, command=self._set_storage_position).grid(
+            row=2, column=2, padx=4)
 
         ttk.Separator(frame, orient="horizontal").grid(
             row=3, column=0, columnspan=4, sticky="ew", pady=6)
@@ -278,13 +299,34 @@ class App(tk.Tk):
     #  Automatic drilling — column 1                                       #
     # ------------------------------------------------------------------ #
 
-    def _build_auto_controls(self):
-        frame = ttk.LabelFrame(self, text="Automatic drilling")
-        frame.grid(row=1, column=1, padx=8, pady=6, sticky="nsew")
+    def _build_height_panel(self):
+        frame = ttk.LabelFrame(self.columns[1], text="Height measurement")
+        frame.pack(fill="x", padx=8, pady=6)
+
+        ttk.Label(frame, text="Height above ground:").grid(
+            row=0, column=0, sticky="w", padx=6, pady=2)
+        self.height_above_ground_var = tk.StringVar(value="—")
+        ttk.Label(frame, textvariable=self.height_above_ground_var, width=8, anchor="w").grid(
+            row=0, column=1, sticky="w", padx=4)
+        ttk.Label(frame, text="mm").grid(row=0, column=2, sticky="w", padx=(0, 6))
+
+        ttk.Button(frame, text="Measure height above ground", command=self._measure_height).grid(
+            row=1, column=0, columnspan=3, sticky="ew", padx=6, pady=2)
+        ttk.Button(frame, text="Get height above ground", command=self._get_height).grid(
+            row=2, column=0, columnspan=3, sticky="ew", padx=6, pady=(2, 6))
+
+    # ------------------------------------------------------------------ #
+    #  Autonomy — column 1                                                 #
+    # ------------------------------------------------------------------ #
+
+    def _build_autonomy_controls(self):
+        frame = ttk.LabelFrame(self.columns[1], text="Autonomy")
+        frame.pack(fill="x", padx=8, pady=6)
 
         ttk.Label(frame, text="Target depth (cm):").grid(row=0, column=0, sticky="w", padx=6, pady=3)
         self.drill_depth_var = tk.StringVar(value="10")
-        ttk.Entry(frame, textvariable=self.drill_depth_var, width=8).grid(row=0, column=1, padx=4)
+        ttk.Entry(frame, textvariable=self.drill_depth_var, width=8).grid(
+            row=0, column=1, sticky="w", padx=4)
 
         ttk.Button(frame, text="Start auto drill", command=self._drill_auto).grid(
             row=1, column=0, columnspan=2, sticky="ew", padx=6, pady=4)
@@ -294,47 +336,33 @@ class App(tk.Tk):
         ttk.Separator(frame, orient="horizontal").grid(
             row=3, column=0, columnspan=2, sticky="ew", pady=6)
 
-        ttk.Label(frame, text="Height above ground:").grid(
-            row=4, column=0, sticky="w", padx=6, pady=2)
-        self.height_above_ground_var = tk.StringVar(value="—")
-        ttk.Label(frame, textvariable=self.height_above_ground_var, width=10, anchor="w").grid(
-            row=4, column=1, padx=4)
-        ttk.Label(frame, text="mm").grid(row=4, column=2, sticky="w")
-
-        ttk.Button(frame, text="Measure height above ground", command=self._measure_height).grid(
-            row=5, column=0, columnspan=3, sticky="ew", padx=6, pady=2)
-        ttk.Button(frame, text="Get height above ground", command=self._get_height).grid(
-            row=6, column=0, columnspan=3, sticky="ew", padx=6, pady=2)
-
-        ttk.Separator(frame, orient="horizontal").grid(
-            row=7, column=0, columnspan=3, sticky="ew", pady=6)
-
         ttk.Button(frame, text="Stop auto", command=self._stop_auto).grid(
-            row=8, column=0, columnspan=3, sticky="ew", padx=6, pady=2)
+            row=4, column=0, columnspan=2, sticky="ew", padx=6, pady=(2, 6))
 
     # ------------------------------------------------------------------ #
     #  Sample handling — column 1                                          #
     # ------------------------------------------------------------------ #
 
     def _build_sample_controls(self):
-        frame = ttk.LabelFrame(self, text="Sample handling")
-        frame.grid(row=2, column=1, padx=8, pady=6, sticky="nsew")
+        frame = ttk.LabelFrame(self.columns[1], text="Sample handling")
+        frame.pack(fill="x", padx=8, pady=6)
 
-        buttons = [
-            ("Weigh deep sample",    self._weigh_deep),
-            ("Weigh surface sample", self._weigh_surface),
-            ("Get deep weight",      self._get_weight_deep),
-            ("Get surface weight",   self._get_weight_surface),
-            ("Rock box — open",      self._rock_open),
-            ("Rock box — close",     self._rock_close),
-            ("Sand box — open",      self._sand_open),
-            ("Sand box — close",     self._sand_close),
-            ("Storage — set hold",   self._set_hold_mode),
-            ("Storage — clear hold", self._clear_hold_mode),
+        # Two columns: the action and its matching counterpart side by side.
+        rows = [
+            ("Weigh deep",    self._weigh_deep,    "Get deep",    self._get_weight_deep),
+            ("Weigh surface", self._weigh_surface, "Get surface", self._get_weight_surface),
+            ("Rock open",     self._rock_open,     "Rock close",  self._rock_close),
+            ("Sand open",     self._sand_open,     "Sand close",  self._sand_close),
+            ("Set hold",      self._set_hold_mode, "Clear hold",  self._clear_hold_mode),
         ]
-        for i, (label, cmd) in enumerate(buttons):
-            ttk.Button(frame, text=label, command=cmd).grid(
-                row=i, column=0, columnspan=2, sticky="ew", padx=6, pady=2)
+        for i, (left_label, left_cmd, right_label, right_cmd) in enumerate(rows):
+            ttk.Button(frame, text=left_label, command=left_cmd).grid(
+                row=i, column=0, sticky="ew", padx=(6, 2), pady=2)
+            ttk.Button(frame, text=right_label, command=right_cmd).grid(
+                row=i, column=1, sticky="ew", padx=(2, 6), pady=2)
+
+        frame.columnconfigure(0, weight=1, uniform="sample")
+        frame.columnconfigure(1, weight=1, uniform="sample")
 
 
 
@@ -343,8 +371,8 @@ class App(tk.Tk):
     # ------------------------------------------------------------------ #
 
     def _build_device_status_panel(self):
-        frame = ttk.LabelFrame(self, text="Device status")
-        frame.grid(row=1, column=2, padx=8, pady=6, sticky="nsew")
+        frame = ttk.LabelFrame(self.columns[2], text="Device status")
+        frame.pack(fill="x", padx=8, pady=6)
 
         ttk.Button(frame, text="Check devices", command=self._start_dev_check).grid(
             row=0, column=0, columnspan=2, sticky="ew", padx=6, pady=4)
@@ -370,9 +398,29 @@ class App(tk.Tk):
     #  Calibration — column 3, row 2                                       #
     # ------------------------------------------------------------------ #
 
+    def _build_weight_panel(self):
+        frame = ttk.LabelFrame(self.columns[2], text="Weight")
+        frame.pack(fill="x", padx=8, pady=6)
+
+        weights = [
+            ("Weight (deep)",    "weight_deep_var"),
+            ("Weight (surface)", "weight_surface_var"),
+        ]
+        for i, (label, attr) in enumerate(weights):
+            ttk.Label(frame, text=label + ":").grid(row=i, column=0, sticky="w", padx=6, pady=2)
+            var = tk.StringVar(value="—")
+            setattr(self, attr, var)
+            ttk.Label(frame, textvariable=var, width=10, anchor="w").grid(
+                row=i, column=1, sticky="w", padx=4)
+            ttk.Label(frame, text="g").grid(row=i, column=2, sticky="w", padx=(0, 6))
+
+    # ------------------------------------------------------------------ #
+    #  Calibration — column 2                                              #
+    # ------------------------------------------------------------------ #
+
     def _build_calibration_panel(self):
-        frame = ttk.LabelFrame(self, text="Calibration")
-        frame.grid(row=2, column=2, padx=8, pady=6, sticky="new")
+        frame = ttk.LabelFrame(self.columns[2], text="Calibration")
+        frame.pack(fill="x", padx=8, pady=6)
 
         ttk.Label(frame, text="Calibration weight (g):").grid(
             row=0, column=0, sticky="w", padx=6, pady=2)
@@ -395,14 +443,16 @@ class App(tk.Tk):
     # ------------------------------------------------------------------ #
 
     def _build_log(self):
-        frame = ttk.LabelFrame(self, text="Log")
-        frame.grid(row=1, column=3, rowspan=2, padx=8, pady=6, sticky="nsew")
+        frame = ttk.LabelFrame(self.columns[3], text="Log")
+        frame.pack(fill="both", expand=True, padx=8, pady=6)
 
         self.auto_scroll_var = tk.BooleanVar(value=True)
         ttk.Checkbutton(frame, text="Auto-scroll", variable=self.auto_scroll_var).grid(
             row=0, column=0, columnspan=2, sticky="w", padx=4, pady=(4, 0))
 
-        self.log_text = tk.Text(frame, height=30, width=50, state="disabled",
+        # Narrow minimum — the log column absorbs any extra window width,
+        # so this only sets how small it may be squeezed, not how it looks.
+        self.log_text = tk.Text(frame, height=30, width=28, state="disabled",
                                 wrap="word", font=("Courier New", 9))
         self.log_text.grid(row=1, column=0, sticky="nsew", padx=4, pady=4)
         scrollbar = ttk.Scrollbar(frame, command=self.log_text.yview)
@@ -443,7 +493,7 @@ class App(tk.Tk):
             under_surface = offset - self._last_height_above_ground_mm
             self.depth_under_surface_var.set(str(under_surface))
         else:
-            self.depth_under_surface_var.set("— (no height reading)")
+            self.depth_under_surface_var.set("— no height")
 
     # ------------------------------------------------------------------ #
     #  Polling loops                                                       #
