@@ -116,6 +116,8 @@ private:
     uint16_t _lastAngle      = 0;
     uint16_t _retryCount     = 0;
     uint32_t _lastCheckMs    = 0;
+    uint32_t _moveStartMs    = 0;
+    bool     _retryPending   = false;  // po zaseknuti cekame na zastaveni motoru
 
     uint16_t _stepsPerRevolution = 3200;
 
@@ -125,6 +127,7 @@ private:
     // Prahové hodnoty pro detekci zaseknutí
     static constexpr int  STALL_ANGLE_ERR_DEG = 15;   // °  – max. odchylka
     static constexpr int  STALL_CHECK_MS      = 200;  // ms – interval kontroly
+    static constexpr int  STALL_GRACE_MS      = 400;  // ms – rezerva na rozjezd pred prvni kontrolou
     static constexpr int  MAX_RETRIES         = 1;    // počet pokusů uvolnění
 
     static constexpr uint16_t SLOT_TOLERANCE = 3;

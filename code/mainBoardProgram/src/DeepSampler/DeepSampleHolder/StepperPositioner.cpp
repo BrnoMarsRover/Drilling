@@ -92,6 +92,17 @@ void StepperPositioner::update() {
 
     if (_fatalError || !_moving || _stepper == nullptr || _encoder == nullptr) return;
 
+    // Po zaseknuti cekame, az forceStop() skutecne zabere a mechanika dobehne.
+    // Teprve pak ma smysl odecist novou referencni polohu - jinak by krokovy
+    // citac a enkoder pochazely z ruzneho okamziku a dalsi kontrola by
+    // falesne hlasila dalsi zaseknuti.
+    if (_retryPending) {
+        if (_stepper->isRunning()) return;
+        _retryPending = false;
+        _doMoveToAngle(_targetAngle);
+        return;
+    }
+
     // Motor doběhl
     if (!_stepper->isRunning()) {
         _moving    = false;
@@ -105,8 +116,11 @@ void StepperPositioner::update() {
         return;
     }
 
-    // Periodická kontrola polohy vůči enkodéru
+    // Periodická kontrola polohy vůči enkodéru.
+    // Behem rozjezdu enkoder legitimne zaostava za krokovym citacem,
+    // takze prvni kontrolu pustime az po STALL_GRACE_MS.
     uint32_t now = millis();
+    if (now - _moveStartMs < STALL_GRACE_MS) return;
     if (now - _lastCheckMs < STALL_CHECK_MS) return;
     _lastCheckMs = now;
 
@@ -177,7 +191,8 @@ bool StepperPositioner::moveToSlot(StoragePosition position) {
 // ---------------------------------------------------------------
 bool StepperPositioner::moveToAngle(int16_t angleDeg) {
     if (_fatalError) {return false;}
-    _retryCount = 0;
+    _retryCount   = 0;
+    _retryPending = false;
     _doMoveToAngle(angleDeg);
     return true;
 }
@@ -202,7 +217,12 @@ void StepperPositioner::_doMoveToAngle(int16_t angleDeg) {
     }
 
     _moving          = true;
-    _lastCheckMs     = millis() + STALL_CHECK_MS;   // první kontrola až po celém intervalu
+    // Pozor: _lastCheckMs musi vzdy zustat v minulosti. Drive zde bylo
+    // millis() + STALL_CHECK_MS, coz kvuli podteceni uint32_t v porovnani
+    // (now - _lastCheckMs) znamenalo presny opak zameru - kontrola bezela
+    // hned pri prvnim update(). Rezerva na rozjezd se resi pres _moveStartMs.
+    _moveStartMs     = millis();
+    _lastCheckMs     = _moveStartMs;
     _lastAngle       = currentEnc;
     _moveStartSteps  = _stepper->getCurrentPosition();
     _moveStartAngle  = currentEnc;
@@ -230,7 +250,8 @@ void StepperPositioner::_doMoveToAngle(int16_t angleDeg) {
 // ---------------------------------------------------------------
 void StepperPositioner::stop() {
     if (_stepper) _stepper->forceStop();
-    _moving = false;
+    _moving       = false;
+    _retryPending = false;
     Serial.println(F("[STORAGE] Zastaveno."));
     _applyHoldState(); 
 }
@@ -265,9 +286,10 @@ void StepperPositioner::setZero() {
 // ---------------------------------------------------------------
 void StepperPositioner::unlock() {
     if (_fatalError) {
-        _fatalError  = false;
-        _retryCount  = 0;
-        _moving      = false;
+        _fatalError   = false;
+        _retryCount   = 0;
+        _moving       = false;
+        _retryPending = false;
         Serial.println(F("[STORAGE] System odblokovam. Zadejte novou pozici."));
     } else {
         Serial.println(F("[STORAGE] System nebyl zablokovan."));
@@ -388,10 +410,11 @@ void StepperPositioner::handleStall() {
     _retryCount++;
 
     if (_retryCount > MAX_RETRIES) {
-        _moving     = false;
+        _moving       = false;
+        _retryPending = false;
         //_fatalError = true;
         Serial.println(F("[STORAGE] !!! MOTOR ZABLOKOVAN !!!."));
-        //_applyHoldState(); 
+        //_applyHoldState();
         return;
     }
 
@@ -399,8 +422,8 @@ void StepperPositioner::handleStall() {
     Serial.print(_retryCount);
     Serial.println(F(")..."));
 
-    // Znovu cílový úhel (bez resetování retry)
-    _doMoveToAngle(_targetAngle);
+    // Novy pokus nespoustime hned - update() ho spusti az motor skutecne stoji.
+    _retryPending = true;
 }
 
 // ---------------------------------------------------------------
