@@ -250,18 +250,16 @@ float DeepSampler::getDistFromSurfaceMM() {return _drillController.getDistFromSu
 
 bool DeepSampler::autoDrillStoreWeigh(float targetDepthMM)
 {
-  if(!_drillController.isDepthCalibrated())
-    _debugSerial.println("not calibrated");
   if(_autoState == AutoState::MANUAL && _drillController.isDepthCalibrated())
   {
-    //if(_deepSampleHolder.storageMoveToSlot(StepperPositioner::StoragePosition::Home))
+    if(_deepSampleHolder.storageMoveToSlot(StepperPositioner::StoragePosition::Home))
     {
       _divideSlotIndex = 0;
       _targetDepthMM = targetDepthMM;
       _autoState = AutoState::WAITING_FOR_STORAGE_CLEAR;
       return true;
     }
-    //else{ return false; }
+    else{ return false; }
   }
   else { return false; }
 }
