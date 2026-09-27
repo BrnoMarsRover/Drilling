@@ -15,6 +15,19 @@
 #define PROTOCOL_QUEUE_DEPTH 4
 
 // ------------------------------------------------------------------ //
+//  Firmware identity — answered by CMD_GET_ID                        //
+//                                                                     //
+//  Every Freya ESP32 is an ESP32-DevKitC behind a CP2102 and they are  //
+//  descriptor-identical: same 10c4:ea60, same Silicon Labs factory     //
+//  serial "0001", same product string. They also collide in            //
+//  /dev/serial/by-id, where all three claim the same filename. The     //
+//  firmware name is the only thing that tells this board apart from    //
+//  the science and astro-bio modules.                                  //
+// ------------------------------------------------------------------ //
+#define FIRMWARE_NAME     "freya-drilling-module"
+#define FIRMWARE_VERSION  "1.0.0"
+
+// ------------------------------------------------------------------ //
 //  Command codes                                                      //
 // ------------------------------------------------------------------ //
 enum RoverCommand : uint8_t
@@ -24,6 +37,7 @@ enum RoverCommand : uint8_t
     CMD_CALIBRATE_CARRIAGE_DEPTH  = 0x03,
     CMD_START_DEVICE_CHECK = 0x04,
     CMD_GET_DEVICE_STATUS = 0x05,
+    CMD_GET_ID            = 0x06,
     CMD_DRILL_SPEED       = 0x20,
     CMD_VERTICAL_SPEED    = 0x21,
     CMD_STORAGE_POSITION  = 0x22,
@@ -127,6 +141,10 @@ public:
     void sendDeviceStatus(bool vertStepper, bool vertEncoder, bool vertCurrentSensor, bool spiralMotor, bool heightSensor, bool deepSampleStepper, bool deepSampleEncoder, bool deepSampleADC, bool surfaceSampleADC);
 
     void sendWeight(RoverCommand cmd, WeightResult result);
+
+    // Send the firmware name and version, so a host that has just opened an
+    // unknown serial port can find out which board it is talking to.
+    void sendId();
 private:
     HardwareSerial& _serial;
 

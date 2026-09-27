@@ -115,6 +115,12 @@ void respondToMsg(const RoverMessage& msg)
       break;
     }
 
+    case CMD_GET_ID:
+    {
+      roverComm.sendId();
+      break;
+    }
+
     case CMD_STATE:
     {
       roverComm.sendState(

@@ -110,6 +110,28 @@ void RoverComm::sendUint16(RoverCommand cmd, uint16_t value)
     _sendRaw(payload, 3);
 }
 
+void RoverComm::sendId()
+{
+    // The identity goes out as a plain string after the command code rather
+    // than as a number, because a host that does not already know this board
+    // would have nowhere to look a number up -- and finding out what an
+    // unknown board is, is the entire purpose of this command.
+    const char* identity = FIRMWARE_NAME " " FIRMWARE_VERSION;
+
+    uint8_t payload[64];
+    uint8_t textLength = (uint8_t)strlen(identity);
+
+    if (textLength > sizeof(payload) - 1)
+    {
+        textLength = sizeof(payload) - 1;
+    }
+
+    payload[0] = (uint8_t)CMD_GET_ID;
+    memcpy(payload + 1, identity, textLength);
+
+    _sendRaw(payload, (uint8_t)(textLength + 1));
+}
+
 void RoverComm::sendFloat(RoverCommand cmd, float value)
 {
     uint8_t payload[5];
