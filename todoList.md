@@ -1,12 +1,11 @@
 # TODO list
 
 ## Hardware
-Namontovat novou kastli na PCB + dodělat kabely\
 Krytka spodního ložiska\
 Adaptace surface sample boxu pro vysypání\
 Design a testování lopatky 2.0 (surface sample)\
 Nový Adc board s pinem pro stínění kabelu?\
-Silnější motor?\
+Silnější motor\
 Lepší držení podpěry zásobníku - zbavit se těch krátkých profilů\
 Zjednodušit kabeláž\
 Nechat si vyrobit nový vrták\
