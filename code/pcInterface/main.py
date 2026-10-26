@@ -1,20 +1,21 @@
-"""
-main.py
-
-Entry point for the Drilling HMI application.
-Run this file with: python main.py
-"""
-
+"""Drilling HMI (PyQt6) launcher: python main.py"""
+import sys
+from PyQt6.QtWidgets import QApplication
 from comm_worker import CommWorker
 from gui import App
 
 
 def main():
+    qt_app = QApplication(sys.argv)
+    qt_app.setStyle('Fusion')
     worker = CommWorker()
-    app = App(worker)
-    app.mainloop()
-    worker.disconnect()
+    window = App(worker)
+    window.show()
+    try:
+        return qt_app.exec()
+    finally:
+        worker.disconnect()
 
 
-if __name__ == "__main__":
-    main()
+if __name__ == '__main__':
+    sys.exit(main())

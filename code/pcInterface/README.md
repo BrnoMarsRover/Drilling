@@ -1,86 +1,53 @@
-# Drilling HMI
+# Drilling HMI — Dashboard v13
 
-A desktop application for controlling and monitoring the drilling device.
+PyQt6-based application for controlling and monitoring the rover drill. The communication protocol and transport worker are unchanged from the original project.
 
-It supports two connection modes, switchable in the app:
+## Install and run
 
-- **USB Serial** — direct connection to the ESP32 over UART. Used during
-  standalone bench testing.
-- **UDP (localhost)** — used once the drill is mounted on the rover. This
-  app runs alongside the main rover communication app on the same laptop.
-  Framed drill messages are sent over a localhost UDP socket to the main
-  app, which is responsible for actually getting them to/from the drill
-  over the rover link. Responses come back the same way.
+Python 3.9+ required. In the folder containing `main.py`:
 
-## Requirements
-
-- Python 3.8 or newer — download from https://www.python.org/downloads/
-  - During installation, tick **"Add Python to PATH"** on the first screen
-- For USB Serial mode: the ESP32 connected via USB (USB-to-serial adapter or direct USB)
-- For UDP mode: the main rover communication app running on the same machine
-
-## Installation
-
-1. Open CMD and navigate to this folder:
-   ```
-   cd ...\Drilling\code\pcInterface
-   ```
-
-2. Install dependencies:
-   ```
-   pip install -r requirements.txt
-   ```
-
-## Running the application
-
-```
+```bash
+python -m pip install -r requirements.txt
 python main.py
 ```
 
-A window will open with a **Connection** bar at the top.
+USB mode requires an appropriate serial driver and a connected drill controller. UDP mode connects to the main rover communications application running on the same PC.
 
-### USB Serial mode
+## Connection
 
-Select **USB Serial**, choose the correct COM port from the dropdown, and
-click **Connect**.
+The **Connection** button in the top bar opens a floating connection panel, without moving the dashboard. Clicking outside closes it. Select USB Serial (38,400 baud) or UDP localhost (default send port 5610 / listen port 5611), then connect. The connection status always remains visible in the top bar. Sun/moon switches between the dark and light themes.
 
-To find the correct COM port: open Device Manager → Ports (COM & LPT) →
-look for your USB serial device.
+## Live Drill Status
 
-### UDP (localhost) mode
+* The graph plots real measurements as the STATE responses arrive (the controller is polled every 500 ms while connected).
+* Each value has its own stable color and a circular visibility switch: **filled bright-red circle = ON**, **empty gray circle = OFF**. The latest numerical value appears beside the signal name.
+* Signals with the same unit share a Y axis; different units have their own real-valued Y axes. Active axis labels are shown below their corresponding axes. Scales update using the enabled measurements within the displayed window.
+* The time window can be set to 30 s, 1, 2, 5, 10, 30 or 60 min. The X axis uses seconds up to 5 min and minutes for longer ranges.
+* The graph scrolls as data arrives, while up to 60 minutes / 7,200 samples remain buffered. Switching to a longer window can reveal previous samples. **Clear history** explicitly clears the buffer.
+* Controller states are three separate state machines (DeepSampler, DrillController, DeepSampleHolder), not sensor measurements.
 
-Select **UDP (localhost)** and set two ports:
+## Workspace: Windows menu
 
-- **Listen port** — the port this app listens on. The main rover comms
-  app must send the drill's responses to `127.0.0.1` on this port.
-- **Send port** — the port this app sends to. The main rover comms app
-  must be listening on `127.0.0.1` on this port.
+**Dashboard layout** restores the default responsive dashboard with the large Drill Status graph and equally tall Communication Log above the control panels. The chart takes roughly 77% of the upper row's width, subject to minimum panel widths.
 
-These two ports must be different from each other, and must match
-whatever the main app is configured to use on its side. Click **Connect**
-to open the socket.
+**Reset layout** is intentionally different: it shows **all nine panels at their individual compact dimensions**, packed into three columns near the upper-left corner. These panels are **not stretched to fill the viewport**. On smaller screens the workspace may need scrollbars.
 
-Note: UDP mode expects the main rover communication app to already be
-running and listening — this app doesn't start or manage it.
+**Show all windows** unhides every panel, and individual entries in the Windows menu control panel visibility.
 
-The mode switch and its fields lock while connected; disconnect first to
-change modes.
+Move a panel by dragging its header. Resize by positioning the pointer over its frame edge, where a **horizontal or vertical double-arrow cursor** appears, then dragging. In Dashboard mode, only shared edges are resizable, so adjacent panels remain aligned. Dragging the divider between the graph and log resizes just those two panels, with updates capped near 60 Hz for smoother feedback. Reset layout allows free panel-edge resizing. Panels can also be minimized, maximized and hidden via their header buttons.
 
-## Project structure
+The Calibration, Height Measurement and Autonomy panels retain equally wide paired action buttons. Device Status lists peripherals in two columns. **Clear log** clears the communication log independently of graph history.
 
-```
-drilling-hmi/
-├── main.py            # Entry point — run this
-├── protocol.py        # Message building and parsing (checksum, framing)
-├── comm_worker.py      # Background thread handling USB serial and UDP communication
-├── gui.py              # All GUI windows and widgets
-├── requirements.txt    # Python dependencies
-└── README.md            # This file
-```
+The app saves panel positions and the theme using QSettings. Choosing **Dashboard layout** always resets factory widths and heights; choosing **Reset layout** always resets compact sizes.
 
-## Notes
+## Project files
 
-- Baud rate is fixed at 38400 as per the protocol spec (USB Serial mode only)
-- The application will not send commands if not connected
-- The STATE command is sent automatically every 500 ms when connected, regardless of mode
-- `serial_worker.py` from earlier versions has been replaced by `comm_worker.py` — delete the old file if it's still present in this folder
+- `main.py` — application entry point
+- `gui.py` — Qt workspace, chart, controls and layout logic
+- `comm_worker.py` — threaded serial/UDP transport
+- `protocol.py` — drill message framing and parsing
+- `requirements.txt` — Python dependencies
+
+## Verification
+
+Python source syntax and panel geometry/regression logic were tested without the drill controller. On-machine visual rendering and live hardware communication still need to be checked with PyQt6 installed.
