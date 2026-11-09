@@ -395,6 +395,11 @@ void activeDelayReset()
   delay(100);
 }
 
+// Communication timeout handling
+constexpr uint32_t COMM_TIMEOUT_MS = 2000;
+uint32_t lastMessageTimeMillis = 0;
+bool commErrorActive = false;
+
 
 void setup()
 {
@@ -406,6 +411,8 @@ void setup()
 
   deepSampler.begin();
   surfaceSampleHolder.begin();
+
+  lastMessageTimeMillis = millis();
 }
 
 void loop()
@@ -413,9 +420,30 @@ void loop()
   deepSampler.update();
 
   roverComm.handle();
+
+  if (roverComm.messageAvailable())
+  {
+    lastMessageTimeMillis = millis();
+    if (commErrorActive)
+    {
+      commErrorActive = false;
+      roverSerial.println(F("Communication restored. Timer reset."));
+    }
+  }
+
   while(roverComm.messageAvailable())
   {
     respondToMsg(roverComm.popMessage());
+  }
+
+  if (!commErrorActive && ((millis() - lastMessageTimeMillis) > COMM_TIMEOUT_MS))
+  {
+    commErrorActive = true;
+    roverSerial.println(F("Rover communication timed out. Stopping drill."));
+
+    deepSampler.setManualControl();
+    deepSampler.setCarriageSpeedMMps(0);
+    deepSampler.setSpiralRPM(0);
   }
 }
 
