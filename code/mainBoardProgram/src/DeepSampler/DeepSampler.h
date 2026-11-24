@@ -34,6 +34,13 @@ public:
   DrillController::AutoState getDrillControllerState();
   DeepSampleHolder::AutoState getDeepSampleHolderState();
   bool setManualControl();
+
+  // Full stop of every powered axis - carriage, spiral and sample storage.
+  // Leaves the sampler in ERROR, so an autonomous sequence is not accepted
+  // again until the rover sends STOP AUTO (0x60). Manual speed commands are
+  // accepted right away.
+  bool emergencyStop();
+
   bool startDistFromSurfaceMeasure();
   float getDistFromSurfaceMM();
   bool autoDrillStoreWeigh(float targetDepthMM);

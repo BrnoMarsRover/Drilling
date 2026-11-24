@@ -244,6 +244,14 @@ bool DeepSampler::setManualControl()
   _drillController.setManualControl();
   return true;
 }
+
+bool DeepSampler::emergencyStop()
+{
+  // Same shutdown path the internal fault handler uses: carriage and spiral to
+  // zero, sample storage force-stopped, both state machines out of auto.
+  enterError();
+  return true;
+}
 bool DeepSampler::startDistFromSurfaceMeasure() {return _drillController.startDistFromSurfaceMeasure(); }
 float DeepSampler::getDistFromSurfaceMM() {return _drillController.getDistFromSurfaceMM(); }
 

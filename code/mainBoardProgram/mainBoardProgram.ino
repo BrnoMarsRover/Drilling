@@ -397,8 +397,24 @@ void activeDelayReset()
 
 // Communication timeout handling
 constexpr uint32_t COMM_TIMEOUT_MS = 2000;
+constexpr uint32_t STOP_RETRY_MS   = 200;
+
 uint32_t lastMessageTimeMillis = 0;
+uint32_t lastStopRetryMillis   = 0;
+
+// Armed by the first valid message from the rover. Without it the drill would
+// declare a timeout 2 s after boot, before the rover has even opened the port.
+bool commArmed = false;
 bool commErrorActive = false;
+
+// Re-asserts zero on both powered axes. Cheap to repeat: LinearAxis only acts
+// when the motion state is not already Stop, so this stays silent unless an
+// axis really is still running.
+void stopDrive()
+{
+  deepSampler.setCarriageSpeedMMps(0);
+  deepSampler.setSpiralRPM(0);
+}
 
 
 void setup()
@@ -411,8 +427,6 @@ void setup()
 
   deepSampler.begin();
   surfaceSampleHolder.begin();
-
-  lastMessageTimeMillis = millis();
 }
 
 void loop()
@@ -424,11 +438,8 @@ void loop()
   if (roverComm.messageAvailable())
   {
     lastMessageTimeMillis = millis();
-    if (commErrorActive)
-    {
-      commErrorActive = false;
-      roverSerial.println(F("Communication restored. Timer reset."));
-    }
+    commArmed = true;
+    commErrorActive = false;
   }
 
   while(roverComm.messageAvailable())
@@ -436,16 +447,24 @@ void loop()
     respondToMsg(roverComm.popMessage());
   }
 
-  if (!commErrorActive && ((millis() - lastMessageTimeMillis) > COMM_TIMEOUT_MS))
+  // Communication timeout. The stop is re-issued for as long as the link is
+  // down instead of being fired once, so a command that does not get through
+  // is retried. Throttled, because setSpiralRPM() transmits a frame to the
+  // motor controller on every call.
+  if (commArmed && ((millis() - lastMessageTimeMillis) > COMM_TIMEOUT_MS))
   {
-    commErrorActive = true;
-    roverSerial.println(F("Rover communication timed out. Stopping drill."));
-
-    deepSampler.setManualControl();
-    deepSampler.setCarriageSpeedMMps(0);
-    deepSampler.setSpiralRPM(0);
+    if (!commErrorActive)
+    {
+      commErrorActive = true;
+      deepSampler.emergencyStop();
+      lastStopRetryMillis = millis();
+    }
+    else if ((millis() - lastStopRetryMillis) >= STOP_RETRY_MS)
+    {
+      lastStopRetryMillis = millis();
+      stopDrive();
+    }
   }
 }
-
 
 
